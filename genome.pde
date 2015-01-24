@@ -1,44 +1,39 @@
 class genome {
   float[] the_genome;
-  /*
-    int numsegments = 8;
-    int numsegmentgenes = 2; // length, weight
-    int numcolorgenes = 3;
-    int numdividegenes = 1;
-    int numDensityGenes = 1;
-    int numForceGenes = 1;
-    int numRestitutionGenes = 1;
-    int totalgenes = numsegments*numsegmentgenes+numcolorgenes+numdividegenes+numDensityGenes+numForceGenes+numRestitutionGenes;
-  */
-
+ 
+  int numsegments = 8;      // number of segments/ribs/spines in a creature
+  
   // These are where each section of the genome starts
-  int segmentsStart = 0;    // size of each segment
-  int numsegments = 8;
-  int colorStart = 100;     // overall color
-  int reproduceStart = 200; // parameters for reporduction
-  int physicalStart = 300;  // physical characteristics, density, restitution, etc.
-  int sensingStart = 400;   // type, number, location of sensors
-  int behaviorStart = 500;  // parameters controlling behavior
-  int totalgenes = 599;
+  int segmentsStart = 0;    // begining of genome for the segment lengths
+  int colorStart = 100;     // begining of genome for the overall color
+  int reproduceStart = 200; // begining of genome for the parameters for reporduction
+  int physicalStart = 300;  // begining of genome for the physical characteristics, density, restitution, etc.
+  int sensingStart = 400;   // begining of genome for the type, number, location of sensors
+  int behaviorStart = 500;  // begining of genome for the parameters controlling behavior
+  int totalgenes = 599;     // current length of the genome
 
   
-  genome() {
-    the_genome = new float[totalgenes];
+  // "Constructor" function - this is the function to create a new genome.
+  // It is called automatically when a new genome is created with the command: genome g = new genome();
+  genome() {  
+    the_genome = new float[totalgenes];   // create a new array (list) of values
     for (int i = 0; i < totalgenes; i++) {
-      the_genome[i] = randomGaussian()*0.05;
+      the_genome[i] = randomGaussian()*0.05;   // give each loci a random value near zero
     }
-    //the_genome[behaviorStart + 3] = -1; // to head towards food scent initially
   }
   
+  // Copies one genome (the source) into another, the first step in reporduction, usually followed by mutating the copy
   void copy(genome source) {
     the_genome = new float[totalgenes];
     for (int i = 0; i < totalgenes; i++) {
       the_genome[i] = source.the_genome[i];
     }
-    //  println(the_genome[behaviorStart] + " " + the_genome[behaviorStart+1] + " " + the_genome[behaviorStart+2] + " " + the_genome[behaviorStart+3] );
   }
 
-  double getBehavior(int i) {
+  // Returns the amount of turning force (just a decimal number) the creature has evolved to apply when it senses either
+  // food, another creature, a rock, or a (food) scent.
+  // Notice that the argument i passed to the function determine where in the genome to get the value from: behaviorStart+i
+  double getBehavior(int i) {  
     // 0 = food, 1 = creature, 2 = rock, 3 = scent
     double b;
     b = getTurningForce()*the_genome[behaviorStart+i]; // there's a turning force
