@@ -41,8 +41,7 @@ class genome {
   }
   
   color getcolor() {
-    //   int offset = numsegments*numsegmentgenes;   // 0 to 255
-    // sigmoid mapping to 0 to 255 centered on 126
+    //   mapping from allele value to color is a sigmoid mapping to 0 to 255 centered on 126
     int r = 126 + (int)(126*(the_genome[colorStart]/(1+abs(the_genome[colorStart]))));
     int g = 126 + (int)(126*(the_genome[colorStart+1]/(1+abs(the_genome[colorStart+1]))));
     int b = 126 + (int)(126*(the_genome[colorStart+2]/(1+abs(the_genome[colorStart+2]))));
@@ -50,18 +49,22 @@ class genome {
     return c;
   }
   
+  // amount of energy a creature must have to reproduce, not used in the tower defense, but could be if we wanted creates to reproduce during a wave
   int getreproduceEnergy() {
-    //int offset = numsegments*numsegmentgenes+numcolorgenes;
     int e = (int)(2000*(the_genome[reproduceStart]/(1+abs(the_genome[reproduceStart]))));
     return((int)(200 + 2000+ e));   // 2 to 4200 sigmoid, 200 is the amount of energy per food
   }
   
+  
+  // Density of a creature for the box2D "physical" body.
+  // Box2D automatically handles the mass as density times area, so that when a force is applied to a body the correct acceleration is generated.
   float getDensity() {
-    //int offset = numsegments*numsegmentgenes+numcolorgenes+numdividegenes;
     float d = 1;
+    // If the value is negative, density approaches xzro asymtotically from 10
     if (the_genome[physicalStart] < 0) {
       d = 10 * (1/1+abs(the_genome[physicalStart]));
     }
+    // if the value is positive, density grows as 10 plus the square root of the evolved value
     if (the_genome[physicalStart] >= 0) {
       d = 10 + sqrt(the_genome[physicalStart]);
     }
@@ -69,19 +72,20 @@ class genome {
     return d; // limit 0 to infinity 
   }
   
+  // Forward force to accelerate the creature, evolved, but (currently) doesn't change anytime durning a wave
   int getForce() {
     return((int)(500+10*the_genome[physicalStart+1])); // -infinity to infinity linear
   }
   
+  // This is the base turning force, it is modified by getBehavior() above, depending on what type of object was sensed to start turning
   int getTurningForce() {
     return((int)(100+10*the_genome[physicalStart+2])); // -infinity to infinity linear
   }
   
-  
+  // How bouncy a creature is, one of the basic box2D body parameters, no idea how it evolves or if it has any value to the creatures
   float getRestitution() {
-    //    int offset = numsegments*numsegmentgenes+numcolorgenes+numdividegenes+numDensityGenes+ numForceGenes;
     float r = 0;
-    r = 0.5 + (0.5 * (the_genome[physicalStart+2]/(1+abs(the_genome[physicalStart+2]))));
+    r = 0.5 + (0.5 * (the_genome[physicalStart+3]/(1+abs(the_genome[physicalStart+3]))));
     return r;
   }
 
@@ -113,6 +117,7 @@ class genome {
     return (maxY - minY);
   }
   
+  // Gets the end point of the ith segment/rib/spine used to create the creatures body  
   Vec2 getpoint(int i) {
     Vec2 a = new Vec2();
     int lengthbase = 20;
@@ -128,6 +133,7 @@ class genome {
     return a;
   }
   
+  // Gets the end point of the ith segment/rib/spine on the other side of the creatures body
   Vec2 getflippedpoint(int i) {
     Vec2 a = new Vec2();
     int lengthbase = 20;
@@ -142,7 +148,8 @@ class genome {
     a.y = (float)(l * Math.cos((i)*PI/(numsegments)) );
     return a;
   }
-  
+ 
+  // Mutates every value by a little bit. Biologically speaking a very high mutation rate to foster fast evolution
   void mutate() {
     for (int i = 0; i < totalgenes; i++) {
       the_genome[i] += randomGaussian()*0.3;
