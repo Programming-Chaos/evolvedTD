@@ -44,7 +44,7 @@ we add to this branch, the `getting-started` branch reference (and
 `HEAD`) is moved to the new commit, but `master` (and other branches)
 are not, so the history has diverged. This is a good thing, because
 the differences can be compared, discussed, reviewed, and merged back
-in easily via [Pull Request][pr].
+in easily via [pull request][pr].
 
 The two things the above command did are equivalent to this:
 
@@ -72,7 +72,7 @@ checking it out first:
 
 ## Pulling
 
-Let's say a Pull Request was recently merged into `master` and we want
+Let's say a pull request was recently merged into `master` and we want
 to obtain those changes. It's as easy as checking it out and pulling:
 
     git checkout master
@@ -154,7 +154,7 @@ most recent, so we should see `foo` but *not* `master` right before
 that commit's summary. Since we are using [GitHub Flow][flow],
 `master` and the remote branch that it tracks, `origin/master`, should
 *always* be on the same commit if we are not actively merging a
-finished Pull Request. Once we are sure we have not erroneously
+finished pull request. Once we are sure we have not erroneously
 committed to `master`, we will push our changes to GitHub:
 
     git push --set-upstream origin foo
@@ -174,21 +174,21 @@ Our peers can then pull our changes into their local repos by running
 ## Reviewing
 
 Once we've pushed our changes to GitHub, we want to
-[write a perfect][perfect] [Pull Request][pr]. After navigating to the
+[write a perfect][perfect] [pull request][pr]. After navigating to the
 [project's page][gh], we want to find our branch `foo` and click the
 "Compare & review". This will present with an overview of changes
-between our branch and `master`. After writing the Pull Request, we
+between our branch and `master`. After writing the pull request, we
 then submit it by clicking "Create pull request".
 
-The Pull Request will now be viewable to all our peers, and open for
-discussion. We can add to the request by pushing more commits to
-`foo`; in fact, any collaborator can do this, so don't forget to pull
-their changes before continuing your work.
+The PR will now be viewable to all our peers, and open for
+discussion. We can add to the PR by pushing more commits to `foo`; in
+fact, any collaborator can do this, so don't forget to pull their
+changes before continuing your work.
 
-Before a request can be signed-off, it needs to be able to merge
-cleanly, which means merging `master` into `foo`, such that when we
-merge `foo` into `master`, Git will simply "fast-forward" the `master`
-branch reference to the merge commit at the head of `foo`. Since this
+Before a PR can be signed-off, it needs to be able to merge cleanly,
+which means merging `master` into `foo`, such that when we merge `foo`
+into `master`, Git will simply "fast-forward" the `master` branch
+reference to the merge commit at the head of `foo`. Since this
 commit's parents were `master` and `foo` to begin with, the second
 merge won't make another commit as it can just move the reference
 forward.
@@ -196,12 +196,12 @@ forward.
 > "Any sufficiently advanced technology is indistinguishable from
 > magic." - Arthur C. Clarke
 
-After the request has been sufficiently reviewed and signed-off by
-another team member, we will want to merge it back into
-`master`. Since we already took the time to ensure this will happen
-cleanly, GitHub offers us a button at the bottom of the request to
-automatically perform the merge from `foo` into `master`, thus
-completing and closing the Pull Request.
+After the PR has been sufficiently reviewed and signed-off by another
+team member, we will want to merge it back into `master`. Since we
+already took the time to ensure this will happen cleanly, GitHub
+offers us a button at the bottom of the PR to automatically perform
+the merge from `foo` into `master`, thus completing and closing the
+pull request.
 
 [wiki]: http://course.cs.uidaho.edu/wiki404/index.php/Main_Page
 [ssh]: https://help.github.com/articles/generating-ssh-keys/
