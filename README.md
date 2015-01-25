@@ -3,7 +3,7 @@
 Welcome to [EvolveTD][wiki], an evolutionary Tower Defense game!
 
 The following sections walk you through cloning, branching, pulling,
-commiting, pushing, and merging code changes using
+commiting, pushing, and reviewing code changes using
 [Git](http://git-scm.com/).
 
 ## Cloning
@@ -171,11 +171,37 @@ accordingly.
 Our peers can then pull our changes into their local repos by running
 `git pull`, and then check those changes out with `git checkout foo`.
 
-## Merging
+## Reviewing
 
-### TODO
+Once we've pushed our changes to GitHub, we want to
+[write a perfect][perfect] [Pull Request][pr]. After navigating to the
+[project's page][gh], we want to find our branch `foo` and click the
+"Compare & review". This will present with an overview of changes
+between our branch and `master`. After writing the Pull Request, we
+then submit it by clicking "Create pull request".
 
-Explain the GitHub Flow / Pull Request review process and merging
+The Pull Request will now be viewable to all our peers, and open for
+discussion. We can add to the request by pushing more commits to
+`foo`; in fact, any collaborator can do this, so don't forget to pull
+their changes before continuing your work.
+
+Before a request can be signed-off, it needs to be able to merge
+cleanly, which means merging `master` into `foo`, such that when we
+merge `foo` into `master`, Git will simply "fast-forward" the `master`
+branch reference to the merge commit at the head of `foo`. Since this
+commit's parents were `master` and `foo` to begin with, the second
+merge won't make another commit as it can just move the reference
+forward.
+
+> "Any sufficiently advanced technology is indistinguishable from
+> magic." - Arthur C. Clarke
+
+After the request has been sufficiently reviewed and signed-off by
+another team member, we will want to merge it back into
+`master`. Since we already took the time to ensure this will happen
+cleanly, GitHub offers us a button at the bottom of the request to
+automatically perform the merge from `foo` into `master`, thus
+completing and closing the Pull Request.
 
 [wiki]: http://course.cs.uidaho.edu/wiki404/index.php/Main_Page
 [ssh]: https://help.github.com/articles/generating-ssh-keys/
@@ -185,6 +211,8 @@ Explain the GitHub Flow / Pull Request review process and merging
 [stage]: http://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository
 [commit]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [flow]: https://guides.github.com/introduction/flow/index.html
+[perfect]: https://github.com/blog/1943-how-to-write-the-perfect-pull-request
+[gh]: https://github.com/tsoule88/evolvedTD
 
 # Dependencies
 
