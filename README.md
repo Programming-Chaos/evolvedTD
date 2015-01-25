@@ -2,8 +2,9 @@
 
 Welcome to [EvolveTD][wiki], an evolutionary Tower Defense game!
 
-The following sections walk you through cloning, branching, commiting,
-pushing, and merging code changes using [Git](http://git-scm.com/).
+The following sections walk you through cloning, branching, pulling,
+commiting, pushing, and merging code changes using
+[Git](http://git-scm.com/).
 
 ## Cloning
 
@@ -62,7 +63,13 @@ later using `git stash`.
 
 > Use `git status -sb` to quickly see your current branch and changes
 
-# Commiting
+## Pulling
+
+### TODO
+
+Briefly go over pulling in the latest changes from master
+
+## Commiting
 
 Go ahead and make some changes to any tracked file and save it. Git
 status should now list the file as modified under "Changes not staged
@@ -103,15 +110,43 @@ Executing `git commit` without a message will open the program defined
 in our `$EDITOR` environment variable, where a longer commit message
 can be written.
 
-# Pushing
+## Pushing
 
-## TODO
+Let's suppose we have spent the day working on a feature with its own
+branch `foo`. Since we work with a team, we need to share our work,
+even if it's not completely finished, so we can refactor our code
+based on input we receive from our peers. First, let's take a look at
+our log of changes so we can remember what we've done:
 
-Briefly explain git remotes and then `git push`
+    git log --decorate --graph --oneline
 
-# Merging
+The `--decorate` flag causes references to be emitted in the log, so
+you can see where each branch is. The `--graph` flag draws an ASCII
+tree; and `--oneline` shows just each commit's summary. The top is
+most recent, so we should see `foo` but *not* `master` right before
+that commit's summary. Since we are using [GitHub Flow][flow],
+`master` and the remote branch that it tracks, `origin/master`, should
+*always* be on the same commit if we are not actively merging a
+finished Pull Request. Once we are sure we have not erroneously
+committed to `master`, we will push our changes to GitHub:
 
-## TODO
+    git push --set-upstream origin foo
+
+If we have not pushed this branch to GitHub before, we need to specify
+it with `--set-upstream origin`. When we cloned Dr. Soule's repo, Git
+kept track of where it came from by adding a `remote` named
+`origin`. We are setting `origin` as the upstream repo, and adding a
+new branch `foo` to `origin`, so that all subsequent executions of
+`git push` when we are on our local branch `foo` will automatically
+send our changes to GitHub and move the `origin/foo` reference
+accordingly.
+
+Our peers can then pull our changes into their local repos by running
+`git pull`, and then check those changes out with `git checkout foo`.
+
+## Merging
+
+### TODO
 
 Explain the GitHub Flow / Pull Request review process and merging
 
@@ -121,6 +156,7 @@ Explain the GitHub Flow / Pull Request review process and merging
 [stash]: http://git-scm.com/book/en/v1/Git-Tools-Stashing
 [stage]: http://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository
 [commit]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+[flow]: https://guides.github.com/introduction/flow/index.html
 
 # Dependencies
 
