@@ -56,12 +56,12 @@ The two things the above command did are equivalent to this:
 
 Checking out a reference, i.e. a branch name or a commit hash, will
 update the local files such that they match their state at the given
-reference. If `git status` indicates you have modified files (use `git
-diff` to see the differences), then you'll either want to commit them,
-or if you're not quite ready to do so, you can [stash][] them away for
+reference. If `git status` indicates we have modified files (use `git
+diff` to see the differences), then we'll either want to commit them,
+or if we're not quite ready to do so, we can [stash][] them away for
 later using `git stash`.
 
-> Use `git status -sb` to quickly see your current branch and changes
+> Use `git status -sb` to quickly see the current branch and changes
 
 Whenever we start a new branch, unless another line of development
 makes more sense, we should branch" it off `master`, which just means
@@ -95,8 +95,9 @@ to particular files, but by default it shows the changes between our
 working tree and the staging area, hence why staged changes are
 excluded without the flag.
 
-Perhaps you fixed a typo of mine and so have modified `README.md`, to
-add the all the changes in the file to the stage, do this:
+Perhaps we fixed a typo in this guide and so have modified the file
+`README.md`, and we want to add the all the changes in the file to the
+staging area:
 
     git add README.md
 
@@ -128,7 +129,7 @@ our log of changes so we can remember what we've done:
     git log --decorate --graph --oneline
 
 The `--decorate` flag causes references to be emitted in the log, so
-you can see where each branch is. The `--graph` flag draws an ASCII
+we can see where each branch is. The `--graph` flag draws an ASCII
 tree; and `--oneline` shows just each commit's summary. The top is
 most recent, so we should see `foo` but *not* `master` right before
 that commit's summary. Since we are using [GitHub Flow][flow],
