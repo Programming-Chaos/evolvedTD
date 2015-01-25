@@ -30,26 +30,26 @@ to record and share changes that we wish to eventually merge into
 the branch's changes have been reviewed by our peers (on GitHub, in a
 [Pull Request][pr]), the entire branch is merged back into `master`.
 
-You should start with a "personal" branch, perhaps using your GitHub
-alias, so that you have a base point for *your* commits:
+Before changing any code, we need to make a branch for what we are
+going to work on:
 
-    git checkout -b andschwa
+    git checkout -b getting-started
 
-This command did two things: it created the branch `andschwa` *and* it
-checked the branch out, meaning that our `HEAD` reference (a pointer
-or marker to the checked out commit) now points to the tip of the new
-branch. When we commit, it is added to the commit tree as a child of
-the commit that our `HEAD` reference marks. With each commit we add to
-this branch, the `andschwa` branch reference (and `HEAD`) is moved to
-the new commit, but `master` (and other branches) are not, so the
-history has diverged. This is a good thing, because the differences
-can be compared, discussed, reviewed, and merged back in easily via
-[Pull Request][pr].
+This command did two things: it created the branch `getting-started`
+*and* it checked the branch out, meaning that our `HEAD` reference (a
+pointer or marker to the checked out commit) now points to the tip of
+the new branch. When we commit, it is added to the commit tree as a
+child of the commit that our `HEAD` reference marks. With each commit
+we add to this branch, the `getting-started` branch reference (and
+`HEAD`) is moved to the new commit, but `master` (and other branches)
+are not, so the history has diverged. This is a good thing, because
+the differences can be compared, discussed, reviewed, and merged back
+in easily via [Pull Request][pr].
 
 The two things the above command did are equivalent to this:
 
-    git branch andschwa
-    git checkout andschwa
+    git branch getting-started
+    git checkout getting-started
 
 > Git has lots of documentation; use `git help subcommand` to read it,
 > e.g. `git help checkout`.
@@ -62,6 +62,13 @@ or if you're not quite ready to do so, you can [stash][] them away for
 later using `git stash`.
 
 > Use `git status -sb` to quickly see your current branch and changes
+
+Whenever we start a new branch, unless another line of development
+makes more sense, we should branch" it off `master`, which just means
+checking it out first:
+
+    git checkout master
+    git checkout -b new-topic
 
 ## Pulling
 
