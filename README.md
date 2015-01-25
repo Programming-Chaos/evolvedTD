@@ -72,9 +72,28 @@ checking it out first:
 
 ## Pulling
 
-### TODO
+Let's say a Pull Request was recently merged into `master` and we want
+to obtain those changes. It's as easy as checking it out and pulling:
 
-Briefly go over pulling in the latest changes from master
+    git checkout master
+    git pull
+
+We should then integrate the latest changes into our topic branch,
+which requires [merging][]. For most cases the merge will be trivially
+resolved by Git; manual intervention is only necessary if the same
+lines of code have been changed on each side of the merge.
+
+Merges always merge *into* the current branch, from the one specified
+on the command line. Since we want the changes in `master` to be
+merged into `new-topic`, we'll start there:
+
+    git checkout new-topic
+    git merge master
+
+Git will create a "merge" commit which brings the two branches of the
+tree together by having each as a parent, for two parent commits. Git
+will allow us to edit the commit message before saving it, but we
+should keep the summary.
 
 ## Commiting
 
@@ -162,6 +181,7 @@ Explain the GitHub Flow / Pull Request review process and merging
 [ssh]: https://help.github.com/articles/generating-ssh-keys/
 [pr]: https://help.github.com/articles/using-pull-requests/
 [stash]: http://git-scm.com/book/en/v1/Git-Tools-Stashing
+[merging]: http://www.git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
 [stage]: http://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository
 [commit]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [flow]: https://guides.github.com/introduction/flow/index.html
