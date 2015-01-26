@@ -21,7 +21,7 @@ class creature {
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
 
-  // constructor
+  // constructor, create a new creature at the given location and angle
   creature(float x, float y, float a) {
     // Add the box to the box2d world
     angle = a;
