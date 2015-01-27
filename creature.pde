@@ -37,9 +37,10 @@ class creature {
     g.copy(cs.g);     // copy the parent's genome into this creature's genome
     angle = random(0, 2 * PI); // start at a random angle
     // Currently creatures are 'born' around a circle a fixed distance from the tower.
+    // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));  
     makeBody(pos);
-    energy = e;
+    energy = e;   // starting energy comes from parent
     health = maxHealth;  // Probably should be evolved.
     fitness = 0;
     body.setUserData(this);
@@ -50,10 +51,12 @@ class creature {
     g.mutate(); // mutate the genome
   }
    
+  // returns a vector to the creature's postion 
   Vec2 get_pos() {
     return(box2d.getBodyPixelCoord(body));
   }
   
+  // adds some energy to the creature - called when the creature picks up food/resource
   void add_energy(int x) {
     energy += x;
   }
@@ -83,34 +86,46 @@ class creature {
     return alive;
   }
   
-  double calcTorque() { // creature senses the environment and generates a turning torque
-    Vec2 pos2 = box2d.getBodyPixelCoord(body);
+  // This function calculates the torques the creature produces to turn, as a 
+  // function of what it senses in the environment
+  double calcTorque() { 
+    Vec2 pos2 = box2d.getBodyPixelCoord(body);  // get the creature's position
     int l = 50; // distance of the sensor from the body (should be evolved)
     int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
     float scentAheadL,scentAheadR;
     double sensorX,sensorY;
     // left sensor check
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40)); // calculate the x,y position of the left sensor
+    // Begin by calculating the x,y position of the left sensor
+    // (Currently the angle of the sensors is fixed, angle PI*0.40, length 50 pixels, these should be evolved
+    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40)); 
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
-    foodAheadL = environ.checkForFood(sensorX, sensorY); // environ is a global
-    creatureAheadL = environ.checkForCreature(sensorX, sensorY);
-    rockAheadL = environ.checkForRock(sensorX, sensorY);
-    scentAheadL = environ.getScent(sensorX, sensorY);
+    foodAheadL = environ.checkForFood(sensorX, sensorY);     // Check if there's food 'under' the left sensor
+    creatureAheadL = environ.checkForCreature(sensorX, sensorY);  // Check if there's a creature 'under' the left sensor
+    rockAheadL = environ.checkForRock(sensorX, sensorY); // Check if there's a rock 'under' the left sensor
+    scentAheadL = environ.getScent(sensorX, sensorY);  // Get the amount of scent at the left sensor
     // right sensor check
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60)); // calculate the x,y position of the right sensor
+    // Begin by calculating the x,y position of the right sensor
+    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60)); 
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.60));
-    foodAheadR = environ.checkForFood(sensorX, sensorY); // environ is a global
-    creatureAheadR = environ.checkForCreature(sensorX, sensorY); // environ is a global
+    // Then do all of the right sensor checks
+    foodAheadR = environ.checkForFood(sensorX, sensorY); 
+    creatureAheadR = environ.checkForCreature(sensorX, sensorY); 
     rockAheadR = environ.checkForRock(sensorX, sensorY);
     scentAheadR = environ.getScent(sensorX, sensorY);
+    // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
-    torque += foodAheadL * g.getBehavior(0); // use the same genetic value for food, but negative for R sensor
+    // If there's food ahead on the left, turn by the evolved amount of torque for food: Behavior(0)
+    torque += foodAheadL * g.getBehavior(0); 
+    // If there's food ahead on the right, turn by the evolved amount of torque for food: Behavior(0), but in the opposite, -1, direction
     torque += foodAheadR * -1 * g.getBehavior(0);
+    // Similar turns for creatures and rocks
     torque += creatureAheadL * g.getBehavior(1);
     torque += creatureAheadR * -1 * g.getBehavior(1);
     torque += rockAheadL * g.getBehavior(2);
     torque += rockAheadR * -1 * g.getBehavior(2);
-    torque += sqrt(scentAheadL) * g.getBehavior(3); // take the squareroot of the scent to reduce over correction
+    // Take the square root of the amout of scent detected on the left (right), factor in the evolved response to smelling food, and add that to the torque
+    // Take the squareroot of the scent to reduce over correction
+    torque += sqrt(scentAheadL) * g.getBehavior(3);
     torque += sqrt(scentAheadR) * -1 * g.getBehavior(3);
     //println(torque); 
     return torque;
