@@ -131,18 +131,21 @@ class creature {
     return torque;
   }
   
+  // Amount of forward force applied to the creature, this is evolved, hence gotten from the genome (g.getForce())
   float calcForce() {
     float f = g.getForce();
     return f;
   }
   
+  // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
-    fitness += energy;
-    fitness += health;
-    if (alive) {
+    fitness += energy;  // More energy = more fitness
+    fitness += health;  // More health = more fitness
+    if (alive) {        // Staying alive = more fitness
       fitness *= 2;
     }
+    // Note that unrealistically dead creatures can reproduce, which is necessary in cases where a player kills a whole wave
   }
   
   void change_health(int h) {
@@ -153,6 +156,9 @@ class creature {
     return fitness;
   }
   
+  // The update function is called every timestep
+  // It updates the creature's postion, including applying turning torques,
+  // and checks if the creature has died.
   void update() {
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     if (!alive) { // dead creatures don't update
@@ -164,12 +170,14 @@ class creature {
     double torque = 0;
     torque = calcTorque();
     body.applyTorque((float)torque);
-
+    // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
-    if (energy > 0) { // if there's energy left apply force
+    if (energy > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter()); 
       energy = energy - abs(2 + (f * 0.005));
     }
+    
+    // Creatures that run off one side of the world wrap to the other side.
     if (pos2.x < -0.5 * worldWidth) {
       pos2.x += worldWidth;
       body.setTransform(box2d.coordPixelsToWorld(pos2), a);
@@ -193,7 +201,7 @@ class creature {
     }
   }
   
-  // Drawing the shape
+  // Called every timestep (if the display is on) draws the creature
   void display() {
     if (!alive) { // dead creatures aren't displayed
       return;
@@ -203,27 +211,27 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
 
-    Fixture f = body.getFixtureList();
-    PolygonShape ps; // = (PolygonShape) f.getShape(); 
+    Fixture f = body.getFixtureList();  // This is a list of the Box2D fixtures (segments) of the creature
+    PolygonShape ps; // Create a polygone variable
+    // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-    pushMatrix();
-    translate(pos.x, pos.y);
-    rotate(-a);
-    stroke(0);
-    //noStroke();
-    int shade = 126;
-    while(f != null) {
-      fill(g.getcolor());
-      ps = (PolygonShape)f.getShape();
-      beginShape();
+    pushMatrix();  // Stores the current drawing reference frame
+    translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
+    rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
+    stroke(0);   // Draw polygons with edges
+    while(f != null) {  // While there are still Box2D fixtures in the body, draw them
+      fill(g.getcolor());  // Get the creature's color, creatures could evolve a different color for each segement
+      ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
+      beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
-        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));
-        vertex(v.x, v.y);
+        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+        vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
-      f = f.getNext();
+      f = f.getNext();  // Get the next fixture from the fixture list
     }
+    // Add some eyespots
     fill(0);
     Vec2 eye = g.getpoint(6);
     ellipse(eye.x, eye.y, 5, 5);
@@ -233,8 +241,9 @@ class creature {
     ellipse(-1 * eye.x, eye.y - 1, 2, 2);
     popMatrix();
     
-    // "feelers"
+    // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
+    // Note that the length (50) and angles PI*40 and PI*60 are the same as when calculating the sensor postions in getTorque()
     int l = 50;
     sensorX = pos.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
     sensorY = pos.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
@@ -248,7 +257,7 @@ class creature {
     sensorY = round((sensorY) / 20) * 20;
     line(pos.x, pos.y, sensorX, sensorY);
     
-    pushMatrix(); // draws a "health" bar above the creature
+    pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
@@ -261,42 +270,42 @@ class creature {
     
   }
 
-  // This function adds a creature to the box2d world
+  // This function makes a Box2D body for the creature and adds it to the box2d world
   void makeBody(Vec2 center) {
     // Define the body and make it from the shape
-    BodyDef bd = new BodyDef();
-    bd.type = BodyType.DYNAMIC;
-    bd.position.set(box2d.coordPixelsToWorld(center));
-    bd.linearDamping = 0.9;
-    //bd.setAngle(random(0,7));
-    bd.setAngle(angle);
-    body = box2d.createBody(bd);
+    BodyDef bd = new BodyDef();  // Define a new Box2D body object
+    bd.type = BodyType.DYNAMIC;  // Make the body dynamic (Box2d bodies can also be static: unmoving)
+    bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
+    bd.linearDamping = 0.9;  // Give it some friction, could be evolved
+    bd.setAngle(angle);      // Set the body angle to be the creature's angle
+    body = box2d.createBody(bd);  // Create the body, not that it currently has no shape
     
-    // Define a polygon (this is what we use for a rectangle)
-    PolygonShape sd;// = new PolygonShape();
-    
-    //Vec2[] vertices = new Vec2[g.numgenes];
-    Vec2[] vertices3;
+    // Define a polygon object, this will be used to make the body fixtures
+    PolygonShape sd;
+
+    Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
     float density = g.getDensity();
     
-    for (int i = 0; i < g.numsegments; i++) {
-      sd = new PolygonShape();
+    for (int i = 0; i < g.numsegments; i++) {  // For each segment
+      sd = new PolygonShape();  // Create a new polygone
 
-      vertices3  = new Vec2[3];
-      //vertices[i] = box2d.vectorPixelsToWorld(g.getpoint(i));
-      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));
-      vertices3[1] = box2d.vectorPixelsToWorld(g.getpoint(i));      
+      vertices3  = new Vec2[3];  // Create an array of 3 new vectors
+      // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
+      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));  // First vertex is at the center of the creature
+      vertices3[1] = box2d.vectorPixelsToWorld(g.getpoint(i));   // Second and third vertices are evolved, so get from the genome
       vertices3[2] = box2d.vectorPixelsToWorld(g.getpoint(i + 1));
+      //  sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
-      FixtureDef fd = new FixtureDef();
+      FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
+      fd.shape = sd;  // Give the fixture a shape = polygon that was just created
+      fd.density = density;  // give it a density
+      fd.restitution = g.getRestitution();  // Give it a restitution (bounciness)
       fd.filter.categoryBits = 1; // creatures are in filter category 1
-      fd.filter.maskBits = 65535; //#ffffff; // interacts with everything
-      fd.shape = sd;
-      fd.density = density;
-      fd.restitution = g.getRestitution();
-      body.createFixture(fd);
+      fd.filter.maskBits = 65535;  // interacts with everything
+      body.createFixture(fd);  // Create the actual fixture, which adds it to the body
     }
     
+    // now repeat the whole process for the other side of the creature
     for (int i = 0; i < g.numsegments; i++) {
       sd = new PolygonShape();
       vertices3  = new Vec2[3];
@@ -309,6 +318,8 @@ class creature {
       fd.shape = sd;
       fd.density = density;
       fd.restitution = g.getRestitution();
+      fd.filter.categoryBits = 1; // creatures are in filter category 1
+      fd.filter.maskBits = 65535;  // interacts with everything
       body.createFixture(fd);
     }
   }
