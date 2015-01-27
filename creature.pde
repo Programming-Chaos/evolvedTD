@@ -5,13 +5,9 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
-// The Nature of Code
-// <http://www.shiffman.net/teaching/nature>
-// Spring 2011
-// Box2DProcessing example
-
 class creature {
-  // We need to keep track of a Body and a width and height
+  // All creatures have a Box2D body, a genome, and some other qualities:
+  // fitness, health, a max health, angle they are facing, etc.
   Body body;
   genome g;
   float energy;   // used for reproduction and movement, given to offspring? gained from resources/food
@@ -21,34 +17,34 @@ class creature {
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
 
-  // constructor, create a new creature at the given location and angle
+  // Constructor, creates a new creature at the given location and angle
+  // This constructor is generally only used for the first wave, after that creatures are created from parents.
   creature(float x, float y, float a) {
-    // Add the box to the box2d world
-    angle = a;
-    g = new genome();
-    makeBody(new Vec2(x, y));
-    body.setUserData(this);
-    energy = 20000; // inherent from parent?
-    health = maxHealth;
-    fitness = 0;
-    alive = true;
-    //  println("New: " + g.getForce() + " " + body.getMass() + " " + g.getDensity() + " " + energy + " " +g.getreproduceEnergy());
+    angle = a;  // set the creature's angle
+    g = new genome();  // call the genome's constructor function to generate a new, random genome
+    makeBody(new Vec2(x, y));  // call the function that makes a Box2D body
+    body.setUserData(this);    // required by Box2D
+    energy = 20000;            // Starting energy 
+    health = maxHealth;  // initial health
+    fitness = 0;   // initial fitness
+    alive = true;   // creatures begin life alive
   }
   
-  // copy constructor
+  // copy constructor - this constucts a creature from a parent
+  // notice that the starting energy, e, is supplied by the parent
   creature(creature cs,float e) {
     g = new genome();
-    g.copy(cs.g);
-    angle = random(0, 2 * PI); // start over at random location
-    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));
+    g.copy(cs.g);     // copy the parent's genome into this creature's genome
+    angle = random(0, 2 * PI); // start at a random angle
+    // Currently creatures are 'born' around a circle a fixed distance from the tower.
+    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));  
     makeBody(pos);
     energy = e;
-    health = maxHealth;
+    health = maxHealth;  // Probably should be evolved.
     fitness = 0;
     body.setUserData(this);
     alive = true; 
-    //   println("New: " + g.getForce() + " " + body.getMass() + " " + g.getDensity() + " " + energy + " " +g.getreproduceEnergy());
-  }
+ }
   
   void mutate() {
     g.mutate(); // mutate the genome
