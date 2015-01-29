@@ -5,13 +5,9 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
-// The Nature of Code
-// <http://www.shiffman.net/teaching/nature>
-// Spring 2011
-// Box2DProcessing example
-
 class creature {
-  // We need to keep track of a Body and a width and height
+  // All creatures have a Box2D body, a genome, and some other qualities:
+  // fitness, health, a max health, angle they are facing, etc.
   Body body;
   genome g;
   float energy;   // used for reproduction and movement, given to offspring? gained from resources/food
@@ -21,43 +17,46 @@ class creature {
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
 
-  // constructor
+  // Constructor, creates a new creature at the given location and angle
+  // This constructor is generally only used for the first wave, after that creatures are created from parents.
   creature(float x, float y, float a) {
-    // Add the box to the box2d world
-    angle = a;
-    g = new genome();
-    makeBody(new Vec2(x, y));
-    body.setUserData(this);
-    energy = 20000; // inherent from parent?
-    health = maxHealth;
-    fitness = 0;
-    alive = true;
-    //  println("New: " + g.getForce() + " " + body.getMass() + " " + g.getDensity() + " " + energy + " " +g.getreproduceEnergy());
+    angle = a;  // set the creature's angle
+    g = new genome();  // call the genome's constructor function to generate a new, random genome
+    makeBody(new Vec2(x, y));  // call the function that makes a Box2D body
+    body.setUserData(this);    // required by Box2D
+    energy = 20000;            // Starting energy 
+    health = maxHealth;  // initial health
+    fitness = 0;   // initial fitness
+    alive = true;   // creatures begin life alive
   }
   
-  // copy constructor
+  // copy constructor - this constucts a creature from a parent
+  // notice that the starting energy, e, is supplied by the parent
   creature(creature cs,float e) {
     g = new genome();
-    g.copy(cs.g);
-    angle = random(0, 2 * PI); // start over at random location
-    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));
+    g.copy(cs.g);     // copy the parent's genome into this creature's genome
+    angle = random(0, 2 * PI); // start at a random angle
+    // Currently creatures are 'born' around a circle a fixed distance from the tower.
+    // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
+    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));  
     makeBody(pos);
-    energy = e;
-    health = maxHealth;
+    energy = e;   // starting energy comes from parent
+    health = maxHealth;  // Probably should be evolved.
     fitness = 0;
     body.setUserData(this);
     alive = true; 
-    //   println("New: " + g.getForce() + " " + body.getMass() + " " + g.getDensity() + " " + energy + " " +g.getreproduceEnergy());
-  }
+ }
   
   void mutate() {
     g.mutate(); // mutate the genome
   }
    
+  // returns a vector to the creature's postion 
   Vec2 get_pos() {
     return(box2d.getBodyPixelCoord(body));
   }
   
+  // adds some energy to the creature - called when the creature picks up food/resource
   void add_energy(int x) {
     energy += x;
   }
@@ -87,51 +86,66 @@ class creature {
     return alive;
   }
   
-  double calcTorque() { // creature senses the environment and generates a turning torque
-    Vec2 pos2 = box2d.getBodyPixelCoord(body);
+  // This function calculates the torques the creature produces to turn, as a 
+  // function of what it senses in the environment
+  double calcTorque() { 
+    Vec2 pos2 = box2d.getBodyPixelCoord(body);  // get the creature's position
     int l = 50; // distance of the sensor from the body (should be evolved)
     int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
     float scentAheadL,scentAheadR;
     double sensorX,sensorY;
     // left sensor check
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40)); // calculate the x,y position of the left sensor
+    // Begin by calculating the x,y position of the left sensor
+    // (Currently the angle of the sensors is fixed, angle PI*0.40, length 50 pixels, these should be evolved
+    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40)); 
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
-    foodAheadL = environ.checkForFood(sensorX, sensorY); // environ is a global
-    creatureAheadL = environ.checkForCreature(sensorX, sensorY);
-    rockAheadL = environ.checkForRock(sensorX, sensorY);
-    scentAheadL = environ.getScent(sensorX, sensorY);
+    foodAheadL = environ.checkForFood(sensorX, sensorY);     // Check if there's food 'under' the left sensor
+    creatureAheadL = environ.checkForCreature(sensorX, sensorY);  // Check if there's a creature 'under' the left sensor
+    rockAheadL = environ.checkForRock(sensorX, sensorY); // Check if there's a rock 'under' the left sensor
+    scentAheadL = environ.getScent(sensorX, sensorY);  // Get the amount of scent at the left sensor
     // right sensor check
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60)); // calculate the x,y position of the right sensor
+    // Begin by calculating the x,y position of the right sensor
+    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60)); 
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.60));
-    foodAheadR = environ.checkForFood(sensorX, sensorY); // environ is a global
-    creatureAheadR = environ.checkForCreature(sensorX, sensorY); // environ is a global
+    // Then do all of the right sensor checks
+    foodAheadR = environ.checkForFood(sensorX, sensorY); 
+    creatureAheadR = environ.checkForCreature(sensorX, sensorY); 
     rockAheadR = environ.checkForRock(sensorX, sensorY);
     scentAheadR = environ.getScent(sensorX, sensorY);
+    // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
-    torque += foodAheadL * g.getBehavior(0); // use the same genetic value for food, but negative for R sensor
+    // If there's food ahead on the left, turn by the evolved amount of torque for food: Behavior(0)
+    torque += foodAheadL * g.getBehavior(0); 
+    // If there's food ahead on the right, turn by the evolved amount of torque for food: Behavior(0), but in the opposite, -1, direction
     torque += foodAheadR * -1 * g.getBehavior(0);
+    // Similar turns for creatures and rocks
     torque += creatureAheadL * g.getBehavior(1);
     torque += creatureAheadR * -1 * g.getBehavior(1);
     torque += rockAheadL * g.getBehavior(2);
     torque += rockAheadR * -1 * g.getBehavior(2);
-    torque += sqrt(scentAheadL) * g.getBehavior(3); // take the squareroot of the scent to reduce over correction
+    // Take the square root of the amout of scent detected on the left (right), factor in the evolved response to smelling food, and add that to the torque
+    // Take the squareroot of the scent to reduce over correction
+    torque += sqrt(scentAheadL) * g.getBehavior(3);
     torque += sqrt(scentAheadR) * -1 * g.getBehavior(3);
     //println(torque); 
     return torque;
   }
   
+  // Amount of forward force applied to the creature, this is evolved, hence gotten from the genome (g.getForce())
   float calcForce() {
     float f = g.getForce();
     return f;
   }
   
+  // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
-    fitness += energy;
-    fitness += health;
-    if (alive) {
+    fitness += energy;  // More energy = more fitness
+    fitness += health;  // More health = more fitness
+    if (alive) {        // Staying alive = more fitness
       fitness *= 2;
     }
+    // Note that unrealistically dead creatures can reproduce, which is necessary in cases where a player kills a whole wave
   }
   
   void change_health(int h) {
@@ -142,6 +156,9 @@ class creature {
     return fitness;
   }
   
+  // The update function is called every timestep
+  // It updates the creature's postion, including applying turning torques,
+  // and checks if the creature has died.
   void update() {
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     if (!alive) { // dead creatures don't update
@@ -153,12 +170,14 @@ class creature {
     double torque = 0;
     torque = calcTorque();
     body.applyTorque((float)torque);
-
+    // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
-    if (energy > 0) { // if there's energy left apply force
+    if (energy > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter()); 
       energy = energy - abs(2 + (f * 0.005));
     }
+    
+    // Creatures that run off one side of the world wrap to the other side.
     if (pos2.x < -0.5 * worldWidth) {
       pos2.x += worldWidth;
       body.setTransform(box2d.coordPixelsToWorld(pos2), a);
@@ -182,7 +201,7 @@ class creature {
     }
   }
   
-  // Drawing the shape
+  // Called every timestep (if the display is on) draws the creature
   void display() {
     if (!alive) { // dead creatures aren't displayed
       return;
@@ -192,27 +211,27 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
 
-    Fixture f = body.getFixtureList();
-    PolygonShape ps; // = (PolygonShape) f.getShape(); 
+    Fixture f = body.getFixtureList();  // This is a list of the Box2D fixtures (segments) of the creature
+    PolygonShape ps; // Create a polygone variable
+    // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-    pushMatrix();
-    translate(pos.x, pos.y);
-    rotate(-a);
-    stroke(0);
-    //noStroke();
-    int shade = 126;
-    while(f != null) {
-      fill(g.getcolor());
-      ps = (PolygonShape)f.getShape();
-      beginShape();
+    pushMatrix();  // Stores the current drawing reference frame
+    translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
+    rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
+    stroke(0);   // Draw polygons with edges
+    while(f != null) {  // While there are still Box2D fixtures in the body, draw them
+      fill(g.getcolor());  // Get the creature's color, creatures could evolve a different color for each segement
+      ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
+      beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
-        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));
-        vertex(v.x, v.y);
+        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+        vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
-      f = f.getNext();
+      f = f.getNext();  // Get the next fixture from the fixture list
     }
+    // Add some eyespots
     fill(0);
     Vec2 eye = g.getpoint(6);
     ellipse(eye.x, eye.y, 5, 5);
@@ -222,8 +241,9 @@ class creature {
     ellipse(-1 * eye.x, eye.y - 1, 2, 2);
     popMatrix();
     
-    // "feelers"
+    // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
+    // Note that the length (50) and angles PI*40 and PI*60 are the same as when calculating the sensor postions in getTorque()
     int l = 50;
     sensorX = pos.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
     sensorY = pos.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
@@ -237,7 +257,7 @@ class creature {
     sensorY = round((sensorY) / 20) * 20;
     line(pos.x, pos.y, sensorX, sensorY);
     
-    pushMatrix(); // draws a "health" bar above the creature
+    pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
@@ -250,42 +270,42 @@ class creature {
     
   }
 
-  // This function adds a creature to the box2d world
+  // This function makes a Box2D body for the creature and adds it to the box2d world
   void makeBody(Vec2 center) {
     // Define the body and make it from the shape
-    BodyDef bd = new BodyDef();
-    bd.type = BodyType.DYNAMIC;
-    bd.position.set(box2d.coordPixelsToWorld(center));
-    bd.linearDamping = 0.9;
-    //bd.setAngle(random(0,7));
-    bd.setAngle(angle);
-    body = box2d.createBody(bd);
+    BodyDef bd = new BodyDef();  // Define a new Box2D body object
+    bd.type = BodyType.DYNAMIC;  // Make the body dynamic (Box2d bodies can also be static: unmoving)
+    bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
+    bd.linearDamping = 0.9;  // Give it some friction, could be evolved
+    bd.setAngle(angle);      // Set the body angle to be the creature's angle
+    body = box2d.createBody(bd);  // Create the body, not that it currently has no shape
     
-    // Define a polygon (this is what we use for a rectangle)
-    PolygonShape sd;// = new PolygonShape();
-    
-    //Vec2[] vertices = new Vec2[g.numgenes];
-    Vec2[] vertices3;
+    // Define a polygon object, this will be used to make the body fixtures
+    PolygonShape sd;
+
+    Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
     float density = g.getDensity();
     
-    for (int i = 0; i < g.numsegments; i++) {
-      sd = new PolygonShape();
+    for (int i = 0; i < g.numsegments; i++) {  // For each segment
+      sd = new PolygonShape();  // Create a new polygone
 
-      vertices3  = new Vec2[3];
-      //vertices[i] = box2d.vectorPixelsToWorld(g.getpoint(i));
-      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));
-      vertices3[1] = box2d.vectorPixelsToWorld(g.getpoint(i));      
+      vertices3  = new Vec2[3];  // Create an array of 3 new vectors
+      // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
+      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));  // First vertex is at the center of the creature
+      vertices3[1] = box2d.vectorPixelsToWorld(g.getpoint(i));   // Second and third vertices are evolved, so get from the genome
       vertices3[2] = box2d.vectorPixelsToWorld(g.getpoint(i + 1));
+      //  sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
-      FixtureDef fd = new FixtureDef();
+      FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
+      fd.shape = sd;  // Give the fixture a shape = polygon that was just created
+      fd.density = density;  // give it a density
+      fd.restitution = g.getRestitution();  // Give it a restitution (bounciness)
       fd.filter.categoryBits = 1; // creatures are in filter category 1
-      fd.filter.maskBits = 65535; //#ffffff; // interacts with everything
-      fd.shape = sd;
-      fd.density = density;
-      fd.restitution = g.getRestitution();
-      body.createFixture(fd);
+      fd.filter.maskBits = 65535;  // interacts with everything
+      body.createFixture(fd);  // Create the actual fixture, which adds it to the body
     }
     
+    // now repeat the whole process for the other side of the creature
     for (int i = 0; i < g.numsegments; i++) {
       sd = new PolygonShape();
       vertices3  = new Vec2[3];
@@ -298,6 +318,8 @@ class creature {
       fd.shape = sd;
       fd.density = density;
       fd.restitution = g.getRestitution();
+      fd.filter.categoryBits = 1; // creatures are in filter category 1
+      fd.filter.maskBits = 65535;  // interacts with everything
       body.createFixture(fd);
     }
   }
