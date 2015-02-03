@@ -22,6 +22,7 @@ class tower {
   }
   
   void update() {
+    update_projectiles();
     energy += energyGain;  // gain energy
     resources += resourceGain;  // gain resources
     if (autofire) {
@@ -46,6 +47,17 @@ class tower {
       //calculate the angle to the mouse pointer
       angle = atan2(y, x);
     }
+  }
+  
+  void update_projectiles(){
+    for (int i = projectiles.size() - 1; i >= 0; i--) {  // walk through particles to avoid missing one
+      projectile p = projectiles.get(i);
+      p.update();
+      if(p.getRemove()){
+        p.killBody();  // remove the box2d body
+        projectiles.remove(i);  // remove the projectile from the list
+      }
+    } 
   }
   
   void display() {

@@ -5,6 +5,7 @@ class projectile {
   boolean remove = false;
   int damage; // how much damge the projectile does
   
+  // constructor, creates a projectile
   projectile(int x, int y, float a, int d) {
     radius = (int)(2);
     angle = a;
@@ -12,6 +13,14 @@ class projectile {
     makebody(x, y);
     the_projectile.setUserData(this);
   }
+  
+  void update(){
+    Vec2 velocity;
+    velocity = the_projectile.getLinearVelocity();
+    if(velocity.length()< 50){  // remove slow projectiles
+      remove = true;
+    }
+  }   
   
   // This function removes the particle from the box2d world
   void killBody() {
@@ -30,6 +39,10 @@ class projectile {
   
   void setRemove(boolean x) { // sets the projectile to be removed later
     remove = x;
+  }
+  
+  Boolean getRemove(){
+    return remove;
   }
 
   void display() {
