@@ -258,7 +258,9 @@ void mousePressed() { // called if the (left) mouse button is pressed
   // this calculation is not correct
   x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
   y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-  the_tower.fire(); // have the tower fire its active weapon
+
+  if (!paused)
+    the_tower.fire(); // have the tower fire its active weapon if unpaused
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
