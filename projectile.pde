@@ -5,6 +5,7 @@ class projectile {
   boolean remove = false;
   int damage; // how much damge the projectile does
   
+  // constructor, creates a projectile
   projectile(int x, int y, float a, int d) {
     radius = (int)(2);
     angle = a;
@@ -12,6 +13,14 @@ class projectile {
     makebody(x, y);
     the_projectile.setUserData(this);
   }
+  
+  void update(){
+    Vec2 velocity;
+    velocity = the_projectile.getLinearVelocity();
+    if(velocity.length()< 50){  // remove slow projectiles
+      remove = true;
+    }
+  }   
   
   // This function removes the particle from the box2d world
   void killBody() {
@@ -24,12 +33,16 @@ class projectile {
     return(box2d.getBodyPixelCoord(the_projectile));
   }
   
-  int get_damage() {
+  int get_damage() {  // returns the amount of damage a projectile does
     return damage;
   }
   
   void setRemove(boolean x) { // sets the projectile to be removed later
     remove = x;
+  }
+  
+  Boolean getRemove(){
+    return remove;
   }
 
   void display() {
@@ -58,7 +71,7 @@ class projectile {
     fd.filter.categoryBits = 3; // projectiles are in category 3
     fd.filter.maskBits = 65533; // doesn't interact with food 
     fd.shape = sd;
-    fd.density = 100; // should be upgradable
+    fd.density = 40; // should be upgradable
     the_projectile.createFixture(fd);
     the_projectile.setLinearVelocity(new Vec2(100*cos(angle), -100*sin(angle)));
   }
