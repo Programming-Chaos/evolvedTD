@@ -24,7 +24,7 @@ class projectile {
     return(box2d.getBodyPixelCoord(the_projectile));
   }
   
-  int get_damage() {
+  int get_damage() {  // returns the amount of damage a projectile does
     return damage;
   }
   
@@ -58,7 +58,7 @@ class projectile {
     fd.filter.categoryBits = 3; // projectiles are in category 3
     fd.filter.maskBits = 65533; // doesn't interact with food 
     fd.shape = sd;
-    fd.density = 100; // should be upgradable
+    fd.density = 40; // should be upgradable
     the_projectile.createFixture(fd);
     the_projectile.setLinearVelocity(new Vec2(100*cos(angle), -100*sin(angle)));
   }

@@ -1,33 +1,41 @@
 class tower {
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
+  int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
+  float resources;        // amount of resources the tower has
+  float maxResources;     // max resources the tower can store, may not use, if used should be upgradable
+  float resourceGain;     // gain per timestep
   int activeweapon;     // value determines which weapon is active
-  ArrayList<projectile> projectiles;
-  float angle;
+  ArrayList<projectile> projectiles;  // list of active projectiles
+  float angle;    // angle of tower's main, auto-fir weapon
   boolean autofire = true;
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
   
+  // constructor function, initializes the tower
   tower() {
     energy = maxEnergy;
+    energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
+    resourceGain = 0.1;  // changes with upgrades
     projectiles = new ArrayList<projectile>();
     angle = 0;
   }
   
   void update() {
+    energy += energyGain;  // gain energy
+    resources += resourceGain;  // gain resources
     if (autofire) {
       Vec2 target;
-      
       autofirecounter++;
       if (autofirecounter % 20 == 0 & !paused) { // only autofire every Nth time step
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
         target = the_pop.vec_to_random_creature(); // target a random creature
         angle = atan2(target.y,target.x);
         fire();
-        autofirecounter = 0;
+        autofirecounter = 0;  // reset the counter
       }
     }
-    else {
+    else {  // user controlled, point at the mouse
       // calculate the location of the mouse pointer in the world
       float x, y;
       float dx, dy;
@@ -114,7 +122,7 @@ class tower {
     if (energy < 100) {
       return;
     }
-    energy -= 100;
+    energy -= 100;  // uses a lot of energy to drop a rock
     rock r = new rock((int)x, (int)y);
     rocks.add(r); // rocks is a global list
     
