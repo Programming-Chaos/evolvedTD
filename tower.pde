@@ -23,29 +23,31 @@ class tower {
   
   void update() {
     update_projectiles();
-    energy += energyGain;  // gain energy
-    resources += resourceGain;  // gain resources
-    if (autofire) {
-      Vec2 target;
-      autofirecounter++;
-      if (autofirecounter % 20 == 0 & !paused) { // only autofire every Nth time step
+    if(!paused){
+      energy += energyGain;  // gain energy
+      resources += resourceGain;  // gain resources
+      if (autofire) {
+        Vec2 target;
+        autofirecounter++;
+        if (autofirecounter % 20 == 0 & !paused) { // only autofire every Nth time step
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
-        target = the_pop.vec_to_random_creature(); // target a random creature
-        angle = atan2(target.y,target.x);
-        fire();
-        autofirecounter = 0;  // reset the counter
+          target = the_pop.vec_to_random_creature(); // target a random creature
+          angle = atan2(target.y,target.x);
+          fire();
+          autofirecounter = 0;  // reset the counter
+        }
       }
-    }
-    else {  // user controlled, point at the mouse
-      // calculate the location of the mouse pointer in the world
-      float x, y;
-      float dx, dy;
-      dx = mouseX + cameraX;
-      dy = mouseY + cameraY;
-      x = cameraX + (cameraZ/(0.5*sqrt(width*width+height*height)))*(mouseX-width*0.5);
-      y = cameraY + (cameraZ/(0.5*sqrt(width*width+height*height)))*(mouseY-height*0.5);
-      //calculate the angle to the mouse pointer
-      angle = atan2(y, x);
+      else {  // user controlled, point at the mouse
+        // calculate the location of the mouse pointer in the world
+        float x, y;
+        float dx, dy;
+        dx = mouseX + cameraX;
+        dy = mouseY + cameraY;
+        x = cameraX + (cameraZ/(0.5*sqrt(width*width+height*height)))*(mouseX-width*0.5);
+        y = cameraY + (cameraZ/(0.5*sqrt(width*width+height*height)))*(mouseY-height*0.5);
+        //calculate the angle to the mouse pointer
+        angle = atan2(y, x);
+      }
     }
   }
   
@@ -78,7 +80,16 @@ class tower {
     rect(0, -30, 0.1*maxEnergy, 6);
     noStroke();
     fill(0, 0, 255);
-    rect(0, -30, 0.1*energy, 6);  
+    rect(0, -30, 0.1*energy, 6);
+    // display resources
+    pushMatrix();
+    hint(DISABLE_DEPTH_TEST);
+      translate(cameraX, cameraY,cameraZ-400);  // centered and below the camera
+      fill(0,0,0,200);
+      textSize(8);
+      text("Resources: "+(int)resources,0.2*width,-0.25*height); 
+    hint(ENABLE_DEPTH_TEST); 
+    popMatrix();
   }
   
   void next_generation() { // update the tower
