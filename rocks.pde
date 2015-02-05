@@ -1,7 +1,7 @@
 
 /* This is a simple class included mostly as an example of how to create box2d objects.
    It could be expanded or copied to create other box2d objects to put in the environment:
-   boulders, walls, fallen trees, etc.
+   boulders, walls, fallen trees, etc. including ones that move, rotate, are static (can't move), etc.
    */
 
 class rock {
@@ -49,7 +49,7 @@ class rock {
     translate(pos.x, pos.y);
     fill(200, 200, 200);
     stroke(0);
-    ellipse(0, 0, radius*2, radius*2);
+    ellipse(0, 0, radius*2, radius*2);  
     popMatrix();
   }
   
