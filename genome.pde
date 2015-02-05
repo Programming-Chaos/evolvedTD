@@ -55,6 +55,13 @@ class genome {
     return((int)(200 + 2000+ e));   // 2 to 4200 sigmoid, 200 is the amount of energy per food
   }
   
+  double getCompat() {
+    double sum = 0;
+    for (int i = 0; i < 10; i++) { 
+      sum += the_genome[reproduceStart+1+i];
+    }
+    return sum;
+  }
   
   // Density of a creature for the box2D "physical" body.
   // Box2D automatically handles the mass as density times area, so that when a force is applied to a body the correct acceleration is generated.

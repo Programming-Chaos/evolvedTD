@@ -86,6 +86,10 @@ class creature {
     return alive;
   }
   
+  double getCompat() {
+    return g.getCompat();
+  }
+  
   // This function calculates the torques the creature produces to turn, as a 
   // function of what it senses in the environment
   double calcTorque() { 
