@@ -109,15 +109,49 @@ class population {
     }
     return best;
   }
-   
+  
+  /* Function: AreCompatible(int,int)
+   * Looks at the compatibility loci of the parents passed in, and determines
+   * whether they are reproductively compatible.  Viability is based on
+   * the difference between the loci, with the probability being the normal
+   * distribution value at the point where the difference is.  Visually, the
+   * probability that an offspring is viable is the Y-value of the point on 
+   * a normal distribution where x = difference between compat genes.  If the
+   * difference is more than 2 standard deviations, then the parents are by
+   * default incompatible
+   *
+   * @param p1: first parent
+   * @param p2: second parent
+   * @return: boolean true if offspring is viable, false if not
+   */
+  boolean AreCompatible(creature p1, creature p2) {
+    double sDev = 5.0; // standard deviation: 5.0 ---- This determines the "speciation rate" by restricting the range of compatible values in the genome
+    double mean = 0.0; // mean at the Y axis --------- Changing this will move the "most compatibility" value left or right of zero
+    double x_val = p1.getCompat() - p2.getCompat(); // This is the location to evaluate the probability.  The further away from the center of the curve, the less likely to be compatible.
+    
+    double r = Math.random();
+    
+    return r <= (1.0 / (sDev * sqrt((float)(2 * Math.PI))) * Math.exp(-1 * ((x_val - mean)*(x_val - mean)/(2 * sDev * sDev)))); // returns whether r is at or below the curve at the x_val point
+  }
   void next_generation() { // creates the next generation
     ArrayList<creature> tempswarm = new ArrayList<creature>();
     calculateFitnesses();
     creature c;
-    int parent;
-    for (int i = 0; i < pop_size; i++) {
-      parent = select();
-      c = new creature(swarm.get(parent),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
+    
+    int parent1;  // two parents for sexual reproduction
+    int parent2;
+    
+    for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
+      parent1 = select();
+      parent2 = select();
+      while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
+      while (!AreCompatible(swarm.get(parent1),swarm.get(parent2))) {
+        parent1 = select();
+        parent2 = select();
+        while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
+      }
+      
+      c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
       c.mutate(); // mutate the new creature 
       tempswarm.add(c); // add it to the temp swarm
     }
