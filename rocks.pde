@@ -1,15 +1,21 @@
+
+/* This is a simple class included mostly as an example of how to create box2d objects.
+   It could be expanded or copied to create other box2d objects to put in the environment:
+   boulders, walls, fallen trees, etc.
+   */
+
 class rock {
-  Body the_rock;
-  int radius;
-  boolean remove = false;
+  Body the_rock;  // box2d body
+  int radius;     // radius of the rock
+  boolean remove = false;  // used to remember to remove it from the list of rocks
   
-  rock(int x, int y) {
+  rock(int x, int y) {  // Construct a rock at the given location
     radius = (int)(10);
     makebody(x, y);
     the_rock.setUserData(this);
   }
   
-  rock() {
+  rock() {  // Construct a rock at a random location
     radius = (int)(10);
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
@@ -37,7 +43,7 @@ class rock {
     return 0;
   }
   
-  void display() {
+  void display() {  // draws the rock, could be way cooler
     Vec2 pos = box2d.getBodyPixelCoord(the_rock);
     pushMatrix();
     translate(pos.x, pos.y);
