@@ -33,8 +33,7 @@ class creature {
   // copy constructor - this constucts a creature from a parent
   // notice that the starting energy, e, is supplied by the parent
   creature(creature cs,float e) {
-    g = new genome();
-    g.copy(cs.g);     // copy the parent's genome into this creature's genome
+    g = new genome(cs.g);
     angle = random(0, 2 * PI); // start at a random angle
     // Currently creatures are 'born' around a circle a fixed distance from the tower.
     // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
@@ -87,7 +86,7 @@ class creature {
   }
   
   double getCompat() {
-    return g.getCompat();
+    return g.getTraitSum("compatibility");
   }
   
   // This function calculates the torques the creature produces to turn, as a 
@@ -119,18 +118,18 @@ class creature {
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved amount of torque for food: Behavior(0)
-    torque += foodAheadL * g.getBehavior(0); 
+    torque += foodAheadL * g.getBehavior("food"); 
     // If there's food ahead on the right, turn by the evolved amount of torque for food: Behavior(0), but in the opposite, -1, direction
-    torque += foodAheadR * -1 * g.getBehavior(0);
+    torque += foodAheadR * -1 * g.getBehavior("food");
     // Similar turns for creatures and rocks
-    torque += creatureAheadL * g.getBehavior(1);
-    torque += creatureAheadR * -1 * g.getBehavior(1);
-    torque += rockAheadL * g.getBehavior(2);
-    torque += rockAheadR * -1 * g.getBehavior(2);
+    torque += creatureAheadL * g.getBehavior("creature");
+    torque += creatureAheadR * -1 * g.getBehavior("creature");
+    torque += rockAheadL * g.getBehavior("rock");
+    torque += rockAheadR * -1 * g.getBehavior("rock");
     // Take the square root of the amout of scent detected on the left (right), factor in the evolved response to smelling food, and add that to the torque
     // Take the squareroot of the scent to reduce over correction
-    torque += sqrt(scentAheadL) * g.getBehavior(3);
-    torque += sqrt(scentAheadR) * -1 * g.getBehavior(3);
+    torque += sqrt(scentAheadL) * g.getBehavior("scent");
+    torque += sqrt(scentAheadR) * -1 * g.getBehavior("scent");
     //println(torque); 
     return torque;
   }
