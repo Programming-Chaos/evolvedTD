@@ -7,6 +7,10 @@ int tournSize = 5;
 
 class population {
   ArrayList<creature> swarm;
+  /* create gamete hash table for storing gametes.  
+     Use global variables to find how many spaces are needed. */
+  ArrayList<genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
+  
   
   population() {
     swarm = new ArrayList<creature>();
