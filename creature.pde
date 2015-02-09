@@ -16,6 +16,7 @@ class creature {
   float maxHealth = 100; // should be evolved
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
+  int round_counter; //Counter to track how many rounds/generations the individual creature has been alive
 
   // Constructor, creates a new creature at the given location and angle
   // This constructor is generally only used for the first wave, after that creatures are created from parents.
@@ -79,7 +80,9 @@ class creature {
   
   // This function removes the body from the box2d world
   void killBody() {
-    box2d.destroyBody(body);
+    if(alive() == false){
+      box2d.destroyBody(body);
+    }
   }
   
   boolean alive() {
@@ -270,8 +273,9 @@ class creature {
     noStroke();
     fill(0, 0, 255);
     rect(0, -1 * offset, 0.1 * health, 3);
+    //Text to display the round counter of each creature for debug purposes
+    //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
-    
   }
 
   // This function makes a Box2D body for the creature and adds it to the box2d world
