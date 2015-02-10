@@ -51,6 +51,7 @@ class Genome {
   // segments need an extra for the leading and trailing edge (spine)
   Trait segments = new Trait(numSegments + 1);
   Trait density = new Trait(10);
+  Trait armor = new Trait(10);
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
@@ -117,6 +118,14 @@ class Genome {
     }
 
     return d; // limit 0 to infinity
+  }
+  
+  float getArmor() {
+    // the value mins at 0.1
+    if ((1+armor.avg()) < 0.1) {
+      return (0.1);
+    }
+    return (1+armor.avg());//limit 0.1 to infinity
   }
 
   // Forward force to accelerate the creature, evolved, but
