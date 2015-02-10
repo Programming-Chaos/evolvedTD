@@ -10,6 +10,7 @@ class tower {
   float angle;    // angle of tower's main, auto-fir weapon
   boolean autofire = true;
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
+  PImage img;    // declare image for tower
   
   // constructor function, initializes the tower
   tower() {
@@ -19,6 +20,7 @@ class tower {
     resourceGain = 0.1;  // changes with upgrades
     projectiles = new ArrayList<projectile>();
     angle = 0;
+    img = loadImage("Gunturret02.png");
   }
   
   void update() {
@@ -63,11 +65,18 @@ class tower {
   }
   
   void display() {
+    /*
     // draw a line 
     stroke(255, 0, 0);
     line(0, 0, 30*cos(angle), 30*sin(angle));
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
+    */
+    pushMatrix();
+    float c = angle;
+    rotate(c + HALF_PI);
+    image(img,-128,-128);
+    popMatrix();
     
     for (projectile p: projectiles) { // display the active projectiles
       p.display();
