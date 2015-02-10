@@ -55,6 +55,7 @@ class Genome {
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
   Trait scent = new Trait(10);
+  Trait control = new Trait(10);
   // TODO: add gender, mutation rate, etc.
 
   // Constructor: creates a random genome with values near zero
