@@ -17,11 +17,14 @@ class tile {
                        // liquid
   
   float scent;         // how much sent is present
+  float creatureScent; // how much creature scent is present
   
   boolean isLiquid;    // is the cell traversable as a liquid
   boolean hasFood;     // is there food present
   boolean hasRock;     // is there a rock present
   boolean hasScent;    // is scent present
+  boolean hasCreatureScent; // is creature scent present
+
   boolean hasTower;    // is there a tower present
   
   creature hasCreature; // is there a creature present
@@ -34,13 +37,16 @@ class tile {
     weathering = 0;
     viscosity = 0;
     scent = 0;
+    creatureScent = 0;
     isLiquid = false;
     hasFood = false;
     hasRock = false;
     hasTower = false;
     hasCreature = null;
+    hasCreatureScent = false;
     
     DEBUG_sensing = false;
+
   }
   
   // GET
@@ -55,6 +61,7 @@ class tile {
   creature hasCreature()   { return hasCreature; }
   
   boolean DEBUG_sensing()  { return DEBUG_sensing; }
+  float getCreatureScent() {return creatureScent;}
   
   // SET
   void setColor(int c)           { coloring = c; }
@@ -66,6 +73,7 @@ class tile {
   void hasRock(boolean r)        { hasRock = r; }
   void hasTower(boolean t)       { hasTower = t; }
   void hasCreature(creature c)   { hasCreature = c; }
+  void setCreatureScent(float s) { creatureScent = s;}
 
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; } 
 }
@@ -117,6 +125,7 @@ class environment{
 }
   
   void update_scent() {
+    if(!paused){
     int range = 1, tempx, tempy;
     float count;
     float[][] temparray;
@@ -125,7 +134,16 @@ class environment{
       for (int x = 0; x < environWidth; x++) {
         if (tileMap[x][y].hasFood()) {
           count = tileMap[x][y].getScent() + 10; // food causes scent to increase
-          tileMap[x][y].setScent(min(count,maxscent)); // increase scent up to the max 
+          tileMap[x][y].setScent(min(count,maxscent)); // increase scent up to the max
+
+          /* if creature that has scent add scent to map
+        } else if( (tileMap[x][y].hasCreature != null) &&
+                   (tileMap[x][y].hasCreature.scent >= 5) ) {
+          count = tileMap[x][y].getScent() + 10;
+          tileMap[x][y].setScent(min(count,maxscent));
+        }
+
+          */
         }
         else {
           count = 0;
@@ -150,6 +168,48 @@ class environment{
         //scent[x][y] = min(maxscent,temparray[x][y]);
         tileMap[x][y].setScent(temparray[x][y]);
       }
+    }
+    }
+  }
+
+  void update_creature_scent() {
+    if(!paused){
+    int range = 1, tempx, tempy;
+    float count = 0;
+    float[][] temparray;
+    temparray = new float[environWidth][environHeight];
+    for (int y = 0; y < environHeight; y++) {
+      for (int x = 0; x < environWidth; x++) {
+        if (tileMap[x][y].hasCreature != null) {
+          if ( tileMap[x][y].hasCreature.scent >= 5) {
+          count = tileMap[x][y].getCreatureScent() + 8; // creature causes scent to increase
+          tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the max
+          }
+        }
+        else {
+          count = 0;
+          for (int rx = -1*range; rx < range+1; rx++) {
+            for (int ry = -1*range; ry < range+1; ry++) {
+              tempx = x+rx;
+              tempy = y+ry;
+              tempx = max(min(environWidth-1, tempx), 0);
+              tempy = max(min(environHeight-1, tempy), 0);
+              count += tileMap[tempx][tempy].getCreatureScent();
+            }
+          }
+          count /= 9.0; // scent is average contribution of 9 cells
+          //scent[x][y] = count;
+        }
+        count *= 0.99; // scent decays over time
+        temparray[x][y] = count;
+      }
+    }
+    for (int y = 0; y < environHeight; y++) {
+      for (int x = 0; x < environWidth; x++) {
+        //scent[x][y] = min(maxscent,temparray[x][y]);
+        tileMap[x][y].setCreatureScent(temparray[x][y]);
+      }
+    }
     }
   }
   
@@ -184,6 +244,7 @@ class environment{
       }
     }
     update_scent();
+    update_creature_scent();
   }
   
   int checkForFood(double x1, double y1) {
@@ -268,6 +329,7 @@ class environment{
       }
     }
     display_scent();
+    display_creature_scent();
   }
   
   void display_scent() {
@@ -279,7 +341,7 @@ class environment{
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
-        /* code that colors cells with any non-zero scent - shows that scent spreads very far
+         /* code that colors cells with any non-zero scent - shows that scent spreads very far
            if (scent[x][y] > 0) {
            fill(100, 100, 100);
            }
@@ -292,7 +354,33 @@ class environment{
         translate(cellWidth, 0);
       }
       translate(worldWidth*-1, cellHeight);
-    }
+    }    
+    popMatrix();  
+  }
+
+    void display_creature_scent() {
+    float size = cellWidth;
+    float offset = 0;// cellWidth*0.5;
+    pushMatrix();
+    translate(worldWidth*-0.5, worldHeight*-0.5, -1);
+    noStroke();
+    for (int y = 0; y < environHeight; y++) {
+      for (int x = 0; x < environWidth; x++) {
+        fill(255, 0, 0, 255 * tileMap[x][y].getCreatureScent() / maxscent);
+         /* code that colors cells with any non-zero scent - shows that scent spreads very far
+           if (scent[x][y] > 0) {
+           fill(100, 100, 100);
+           }
+           else {
+           fill(100, 100, 100, 0);
+           }
+        */
+          
+        rect(offset, offset, size, size);
+        translate(cellWidth, 0);
+      }
+      translate(worldWidth*-1, cellHeight);
+    }    
     popMatrix();  
   }
   

@@ -16,6 +16,7 @@ class creature {
   float maxHealth = 100; // should be evolved
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
+  float scent;
 
   // Constructor, creates a new creature at the given location and angle
   // This constructor is generally only used for the first wave, after that creatures are created from parents.
@@ -28,6 +29,7 @@ class creature {
     health = maxHealth;  // initial health
     fitness = 0;   // initial fitness
     alive = true;   // creatures begin life alive
+    scent = getScent(this);
   }
   
   // copy constructor - this constucts a creature from a parent
@@ -44,8 +46,17 @@ class creature {
     health = maxHealth;  // Probably should be evolved.
     fitness = 0;
     body.setUserData(this);
-    alive = true; 
+    alive = true;
+    scent = getScent(this);
  }
+
+  // function getScent will calculate the creatures scent value
+  // from the genome, but for now it is just a constant
+  float getScent( creature c ) {
+    float s = 5;
+    // s = g.scent()
+    return s;
+  }
   
   void mutate() {
     g.mutate(); // mutate the genome
