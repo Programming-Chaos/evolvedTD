@@ -103,7 +103,7 @@ class environment{
       }
     }
     
-    generateWater(5, 10, 3);
+    generateWater(10, 15, 10);
     makeImage();
     // makeImageFood();
     // updateEnvrion();
@@ -314,7 +314,7 @@ class environment{
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         if(tileMap[x][y].isLiquid()) {
-          fill(0, 0, 255);
+          fill(20, 50, 200,200);
           rect(offset, offset, size, size);
         }
         translate(cellWidth, 0);
