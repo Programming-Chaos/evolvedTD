@@ -203,6 +203,14 @@ offers us a button at the bottom of the PR to automatically perform
 the merge from `foo` into `master`, thus completing and closing the
 pull request.
 
+### Reverting
+
+If published commits break the game, or for any other reason need to
+be "undone", the `git revert` [command][revert] will create *inverse*
+commits of the specified range, which are then committed, effectively
+undoing the changes in a recorded manner. GitHub also provides a
+`revert` button on merged pull requests.
+
 [wiki]: http://course.cs.uidaho.edu/wiki404/index.php/Main_Page
 [ssh]: https://help.github.com/articles/generating-ssh-keys/
 [pr]: https://help.github.com/articles/using-pull-requests/
@@ -213,6 +221,7 @@ pull request.
 [flow]: https://guides.github.com/introduction/flow/index.html
 [perfect]: https://github.com/blog/1943-how-to-write-the-perfect-pull-request
 [gh]: https://github.com/tsoule88/evolvedTD
+[revert]: http://git-scm.com/docs/git-revert
 
 # Dependencies
 
