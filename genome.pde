@@ -48,7 +48,8 @@ class Genome {
   Trait forwardForce = new Trait(10);
   Trait turningForce = new Trait(10);
   Trait restitution = new Trait(10);
-  Trait segments = new Trait(numSegments * 2);
+  // segments need an extra for the leading and trailing edge (spine)
+  Trait segments = new Trait(numSegments + 1);
   Trait density = new Trait(10);
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
