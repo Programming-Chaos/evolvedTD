@@ -157,7 +157,6 @@ class population {
     for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
       parent1 = select();
       parent2 = select();
-      while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
       while (!AreCompatible(swarm.get(parent1),swarm.get(parent2))) {
         parent1 = select();
         parent2 = select();
