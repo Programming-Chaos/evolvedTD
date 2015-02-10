@@ -7,6 +7,7 @@ int tournSize = 5;
 
 class population {
   ArrayList<creature> swarm;
+  
   /* create gamete hash table for storing gametes.  
      Use global variables to find how many spaces are needed. */
   ArrayList<genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
@@ -139,6 +140,14 @@ class population {
   }
   void next_generation() { // creates the next generation
     ArrayList<creature> tempswarm = new ArrayList<creature>();
+    // Add gametes to gamete bucket
+    for (creature cd: swarm) {
+      float fit = cd.fitness;
+      for (int i=0; i < fit; i++) {
+         gametes[0].add(cd.g);
+      }
+    }
+    
     calculateFitnesses();
     creature c;
     
