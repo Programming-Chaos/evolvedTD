@@ -210,7 +210,11 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // projectiles damage creatures
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    p1.change_health(-1*p2.get_damage());
+    if (p1.getArmor() < 0.1){
+      p1.change_health((int)(-1*(p2.get_damage()/0.1)));//armor cannot reduce damage beyond 1/10
+    } else{
+      p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor())));
+    }
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {

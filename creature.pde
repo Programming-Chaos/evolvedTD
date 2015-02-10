@@ -73,7 +73,15 @@ class creature {
   }
 
   float getDensity() {
-    return g.getDensity();
+    if (g.getArmor() > 0.1){
+      return (g.getDensity()*0.1);
+    } else{
+      return (g.getDensity()*g.getArmor());
+    }
+  }
+  
+  float getArmor(){
+    return g.getArmor();
   }
 
   // This function removes the body from the box2d world
@@ -225,6 +233,11 @@ class creature {
     stroke(0);   // Draw polygons with edges
     while(f != null) {  // While there are still Box2D fixtures in the body, draw them
       fill(g.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
+      if (g.getArmor() < 0.1){
+        strokeWeight(0.1);
+      } else{
+        strokeWeight(0.05+(g.getArmor()/2));
+      }
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
@@ -234,6 +247,7 @@ class creature {
       endShape(CLOSE);
       f = f.getNext();  // Get the next fixture from the fixture list
     }
+    strokeWeight(1);
     // Add some eyespots
     fill(0);
     Vec2 eye = g.getPoint(6);
