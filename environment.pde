@@ -105,7 +105,7 @@ class environment{
     
     makeImage();
     // makeImageFood();
-    // updateEnvrion();
+    // updateEnviron();
   }
   
   void place_creature(creature cd, float x, float y) {
@@ -153,7 +153,7 @@ class environment{
     }
   }
   
-  void updateEnvrion() {
+  void updateEnviron() {
     Vec2 p = new Vec2();
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
@@ -234,7 +234,7 @@ class environment{
   }
   
   void display() {
-    updateEnvrion();
+    updateEnviron();
     pushMatrix();
     translate(worldWidth*-0.5, worldHeight*-0.5, -1);
     image(image, 0, 0); 
