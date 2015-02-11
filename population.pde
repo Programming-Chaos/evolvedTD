@@ -151,12 +151,19 @@ class population {
         while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
       }
       
+      c = swarm.get(i);
+      if (c.alive() == true){
+        c.round_counter++;
+        tempswarm.add(c);
+      }else{
+      
       c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
       c.mutate(); // mutate the new creature 
       tempswarm.add(c); // add it to the temp swarm
+      } 
     }
     for (creature cd: swarm) { // explicitly remove bodies from the box2dworld
-      cd.killBody();
+        cd.killBody();  
     }
     swarm.clear(); // clear the old swarm
     for (int i = 0; i < pop_size; i++) {
