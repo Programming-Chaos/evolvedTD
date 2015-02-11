@@ -11,7 +11,7 @@ class tower {
   boolean autofire = true;
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
   PImage img;    // declare image for tower
-  SoundFile cannon;  // declare soundfile for tower
+  //SoundFile cannon;  // declare soundfile for tower
   
   // constructor function, initializes the tower
   tower() {
@@ -22,7 +22,7 @@ class tower {
     projectiles = new ArrayList<projectile>();
     angle = 0;
     img = loadImage("Gunturret02.png");
-    cannon = new SoundFile(this, "Cannon.wave");
+    //cannon = new SoundFile(this, "Cannon.wave");
   }
   
   void update() {
@@ -146,7 +146,7 @@ class tower {
     projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
     energy-=10;
-    cannon.play();
+//    cannon.play();
     
   }
   
