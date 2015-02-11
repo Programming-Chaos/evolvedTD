@@ -2,7 +2,7 @@
 /* The environment is divided into cells.
  * Each cell has a type (an int).
  * A cell may also contain a creature, food, rock, etc.
- * This is done to make sensing efficient - a creature can snese whether there's food (for example) in a cell.
+ * This is done to make sensing efficient - a creature can sense whether there's food (for example) in a cell.
  */
 
 int cellWidth = 20;
@@ -12,12 +12,14 @@ int maxscent = 255;
 class tile {
   int coloring;      // 0 to 255 value that describes tile visually
   int weathering;    // 0 to 255 value that describes tile weathering visually
-  int viscosity;     // 0 (none) to 255 (water) value that describes the viscosity
+  int viscosity;     // 0 (solid) to 255 (water) value that describes the viscosity
                        // of a tile and determines whether the tile can be considered
                        // liquid
   
+
   float scent;         // how much sent is present
   float creatureScent; // how much creature scent is present
+
   
   boolean isLiquid;    // is the cell traversable as a liquid
   boolean hasFood;     // is there food present
@@ -82,7 +84,7 @@ class environment{
   int environWidth;
   int environHeight;
   int environAltitude;
-  float temp; // celcius
+  float temp; // celsius
   PGraphics image;
   
   tile[][] tileMap;
@@ -99,7 +101,7 @@ class environment{
         tileMap[i][j] = new tile();
         tileMap[i][j].setColor(200 + (int)random(25));    // environment type
         tileMap[i][j].setWeather(0);                      // weather type
-        tileMap[i][j].setViscosity(0);                    // how muddy or liquid is the tile
+        tileMap[i][j].setViscosity(0);                    // how viscous the tile is;
         tileMap[i][j].setScent(0);
         tileMap[i][j].isLiquid(false);                    // viscosity > 200 liquid = true
         tileMap[i][j].hasCreature(null);                 
@@ -111,10 +113,43 @@ class environment{
       }
     }
     
+    generateWater(10, 15, 10);
     makeImage();
     // makeImageFood();
-    // updateEnvrion();
+    // updateEnviron();
   }
+
+  void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
+    int totalSize = 0;
+    int x = 0;
+    int y = 0;
+    for(int i = 0; i < numWaterBodies; i++) {
+      // water body origin
+      x = (int)random(environWidth);
+      y = (int)random(environHeight);
+      
+      totalSize = initialSize + ((int)random(deltaSize) * (int)random(-1, 1)); // noted extra chance of delta being 0
+      
+      x = x + (totalSize / 2);
+      y = y + (totalSize / 2);
+      
+      
+      int a, b, r;
+      for(int xOffset = x - (totalSize / 2); xOffset < (x + (totalSize / 2)); xOffset++) {
+        for(int yOffset = y - (totalSize / 2); yOffset < (y + (totalSize / 2)); yOffset++) {
+          a = xOffset - x;
+          b = yOffset - y;
+          r = (totalSize / 2);
+          if(xOffset < environWidth && yOffset < environHeight && xOffset > 0 && yOffset > 0) {
+            if((a * a) + (b * b) <= (r * r) ){  
+              tileMap[xOffset][yOffset].isLiquid(true);
+              tileMap[xOffset][yOffset].setViscosity(255);
+            }
+          }  
+        }  
+      }
+    }
+  }  
   
   void place_creature(creature cd, float x, float y) {
     x = (int)((worldWidth*0.5+x-1)/cellWidth);
@@ -122,7 +157,7 @@ class environment{
     x = (x+environWidth)%environWidth; // in case creature was temporarily bumped out of bounds
     y = (y+environHeight)%environHeight;
     tileMap[(int)x][(int)y].hasCreature(cd);
-}
+  }
   
   void update_scent() {
     if(!paused){
@@ -213,7 +248,7 @@ class environment{
     }
   }
   
-  void updateEnvrion() {
+  void updateEnviron() {
     Vec2 p = new Vec2();
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
@@ -295,7 +330,7 @@ class environment{
   }
   
   void display() {
-    updateEnvrion();
+    updateEnviron();
     pushMatrix();
     translate(worldWidth*-0.5, worldHeight*-0.5, -1);
     image(image, 0, 0); 
@@ -330,6 +365,27 @@ class environment{
     }
     display_scent();
     display_creature_scent();
+    display_water();
+  }
+  
+  void display_water() {
+    float size = cellWidth;
+    float offset = 0;
+    pushMatrix();
+    translate(worldWidth * -0.5, worldHeight * -0.5, -1);
+    noStroke();
+    
+    for (int y = 0; y < environHeight; y++) {
+      for (int x = 0; x < environWidth; x++) {
+        if(tileMap[x][y].isLiquid()) {
+          fill(20, 50, 200,200);
+          rect(offset, offset, size, size);
+        }
+        translate(cellWidth, 0);
+      }  
+      translate(worldWidth*-1, cellHeight);  
+    }
+    popMatrix();  
   }
   
   void display_scent() {
