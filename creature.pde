@@ -80,9 +80,7 @@ class creature {
   
   // This function removes the body from the box2d world
   void killBody() {
-    if(alive() == false){
       box2d.destroyBody(body);
-    }
   }
   
   boolean alive() {
