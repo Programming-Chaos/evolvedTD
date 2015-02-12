@@ -156,15 +156,22 @@ class population {
         c.round_counter++;
         tempswarm.add(c);
       }else{
-      
-      c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
-      c.mutate(); // mutate the new creature 
-      tempswarm.add(c); // add it to the temp swarm
+        c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
+        c.mutate(); // mutate the new creature 
+        tempswarm.add(c); // add it to the temp swarm
       } 
     }
+    for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
+        c = swarm.get(i);
+        if (c.alive() != true){
+          c.killBody();
+        }
+    }
+    /*
     for (creature cd: swarm) { // explicitly remove bodies from the box2dworld
         cd.killBody();  
     }
+    */
     swarm.clear(); // clear the old swarm
     for (int i = 0; i < pop_size; i++) {
       swarm.add(tempswarm.get(i)); // copy the tempswarm into the swarm
