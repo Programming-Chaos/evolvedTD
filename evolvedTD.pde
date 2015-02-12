@@ -1,3 +1,9 @@
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
 
 import shiffman.box2d.*;
 import org.jbox2d.collision.shapes.*;
@@ -28,6 +34,9 @@ ArrayList<rock> rocks;         // list of rock objects in the world
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
+Minim minim;
+AudioPlayer gunshot;
+
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
 void setup() {
@@ -35,6 +44,9 @@ void setup() {
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   the_tower = new tower();
+  
+  minim = new Minim(this);
+  gunshot = minim.loadFile("Cannon.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -60,6 +72,7 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
+  
 
   if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;

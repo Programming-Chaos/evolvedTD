@@ -23,6 +23,7 @@ class tower {
     angle = 0;
     gunbase = loadImage("Tower_base_02.png");
     gun = loadImage("Gunturret02.png");
+    
   }
   
   void update() {
@@ -147,6 +148,8 @@ class tower {
     projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
     energy-=10;
+    gunshot.rewind();
+    gunshot.play();
     
   }
   
