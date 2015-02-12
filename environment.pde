@@ -118,7 +118,7 @@ class environment{
       }
     }
     
-    generateWater(10, 15, 10);
+    generateWater(10, 15, 14);
     makeImage();
     // makeImageFood();
     // updateEnviron();
@@ -133,7 +133,7 @@ class environment{
       x = (int)random(environWidth);
       y = (int)random(environHeight);
       
-      totalSize = initialSize + ((int)random(deltaSize) * (int)random(-1, 1)); // noted extra chance of delta being 0
+      totalSize = initialSize + (int)(random(deltaSize) * random(-1, 1)); // noted extra chance of delta being 0
       
       x = x + (totalSize / 2);
       y = y + (totalSize / 2);

@@ -12,7 +12,7 @@ public static class Utilities {
   /// @param(range_scale): The value of the asymptote.  This is the N described above
   
   public double Sigmoid(double x, double lambda, double range_scale) {
-    return (range_scale * ( (2.0 / (1 + exp(-1 * x * lambda))) - 1 ));    // f(x) = N * ( ______2______  - 1 )   N is the range scaling factor, l is the horizontal scaling factor (steepness of the curve)     
+    return (range_scale * ( (2.0 / (1 + exp((float)(-1 * x * lambda))) - 1 )));    // f(x) = N * ( ______2______  - 1 )   N is the range scaling factor, l is the horizontal scaling factor (steepness of the curve)     
   }                                                                //            ( (1 + e^(-lx))      )   This sigmoid is centered on 0, gives values in the range (-N,N)
 }
 

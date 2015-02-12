@@ -23,6 +23,7 @@ class creature {
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
   int round_counter; //Counter to track how many rounds/generations the individual creature has been alive
+  float armor;
 
   // Constructor, creates a new creature at the given location and angle
   // This constructor is generally only used for the first wave, after that creatures are created from parents.
@@ -39,14 +40,15 @@ class creature {
     scent = setScent(this);     // does creature produce scent
     scentStrength = setScentStrength(this);        // how strong is the scent
     scentColor = setScentColor(this); // what color is the scent
+    armor = g.getArmor();
 
   }
   
   // copy constructor - this constucts a creature from a parent
   // notice that the starting energy, e, is supplied by the parent
   creature(creature cs,float e) {
-    g = new genome();
-    g.copy(cs.g);     // copy the parent's genome into this creature's genome
+    g = new Genome(cs.g);
+    //g.copy(cs.g);     // copy the parent's genome into this creature's genome
     angle = random(0, 2 * PI); // start at a random angle
     // Currently creatures are 'born' around a circle a fixed distance from the tower.
     // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
@@ -60,6 +62,7 @@ class creature {
     scent = setScent(this);      // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
     scentColor = setScentColor(this); // what color is the scent
+    armor = g.getArmor();
  }
 
   boolean getScent()        { return scent; }
@@ -115,6 +118,10 @@ class creature {
     energy += x;
   }
   
+  float getArmor(){
+    return armor;
+  }
+  
   float getEnergy() {
     return energy;
   }
@@ -141,7 +148,8 @@ class creature {
   }
   
   double getCompat() {
-    return g.getCompat();
+    //return g.getCompat();
+    return 0;
   }
   
   // This function calculates the torques the creature produces to turn, as a 
@@ -279,7 +287,7 @@ class creature {
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
     while(f != null) {  // While there are still Box2D fixtures in the body, draw them
-      fill(g.getcolor());  // Get the creature's color, creatures could evolve a different color for each segement
+      fill(g.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
@@ -291,7 +299,7 @@ class creature {
     }
     // Add some eyespots
     fill(0);
-    Vec2 eye = g.getpoint(6);
+    Vec2 eye = g.getPoint(6);
     ellipse(eye.x, eye.y, 5, 5);
     ellipse(-1 * eye.x, eye.y, 5, 5);
     fill(255);
@@ -345,14 +353,14 @@ class creature {
     Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
     float density = g.getDensity();
     
-    for (int i = 0; i < g.numsegments; i++) {  // For each segment
+    for (int i = 0; i < g.numSegments; i++) {  // For each segment
       sd = new PolygonShape();  // Create a new polygone
 
       vertices3  = new Vec2[3];  // Create an array of 3 new vectors
       // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));  // First vertex is at the center of the creature
-      vertices3[1] = box2d.vectorPixelsToWorld(g.getpoint(i));   // Second and third vertices are evolved, so get from the genome
-      vertices3[2] = box2d.vectorPixelsToWorld(g.getpoint(i + 1));
+      vertices3[1] = box2d.vectorPixelsToWorld(g.getPoint(i));   // Second and third vertices are evolved, so get from the genome
+      vertices3[2] = box2d.vectorPixelsToWorld(g.getPoint(i + 1));
       //  sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
@@ -365,13 +373,13 @@ class creature {
     }
     
     // now repeat the whole process for the other side of the creature
-    for (int i = 0; i < g.numsegments; i++) {
+    for (int i = 0; i < g.numSegments; i++) {
       sd = new PolygonShape();
       vertices3  = new Vec2[3];
       //vertices[i] = box2d.vectorPixelsToWorld(g.getpoint(i));
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0,0));
-      vertices3[1] = box2d.vectorPixelsToWorld(g.getflippedpoint(i));      
-      vertices3[2] = box2d.vectorPixelsToWorld(g.getflippedpoint(i + 1));
+      vertices3[1] = box2d.vectorPixelsToWorld(g.getFlippedPoint(i));      
+      vertices3[2] = box2d.vectorPixelsToWorld(g.getFlippedPoint(i + 1));
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();
       fd.shape = sd;

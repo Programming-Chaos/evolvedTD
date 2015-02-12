@@ -79,6 +79,19 @@ class Genome {
   double getBehavior(Trait trait) {
     return getTurningForce() * trait.sum(); // there's a turning force
   }
+  
+  double getBehavior(int traitN) {
+    if(traitN == 0){
+      return getBehavior(food);
+    }
+    if(traitN == 1){
+      return getBehavior(creature);
+    }
+    if(traitN == 2){
+      return getBehavior(rock);
+    }
+    return getBehavior(scent); // there's a turning force
+  }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
