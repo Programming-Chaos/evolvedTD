@@ -386,4 +386,4 @@ class creature {
       body.createFixture(fd);
     }
   }
-}
+
