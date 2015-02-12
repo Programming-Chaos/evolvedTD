@@ -100,11 +100,7 @@ class creature {
       return false;
     }
   }
-
-
-}
   
-
   void mutate() {
     g.mutate(); // mutate the genome
   }
@@ -386,4 +382,4 @@ class creature {
       body.createFixture(fd);
     }
   }
-
+}
