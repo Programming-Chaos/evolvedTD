@@ -10,26 +10,32 @@ class creature {
   // fitness, health, a max health, angle they are facing, etc.
   Body body;
   Genome g;
-  float energy;   // used for reproduction and movement, given to offspring? gained from resources/food
-  float fitness; // used for selection
-  float health; // 0 health, creature dies
-  float maxHealth = 100; // should be evolved
+  float energy;           // used for reproduction and movement, given to offspring? gained from resources/food
+  float fitness;          // used for selection
+  float health;           // 0 health, creature dies
+  float maxHealth = 100;  // should be evolved
   float angle;
-  boolean alive; // dead creatures remain in the swarm to have a breeding chance
-  float scent;
+  boolean alive;          // dead creatures remain in the swarm to have a breeding chance
+
+  // communication traits
+  boolean scent;          // used to determine if creature is capable of producing scent
+  float scentStrength;    // how strong the creature's scent is
+  int scentColor;         // store an integer for different colors
 
   // Constructor, creates a new creature at the given location and angle
   // This constructor is generally only used for the first wave, after that creatures are created from parents.
   creature(float x, float y, float a) {
-    angle = a;  // set the creature's angle
-    g = new Genome();  // call the genome's constructor function to generate a new, random genome
-    makeBody(new Vec2(x, y));  // call the function that makes a Box2D body
-    body.setUserData(this);    // required by Box2D
-    energy = 20000;            // Starting energy
-    health = maxHealth;  // initial health
-    fitness = 0;   // initial fitness
-    alive = true;   // creatures begin life alive
-    scent = getScent(this);
+    angle = a;                  // set the creature's angle
+    g = new Genome();           // call the genome's constructor function to generate a new, random genome
+    makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
+    body.setUserData(this);     // required by Box2D
+    energy = 20000;             // Starting energy
+    health = maxHealth;         // initial health
+    fitness = 0;                // initial fitness
+    alive = true;               // creatures begin life alive
+    scent = setScent(this);     // does creature produce scent
+    scentStrength = setScentStrength(this);        // how strong is the scent
+    scentColor = setScentColor(this); // what color is the scent
   }
 
   // copy constructor - this constucts a creature from a parent
@@ -46,15 +52,48 @@ class creature {
     fitness = 0;
     body.setUserData(this);
     alive = true;
-    scent = getScent(this);
+    scent = setScent(this);      // does creature produce scent
+    scentStrength = setScentStrength(this); // how strong is the scent
+    scentColor = setScentColor(this); // what color is the scent
  }
 
-  // function getScent will calculate the creatures scent value
-  // from the genome, but for now it is just a constant
-  float getScent( creature c ) {
-    float s = 5;
-    // s = g.scent()
+  boolean getScent()        { return scent; }
+  float getScentStrength()  { return scentStrength; }
+  int getScentColor()       { return scentColor; }
+  
+  int setScentColor( creature c ) {
+    FloatList l;
+    float s;
+    int val;
+    l = c.g.scent.list();
+    s = l.get(5); // the 5th gene determines scent color for now
+    // map function goes here
+    if( s >= 0 ) {
+      return 1;
+    } else {
+      return 2;
+    }
+  }
+
+  // set scentStrength
+  float setScentStrength( creature c ) {
+    float s;
+    s = c.g.scent.avg();
+    // mapping function goes here
     return s;
+  }
+  
+  // function setScent will calculate the creatures scent value
+  boolean setScent( creature c ) {
+    float s;
+    s = c.g.scent.sum();
+    print(s + "\n");
+    // need to add a mapping function here
+    if( s >= 0 ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void mutate() {
