@@ -23,7 +23,8 @@ class creature {
   float angle;
   boolean alive; // dead creatures remain in the swarm to have a breeding chance
   int round_counter; //Counter to track how many rounds/generations the individual creature has been alive
-  float armor;
+  float[] armor;
+  float density;
 
   // Constructor, creates a new creature at the given location and angle
   // This constructor is generally only used for the first wave, after that creatures are created from parents.
@@ -31,6 +32,12 @@ class creature {
 
     angle = a;                  // set the creature's angle
     g = new Genome();           // call the genome's constructor function to generate a new, random genome
+    armor = new float[g.numSegments];
+    for (int c = 0; c < g.numSegments; c++)armor[c] = g.getArmor(c);
+    float avgarmor = 0;
+    for (int c = 0; c < g.numSegments; c++)avgarmor += armor[c];
+    avgarmor /= g.numSegments;
+    density = (g.getDensity()*avgarmor);
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
     energy = 20000;             // Starting energy
@@ -40,7 +47,6 @@ class creature {
     scent = setScent(this);     // does creature produce scent
     scentStrength = setScentStrength(this);        // how strong is the scent
     scentColor = setScentColor(this); // what color is the scent
-    armor = g.getArmor();
 
   }
   
@@ -52,6 +58,12 @@ class creature {
     angle = random(0, 2 * PI); // start at a random angle
     // Currently creatures are 'born' around a circle a fixed distance from the tower.
     // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
+    armor = new float[g.numSegments];
+    for (int c = 0; c < g.numSegments; c++)armor[c] = g.getArmor(c);
+    float avgarmor = 0;
+    for (int c = 0; c < g.numSegments; c++)avgarmor += armor[c];
+    avgarmor /= g.numSegments;
+    density = (g.getDensity()*avgarmor);
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));  
     makeBody(pos);
     energy = e;   // starting energy comes from parent
@@ -62,7 +74,6 @@ class creature {
     scent = setScent(this);      // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
     scentColor = setScentColor(this); // what color is the scent
-    armor = g.getArmor();
  }
 
   boolean getScent()        { return scent; }
@@ -130,15 +141,11 @@ class creature {
   }
   
   float getDensity() {
-    if (g.getArmor() > 0.1){
-      return (g.getDensity()*0.1);
-    } else{
-      return (g.getDensity()*g.getArmor());
-    }
+    return density;
   }
   
-  float getArmor(){
-    return armor;
+  float getArmor(int c){
+    return armor[c];
   }
   
   // This function removes the body from the box2d world
@@ -289,13 +296,10 @@ class creature {
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
-    while(f != null) {  // While there are still Box2D fixtures in the body, draw them
+    for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
+      if (c > 7)c %= 8;
       fill(g.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
-      if (g.getArmor() < 0.1){
-        strokeWeight(0.1);
-      } else{
-        strokeWeight(0.05+(g.getArmor()/2));
-      }
+      strokeWeight(armor[c]);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
@@ -345,6 +349,10 @@ class creature {
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
   }
+  
+  class segIndex {  // This class is a helper. One of these is attached to every segment of every creature
+    int segmentIndex;  // This class's only variable is an index corresponding to of the creature's segments this is, so its armor can be referenced later
+  }
 
   // This function makes a Box2D body for the creature and adds it to the box2d world
   void makeBody(Vec2 center) {
@@ -354,16 +362,15 @@ class creature {
     bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
     bd.linearDamping = 0.9;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
-    body = box2d.createBody(bd);  // Create the body, not that it currently has no shape
+    body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
     
     // Define a polygon object, this will be used to make the body fixtures
     PolygonShape sd;
 
     Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
-    float density = g.getDensity();
     
     for (int i = 0; i < g.numSegments; i++) {  // For each segment
-      sd = new PolygonShape();  // Create a new polygone
+      sd = new PolygonShape();  // Create a new polygon
 
       vertices3  = new Vec2[3];  // Create an array of 3 new vectors
       // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
@@ -378,6 +385,8 @@ class creature {
       fd.restitution = g.getRestitution();  // Give it a restitution (bounciness)
       fd.filter.categoryBits = 1; // creatures are in filter category 1
       fd.filter.maskBits = 65535;  // interacts with everything
+//      fd.userData = new segIndex();
+//      fd.userData.segmentIndex = i;
       body.createFixture(fd);  // Create the actual fixture, which adds it to the body
     }
     
@@ -396,6 +405,8 @@ class creature {
       fd.restitution = g.getRestitution();
       fd.filter.categoryBits = 1; // creatures are in filter category 1
       fd.filter.maskBits = 65535;  // interacts with everything
+//      fd.userData = new segIndex();
+//      fd.userData.segmentIndex = i;
       body.createFixture(fd);
     }
   }
