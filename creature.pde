@@ -95,7 +95,6 @@ class creature {
   boolean setScent( creature c ) {
     float s;
     s = c.g.scent.sum();
-    print(s + "\n");
     // need to add a mapping function here
     if( s >= 0 ) {
       return true;
