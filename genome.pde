@@ -51,7 +51,7 @@ class Genome {
   // segments need an extra for the leading and trailing edge (spine)
   Trait segments = new Trait(numSegments + 1);
   Trait density = new Trait(10);
-  Trait armor = new Trait(10);
+  Trait[] armor = new Trait[numSegments];
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
@@ -61,6 +61,7 @@ class Genome {
 
   // Constructor: creates a random genome with values near zero
   Genome() {
+    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
     genome = new FloatList(numGenes);
     for (int i = 0; i < numGenes; i++) {
       // give each gene a random value near zero
@@ -70,6 +71,7 @@ class Genome {
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
+    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
     genome = g.genome.copy();
   }
 
@@ -119,26 +121,18 @@ class Genome {
   // that when a force is applied to a body the correct acceleration
   // is generated.
   float getDensity() {
-    float d = 1;
     // if the value is negative, density approaches zero asympototically from 10
-    if (density.sum() < 0) {
-      d = 10 * (1/1+abs(density.sum()));
-    }
-    // if the value is positive, density grows as 10 plus the square
+    if (density.sum() < 0) return (10 * (1/1+abs(density.sum())));
+    // otherwise, the value is positive and density grows as 10 plus the square
     // root of the evolved value
-    if (density.sum() >= 0) {
-      d = 10 + sqrt(density.sum());
-    }
-
-    return d; // limit 0 to infinity
+    return (10 + sqrt(density.sum())); // limit 0 to infinity 
   }
   
-  float getArmor() {
+  float getArmor(int index) {
     // the value mins at 0.1
-    if ((1+armor.avg()) < 0.1) {
-      return (0.1);
-    }
-    return (1+armor.avg());//limit 0.1 to infinity
+    float a = armor[index].avg();
+    if ((1+a) < 0.1)return (0.1);
+    return (1+a);//limit 0.1 to infinity, starts around 1
   }
 
   // Forward force to accelerate the creature, evolved, but

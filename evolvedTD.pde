@@ -202,19 +202,22 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     p1.add_energy(20000); // getting food is valuable
     food p2 = (food)o2;
     if (p2 != null) {
-      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function
+      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == projectile.class) {// check the class of the objects and respond accordingly
     // projectiles damage creatures
+    Fixture f = b1.getFixtureList();
+    int c= 0;
+    while (f != f1) {
+      f = f.getNext();
+      c++;
+    }
+    c %= 8;
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    if (p1.getArmor() < 0.1){
-      p1.change_health((int)(-1*(p2.get_damage()/0.1)));//armor cannot reduce damage beyond 1/10
-    } else{
-      p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor())));
-    }
+    p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor(c))));
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {
