@@ -139,7 +139,7 @@ class creature {
   }
   
   float getArmor(){
-    return armor;
+    return g.getArmor();
   }
   
   // This function removes the body from the box2d world
