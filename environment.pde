@@ -226,15 +226,18 @@ class environment{
           count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
           tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the max
 
+          // need to check bounds here
+          // environWidth
+          // environHeight
           tileMap[x][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x+1][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x-1][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x][y+1].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x][y-1].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x+1][y+1].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x+1][y-1].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x-1][y+1].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x-1][y-1].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );          
+          tileMap[(x+1+environWidth)%environWidth][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[(x-1+environWidth)%environWidth][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[x][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[x][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[(x+1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[(x+1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[(x-1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+          tileMap[(x-1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );          
           }
         }
         else {
