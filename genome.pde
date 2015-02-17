@@ -74,13 +74,13 @@ class Genome {
     segments = new Trait(numSegments + 1);
   }
 
-  // Copy constructor: copies prior genome
+  // Copy constructor: copies prior genome and dynamic traits
   Genome(Genome g) {
     genome = g.genome.copy();
-    numSegments = getNumSegments();
-    armor = new Trait[numSegments];//the traits that are dependent on how many segments there are must be declared here
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    segments = new Trait(numSegments + 1);// segments need an extra for the leading and trailing edge (spine)
+    
+    numSegments = g.numSegments;
+    armor = g.armor;
+    segments = g.segments;
   }
 
   // Returns the amount of turning force (just a decimal number) the
