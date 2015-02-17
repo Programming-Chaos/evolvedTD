@@ -5,7 +5,7 @@ class Genome {
   // TODO: make diploid with a second genome
 
   int numGenes = 0; // subsequently known as genome.size()
-  int numSegments; // number of segments/ribs/spines in a creature EVOLVED
+  int numSegments; // an evolved number of segments/ribs/spines in a creature
 
   // Represents a trait with a number of genes/loci and its index in the genome
   class Trait {
@@ -66,9 +66,12 @@ class Genome {
   // Constructor: creates a random genome with values near zero
   Genome() {
     numSegments = getNumSegments();
-    armor = new Trait[numSegments];//the traits that are dependent on how many segments there are must be declared here
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    segments = new Trait(numSegments + 1);// segments need an extra for the leading and trailing edge (spine)
+    // dynamic traits must be instantiated here
+    armor = new Trait[numSegments]; 
+    for (int c = 0; c < numSegments; c++)
+      armor[c] = new Trait(10);
+    // segments need an extra for the leading and trailing edge (spine)
+    segments = new Trait(numSegments + 1);
   }
 
   // Copy constructor: copies prior genome
