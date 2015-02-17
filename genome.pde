@@ -1,7 +1,7 @@
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
 class Genome {
-  FloatList genome = new FloatList; // a nice wrapper to an array of floats
+  FloatList genome = new FloatList(); // a nice wrapper to an array of floats
   // TODO: make diploid with a second genome
 
   int numGenes = 0; // subsequently known as genome.size()
