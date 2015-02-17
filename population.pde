@@ -124,10 +124,10 @@ class population {
    * @param p2: second parent
    * @return: boolean true if offspring is viable, false if not
    */
-  boolean AreCompatible(creature p1, creature p2) {
+  boolean AreCompatible(Genome g1, Genome g2) {
     double sDev = 5.0; // standard deviation: 5.0 ---- This determines the "speciation rate" by restricting the range of compatible values in the genome
     double mean = 0.0; // mean at the Y axis --------- Changing this will move the "most compatibility" value left or right of zero
-    double x_val = p1.getCompat() - p2.getCompat(); // This is the location to evaluate the probability.  The further away from the center of the curve, the less likely to be compatible.
+    double x_val = Utilities.Sigmoid(g1.compatibility.sum(),50,50) - Utilities.Sigmoid(g2.compatibility.sum(),50,50); // This is the location to evaluate the probability.  The further away from the center of the curve, the less likely to be compatible.
     
     double r = Math.random();
     
@@ -145,7 +145,7 @@ class population {
       parent1 = select();
       parent2 = select();
       while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
-      while (!AreCompatible(swarm.get(parent1),swarm.get(parent2))) {
+      while (!AreCompatible(swarm.get(parent1).getGenome(),swarm.get(parent2).getGenome())) {
         parent1 = select();
         parent2 = select();
         while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
