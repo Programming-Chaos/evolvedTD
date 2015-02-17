@@ -76,7 +76,6 @@ class creature {
     scentColor = setScentColor(this); // what color is the scent
  }
 
-  Genome getGenome()        { return g;}
   boolean getScent()        { return scent; }
   float getScentStrength()  { return scentStrength; }
   int getScentColor()       { return scentColor; }

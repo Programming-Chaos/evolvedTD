@@ -145,7 +145,7 @@ class population {
       parent1 = select();
       parent2 = select();
       while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
-      while (!AreCompatible(swarm.get(parent1).getGenome(),swarm.get(parent2).getGenome())) {
+      while (!AreCompatible(swarm.get(parent1).g,swarm.get(parent2).g)) {
         parent1 = select();
         parent2 = select();
         while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
