@@ -53,7 +53,6 @@ class Genome {
   Trait forwardForce = new Trait(10);
   Trait turningForce = new Trait(10);
   Trait restitution = new Trait(10);
-  // segments need an extra for the leading and trailing edge (spine)
   Trait segments;
   Trait density = new Trait(10);
   Trait[] armor;
@@ -69,7 +68,7 @@ class Genome {
     numSegments = getNumSegments();
     armor = new Trait[numSegments];//the traits that are dependent on how many segments there are must be declared here
     for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    segments = new Trait(numSegments + 1);
+    segments = new Trait(numSegments + 1);// segments need an extra for the leading and trailing edge (spine)
   }
 
   // Copy constructor: copies prior genome
@@ -78,7 +77,7 @@ class Genome {
     numSegments = getNumSegments();
     armor = new Trait[numSegments];//the traits that are dependent on how many segments there are must be declared here
     for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    segments = new Trait(numSegments + 1);
+    segments = new Trait(numSegments + 1);// segments need an extra for the leading and trailing edge (spine)
   }
 
   // Returns the amount of turning force (just a decimal number) the
