@@ -382,8 +382,10 @@ class environment{
         }
       }
     }
-    display_scent();
-    display_creature_scent();
+    if (displayScent) {
+      display_scent();
+      display_creature_scent();
+    }
     display_water();
   }
   
