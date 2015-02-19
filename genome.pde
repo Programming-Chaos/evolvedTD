@@ -51,7 +51,7 @@ class Genome {
   // segments need an extra for the leading and trailing edge (spine)
   Trait segments = new Trait(numSegments + 1);
   Trait density = new Trait(10);
-  Trait[] armor = new Trait[numSegments];
+  Trait armor = new Trait(numSegments*10);
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
@@ -61,7 +61,6 @@ class Genome {
 
   // Constructor: creates a random genome with values near zero
   Genome() {
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
     genome = new FloatList(numGenes);
     for (int i = 0; i < numGenes; i++) {
       // give each gene a random value near zero
@@ -71,8 +70,8 @@ class Genome {
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
     genome = g.genome.copy();
+    mutate();
   }
 
   // Returns the amount of turning force (just a decimal number) the
@@ -130,7 +129,9 @@ class Genome {
   
   float getArmor(int index) {
     // the value mins at 0.1
-    float a = armor[index].avg();
+    float a = 0;
+    for (int c = (index*10); c < ((index+1)*10); c++)a += armor.list().get(c);
+    a /= 10; // get the average of the 10 numbers in the segment of the genome corresponding to this armor segment
     if ((1+a) < 0.1)return (0.1);
     return (1+a);//limit 0.1 to infinity, starts around 1
   }

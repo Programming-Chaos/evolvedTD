@@ -156,8 +156,7 @@ class population {
         c.round_counter++;
         tempswarm.add(c);
       }else{
-        c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
-        c.mutate(); // mutate the new creature 
+        c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy, and is automatically mutated
         tempswarm.add(c); // add it to the temp swarm
       } 
     }
