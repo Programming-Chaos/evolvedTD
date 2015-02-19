@@ -24,7 +24,9 @@ class Genome {
   Chromosome y;
 
   int numGenes = 0; // subsequently known as genome.size()
-  int maxSegments = 20; // maximum number of segments/ribs/spines in a creature
+  // maximum number of segments/ribs/spines in a creature
+  final static int maxSegments = 20;
+  // TODO: refactor getNumSegments() into creature
   int numSegments;
 
   // Represents a trait with a number of genes/loci and its index in the genome
