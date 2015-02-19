@@ -297,7 +297,7 @@ class creature {
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      if (c > 7)c %= 8;
+      if (c > (g.numSegments-1))c %= g.numSegments;
       fill(g.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
       strokeWeight(armor[c]);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
@@ -350,9 +350,9 @@ class creature {
     popMatrix();
   }
   
-  class segIndex {  // This class is a helper. One of these is attached to every segment of every creature
-    int segmentIndex;  // This class's only variable is an index corresponding to of the creature's segments this is, so its armor can be referenced later
-  }
+  //class segIndex {  // This class is a helper. One of these is attached to every segment of every creature
+  //  int segmentIndex;  // This class's only variable is an index corresponding to of the creature's segments this is, so its armor can be referenced later
+  //}
 
   // This function makes a Box2D body for the creature and adds it to the box2d world
   void makeBody(Vec2 center) {

@@ -1,11 +1,11 @@
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
 class Genome {
-  FloatList genome; // a nice wrapper to an array of floats
+  FloatList genome = new FloatList(); // a nice wrapper to an array of floats
   // TODO: make diploid with a second genome
 
   int numGenes = 0; // subsequently known as genome.size()
-  int numSegments = 8; // number of segments/ribs/spines in a creature
+  int numSegments; // an evolved number of segments/ribs/spines in a creature
 
   // Represents a trait with a number of genes/loci and its index in the genome
   class Trait {
@@ -18,6 +18,10 @@ class Genome {
       this.genes = genes;
       this.index = numGenes;
       numGenes += genes;
+      for (int c = index; c < numGenes; c++) {
+        // give each gene a random value near zero
+        genome.append(randomGaussian() * 0.05);
+      }
     }
 
     // Returns a list of with genes number of floats
@@ -40,6 +44,7 @@ class Genome {
 
   // Since these are not static there's a tad bit of overhead, but the
   // convenience is worth the price; adding a trait takes one LOC
+  Trait numberOfSegments = new Trait(10);
   Trait redColor = new Trait(10);
   Trait greenColor = new Trait(10);
   Trait blueColor = new Trait(10);
@@ -48,10 +53,9 @@ class Genome {
   Trait forwardForce = new Trait(10);
   Trait turningForce = new Trait(10);
   Trait restitution = new Trait(10);
-  // segments need an extra for the leading and trailing edge (spine)
-  Trait segments = new Trait(numSegments + 1);
+  Trait segments;
   Trait density = new Trait(10);
-  Trait[] armor = new Trait[numSegments];
+  Trait[] armor;
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
@@ -61,18 +65,22 @@ class Genome {
 
   // Constructor: creates a random genome with values near zero
   Genome() {
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    genome = new FloatList(numGenes);
-    for (int i = 0; i < numGenes; i++) {
-      // give each gene a random value near zero
-      genome.append(randomGaussian() * 0.05);
-    }
+    numSegments = getNumSegments();
+    // dynamic traits must be instantiated here
+    armor = new Trait[numSegments]; 
+    for (int c = 0; c < numSegments; c++)
+      armor[c] = new Trait(10);
+    // segments need an extra for the leading and trailing edge (spine)
+    segments = new Trait(numSegments + 1);
   }
 
-  // Copy constructor: copies prior genome
+  // Copy constructor: copies prior genome and dynamic traits
   Genome(Genome g) {
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
     genome = g.genome.copy();
+    
+    numSegments = g.numSegments;
+    armor = g.armor;
+    segments = g.segments;
   }
 
   // Returns the amount of turning force (just a decimal number) the
@@ -126,6 +134,12 @@ class Genome {
     // otherwise, the value is positive and density grows as 10 plus the square
     // root of the evolved value
     return (10 + sqrt(density.sum())); // limit 0 to infinity 
+  }
+  
+  int getNumSegments() {// can be from 2 to infinity
+    int ret = round(numberOfSegments.avg()+8);
+    if (ret < 2) return 2;
+    return ret;
   }
   
   float getArmor(int index) {
