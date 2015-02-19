@@ -59,9 +59,7 @@ class Genome {
   }
   
   // segments need an extra for the leading and trailing edge (spine)
-  Segment[] segments = new Segment[maxSegments + 1];
-  for (int i = 0; i < (maxSegments + 1); i++)
-    segments[i] = new Segment();
+  Segment[] segments;
   
   // encodes number of expressed traits 
   Trait expressedSegments = new Trait(10);
@@ -89,6 +87,8 @@ class Genome {
 
   // Constructor: creates a random genome with values near zero
   Genome() {
+    segments = new Segment[maxSegments + 1];
+    for (int i = 0; i < (maxSegments + 1); i++) segments[i] = new Segment();
     genome = new FloatList(numGenes);
     for (int i = 0; i < numGenes; i++) {
       // give each gene a random value near zero
@@ -100,6 +100,7 @@ class Genome {
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
+    segments = new Segment[maxSegments + 1];
     genome = g.genome.copy();
     numSegments = g.numSegments;
   }
