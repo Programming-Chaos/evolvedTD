@@ -8,6 +8,11 @@ int tournSize = 5;
 class population {
   ArrayList<creature> swarm;
   
+  /* create gamete hash table for storing gametes.  
+     Use global variables to find how many spaces are needed. */
+  ArrayList<Genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
+  
+  
   population() {
     swarm = new ArrayList<creature>();
     float a;
@@ -135,6 +140,14 @@ class population {
   }
   void next_generation() { // creates the next generation
     ArrayList<creature> tempswarm = new ArrayList<creature>();
+    // Add gametes to gamete bucket
+    for (creature cd: swarm) {
+      float fit = cd.fitness;
+      for (int i=0; i < fit; i++) {
+         gametes[0].add(cd.g);
+      }
+    }
+    
     calculateFitnesses();
     creature c;
     
@@ -144,7 +157,6 @@ class population {
     for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
       parent1 = select();
       parent2 = select();
-      while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
       while (!AreCompatible(swarm.get(parent1).g,swarm.get(parent2).g)) {
         parent1 = select();
         parent2 = select();
