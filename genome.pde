@@ -44,7 +44,6 @@ class Genome {
 
     // Returns a list of with 2 * genes number of floats
     FloatList list() {
-      // and this is why we use a FloatList
       FloatList l = x.genes.getSubset(index, genes);
       l.append(y.genes.getSubset(index, genes));
       return l;
@@ -57,12 +56,12 @@ class Genome {
 
     // Returns the average of the genes of a trait
     float avg() {
-      return sum()/(genes*2);
+      return sum()/(genes * 2);
     }
   }
 
   class Segment {
-    Trait endpoint;
+    Trait endPoint;
     Trait redColor;
     Trait greenColor;
     Trait blueColor;
@@ -71,7 +70,7 @@ class Genome {
     Trait restitution;
 
     Segment() {
-      endpoint = new Trait(10);
+      endPoint = new Trait(10);
       redColor = new Trait(10);
       greenColor = new Trait(10);
       blueColor = new Trait(10);
@@ -81,20 +80,22 @@ class Genome {
     }
   }
 
-  // segments need an extra for the leading and trailing edge (spine)
+  // need an extra point for the leading and trailing edge (spine)
   Segment[] segments = new Segment[maxSegments + 1];;
     {
-      // Initialize the segments and their traits
+      // initialize the segments and their traits
       for (int i = 0; i < (maxSegments + 1); i++) {
         segments[i] = new Segment();
       }
     }
+  
   // encodes number of expressed traits
   Trait expressedSegments = new Trait(10);
 
   // Speciation
   Trait compatibility = new Trait(10);
   Trait reproductionEnergy = new Trait(10);
+  // TODO: add mutation rate
 
   // Environment interaction
   Trait forwardForce = new Trait(10);
@@ -106,7 +107,7 @@ class Genome {
   // Body
   Trait scent = new Trait(10);
   Trait control = new Trait(10);
-  // TODO: add gender, mutation rate, etc.
+  // TODO: add gender
 
   // TODO: remove these traits when segment refactor is complete
   Trait redColor = new Trait(10);
@@ -116,7 +117,7 @@ class Genome {
   Trait density = new Trait(10);
   Trait restitution = new Trait(10);
 
-  // Constructor: creates a random genome with values near zero
+  // Constructor: creates two new chromosomes
   Genome() {
     x = new Chromosome(numGenes);
     y = new Chromosome(numGenes);
@@ -252,7 +253,7 @@ class Genome {
   // the creatures body
   Vec2 getPoint(int i) {
     Vec2 a = new Vec2();
-    float segment = segments[i].endpoint.sum();
+    float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -271,7 +272,7 @@ class Genome {
   Vec2 getFlippedPoint(int i) {
     // TODO: reduce code duplication
     Vec2 a = new Vec2();
-    float segment = segments[i].endpoint.sum();
+    float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
     float l;
     if (segment < 0) {
