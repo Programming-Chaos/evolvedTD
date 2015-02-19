@@ -113,6 +113,10 @@ class creature {
       return false;
     }
   }
+  
+  void mutate() {
+    g.mutate(); // mutate the genome
+  }
    
   // returns a vector to the creature's postion 
   Vec2 get_pos() {
