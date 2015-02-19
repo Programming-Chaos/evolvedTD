@@ -3,7 +3,7 @@
 class Genome {
   class Chromosome {
     FloatList genes;
-  
+
     Chromosome(int n) {
       genes = new FloatList(n);
       for (int i = 0; i < n; i++) {
@@ -18,7 +18,7 @@ class Genome {
       }
     }
   }
-  
+
   // a pair of chromosomes is the genome
   Chromosome x;
   Chromosome y;
@@ -78,7 +78,7 @@ class Genome {
       restitution = new Trait(10);
     }
   }
-  
+
   // segments need an extra for the leading and trailing edge (spine)
   Segment[] segments = new Segment[maxSegments + 1];;
     {
@@ -87,7 +87,7 @@ class Genome {
         segments[i] = new Segment();
       }
     }
-  // encodes number of expressed traits 
+  // encodes number of expressed traits
   Trait expressedSegments = new Trait(10);
 
   // Speciation
@@ -136,7 +136,7 @@ class Genome {
   double getBehavior(Trait trait) {
     return getTurningForce() * trait.sum(); // there's a turning force
   }
-  
+
   double getBehavior(int traitN) {
     if(traitN == 0){
       return getBehavior(food);
@@ -182,9 +182,9 @@ class Genome {
     if (density.sum() < 0) return (10 * (1/1+abs(density.sum())));
     // otherwise, the value is positive and density grows as 10 plus the square
     // root of the evolved value
-    return (10 + sqrt(density.sum())); // limit 0 to infinity 
+    return (10 + sqrt(density.sum())); // limit 0 to infinity
   }
-  
+
   float getArmor(int index) {
     // TODO: refactor for armor per segment
     // the value mins at 0.1
