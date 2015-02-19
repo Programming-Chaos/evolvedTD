@@ -19,6 +19,7 @@ int generation = 0;
 boolean paused = false;        // is it paused
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
+boolean displayScent = true;   // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -165,6 +166,9 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case 'q':
       displayFood = !displayFood;
+      break;
+    case 'n':
+      displayScent = !displayScent;
       break;
     case '?':
       controls(); // call the instructions function
@@ -328,8 +332,9 @@ void display_controls() {
   text("Mouse button - fire", leftalign, topalign + 42);
   text("Number keys - switch weapons", leftalign, topalign + 50);
   text("q - hide/unhide food", leftalign, topalign + 58);
-  text("v - hide/unhide screen", leftalign, topalign + 66);
-  text("? - show/hide controls", leftalign, topalign + 74);
-  text("a - toggle autofire", leftalign, topalign + 82);
+  text("n - hide/unhide scent", leftalign, topalign + 66);
+  text("v - hide/unhide screen", leftalign, topalign + 74);
+  text("? - show/hide controls", leftalign, topalign + 82);
+  text("a - toggle autofire", leftalign, topalign + 90);
   popMatrix();
 }
