@@ -10,6 +10,12 @@ class tower {
   float angle;    // angle of tower's main, auto-fir weapon
   boolean autofire = true;
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
+  PImage gun;    // declare image for gun
+  PImage gunalt; // declare alternate image for animation
+  PImage gunbase; // gun base
+  boolean showgun = true; // show base gun image
+  boolean showgunalt = false; // show alternate gun image
+  int imagetimer; // timer for alternating gun images
   
   // constructor function, initializes the tower
   tower() {
@@ -19,6 +25,10 @@ class tower {
     resourceGain = 0.1;  // changes with upgrades
     projectiles = new ArrayList<projectile>();
     angle = 0;
+    gunbase = loadImage("Tower_base_02.png");
+    gun = loadImage("Gunturret04a.png");
+    gunalt = loadImage("Gunturret04b.png");
+    imagetimer = 0;
   }
   
   void update() {
@@ -63,11 +73,31 @@ class tower {
   }
   
   void display() {
+    /*
     // draw a line 
     stroke(255, 0, 0);
     line(0, 0, 30*cos(angle), 30*sin(angle));
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
+    */
+    image(gunbase,-128,-128);
+    showgunalt = false;
+    showgun = true;
+    imagetimer++;
+    if (imagetimer > 2) {
+      showgunalt = false;
+      showgun = true;
+    }
+    else {
+      showgunalt = true;
+      showgun = false;
+    }
+      pushMatrix();
+      float c = angle;
+      rotate(c + HALF_PI);
+      if(showgun)image(gun,-128,-128);
+      if(showgunalt)image(gunalt,-128,-128);
+      popMatrix();
     
     for (projectile p: projectiles) { // display the active projectiles
       p.display();
@@ -135,6 +165,10 @@ class tower {
     projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
     energy-=10;
+    imagetimer = 0;
+    gunshot.rewind();
+    gunshot.play();
+    
   }
   
   void drop_rock() {

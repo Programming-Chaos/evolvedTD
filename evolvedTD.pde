@@ -1,3 +1,9 @@
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
 
 import shiffman.box2d.*;
 import org.jbox2d.collision.shapes.*;
@@ -19,6 +25,7 @@ int generation = 0;
 boolean paused = false;        // is it paused
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
+boolean displayScent = true;   // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -28,6 +35,9 @@ ArrayList<rock> rocks;         // list of rock objects in the world
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
+Minim minim;
+AudioPlayer gunshot;
+
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
 void setup() {
@@ -35,6 +45,9 @@ void setup() {
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   the_tower = new tower();
+  
+  minim = new Minim(this);
+  gunshot = minim.loadFile("Cannon.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -60,6 +73,7 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
+  
 
   if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -166,6 +180,9 @@ void keyPressed() { // if a key is pressed this function is called
     case 'q':
       displayFood = !displayFood;
       break;
+    case 'n':
+      displayScent = !displayScent;
+      break;
     case '?':
       controls(); // call the instructions function
       break;
@@ -202,24 +219,52 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     p1.add_energy(20000); // getting food is valuable
     food p2 = (food)o2;
     if (p2 != null) {
-      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function
+      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
   }
 
-  if (o1.getClass() == creature.class && o2.getClass() == projectile.class) {// check the class of the objects and respond accordingly
+  // check the class of the objects and respond accordingly
+  if (o1.getClass() == food.class && o2.getClass() == creature.class) {
+    // creatures grab food
+    creature p1 = (creature)o2;
+    p1.add_energy(20000); // getting food is valuable
+    food p2 = (food)o1;
+    if (p2 != null) {
+      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+    }
+  }
+
+  // check the class of the objects and respond accordingly
+  if (o1.getClass() == creature.class && o2.getClass() == projectile.class) {
     // projectiles damage creatures
+    Fixture f = b1.getFixtureList();
+    int c = 0;
+    while (f != f1) {
+      f = f.getNext();
+      c++;
+    }
+    c %= 8;
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    p1.change_health(-1*p2.get_damage());
+    p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor(c))));
   }
 
-  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {
-    // nothing happens if two creatures collide
+  if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+    // projectiles damage creatures
+    Fixture f = b1.getFixtureList();
+    int c = 0;
+    while (f != f1) {
+      f = f.getNext();
+      c++;
+    }
+    c %= 8;
+    creature p1 = (creature)o2;
+    projectile p2 = (projectile)o1;
+    p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor(c))));
   }
 
+  // nothing happens if two creatures collide
   // Nothing happens if rocks collide with creatures, food with rocks, etc.
-  // It is possible that there should also be cases for o1 is food and o2 is a creatures; o1 is a projectile and o2 is a creature
-
 }
 
 void endContact(Contact cp) { // a required function, but doesn't do anything
@@ -300,8 +345,9 @@ void display_controls() {
   text("Mouse button - fire", leftalign, topalign + 42);
   text("Number keys - switch weapons", leftalign, topalign + 50);
   text("q - hide/unhide food", leftalign, topalign + 58);
-  text("v - hide/unhide screen", leftalign, topalign + 66);
-  text("? - show/hide controls", leftalign, topalign + 74);
-  text("a - toggle autofire", leftalign, topalign + 82);
+  text("n - hide/unhide scent", leftalign, topalign + 66);
+  text("v - hide/unhide screen", leftalign, topalign + 74);
+  text("? - show/hide controls", leftalign, topalign + 82);
+  text("a - toggle autofire", leftalign, topalign + 90);
   popMatrix();
 }

@@ -10,7 +10,7 @@ class population {
   
   /* create gamete hash table for storing gametes.  
      Use global variables to find how many spaces are needed. */
-  ArrayList<genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
+  ArrayList<Genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
   
   
   population() {
@@ -129,10 +129,10 @@ class population {
    * @param p2: second parent
    * @return: boolean true if offspring is viable, false if not
    */
-  boolean AreCompatible(creature p1, creature p2) {
+  boolean AreCompatible(Genome g1, Genome g2) {
     double sDev = 5.0; // standard deviation: 5.0 ---- This determines the "speciation rate" by restricting the range of compatible values in the genome
     double mean = 0.0; // mean at the Y axis --------- Changing this will move the "most compatibility" value left or right of zero
-    double x_val = p1.getCompat() - p2.getCompat(); // This is the location to evaluate the probability.  The further away from the center of the curve, the less likely to be compatible.
+    double x_val = Utilities.Sigmoid(g1.compatibility.sum(),50,50) - Utilities.Sigmoid(g2.compatibility.sum(),50,50); // This is the location to evaluate the probability.  The further away from the center of the curve, the less likely to be compatible.
     
     double r = Math.random();
     
@@ -157,19 +157,33 @@ class population {
     for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
       parent1 = select();
       parent2 = select();
-      while (!AreCompatible(swarm.get(parent1),swarm.get(parent2))) {
+      while (!AreCompatible(swarm.get(parent1).g,swarm.get(parent2).g)) {
         parent1 = select();
         parent2 = select();
         while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
       }
       
-      c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
-      c.mutate(); // mutate the new creature 
-      tempswarm.add(c); // add it to the temp swarm
+      c = swarm.get(i);
+      if (c.alive() == true){
+        c.round_counter++;
+        tempswarm.add(c);
+      }else{
+        c = new creature(swarm.get(parent1),20000.0); // make a new creature from the ith member of the old pop, starts with 5000 energy
+        c.mutate(); // mutate the new creature 
+        tempswarm.add(c); // add it to the temp swarm
+      } 
     }
+    for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
+        c = swarm.get(i);
+        if (c.alive() != true){
+          c.killBody();
+        }
+    }
+    /*
     for (creature cd: swarm) { // explicitly remove bodies from the box2dworld
-      cd.killBody();
+        cd.killBody();  
     }
+    */
     swarm.clear(); // clear the old swarm
     for (int i = 0; i < pop_size; i++) {
       swarm.add(tempswarm.get(i)); // copy the tempswarm into the swarm

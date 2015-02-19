@@ -1,119 +1,236 @@
-class genome {
-  float[] the_genome;
- 
-  int numsegments = 8;      // number of segments/ribs/spines in a creature
-  
-  // These are where each section of the genome starts
-  int segmentsStart = 0;    // begining of genome for the segment lengths
-  int colorStart = 100;     // begining of genome for the overall color
-  int reproduceStart = 200; // begining of genome for the parameters for reporduction
-  int physicalStart = 300;  // begining of genome for the physical characteristics, density, restitution, etc.
-  int sensingStart = 400;   // begining of genome for the type, number, location of sensors
-  int behaviorStart = 500;  // begining of genome for the parameters controlling behavior
-  int totalgenes = 599;     // current length of the genome
+// Represents a creature's genomic data as an array of real values,
+// loosely modeling Additive Quantitative Genetics.
+class Genome {
+  class Chromosome {
+    FloatList genes;
 
-  
-  // "Constructor" function - this is the function to create a new genome.
-  // It is called automatically when a new genome is created with the command: genome g = new genome();
-  genome() {  
-    the_genome = new float[totalgenes];   // create a new array (list) of values
-    for (int i = 0; i < totalgenes; i++) {
-      the_genome[i] = randomGaussian()*0.05;   // give each loci a random value near zero
+    Chromosome(int n) {
+      genes = new FloatList(n);
+      for (int i = 0; i < n; i++) {
+        // give each gene a random value near zero
+        genes.append(randomGaussian() * 0.05);
+      }
     }
-  }
-  
-  // Copies one genome (the source) into another, the first step in reporduction, usually followed by mutating the copy
-  void copy(genome source) {
-    the_genome = new float[totalgenes];
-    for (int i = 0; i < totalgenes; i++) {
-      the_genome[i] = source.the_genome[i];
+
+    Chromosome(Chromosome c) {
+      genes = c.genes.copy();
+    }
+
+    void mutate() {
+      for (int i = 0; i < genes.size(); i++) {
+        genes.set(i, genes.get(i) + randomGaussian()*0.3);
+      }
     }
   }
 
-  // Returns the amount of turning force (just a decimal number) the creature has evolved to apply when it senses either
-  // food, another creature, a rock, or a (food) scent.
-  // Notice that the argument i passed to the function determine where in the genome to get the value from: behaviorStart+i
-  double getBehavior(int i) {  
-    // 0 = food, 1 = creature, 2 = rock, 3 = scent
-    double b;
-    b = getTurningForce()*the_genome[behaviorStart+i]; // there's a turning force
-    return b;
+  // a pair of chromosomes is the genome
+  Chromosome x;
+  Chromosome y;
+
+  int numGenes = 0; // subsequently known as genome.size()
+  // maximum number of segments/ribs/spines in a creature
+  final static int maxSegments = 20;
+  // TODO: refactor getNumSegments() into creature
+  int numSegments;
+
+  // Represents a trait with a number of genes/loci and its index in the genome
+  class Trait {
+    int genes;
+    int index;
+    // TODO: allow custom range with scaling
+
+    Trait(int genes) {
+      // For each trait, assign its index and count its genes
+      this.genes = genes;
+      this.index = numGenes;
+      numGenes += genes;
+    }
+
+    // Returns a list of with 2 * genes number of floats
+    FloatList list() {
+      FloatList l = x.genes.getSubset(index, genes);
+      l.append(y.genes.getSubset(index, genes));
+      return l;
+    }
+
+    // Returns the sum of the genes from both chromosomes for the trait
+    float sum() {
+      return list().sum();
+    }
+
+    // Returns the average of the genes of a trait
+    float avg() {
+      return sum()/(genes * 2);
+    }
   }
-  
-  color getcolor() {
-    //   mapping from allele value to color is a sigmoid mapping to 0 to 255 centered on 126
-    int r = 126 + (int)(126*(the_genome[colorStart]/(1+abs(the_genome[colorStart]))));
-    int g = 126 + (int)(126*(the_genome[colorStart+1]/(1+abs(the_genome[colorStart+1]))));
-    int b = 126 + (int)(126*(the_genome[colorStart+2]/(1+abs(the_genome[colorStart+2]))));
+
+  class Segment {
+    Trait endPoint;
+    Trait redColor;
+    Trait greenColor;
+    Trait blueColor;
+    Trait armor;
+    Trait density;
+    Trait restitution;
+
+    Segment() {
+      endPoint = new Trait(10);
+      redColor = new Trait(10);
+      greenColor = new Trait(10);
+      blueColor = new Trait(10);
+      armor = new Trait(10);
+      density = new Trait(10);
+      restitution = new Trait(10);
+    }
+  }
+
+  // need an extra point for the leading and trailing edge (spine)
+  Segment[] segments = new Segment[maxSegments + 1];;
+    {
+      // initialize the segments and their traits
+      for (int i = 0; i < (maxSegments + 1); i++) {
+        segments[i] = new Segment();
+      }
+    }
+
+  // encodes number of expressed traits
+  Trait expressedSegments = new Trait(10);
+
+  // Speciation
+  Trait compatibility = new Trait(10);
+  Trait reproductionEnergy = new Trait(10);
+  // TODO: add mutation rate
+
+  // Environment interaction
+  Trait forwardForce = new Trait(10);
+  Trait turningForce = new Trait(10);
+  Trait food = new Trait(10);
+  Trait creature = new Trait(10);
+  Trait rock = new Trait(10);
+
+  // Body
+  Trait scent = new Trait(10);
+  Trait control = new Trait(10);
+  // TODO: add gender
+
+  // TODO: remove these traits when segment refactor is complete
+  Trait redColor = new Trait(10);
+  Trait greenColor = new Trait(10);
+  Trait blueColor = new Trait(10);
+  Trait armor = new Trait(10 * maxSegments);
+  Trait density = new Trait(10);
+  Trait restitution = new Trait(10);
+
+  // Constructor: creates two new chromosomes
+  Genome() {
+    x = new Chromosome(numGenes);
+    y = new Chromosome(numGenes);
+
+    // Calculate expressed number of segments
+    numSegments = getNumSegments();
+  }
+
+  // Copy constructor: copies prior genome
+  Genome(Genome g) {
+    x = new Chromosome(g.x);
+    y = new Chromosome(g.y);
+
+    numSegments = g.numSegments;
+  }
+
+  // Returns the amount of turning force (just a decimal number) the
+  // creature has evolved to apply when it senses either food, another
+  // creature, a rock, or a (food) scent.
+  double getBehavior(Trait trait) {
+    return getTurningForce() * trait.sum(); // there's a turning force
+  }
+
+  // Mapping from allele value to color is a sigmoid mapping to 0 to
+  // 255 centered on 126
+  color getColor() {
+    // TODO: refactor for colors per segment
+    int r = 126 + (int)(126*(redColor.sum()/(1+abs(redColor.sum()))));
+    int g = 126 + (int)(126*(greenColor.sum()/(1+abs(greenColor.sum()))));
+    int b = 126 + (int)(126*(blueColor.sum()/(1+abs(blueColor.sum()))));
     color c = color(r, g, b);
     return c;
   }
-  
-  // amount of energy a creature must have to reproduce, not used in the tower defense, but could be if we wanted creates to reproduce during a wave
-  int getreproduceEnergy() {
-    int e = (int)(2000*(the_genome[reproduceStart]/(1+abs(the_genome[reproduceStart]))));
-    return((int)(200 + 2000+ e));   // 2 to 4200 sigmoid, 200 is the amount of energy per food
+
+  // Amount of energy a creature must have to reproduce, not used in
+  // the tower defense, but could be if we wanted creates to reproduce
+  // during a wave.
+
+  // TODO: use this function
+  int getReproductionEnergy() {
+    int e = (int)(2000*(reproductionEnergy.sum())/(1+abs(reproductionEnergy.sum())));
+    return((int)(200 + 2000+ e)); // 2 to 4200 sigmoid, 200 is the amount of energy per food
   }
-  
-  double getCompat() {
-    double sum = 0;
-    for (int i = 0; i < 10; i++) { 
-      sum += the_genome[reproduceStart+1+i];
-    }
-    return sum;
-  }
-  
+
   // Density of a creature for the box2D "physical" body.
-  // Box2D automatically handles the mass as density times area, so that when a force is applied to a body the correct acceleration is generated.
+
+  // Box2D automatically handles the mass as density times area, so
+  // that when a force is applied to a body the correct acceleration
+  // is generated.
   float getDensity() {
-    float d = 1;
-    // If the value is negative, density approaches xzro asymtotically from 10
-    if (the_genome[physicalStart] < 0) {
-      d = 10 * (1/1+abs(the_genome[physicalStart]));
-    }
-    // if the value is positive, density grows as 10 plus the square root of the evolved value
-    if (the_genome[physicalStart] >= 0) {
-      d = 10 + sqrt(the_genome[physicalStart]);
-    }
-    
-    return d; // limit 0 to infinity 
+    // TODO: refactor for density per segment
+    // if the value is negative, density approaches zero asympototically from 10
+    if (density.sum() < 0) return (10 * (1/1+abs(density.sum())));
+    // otherwise, the value is positive and density grows as 10 plus the square
+    // root of the evolved value
+    return (10 + sqrt(density.sum())); // limit 0 to infinity
   }
-  
-  // Forward force to accelerate the creature, evolved, but (currently) doesn't change anytime durning a wave
+
+  float getArmor(int index) {
+    // TODO: refactor for armor per segment
+    // the value mins at 0.1
+    float a = armor.avg();
+    if ((1+a) < 0.1)
+      return (0.1);
+    return (1+a);//limit 0.1 to infinity, starts around 1
+  }
+
+  // Forward force to accelerate the creature, evolved, but
+  // (currently) doesn't change anytime durning a wave
   int getForce() {
-    return((int)(500+10*the_genome[physicalStart+1])); // -infinity to infinity linear
+    return((int)(500+10*forwardForce.sum())); // -infinity to infinity linear
   }
-  
-  // This is the base turning force, it is modified by getBehavior() above, depending on what type of object was sensed to start turning
+
+  // This is the base turning force, it is modified by getBehavior()
+  // above, depending on what type of object was sensed to start
+  // turning
   int getTurningForce() {
-    return((int)(100+10*the_genome[physicalStart+2])); // -infinity to infinity linear
+    return((int)(100+10*turningForce.sum())); // -infinity to infinity linear
   }
-  
-  // How bouncy a creature is, one of the basic box2D body parameters, no idea how it evolves or if it has any value to the creatures
+
+  // How bouncy a creature is, one of the basic box2D body parameters,
+  // no idea how it evolves or if it has any value to the creatures
   float getRestitution() {
+    // TODO: refactor for restitution per segment
     float r = 0;
-    r = 0.5 + (0.5 * (the_genome[physicalStart+3]/(1+abs(the_genome[physicalStart+3]))));
+    r = 0.5 + (0.5 * (restitution.sum()/(1+abs(restitution.sum()))));
     return r;
   }
 
-  float getWidth() { // calculate and return the width of the creature
+  // Calculate and return the width of the creature
+  float getWidth() {
     float maxX = 0;
     Vec2 temp;
-    for (int i = 0; i < numsegments; i++) {
-      temp = getpoint(i);
+    for (int i = 0; i < numSegments; i++) {
+      temp = getPoint(i);
       if (temp.x > maxX) {
         maxX = temp.x;
       }
     }
     return 2*maxX;
   }
-  
-  float getLength() { // calculate and return the length of the creature
+
+  // Calculate and return the length of the creature
+  float getLength() {
     float maxY = 0;
     float minY = 0;
     Vec2 temp;
-    for (int i = 0; i < numsegments; i++) {
-      temp = getpoint(i);
+    for (int i = 0; i < numSegments; i++) {
+      temp = getPoint(i);
       if (temp.y > maxY) {
         maxY = temp.y;
       }
@@ -123,43 +240,60 @@ class genome {
     }
     return (maxY - minY);
   }
-  
-  // Gets the end point of the ith segment/rib/spine used to create the creatures body  
-  Vec2 getpoint(int i) {
+
+  // Gets the end point of the ith segment/rib/spine used to create
+  // the creatures body
+  Vec2 getPoint(int i) {
     Vec2 a = new Vec2();
+    float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
     float l;
-    if (the_genome[i*2] < 0) {
-      l = 1 + (lengthbase-1) * (1.0/(1+abs(the_genome[i*2])));
+    if (segment < 0) {
+      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
     }
     else {
-      l = lengthbase + (2*lengthbase*(the_genome[i*2]/(1+the_genome[i*2])));;
+      l = lengthbase + (2*lengthbase*(segment/(1+segment)));;
     }
-    a.x = (float)(l * Math.sin((i)*PI/(numsegments)) );
-    a.y = (float)(l * Math.cos((i)*PI/(numsegments)) );
+    a.x = (float)(l * Math.sin((i)*PI/(numSegments)) );
+    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
     return a;
   }
-  
-  // Gets the end point of the ith segment/rib/spine on the other side of the creatures body
-  Vec2 getflippedpoint(int i) {
+
+  // Gets the end point of the ith segment/rib/spine on the other side
+  // of the creatures body
+  Vec2 getFlippedPoint(int i) {
+    // TODO: reduce code duplication
     Vec2 a = new Vec2();
+    float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
     float l;
-    if (the_genome[i*2] < 0) {
-      l = 1 + (lengthbase-1) * (1.0/(1+abs(the_genome[i*2])));
+    if (segment < 0) {
+      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
     }
     else {
-      l = lengthbase + (2*lengthbase*(the_genome[i*2]/(1+the_genome[i*2])));
+      l = lengthbase + (2*lengthbase*(segment/(1+segment)));
     }
-    a.x = (float)(-1 * l * Math.sin((i)*PI/(numsegments)) );
-    a.y = (float)(l * Math.cos((i)*PI/(numsegments)) );
+    a.x = (float)(-1 * l * Math.sin((i)*PI/(numSegments)) );
+    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
     return a;
   }
- 
-  // Mutates every value by a little bit. Biologically speaking a very high mutation rate to foster fast evolution
+
+  // Mutates every value by a little bit. Biologically speaking a very
+  // high mutation rate to foster fast evolution.
   void mutate() {
-    for (int i = 0; i < totalgenes; i++) {
-      the_genome[i] += randomGaussian()*0.3;
-    }
+    x.mutate();
+    y.mutate();
+    // TODO: eliminate numSegments magic property
+    numSegments = getNumSegments();
+  }
+
+  // can be from 2 to maxSegments
+  int getNumSegments() {
+    int ret = round(expressedSegments.avg() + 8);
+    if (ret < 2)
+      return 2;
+    if (ret > maxSegments)
+      return maxSegments;
+    return ret;
   }
 }
