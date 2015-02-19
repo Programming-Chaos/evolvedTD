@@ -54,7 +54,6 @@ class creature {
   // notice that the starting energy, e, is supplied by the parent
   creature(creature cs,float e) {
     g = new Genome(cs.g);
-    //g.copy(cs.g);     // copy the parent's genome into this creature's genome
     angle = random(0, 2 * PI); // start at a random angle
     // Currently creatures are 'born' around a circle a fixed distance from the tower.
     // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
@@ -300,7 +299,8 @@ class creature {
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      if (c > 7)c %= 8;
+      if (c > g.numSegments - 1)
+        c %= g.numSegments;
       fill(g.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
       strokeWeight(armor[c]);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape

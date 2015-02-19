@@ -1,11 +1,37 @@
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
 class Genome {
-  FloatList genome; // a nice wrapper to an array of floats
-  // TODO: make diploid with a second genome
+  class Chromosome {
+    FloatList genes;
+
+    Chromosome(int n) {
+      genes = new FloatList(n);
+      for (int i = 0; i < n; i++) {
+        // give each gene a random value near zero
+        genes.append(randomGaussian() * 0.05);
+      }
+    }
+
+    Chromosome(Chromosome c) {
+      genes = c.genes.copy();
+    }
+
+    void mutate() {
+      for (int i = 0; i < genes.size(); i++) {
+        genes.set(i, genes.get(i) + randomGaussian()*0.3);
+      }
+    }
+  }
+
+  // a pair of chromosomes is the genome
+  Chromosome x;
+  Chromosome y;
 
   int numGenes = 0; // subsequently known as genome.size()
-  int numSegments = 8; // number of segments/ribs/spines in a creature
+  // maximum number of segments/ribs/spines in a creature
+  final static int maxSegments = 20;
+  // TODO: refactor getNumSegments() into creature
+  int numSegments;
 
   // Represents a trait with a number of genes/loci and its index in the genome
   class Trait {
@@ -20,59 +46,96 @@ class Genome {
       numGenes += genes;
     }
 
-    // Returns a list of with genes number of floats
+    // Returns a list of with 2 * genes number of floats
     FloatList list() {
-      // and this is why we use a FloatList
-      return genome.getSubset(index, genes);
+      FloatList l = x.genes.getSubset(index, genes);
+      l.append(y.genes.getSubset(index, genes));
+      return l;
     }
 
-    // Returns the sum of the genes of a trait
+    // Returns the sum of the genes from both chromosomes for the trait
     float sum() {
       return list().sum();
     }
 
     // Returns the average of the genes of a trait
     float avg() {
-      return sum()/genes;
+      return sum()/(genes * 2);
     }
-
   }
 
-  // Since these are not static there's a tad bit of overhead, but the
-  // convenience is worth the price; adding a trait takes one LOC
-  Trait redColor = new Trait(10);
-  Trait greenColor = new Trait(10);
-  Trait blueColor = new Trait(10);
+  class Segment {
+    Trait endPoint;
+    Trait redColor;
+    Trait greenColor;
+    Trait blueColor;
+    Trait armor;
+    Trait density;
+    Trait restitution;
+
+    Segment() {
+      endPoint = new Trait(10);
+      redColor = new Trait(10);
+      greenColor = new Trait(10);
+      blueColor = new Trait(10);
+      armor = new Trait(10);
+      density = new Trait(10);
+      restitution = new Trait(10);
+    }
+  }
+
+  // need an extra point for the leading and trailing edge (spine)
+  Segment[] segments = new Segment[maxSegments + 1];;
+    {
+      // initialize the segments and their traits
+      for (int i = 0; i < (maxSegments + 1); i++) {
+        segments[i] = new Segment();
+      }
+    }
+
+  // encodes number of expressed traits
+  Trait expressedSegments = new Trait(10);
+
+  // Speciation
   Trait compatibility = new Trait(10);
   Trait reproductionEnergy = new Trait(10);
+  // TODO: add mutation rate
+
+  // Environment interaction
   Trait forwardForce = new Trait(10);
   Trait turningForce = new Trait(10);
-  Trait restitution = new Trait(10);
-  // segments need an extra for the leading and trailing edge (spine)
-  Trait segments = new Trait(numSegments + 1);
-  Trait density = new Trait(10);
-  Trait[] armor = new Trait[numSegments];
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
+
+  // Body
   Trait scent = new Trait(10);
   Trait control = new Trait(10);
-  // TODO: add gender, mutation rate, etc.
+  // TODO: add gender
 
-  // Constructor: creates a random genome with values near zero
+  // TODO: remove these traits when segment refactor is complete
+  Trait redColor = new Trait(10);
+  Trait greenColor = new Trait(10);
+  Trait blueColor = new Trait(10);
+  Trait armor = new Trait(10 * maxSegments);
+  Trait density = new Trait(10);
+  Trait restitution = new Trait(10);
+
+  // Constructor: creates two new chromosomes
   Genome() {
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    genome = new FloatList(numGenes);
-    for (int i = 0; i < numGenes; i++) {
-      // give each gene a random value near zero
-      genome.append(randomGaussian() * 0.05);
-    }
+    x = new Chromosome(numGenes);
+    y = new Chromosome(numGenes);
+
+    // Calculate expressed number of segments
+    numSegments = getNumSegments();
   }
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
-    for (int c = 0; c < numSegments; c++)armor[c] = new Trait(10);
-    genome = g.genome.copy();
+    x = new Chromosome(g.x);
+    y = new Chromosome(g.y);
+
+    numSegments = g.numSegments;
   }
 
   // Returns the amount of turning force (just a decimal number) the
@@ -81,10 +144,11 @@ class Genome {
   double getBehavior(Trait trait) {
     return getTurningForce() * trait.sum(); // there's a turning force
   }
-  
+
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
   color getColor() {
+    // TODO: refactor for colors per segment
     int r = 126 + (int)(126*(redColor.sum()/(1+abs(redColor.sum()))));
     int g = 126 + (int)(126*(greenColor.sum()/(1+abs(greenColor.sum()))));
     int b = 126 + (int)(126*(blueColor.sum()/(1+abs(blueColor.sum()))));
@@ -108,17 +172,20 @@ class Genome {
   // that when a force is applied to a body the correct acceleration
   // is generated.
   float getDensity() {
+    // TODO: refactor for density per segment
     // if the value is negative, density approaches zero asympototically from 10
     if (density.sum() < 0) return (10 * (1/1+abs(density.sum())));
     // otherwise, the value is positive and density grows as 10 plus the square
     // root of the evolved value
-    return (10 + sqrt(density.sum())); // limit 0 to infinity 
+    return (10 + sqrt(density.sum())); // limit 0 to infinity
   }
-  
+
   float getArmor(int index) {
+    // TODO: refactor for armor per segment
     // the value mins at 0.1
-    float a = armor[index].avg();
-    if ((1+a) < 0.1)return (0.1);
+    float a = armor.avg();
+    if ((1+a) < 0.1)
+      return (0.1);
     return (1+a);//limit 0.1 to infinity, starts around 1
   }
 
@@ -138,6 +205,7 @@ class Genome {
   // How bouncy a creature is, one of the basic box2D body parameters,
   // no idea how it evolves or if it has any value to the creatures
   float getRestitution() {
+    // TODO: refactor for restitution per segment
     float r = 0;
     r = 0.5 + (0.5 * (restitution.sum()/(1+abs(restitution.sum()))));
     return r;
@@ -177,7 +245,7 @@ class Genome {
   // the creatures body
   Vec2 getPoint(int i) {
     Vec2 a = new Vec2();
-    float segment = segments.list().get(i);
+    float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -194,8 +262,9 @@ class Genome {
   // Gets the end point of the ith segment/rib/spine on the other side
   // of the creatures body
   Vec2 getFlippedPoint(int i) {
+    // TODO: reduce code duplication
     Vec2 a = new Vec2();
-    float segment = segments.list().get(i);
+    float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -210,10 +279,21 @@ class Genome {
   }
 
   // Mutates every value by a little bit. Biologically speaking a very
-  // high mutation rate to foster fast evolution
+  // high mutation rate to foster fast evolution.
   void mutate() {
-    for (int i = 0; i < genome.size(); i++) {
-      genome.set(i, genome.get(i) + randomGaussian()*0.3);
-    }
+    x.mutate();
+    y.mutate();
+    // TODO: eliminate numSegments magic property
+    numSegments = getNumSegments();
+  }
+
+  // can be from 2 to maxSegments
+  int getNumSegments() {
+    int ret = round(expressedSegments.avg() + 8);
+    if (ret < 2)
+      return 2;
+    if (ret > maxSegments)
+      return maxSegments;
+    return ret;
   }
 }
