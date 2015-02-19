@@ -1,8 +1,27 @@
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
 class Genome {
-  FloatList genome; // a nice wrapper to an array of floats
-  // TODO: make diploid with a second genome
+  class Chromosome {
+    FloatList genes;
+  
+    Chromosome(int n) {
+      genes = new FloatList(n);
+      for (int i = 0; i < n; i++) {
+        // give each gene a random value near zero
+        genes.append(randomGaussian() * 0.05);
+      }
+    }
+
+    void mutate() {
+      for (int i = 0; i < genes.size(); i++) {
+        genes.set(i, genes.get(i) + randomGaussian()*0.3);
+      }
+    }
+  }
+  
+  // a pair of chromosomes is the genome
+  Chromosome x;
+  Chromosome y;
 
   int numGenes = 0; // subsequently known as genome.size()
   int maxSegments = 20; // maximum number of segments/ribs/spines in a creature
@@ -21,20 +40,22 @@ class Genome {
       numGenes += genes;
     }
 
-    // Returns a list of with genes number of floats
+    // Returns a list of with 2 * genes number of floats
     FloatList list() {
       // and this is why we use a FloatList
-      return genome.getSubset(index, genes);
+      FloatList l = x.genes.getSubset(index, genes);
+      l.append(y.genes.getSubset(index, genes));
+      return l;
     }
 
-    // Returns the sum of the genes of a trait
+    // Returns the sum of the genes from both chromosomes for the trait
     float sum() {
       return list().sum();
     }
 
     // Returns the average of the genes of a trait
     float avg() {
-      return sum()/genes;
+      return sum()/(genes*2);
     }
   }
 
@@ -60,19 +81,27 @@ class Genome {
   
   // segments need an extra for the leading and trailing edge (spine)
   Segment[] segments = new Segment[maxSegments + 1];;
-  
+    {
+      // Initialize the segments and their traits
+      for (int i = 0; i < (maxSegments + 1); i++) {
+        segments[i] = new Segment();
+      }
+    }
   // encodes number of expressed traits 
   Trait expressedSegments = new Trait(10);
 
-  // Since these are not static there's a tad bit of overhead, but the
-  // convenience is worth the price; adding a trait takes one LOC
+  // Speciation
   Trait compatibility = new Trait(10);
   Trait reproductionEnergy = new Trait(10);
+
+  // Environment interaction
   Trait forwardForce = new Trait(10);
   Trait turningForce = new Trait(10);
   Trait food = new Trait(10);
   Trait creature = new Trait(10);
   Trait rock = new Trait(10);
+
+  // Body
   Trait scent = new Trait(10);
   Trait control = new Trait(10);
   // TODO: add gender, mutation rate, etc.
@@ -87,25 +116,17 @@ class Genome {
 
   // Constructor: creates a random genome with values near zero
   Genome() {
-    for (int i = 0; i < (maxSegments + 1); i++) {
-      segments[i] = new Segment();
-    }
-    
-    genome = new FloatList(numGenes);
-    for (int i = 0; i < numGenes; i++) {
-      // give each gene a random value near zero
-      genome.append(randomGaussian() * 0.05);
-    }
+    x = new Chromosome(numGenes);
+    y = new Chromosome(numGenes);
 
+    // Calculate expressed number of segments
     numSegments = getNumSegments();
   }
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
-    for (int i = 0; i < (maxSegments + 1); i++) {
-      segments[i] = new Segment();
-    }
-    genome = g.genome.copy();
+    x.genes = g.x.genes.copy();
+    y.genes = g.y.genes.copy();
     numSegments = g.numSegments;
   }
 
@@ -265,9 +286,8 @@ class Genome {
   // Mutates every value by a little bit. Biologically speaking a very
   // high mutation rate to foster fast evolution.
   void mutate() {
-    for (int i = 0; i < genome.size(); i++) {
-      genome.set(i, genome.get(i) + randomGaussian()*0.3);
-    }
+    x.mutate();
+    y.mutate();
     // TODO: eliminate numSegments magic property
     numSegments = getNumSegments();
   }

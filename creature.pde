@@ -54,7 +54,6 @@ class creature {
   // notice that the starting energy, e, is supplied by the parent
   creature(creature cs,float e) {
     g = new Genome(cs.g);
-    //g.copy(cs.g);     // copy the parent's genome into this creature's genome
     angle = random(0, 2 * PI); // start at a random angle
     // Currently creatures are 'born' around a circle a fixed distance from the tower.
     // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
