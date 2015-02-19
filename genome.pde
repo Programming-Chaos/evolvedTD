@@ -12,6 +12,10 @@ class Genome {
       }
     }
 
+    Chromosome(Chromosome c) {
+      genes = c.genes.copy();
+    }
+
     void mutate() {
       for (int i = 0; i < genes.size(); i++) {
         genes.set(i, genes.get(i) + randomGaussian()*0.3);
@@ -88,7 +92,7 @@ class Genome {
         segments[i] = new Segment();
       }
     }
-  
+
   // encodes number of expressed traits
   Trait expressedSegments = new Trait(10);
 
@@ -128,8 +132,9 @@ class Genome {
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
-    x.genes = g.x.genes.copy();
-    y.genes = g.y.genes.copy();
+    x = new Chromosome(g.x);
+    y = new Chromosome(g.y);
+
     numSegments = g.numSegments;
   }
 
