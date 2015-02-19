@@ -1,3 +1,9 @@
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
 
 import shiffman.box2d.*;
 import org.jbox2d.collision.shapes.*;
@@ -19,6 +25,7 @@ int generation = 0;
 boolean paused = false;        // is it paused
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
+boolean displayScent = true;   // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -28,6 +35,9 @@ ArrayList<rock> rocks;         // list of rock objects in the world
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
+Minim minim;
+AudioPlayer gunshot;
+
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
 void setup() {
@@ -35,6 +45,9 @@ void setup() {
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   the_tower = new tower();
+  
+  minim = new Minim(this);
+  gunshot = minim.loadFile("Cannon.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -60,6 +73,7 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
+  
 
   if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -165,6 +179,9 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case 'q':
       displayFood = !displayFood;
+      break;
+    case 'n':
+      displayScent = !displayScent;
       break;
     case '?':
       controls(); // call the instructions function
@@ -328,8 +345,9 @@ void display_controls() {
   text("Mouse button - fire", leftalign, topalign + 42);
   text("Number keys - switch weapons", leftalign, topalign + 50);
   text("q - hide/unhide food", leftalign, topalign + 58);
-  text("v - hide/unhide screen", leftalign, topalign + 66);
-  text("? - show/hide controls", leftalign, topalign + 74);
-  text("a - toggle autofire", leftalign, topalign + 82);
+  text("n - hide/unhide scent", leftalign, topalign + 66);
+  text("v - hide/unhide screen", leftalign, topalign + 74);
+  text("? - show/hide controls", leftalign, topalign + 82);
+  text("a - toggle autofire", leftalign, topalign + 90);
   popMatrix();
 }

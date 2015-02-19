@@ -189,20 +189,23 @@ class creature {
     scentAheadR = environ.getScent(sensorX, sensorY);
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
-    // If there's food ahead on the left, turn by the evolved amount of torque for food: Behavior(0)
-    torque += foodAheadL * g.getBehavior(0); 
-    // If there's food ahead on the right, turn by the evolved amount of torque for food: Behavior(0), but in the opposite, -1, direction
-    torque += foodAheadR * -1 * g.getBehavior(0);
+    // If there's food ahead on the left, turn by the evolved torque
+    torque += foodAheadL * g.getBehavior(g.food);
+    // If there's food ahead on the right, turn by the evolved torque
+    // but in the opposite direction
+    torque += foodAheadR * -1 * g.getBehavior(g.food);
     // Similar turns for creatures and rocks
-    torque += creatureAheadL * g.getBehavior(1);
-    torque += creatureAheadR * -1 * g.getBehavior(1);
-    torque += rockAheadL * g.getBehavior(2);
-    torque += rockAheadR * -1 * g.getBehavior(2);
-    // Take the square root of the amout of scent detected on the left (right), factor in the evolved response to smelling food, and add that to the torque
-    // Take the squareroot of the scent to reduce over correction
-    torque += sqrt(scentAheadL) * g.getBehavior(3);
-    torque += sqrt(scentAheadR) * -1 * g.getBehavior(3);
-    //println(torque); 
+    torque += creatureAheadL * g.getBehavior(g.creature);
+    torque += creatureAheadR * -1 * g.getBehavior(g.creature);
+    torque += rockAheadL * g.getBehavior(g.rock);
+    torque += rockAheadR * -1 * g.getBehavior(g.rock);
+    // Take the square root of the amout of scent detected on the left
+    // (right), factor in the evolved response to smelling food, and
+    // add that to the torque Take the squareroot of the scent to
+    // reduce over correction
+    torque += sqrt(scentAheadL) * g.getBehavior(g.scent);
+    torque += sqrt(scentAheadR) * -1 * g.getBehavior(g.scent);
+    //println(torque);
     return torque;
   }
   
