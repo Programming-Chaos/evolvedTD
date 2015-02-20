@@ -216,7 +216,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    p1.add_energy(20000); // getting food is valuable
+    p1.addEnergy(20000); // getting food is valuable
     food p2 = (food)o2;
     if (p2 != null) {
       p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -227,7 +227,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    p1.add_energy(20000); // getting food is valuable
+    p1.addEnergy(20000); // getting food is valuable
     food p2 = (food)o1;
     if (p2 != null) {
       p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -246,7 +246,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     c %= 8;
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor(c))));
+    p1.changeHealth((int)(-1*(p2.get_damage()/p1.getArmor(c))));
   }
 
   if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
@@ -260,7 +260,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     c %= 8;
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor(c))));
+    p1.changeHealth((int)(-1*(p2.get_damage()/p1.getArmor(c))));
   }
 
   // nothing happens if two creatures collide

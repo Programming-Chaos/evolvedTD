@@ -10,40 +10,47 @@ class creature {
   // fitness, health, a max health, angle they are facing, etc.
   Body body;
 
-  Genome g;
-  // communication traits
-  boolean scent;          // used to determine if creature is capable of producing scent
-  float scentStrength;    // how strong the creature's scent is
-  int scentColor;         // store an integer for different colors
+  Genome genome;         // encodes the creature's genetic information
 
-  float energy;   // used for reproduction and movement, given to offspring? gained from resources/food
-  float fitness; // used for selection
-  float health; // 0 health, creature dies
+  // communication traits
+  boolean scent;         // used to determine if creature is capable of producing scent
+  float scentStrength;   // how strong the creature's scent is
+  int scentColor;        // store an integer for different colors
+
+  float energy;          // used for reproduction and movement, given to offspring? gained from resources/food
+  float fitness;         // used for selection
+  float health;          // 0 health, creature dies
   float maxHealth = 100; // should be evolved
   float angle;
-  boolean alive; // dead creatures remain in the swarm to have a breeding chance
-  int round_counter; //Counter to track how many rounds/generations the individual creature has been alive
+  boolean alive;         // dead creatures remain in the swarm to have a breeding chance
+  int round_counter;     //Counter to track how many rounds/generations the individual creature has been alive
   float[] armor;
   float density;
 
   // Constructor, creates a new creature at the given location and angle
   // This constructor is generally only used for the first wave, after that creatures are created from parents.
   creature(float x, float y, float a) {
+    angle = a;
+    genome = new Genome();
 
-    angle = a;                  // set the creature's angle
-    g = new Genome();           // call the genome's constructor function to generate a new, random genome
-    armor = new float[g.numSegments];
-    for (int c = 0; c < g.numSegments; c++)armor[c] = g.getArmor(c);
+    armor = new float[genome.numSegments];
+    for (int c = 0; c < genome.numSegments; c++)
+      armor[c] = genome.getArmor(c);
+
     float avgarmor = 0;
-    for (int c = 0; c < g.numSegments; c++)avgarmor += armor[c];
-    avgarmor /= g.numSegments;
-    density = (g.getDensity()*avgarmor);
+    for (int c = 0; c < genome.numSegments; c++)
+      avgarmor += armor[c];
+    avgarmor /= genome.numSegments;
+    density = (genome.getDensity()*avgarmor);
+
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
+
     energy = 20000;             // Starting energy
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+
     scent = setScent(this);     // does creature produce scent
     scentStrength = setScentStrength(this);        // how strong is the scent
     scentColor = setScentColor(this); // what color is the scent
@@ -52,27 +59,35 @@ class creature {
   
   // copy constructor - this constucts a creature from a parent
   // notice that the starting energy, e, is supplied by the parent
-  creature(creature cs,float e) {
-    g = new Genome(cs.g);
+  creature(creature cs, float e) {
     angle = random(0, 2 * PI); // start at a random angle
-    // Currently creatures are 'born' around a circle a fixed distance from the tower.
-    // Birth locations should probably be evolved as part of the reproductive strategy and/or behavior
-    armor = new float[g.numSegments];
-    for (int c = 0; c < g.numSegments; c++)armor[c] = g.getArmor(c);
+    genome = new Genome(cs.genome);
+
+    armor = new float[genome.numSegments];
+    for (int c = 0; c < genome.numSegments; c++)
+      armor[c] = genome.getArmor(c);
     float avgarmor = 0;
-    for (int c = 0; c < g.numSegments; c++)avgarmor += armor[c];
-    avgarmor /= g.numSegments;
-    density = (g.getDensity()*avgarmor);
-    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle), 0.45 * worldWidth * cos(angle));  
+
+    for (int c = 0; c < genome.numSegments; c++)
+      avgarmor += armor[c];
+    avgarmor /= genome.numSegments;
+    density = (genome.getDensity()*avgarmor);
+
+    // Currently creatures are 'born' around a circle a fixed distance
+    // from the tower. Birth locations should probably be evolved as
+    // part of the reproductive strategy and/or behavior
+    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
+                        0.45 * worldWidth * cos(angle));
     makeBody(pos);
-    energy = e;   // starting energy comes from parent
-    health = maxHealth;  // Probably should be evolved.
+    energy = e;         // starting energy comes from parent
+    health = maxHealth; // probably should be evolved
     fitness = 0;
     body.setUserData(this);
     alive = true;
-    scent = setScent(this);      // does creature produce scent
+
+    scent = setScent(this);                 // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
-    scentColor = setScentColor(this); // what color is the scent
+    scentColor = setScentColor(this);       // what color is the scent
  }
 
   boolean getScent()        { return scent; }
@@ -83,7 +98,7 @@ class creature {
     FloatList l;
     float s;
     int val;
-    l = c.g.scent.list();
+    l = c.genome.scent.list();
     s = l.get(5); // the 5th gene determines scent color for now
     // map function goes here
     if( s >= 0 ) {
@@ -96,7 +111,7 @@ class creature {
   // set scentStrength
   float setScentStrength( creature c ) {
     float s;
-    s = c.g.scent.avg();
+    s = c.genome.scent.avg();
     // mapping function goes here
     return s;
   }
@@ -104,7 +119,7 @@ class creature {
   // function setScent will calculate the creatures scent value
   boolean setScent( creature c ) {
     float s;
-    s = c.g.scent.sum();
+    s = c.genome.scent.sum();
     // need to add a mapping function here
     if( s >= 0 ) {
       return true;
@@ -112,21 +127,23 @@ class creature {
       return false;
     }
   }
-  
+
+  // TODO: factor out with meiosis
   void mutate() {
-    g.mutate(); // mutate the genome
+    genome.mutate(); // mutate the genome
   }
    
   // returns a vector to the creature's postion 
-  Vec2 get_pos() {
+  Vec2 getPos() {
     return(box2d.getBodyPixelCoord(body));
   }
   
-  // adds some energy to the creature - called when the creature picks up food/resource
-  void add_energy(int x) {
+  // adds some energy to the creature - called when the creature picks
+  // up food/resource
+  void addEnergy(int x) {
     energy += x;
   }
-  
+
   float getEnergy() {
     return energy;
   }
@@ -136,7 +153,7 @@ class creature {
   }
   
   float getForce() {
-    return g.getForce();
+    return genome.getForce();
   }
   
   float getDensity() {
@@ -157,7 +174,7 @@ class creature {
   }
   
   double getCompat() {
-    //return g.getCompat();
+    //return genome.getCompat();
     return 0;
   }
   
@@ -190,28 +207,28 @@ class creature {
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved torque
-    torque += foodAheadL * g.getBehavior(g.food);
+    torque += foodAheadL * genome.getBehavior(genome.food);
     // If there's food ahead on the right, turn by the evolved torque
     // but in the opposite direction
-    torque += foodAheadR * -1 * g.getBehavior(g.food);
+    torque += foodAheadR * -1 * genome.getBehavior(genome.food);
     // Similar turns for creatures and rocks
-    torque += creatureAheadL * g.getBehavior(g.creature);
-    torque += creatureAheadR * -1 * g.getBehavior(g.creature);
-    torque += rockAheadL * g.getBehavior(g.rock);
-    torque += rockAheadR * -1 * g.getBehavior(g.rock);
+    torque += creatureAheadL * genome.getBehavior(genome.creature);
+    torque += creatureAheadR * -1 * genome.getBehavior(genome.creature);
+    torque += rockAheadL * genome.getBehavior(genome.rock);
+    torque += rockAheadR * -1 * genome.getBehavior(genome.rock);
     // Take the square root of the amout of scent detected on the left
     // (right), factor in the evolved response to smelling food, and
     // add that to the torque Take the squareroot of the scent to
     // reduce over correction
-    torque += sqrt(scentAheadL) * g.getBehavior(g.scent);
-    torque += sqrt(scentAheadR) * -1 * g.getBehavior(g.scent);
+    torque += sqrt(scentAheadL) * genome.getBehavior(genome.scent);
+    torque += sqrt(scentAheadR) * -1 * genome.getBehavior(genome.scent);
     //println(torque);
     return torque;
   }
   
-  // Amount of forward force applied to the creature, this is evolved, hence gotten from the genome (g.getForce())
+  // Amount of forward force applied to the creature, this is evolved, hence gotten from the genome (genome.getForce())
   float calcForce() {
-    float f = g.getForce();
+    float f = genome.getForce();
     return f;
   }
   
@@ -226,7 +243,7 @@ class creature {
     // Note that unrealistically dead creatures can reproduce, which is necessary in cases where a player kills a whole wave
   }
   
-  void change_health(int h) {
+  void changeHealth(int h) {
     health += h;
   }
   
@@ -299,9 +316,9 @@ class creature {
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      if (c > g.numSegments - 1)
-        c %= g.numSegments;
-      fill(g.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
+      if (c > genome.numSegments - 1)
+        c %= genome.numSegments;
+      fill(genome.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
       strokeWeight(armor[c]);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
@@ -315,7 +332,7 @@ class creature {
     strokeWeight(1);
     // Add some eyespots
     fill(0);
-    Vec2 eye = g.getPoint(6);
+    Vec2 eye = genome.getPoint(6);
     ellipse(eye.x, eye.y, 5, 5);
     ellipse(-1 * eye.x, eye.y, 5, 5);
     fill(255);
@@ -343,7 +360,7 @@ class creature {
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
-    int offset = (int)max(g.getWidth(), g.getLength()); // get the largest dimension of the creature
+    int offset = (int)max(genome.getWidth(), genome.getLength()); // get the largest dimension of the creature
     rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it  
     noStroke();
     fill(0, 0, 255);
@@ -372,20 +389,20 @@ class creature {
 
     Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
     
-    for (int i = 0; i < g.numSegments; i++) {  // For each segment
+    for (int i = 0; i < genome.numSegments; i++) {  // For each segment
       sd = new PolygonShape();  // Create a new polygon
 
       vertices3  = new Vec2[3];  // Create an array of 3 new vectors
       // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));  // First vertex is at the center of the creature
-      vertices3[1] = box2d.vectorPixelsToWorld(g.getPoint(i));   // Second and third vertices are evolved, so get from the genome
-      vertices3[2] = box2d.vectorPixelsToWorld(g.getPoint(i + 1));
+      vertices3[1] = box2d.vectorPixelsToWorld(genome.getPoint(i));   // Second and third vertices are evolved, so get from the genome
+      vertices3[2] = box2d.vectorPixelsToWorld(genome.getPoint(i + 1));
       //  sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
       fd.shape = sd;  // Give the fixture a shape = polygon that was just created
       fd.density = density;  // give it a density
-      fd.restitution = g.getRestitution();  // Give it a restitution (bounciness)
+      fd.restitution = genome.getRestitution();  // Give it a restitution (bounciness)
       fd.filter.categoryBits = 1; // creatures are in filter category 1
       fd.filter.maskBits = 65535;  // interacts with everything
 //      fd.userData = new segIndex();
@@ -394,18 +411,18 @@ class creature {
     }
     
     // now repeat the whole process for the other side of the creature
-    for (int i = 0; i < g.numSegments; i++) {
+    for (int i = 0; i < genome.numSegments; i++) {
       sd = new PolygonShape();
       vertices3  = new Vec2[3];
-      //vertices[i] = box2d.vectorPixelsToWorld(g.getpoint(i));
+      //vertices[i] = box2d.vectorPixelsToWorld(genome.getpoint(i));
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0,0));
-      vertices3[1] = box2d.vectorPixelsToWorld(g.getFlippedPoint(i));      
-      vertices3[2] = box2d.vectorPixelsToWorld(g.getFlippedPoint(i + 1));
+      vertices3[1] = box2d.vectorPixelsToWorld(genome.getFlippedPoint(i));
+      vertices3[2] = box2d.vectorPixelsToWorld(genome.getFlippedPoint(i + 1));
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();
       fd.shape = sd;
       fd.density = density;
-      fd.restitution = g.getRestitution();
+      fd.restitution = genome.getRestitution();
       fd.filter.categoryBits = 1; // creatures are in filter category 1
       fd.filter.maskBits = 65535;  // interacts with everything
 //      fd.userData = new segIndex();
