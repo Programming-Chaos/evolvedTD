@@ -12,8 +12,8 @@ class Genome {
       }
     }
 
-    Chromosome(Chromosome c) {
-      genes = c.genes.copy();
+    Chromosome(Chromosome chromosome) {
+      genes = chromosome.genes.copy();
     }
 
     void mutate() {
@@ -24,13 +24,13 @@ class Genome {
   }
 
   // a pair of chromosomes is the genome
-  Chromosome x;
-  Chromosome y;
+  Chromosome xChromosome;
+  Chromosome yChromosome;
 
-  int numGenes = 0; // subsequently known as genome.size()
+  int nGenes = 0; // subsequently known as genome.size()
   // maximum number of segments/ribs/spines in a creature
-  final static int maxSegments = 20;
-  // TODO: refactor getNumSegments() into creature
+  static final int MAX_SEGMENTS = 20;
+  // TODO: refactor getNSegments() into creature
   int numSegments;
 
   // Represents a trait with a number of genes/loci and its index in the genome
@@ -42,14 +42,14 @@ class Genome {
     Trait(int genes) {
       // For each trait, assign its index and count its genes
       this.genes = genes;
-      this.index = numGenes;
-      numGenes += genes;
+      this.index = nGenes;
+      nGenes += genes;
     }
 
     // Returns a list of with 2 * genes number of floats
     FloatList list() {
-      FloatList l = x.genes.getSubset(index, genes);
-      l.append(y.genes.getSubset(index, genes));
+      FloatList l = xChromosome.genes.getSubset(index, genes);
+      l.append(yChromosome.genes.getSubset(index, genes));
       return l;
     }
 
@@ -85,13 +85,13 @@ class Genome {
   }
 
   // need an extra point for the leading and trailing edge (spine)
-  Segment[] segments = new Segment[maxSegments + 1];;
-    {
-      // initialize the segments and their traits
-      for (int i = 0; i < (maxSegments + 1); i++) {
-        segments[i] = new Segment();
-      }
+  Segment[] segments = new Segment[MAX_SEGMENTS + 1];
+  {
+    // initialize the segments and their traits
+    for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
+      segments[i] = new Segment();
     }
+  }
 
   // encodes number of expressed traits
   Trait expressedSegments = new Trait(10);
@@ -117,14 +117,14 @@ class Genome {
   Trait redColor = new Trait(10);
   Trait greenColor = new Trait(10);
   Trait blueColor = new Trait(10);
-  Trait armor = new Trait(10 * maxSegments);
+  Trait armor = new Trait(10 * MAX_SEGMENTS);
   Trait density = new Trait(10);
   Trait restitution = new Trait(10);
 
   // Constructor: creates two new chromosomes
   Genome() {
-    x = new Chromosome(numGenes);
-    y = new Chromosome(numGenes);
+    xChromosome = new Chromosome(nGenes);
+    yChromosome = new Chromosome(nGenes);
 
     // Calculate expressed number of segments
     numSegments = getNumSegments();
@@ -132,8 +132,8 @@ class Genome {
 
   // Copy constructor: copies prior genome
   Genome(Genome g) {
-    x = new Chromosome(g.x);
-    y = new Chromosome(g.y);
+    xChromosome = new Chromosome(g.xChromosome);
+    yChromosome = new Chromosome(g.yChromosome);
 
     numSegments = g.numSegments;
   }
@@ -142,6 +142,7 @@ class Genome {
   // creature has evolved to apply when it senses either food, another
   // creature, a rock, or a (food) scent.
   double getBehavior(Trait trait) {
+    // TODO: Move this to creature
     return getTurningForce() * trait.sum(); // there's a turning force
   }
 
@@ -192,6 +193,7 @@ class Genome {
   // Forward force to accelerate the creature, evolved, but
   // (currently) doesn't change anytime durning a wave
   int getForce() {
+    // TODO: Move this to creature
     return((int)(500+10*forwardForce.sum())); // -infinity to infinity linear
   }
 
@@ -199,6 +201,7 @@ class Genome {
   // above, depending on what type of object was sensed to start
   // turning
   int getTurningForce() {
+    // TODO: Move this to creature
     return((int)(100+10*turningForce.sum())); // -infinity to infinity linear
   }
 
@@ -213,6 +216,7 @@ class Genome {
 
   // Calculate and return the width of the creature
   float getWidth() {
+    // TODO: Move this to creature
     float maxX = 0;
     Vec2 temp;
     for (int i = 0; i < numSegments; i++) {
@@ -226,6 +230,7 @@ class Genome {
 
   // Calculate and return the length of the creature
   float getLength() {
+    // TODO: Move this to creature
     float maxY = 0;
     float minY = 0;
     Vec2 temp;
@@ -244,6 +249,7 @@ class Genome {
   // Gets the end point of the ith segment/rib/spine used to create
   // the creatures body
   Vec2 getPoint(int i) {
+    // TODO: Move this to creature
     Vec2 a = new Vec2();
     float segment = segments[i].endPoint.sum();
     int lengthbase = 20;
@@ -262,6 +268,7 @@ class Genome {
   // Gets the end point of the ith segment/rib/spine on the other side
   // of the creatures body
   Vec2 getFlippedPoint(int i) {
+    // TODO: Move this to creature
     // TODO: reduce code duplication
     Vec2 a = new Vec2();
     float segment = segments[i].endPoint.sum();
@@ -281,19 +288,21 @@ class Genome {
   // Mutates every value by a little bit. Biologically speaking a very
   // high mutation rate to foster fast evolution.
   void mutate() {
-    x.mutate();
-    y.mutate();
+    // TODO: refactor this into meiosis
+    xChromosome.mutate();
+    yChromosome.mutate();
     // TODO: eliminate numSegments magic property
     numSegments = getNumSegments();
   }
 
-  // can be from 2 to maxSegments
+  // can be from 2 to MAX_SEGMENTS
   int getNumSegments() {
+    // TODO: refactor this into creature initialization
     int ret = round(expressedSegments.avg() + 8);
     if (ret < 2)
       return 2;
-    if (ret > maxSegments)
-      return maxSegments;
+    if (ret > MAX_SEGMENTS)
+      return MAX_SEGMENTS;
     return ret;
   }
 }
