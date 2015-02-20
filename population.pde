@@ -10,7 +10,7 @@ class population {
   
   /* create gamete hash table for storing gametes.  
      Use global variables to find how many spaces are needed. */
-  ArrayList<Genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
+  ArrayList<Genome> gametes = new ArrayList<Genome>((worldWidth/20)*(worldHeight/20));
   
   
   population() {
@@ -142,12 +142,12 @@ class population {
     ArrayList<creature> tempswarm = new ArrayList<creature>();
     // Add gametes to gamete bucket
     for (creature cd: swarm) {
-      float fit = cd.fitness;
-      for (int i=0; i < fit; i++) {
-         gametes[0].add(cd.genome);
+      // Fitness proporitional selection
+      for (int i = 0; i < (int)cd.fitness; i++) {
+         gametes.add(cd.genome);
       }
     }
-    
+
     calculateFitnesses();
     creature c;
     
