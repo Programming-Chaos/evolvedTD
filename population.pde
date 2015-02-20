@@ -49,7 +49,7 @@ class population {
       i = (int)random(0, swarm.size());
       c = swarm.get(i);
     }
-    return c.get_pos();
+    return c.getPos();
   }
    
   Vec2 closest(Vec2 v) {
@@ -58,7 +58,7 @@ class population {
     distance = 100000000; // very large value so first living creature will be closer
     for (creature cd: swarm) {
       if (cd.alive()) { // skip non-alive creatures
-        temp = cd.get_pos();
+        temp = cd.getPos();
         tempd = sqrt((temp.x-v.x)*(temp.x-v.x)+(temp.y-v.y)*(temp.y-v.y));
         if (tempd < distance) {
           distance = tempd;
@@ -90,7 +90,7 @@ class population {
     Vec2 p = new Vec2();
     for (creature cd: swarm) {
       if (cd.alive()) { // only place living creatures 
-        p = cd.get_pos();
+        p = cd.getPos();
         environ.place_creature(cd, p.x, p.y); // environ is a global, tells the environment where creatures are
       }
     }
@@ -144,7 +144,7 @@ class population {
     for (creature cd: swarm) {
       float fit = cd.fitness;
       for (int i=0; i < fit; i++) {
-         gametes[0].add(cd.g);
+         gametes[0].add(cd.genome);
       }
     }
     
@@ -157,7 +157,7 @@ class population {
     for (int i = 0; i < pop_size; i++) { // Might be easier to produce 2 offspring at a time
       parent1 = select();
       parent2 = select();
-      while (!AreCompatible(swarm.get(parent1).g,swarm.get(parent2).g)) {
+      while (!AreCompatible(swarm.get(parent1).genome,swarm.get(parent2).genome)) {
         parent1 = select();
         parent2 = select();
         while (parent2 == parent1) parent2 = select(); // explicitly require two different parents
