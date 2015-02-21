@@ -130,15 +130,6 @@ class Genome {
     yChromosome = new Chromosome(g.yChromosome);
   }
 
-  // How bouncy a creature is, one of the basic box2D body parameters,
-  // no idea how it evolves or if it has any value to the creatures
-  float getRestitution() {
-    // TODO: refactor for restitution per segment
-    float r = 0;
-    r = 0.5 + (0.5 * (restitution.sum()/(1+abs(restitution.sum()))));
-    return r;
-  }
-
   // Mutates every value by a little bit. Biologically speaking a very
   // high mutation rate to foster fast evolution.
   void mutate() {

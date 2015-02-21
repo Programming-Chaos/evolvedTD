@@ -233,6 +233,14 @@ class creature {
     return (500 + 10 * genome.forwardForce.sum());
   }
 
+  // How bouncy a creature is, one of the basic box2D body parameters,
+  // no idea how it evolves or if it has any value to the creatures
+  private float getRestitution() {
+    // TODO: refactor for restitution per segment
+    float r = genome.restitution.sum();
+    return 0.5 + (0.5 * (r / (1 + abs(r))));
+  }
+
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
     int ret = round(genome.expressedSegments.avg() + 8);
@@ -524,10 +532,12 @@ class creature {
 
       // sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
-      FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
-      fd.shape = sd;  // Give the fixture a shape = polygon that was just created
-      fd.density = density;  // give it a density
-      fd.restitution = genome.getRestitution();  // Give it a restitution (bounciness)
+      // Create a new Box2d fixture
+      FixtureDef fd = new FixtureDef();
+      // Give the fixture a shape = polygon that was just created
+      fd.shape = sd;
+      fd.density = density;
+      fd.restitution = getRestitution();
       fd.filter.categoryBits = 1; // creatures are in filter category 1
       fd.filter.maskBits = 65535;  // interacts with everything
 //      fd.userData = new segIndex();
@@ -547,9 +557,9 @@ class creature {
       FixtureDef fd = new FixtureDef();
       fd.shape = sd;
       fd.density = density;
-      fd.restitution = genome.getRestitution();
+      fd.restitution = getRestitution();
       fd.filter.categoryBits = 1; // creatures are in filter category 1
-      fd.filter.maskBits = 65535;  // interacts with everything
+      fd.filter.maskBits = 65535; // interacts with everything
 //      fd.userData = new segIndex();
 //      fd.userData.segmentIndex = i;
       body.createFixture(fd);
