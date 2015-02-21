@@ -132,17 +132,6 @@ class Genome {
   }
 
 
-  // Mapping from allele value to color is a sigmoid mapping to 0 to
-  // 255 centered on 126
-  color getColor() {
-    // TODO: refactor for colors per segment
-    int r = 126 + (int)(126*(redColor.sum()/(1+abs(redColor.sum()))));
-    int g = 126 + (int)(126*(greenColor.sum()/(1+abs(greenColor.sum()))));
-    int b = 126 + (int)(126*(blueColor.sum()/(1+abs(blueColor.sum()))));
-    color c = color(r, g, b);
-    return c;
-  }
-
   // Amount of energy a creature must have to reproduce, not used in
   // the tower defense, but could be if we wanted creates to reproduce
   // during a wave.

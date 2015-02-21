@@ -153,6 +153,21 @@ class creature {
     return energy;
   }
   
+  // Mapping from allele value to color is a sigmoid mapping to 0 to
+  // 255 centered on 126
+  private color getColor() {
+    // TODO: refactor for color per segment
+    float redColor = genome.redColor.sum();
+    float greenColor = genome.greenColor.sum();
+    float blueColor = genome.blueColor.sum();
+
+    int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
+    int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
+    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
+
+    return color(r, g, b);
+  }
+
   // Gets the end point of the ith segment/rib/spine used to create
   // the creatures body
   private Vec2 getPoint(int i) {
@@ -415,7 +430,7 @@ class creature {
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       c %= numSegments;
-      fill(genome.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
+      fill(getColor()); // Get the creature's color
       strokeWeight(armor[c]);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
