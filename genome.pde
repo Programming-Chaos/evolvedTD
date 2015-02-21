@@ -130,13 +130,6 @@ class Genome {
     yChromosome = new Chromosome(g.yChromosome);
   }
 
-  // Forward force to accelerate the creature, evolved, but
-  // (currently) doesn't change anytime durning a wave
-  int getForce() {
-    // TODO: Move this to creature
-    return((int)(500+10*forwardForce.sum())); // -infinity to infinity linear
-  }
-
   // How bouncy a creature is, one of the basic box2D body parameters,
   // no idea how it evolves or if it has any value to the creatures
   float getRestitution() {

@@ -225,9 +225,12 @@ class creature {
   float getMass() {
     return body.getMass();
   }
-  
-  float getForce() {
-    return genome.getForce();
+
+  // Forward force to accelerate the creature, evolved, but
+  // (currently) doesn't change anytime durning a wave
+  private float getForce() {
+    // -infinity to infinity linear
+    return (500 + 10 * genome.forwardForce.sum());
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
@@ -346,12 +349,6 @@ class creature {
     return torque;
   }
   
-  // Amount of forward force applied to the creature, this is evolved, hence gotten from the genome (genome.getForce())
-  float calcForce() {
-    float f = genome.getForce();
-    return f;
-  }
-  
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
@@ -381,7 +378,7 @@ class creature {
     }
     float a = body.getAngle();
     float m = body.getMass();
-    float f = calcForce();
+    float f = getForce();
     double torque = 0;
     torque = calcTorque();
     body.applyTorque((float)torque);
