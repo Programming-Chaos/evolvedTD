@@ -106,8 +106,6 @@ class population {
       if (c.alive) {
         c.round_counter++;
         generation.add(c);
-      } else {
-        c.killBody();
       }
 
       // Add 2 * scaled fitness number of gametes to bucket for
