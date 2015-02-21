@@ -2,11 +2,10 @@
  * Each generation/wave the whole population attacks.
  */
 
-int pop_size = 20;
 int tournSize = 5;
-
 class population {
   ArrayList<creature> swarm;
+  static final int POP_SIZE = 20;
   
   // Create gamete buckets for storing sectors of gametes. Use global
   // variables to find how many spaces are needed.
@@ -21,7 +20,7 @@ class population {
   population() {
     swarm = new ArrayList<creature>();
     float a;
-    for (int i = 0; i < pop_size; i++) {
+    for (int i = 0; i < POP_SIZE; i++) {
       a = random(0, 2*PI);
       creature c = new creature(0.45*worldWidth*sin(a),0.45*worldWidth*cos(a),a);
       swarm.add(c);
@@ -29,9 +28,7 @@ class population {
   }
   
   void update() {
-    int creatureUpdateResult;
-    for (int i = 0; i < swarm.size(); i++) {
-      creature c = swarm.get(i);
+    for (creature c : swarm) {
       c.update();
     }
   }
@@ -39,6 +36,10 @@ class population {
   void calculateFitnesses() {
     for (creature cd: swarm) {
       cd.calcFitness();
+
+  void display() {
+    for (creature c : swarm) {
+      c.display();
     }
   }
    
@@ -48,11 +49,9 @@ class population {
     if (get_alive() == 0) {
       return v; // none left alive
     }
-    int i = (int)random(0, swarm.size());
-    c = swarm.get(i);
+    c = swarm.get(int(random(swarm.size())));
     while(!c.alive) {
-      i = (int)random(0, swarm.size());
-      c = swarm.get(i);
+      c = swarm.get(int(random(swarm.size())));
     }
     return c.getPos();
   }
@@ -61,9 +60,9 @@ class population {
     Vec2 closest = new Vec2(0,0), temp;
     float distance, tempd;
     distance = 100000000; // very large value so first living creature will be closer
-    for (creature cd: swarm) {
-      if (cd.alive()) { // skip non-alive creatures
-        temp = cd.getPos();
+    for (creature c: swarm) {
+      if (c.alive) { // skip non-alive creatures
+        temp = c.getPos();
         tempd = sqrt((temp.x-v.x)*(temp.x-v.x)+(temp.y-v.y)*(temp.y-v.y));
         if (tempd < distance) {
           distance = tempd;
@@ -72,23 +71,18 @@ class population {
       }
     }
     return closest;
-     
   }
-   
-  int get_alive() { // returns the number of living creatures, used to decide whether to end a wave
+
+  // returns the number of living creatures, used to decide whether to
+  // end a wave
+  int get_alive() {
     int counter = 0;
-    for (creature cd: swarm) {
-      if (cd.alive()) { 
+    for (creature c: swarm) {
+      if (c.alive) {
         counter++;
       }
     }
     return counter;
-  }
-   
-  void display() {
-    for (creature cd: swarm) {
-      cd.display();
-    }
   }
    
   void set_creatures() {

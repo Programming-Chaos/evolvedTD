@@ -285,10 +285,6 @@ class creature {
       box2d.destroyBody(body);
   }
   
-  boolean alive() {
-    return alive;
-  }
-  
   double getCompat() {
     //return genome.getCompat();
     return 0;
