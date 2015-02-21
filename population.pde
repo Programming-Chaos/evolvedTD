@@ -8,11 +8,16 @@ int tournSize = 5;
 class population {
   ArrayList<creature> swarm;
   
-  /* create gamete hash table for storing gametes.  
-     Use global variables to find how many spaces are needed. */
-  ArrayList<Genome>[] gametes = new ArrayList[(worldWidth/20)*(worldHeight/20)];
-  
-  
+  // Create gamete buckets for storing sectors of gametes. Use global
+  // variables to find how many spaces are needed.
+  private int buckets = (worldWidth/20)*(worldHeight/20);
+  ArrayList<Genome>[] gametes = new ArrayList[buckets];
+  {
+    for (int i = 0; i < buckets; i++) {
+      gametes[i] = new ArrayList<Genome>();
+    }
+  }
+
   population() {
     swarm = new ArrayList<creature>();
     float a;
@@ -142,12 +147,13 @@ class population {
     ArrayList<creature> tempswarm = new ArrayList<creature>();
     // Add gametes to gamete bucket
     for (creature cd: swarm) {
-      float fit = cd.fitness;
-      for (int i=0; i < fit; i++) {
-         gametes[0].add(cd.genome);
+      // Fitness proporitional selection
+      for (int i = 0; i < (int)cd.fitness; i++) {
+        // TODO: implement proximity
+        gametes[0].add(cd.genome);
       }
     }
-    
+
     calculateFitnesses();
     creature c;
     
