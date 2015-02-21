@@ -4,6 +4,8 @@ class Genome {
   // a pair of chromosomes is the genome
   Chromosome xChromosome;
   Chromosome yChromosome;
+  // standard deviation of float added to each gene in meiosis
+  static final float MUTATION_RATE = 0.3;
 
   // Speciation
   Trait compatibility = new Trait(10);
@@ -26,9 +28,6 @@ class Genome {
   // maximum number of segments/ribs/spines that can be evolved
   static final int MAX_SEGMENTS = 20;
 
-  // standard deviation of float added to each gene in meiosis
-  static final float MUTATION_RATE = 0.3;
-
   // TODO: remove these traits when segment refactor is complete
   Trait redColor = new Trait(10);
   Trait greenColor = new Trait(10);
@@ -36,7 +35,7 @@ class Genome {
   Trait density = new Trait(10);
   Trait restitution = new Trait(10);
 
-  private int nGenes = 0; // subsequently known as genome.size()
+  private int nGenes = 0;
 
   class Chromosome {
     FloatList genes;
@@ -58,6 +57,39 @@ class Genome {
         genes.set(i, genes.get(i) + randomGaussian() * MUTATION_RATE);
       }
     }
+  }
+
+  ArrayList getGametes() {
+    ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
+
+    // recombine
+    Chromosome x = new Chromosome(nGenes);
+    Chromosome y = new Chromosome(nGenes);
+
+    int start = int(random(nGenes));
+    int num = int(random(nGenes - start));
+
+    // TODO: fix this naive approach to allow for circular swap
+
+    // get first section from own chromosome
+    x.genes.append(xChromosome.genes.getSubset(0, start));
+    y.genes.append(yChromosome.genes.getSubset(0, start));
+
+    // get swapped section
+    x.genes.append(yChromosome.genes.getSubset(start, num));
+    y.genes.append(xChromosome.genes.getSubset(start, num));
+
+    // get last section from own chromosome
+    x.genes.append(xChromosome.genes.getSubset(start + num, nGenes - start - num));
+    y.genes.append(yChromosome.genes.getSubset(start + num, nGenes - start - num));
+
+    gametes.add(x);
+    gametes.add(y);
+
+    // mutate
+    for (Chromosome chromosome : gametes)
+      chromosome.mutate();
+    return gametes;
   }
 
   // Represents a trait with a number of genes/loci and its index in the genome
