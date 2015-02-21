@@ -24,6 +24,7 @@ class creature {
   float angle;
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   int round_counter;     //Counter to track how many rounds/generations the individual creature has been alive
+  int numSegments;
   float[] armor;
   float density;
 
@@ -33,14 +34,16 @@ class creature {
     angle = a;
     genome = new Genome();
 
-    armor = new float[genome.numSegments];
-    for (int c = 0; c < genome.numSegments; c++)
+    numSegments = getNumSegments();
+
+    armor = new float[numSegments];
+    for (int c = 0; c < numSegments; c++)
       armor[c] = genome.getArmor(c);
 
     float avgarmor = 0;
-    for (int c = 0; c < genome.numSegments; c++)
+    for (int c = 0; c < numSegments; c++)
       avgarmor += armor[c];
-    avgarmor /= genome.numSegments;
+    avgarmor /= numSegments;
     density = (genome.getDensity()*avgarmor);
 
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
@@ -63,14 +66,16 @@ class creature {
     angle = random(0, 2 * PI); // start at a random angle
     genome = new Genome(cs.genome);
 
-    armor = new float[genome.numSegments];
-    for (int c = 0; c < genome.numSegments; c++)
+    numSegments = getNumSegments();
+
+    armor = new float[numSegments];
+    for (int c = 0; c < numSegments; c++)
       armor[c] = genome.getArmor(c);
     float avgarmor = 0;
 
-    for (int c = 0; c < genome.numSegments; c++)
+    for (int c = 0; c < numSegments; c++)
       avgarmor += armor[c];
-    avgarmor /= genome.numSegments;
+    avgarmor /= numSegments;
     density = (genome.getDensity()*avgarmor);
 
     // Currently creatures are 'born' around a circle a fixed distance
@@ -148,6 +153,74 @@ class creature {
     return energy;
   }
   
+  // Gets the end point of the ith segment/rib/spine used to create
+  // the creatures body
+  private Vec2 getPoint(int i) {
+    Vec2 a = new Vec2();
+    float segment = genome.segments[i].endPoint.sum();
+    int lengthbase = 20;
+    float l;
+    if (segment < 0) {
+      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
+    }
+    else {
+      l = lengthbase + (2*lengthbase*(segment/(1+segment)));;
+    }
+    a.x = (float)(l * Math.sin((i)*PI/(numSegments)) );
+    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
+    return a;
+  }
+
+  // Gets the end point of the ith segment/rib/spine on the other side
+  // of the creatures body
+  private Vec2 getFlippedPoint(int i) {
+    // TODO: reduce code duplication
+    Vec2 a = new Vec2();
+    float segment = genome.segments[i].endPoint.sum();
+    int lengthbase = 20;
+    float l;
+    if (segment < 0) {
+      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
+    }
+    else {
+      l = lengthbase + (2*lengthbase*(segment/(1+segment)));
+    }
+    a.x = (float)(-1 * l * Math.sin((i)*PI/(numSegments)) );
+    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
+    return a;
+  }
+
+  // Calculate and return the width of the creature
+  private float getWidth() {
+    // TODO: Move this to creature
+    float maxX = 0;
+    Vec2 temp;
+    for (int i = 0; i < numSegments; i++) {
+      temp = getPoint(i);
+      if (temp.x > maxX) {
+        maxX = temp.x;
+      }
+    }
+    return 2*maxX;
+  }
+
+  // Calculate and return the length of the creature
+  private float getLength() {
+    float maxY = 0;
+    float minY = 0;
+    Vec2 temp;
+    for (int i = 0; i < numSegments; i++) {
+      temp = getPoint(i);
+      if (temp.y > maxY) {
+        maxY = temp.y;
+      }
+      if (temp.y < minY) {
+        minY = temp.y;
+      }
+    }
+    return (maxY - minY);
+  }
+
   float getMass() {
     return body.getMass();
   }
@@ -155,7 +228,17 @@ class creature {
   float getForce() {
     return genome.getForce();
   }
-  
+
+  // can be from 2 to Genome.MAX_SEGMENTS
+  int getNumSegments() {
+    int ret = round(genome.expressedSegments.avg() + 8);
+    if (ret < 2)
+      return 2;
+    if (ret > Genome.MAX_SEGMENTS)
+      return Genome.MAX_SEGMENTS;
+    return ret;
+  }
+
   float getDensity() {
     return density;
   }
@@ -316,8 +399,7 @@ class creature {
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      if (c > genome.numSegments - 1)
-        c %= genome.numSegments;
+      c %= numSegments;
       fill(genome.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
       strokeWeight(armor[c]);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
@@ -332,7 +414,7 @@ class creature {
     strokeWeight(1);
     // Add some eyespots
     fill(0);
-    Vec2 eye = genome.getPoint(6);
+    Vec2 eye = getPoint(6);
     ellipse(eye.x, eye.y, 5, 5);
     ellipse(-1 * eye.x, eye.y, 5, 5);
     fill(255);
@@ -342,7 +424,8 @@ class creature {
     
     // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
-    // Note that the length (50) and angles PI*40 and PI*60 are the same as when calculating the sensor postions in getTorque()
+    // Note that the length (50) and angles PI*40 and PI*60 are the
+    // same as when calculating the sensor postions in getTorque()
     int l = 50;
     sensorX = pos.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
     sensorY = pos.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
@@ -360,7 +443,8 @@ class creature {
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
-    int offset = (int)max(genome.getWidth(), genome.getLength()); // get the largest dimension of the creature
+    // get the largest dimension of the creature
+    int offset = (int)max(getWidth(), getLength());
     rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it  
     noStroke();
     fill(0, 0, 255);
@@ -388,16 +472,23 @@ class creature {
     PolygonShape sd;
 
     Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
-    
-    for (int i = 0; i < genome.numSegments; i++) {  // For each segment
+
+    // For each segment
+    for (int i = 0; i < numSegments; i++) {
       sd = new PolygonShape();  // Create a new polygon
 
       vertices3  = new Vec2[3];  // Create an array of 3 new vectors
-      // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
-      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));  // First vertex is at the center of the creature
-      vertices3[1] = box2d.vectorPixelsToWorld(genome.getPoint(i));   // Second and third vertices are evolved, so get from the genome
-      vertices3[2] = box2d.vectorPixelsToWorld(genome.getPoint(i + 1));
-      //  sd is the polygon shape, create it from the array of 3 vertices
+
+      // Next create a segment, pie slice, of the creature by defining
+      // 3 vertices of a poly gone
+
+      // First vertex is at the center of the creature
+      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));
+      // Second and third vertices are evolved, so get from the genome
+      vertices3[1] = box2d.vectorPixelsToWorld(getPoint(i));
+      vertices3[2] = box2d.vectorPixelsToWorld(getPoint(i + 1));
+
+      // sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
       fd.shape = sd;  // Give the fixture a shape = polygon that was just created
@@ -411,13 +502,13 @@ class creature {
     }
     
     // now repeat the whole process for the other side of the creature
-    for (int i = 0; i < genome.numSegments; i++) {
+    for (int i = 0; i < numSegments; i++) {
       sd = new PolygonShape();
       vertices3  = new Vec2[3];
-      //vertices[i] = box2d.vectorPixelsToWorld(genome.getpoint(i));
+      //vertices[i] = box2d.vectorPixelsToWorld(getpoint(i));
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0,0));
-      vertices3[1] = box2d.vectorPixelsToWorld(genome.getFlippedPoint(i));
-      vertices3[2] = box2d.vectorPixelsToWorld(genome.getFlippedPoint(i + 1));
+      vertices3[1] = box2d.vectorPixelsToWorld(getFlippedPoint(i));
+      vertices3[2] = box2d.vectorPixelsToWorld(getFlippedPoint(i + 1));
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();
       fd.shape = sd;
