@@ -152,23 +152,15 @@ class Genome {
     }
   }
 
-  // Constructor: creates two new chromosomes
+  // creates two new chromosomes
   Genome() {
     xChromosome = new Chromosome(nGenes);
     yChromosome = new Chromosome(nGenes);
   }
 
-  // Copy constructor: copies prior genome
-  Genome(Genome g) {
-    xChromosome = new Chromosome(g.xChromosome);
-    yChromosome = new Chromosome(g.yChromosome);
-  }
-
-  // Mutates every value by a little bit. Biologically speaking a very
-  // high mutation rate to foster fast evolution.
-  void mutate() {
-    // TODO: refactor this into meiosis
-    xChromosome.mutate();
-    yChromosome.mutate();
+  // assembles two chromosomes
+  Genome(Chromosome x, Chromosome y) {
+    xChromosome = x;
+    yChromosome = y;
   }
 }

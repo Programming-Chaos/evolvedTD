@@ -29,7 +29,9 @@ class creature {
   float density;
 
   // Constructor, creates a new creature at the given location and angle
-  // This constructor is generally only used for the first wave, after that creatures are created from parents.
+
+  // This constructor is generally only used for the first wave, after
+  // that creatures are created from parents.
   creature(float x, float y, float a) {
     angle = a;
     genome = new Genome();
@@ -52,12 +54,11 @@ class creature {
     scentColor = setScentColor(this); // what color is the scent
 
   }
-  
-  // copy constructor - this constucts a creature from a parent
-  // notice that the starting energy, e, is supplied by the parent
-  creature(creature cs, float e) {
+
+  // construct a new creature with the given genome and energy
+  creature(Genome g, float e) {
     angle = random(0, 2 * PI); // start at a random angle
-    genome = new Genome(cs.genome);
+    genome = g;
 
     numSegments = getNumSegments();
     computeArmor();
@@ -70,7 +71,7 @@ class creature {
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
                         0.45 * worldWidth * cos(angle));
     makeBody(pos);
-    energy = e;         // starting energy comes from parent
+    energy = e;         // starting energy
     health = maxHealth; // probably should be evolved
     fitness = 0;
     body.setUserData(this);
@@ -119,11 +120,6 @@ class creature {
     }
   }
 
-  // TODO: factor out with meiosis
-  void mutate() {
-    genome.mutate(); // mutate the genome
-  }
-   
   // returns a vector to the creature's postion 
   Vec2 getPos() {
     return(box2d.getBodyPixelCoord(body));
@@ -411,9 +407,14 @@ class creature {
       body.setTransform(box2d.coordPixelsToWorld(pos2), a);
     }
 
-    if (health <=0) { // if out of health have the creature "die".  Stops participating in the world, still exists for reproducton
+    // if out of health have the creature "die". Stops participating
+    // in the world, still exists for reproducton
+    if (health <= 0) {
       alive = false;
-      killBody(); // if its no longer alive the body can be killed - otherwise it still "in" the world.  Have to make sure the body isn't referenced elsewhere
+      // if its no longer alive the body can be killed - otherwise it
+      // still "in" the world.  Have to make sure the body isn't
+      // referenced elsewhere
+      killBody();
     }
   }
   
