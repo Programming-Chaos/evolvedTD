@@ -132,16 +132,6 @@ class Genome {
   }
 
 
-  // Amount of energy a creature must have to reproduce, not used in
-  // the tower defense, but could be if we wanted creates to reproduce
-  // during a wave.
-
-  // TODO: use this function
-  int getReproductionEnergy() {
-    int e = (int)(2000*(reproductionEnergy.sum())/(1+abs(reproductionEnergy.sum())));
-    return((int)(200 + 2000+ e)); // 2 to 4200 sigmoid, 200 is the amount of energy per food
-  }
-
   // Density of a creature for the box2D "physical" body.
 
   // Box2D automatically handles the mass as density times area, so
