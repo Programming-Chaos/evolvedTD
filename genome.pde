@@ -115,7 +115,6 @@ class Genome {
   Trait redColor = new Trait(10);
   Trait greenColor = new Trait(10);
   Trait blueColor = new Trait(10);
-  Trait armor = new Trait(10 * MAX_SEGMENTS);
   Trait density = new Trait(10);
   Trait restitution = new Trait(10);
 
@@ -129,15 +128,6 @@ class Genome {
   Genome(Genome g) {
     xChromosome = new Chromosome(g.xChromosome);
     yChromosome = new Chromosome(g.yChromosome);
-  }
-
-  float getArmor(int index) {
-    // TODO: refactor for armor per segment
-    // the value mins at 0.1
-    float a = armor.avg();
-    if ((1+a) < 0.1)
-      return (0.1);
-    return (1+a);//limit 0.1 to infinity, starts around 1
   }
 
   // Forward force to accelerate the creature, evolved, but

@@ -25,7 +25,7 @@ class creature {
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   int round_counter;     //Counter to track how many rounds/generations the individual creature has been alive
   int numSegments;
-  float[] armor;
+  FloatList armor;
   float density;
 
   // Constructor, creates a new creature at the given location and angle
@@ -35,16 +35,9 @@ class creature {
     genome = new Genome();
 
     numSegments = getNumSegments();
-
-    armor = new float[numSegments];
-    for (int c = 0; c < numSegments; c++)
-      armor[c] = genome.getArmor(c);
-
-    float avgarmor = 0;
-    for (int c = 0; c < numSegments; c++)
-      avgarmor += armor[c];
-    avgarmor /= numSegments;
-    density = (getDensity() * avgarmor);
+    computeArmor();
+    float averageArmor = armor.sum() / numSegments;
+    density = (getDensity() * averageArmor);
 
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
@@ -67,16 +60,9 @@ class creature {
     genome = new Genome(cs.genome);
 
     numSegments = getNumSegments();
-
-    armor = new float[numSegments];
-    for (int c = 0; c < numSegments; c++)
-      armor[c] = genome.getArmor(c);
-    float avgarmor = 0;
-
-    for (int c = 0; c < numSegments; c++)
-      avgarmor += armor[c];
-    avgarmor /= numSegments;
-    density = (getDensity() * avgarmor);
+    computeArmor();
+    float averageArmor = armor.sum() / numSegments;
+    density = (getDensity() * averageArmor);
 
     // Currently creatures are 'born' around a circle a fixed distance
     // from the tower. Birth locations should probably be evolved as
@@ -270,10 +256,19 @@ class creature {
     return 10 + sqrt(genome.density.sum()); // limit 0 to infinity
   }
 
-  float getArmor(int c){
-    return armor[c];
+  private void computeArmor() {
+    armor = new FloatList(numSegments);
+    for (int i = 0; i < numSegments; i++) {
+      // compute armor value for each segment [0.1, infinity]
+      float a = genome.segments[i].armor.avg();
+      if (1 + a < 0.1)
+        a = 0.1;
+      else
+        a = 1 + a;
+      armor.append(a);
+    }
   }
-  
+
   // This function removes the body from the box2d world
   void killBody() {
       box2d.destroyBody(body);
@@ -443,7 +438,7 @@ class creature {
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       c %= numSegments;
       fill(getColor()); // Get the creature's color
-      strokeWeight(armor[c]);
+      strokeWeight(armor.get(c));
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {

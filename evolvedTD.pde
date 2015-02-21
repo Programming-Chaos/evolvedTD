@@ -246,7 +246,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     c %= 8;
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    p1.changeHealth((int)(-1*(p2.get_damage()/p1.getArmor(c))));
+    p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
   }
 
   if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
@@ -260,7 +260,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     c %= 8;
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    p1.changeHealth((int)(-1*(p2.get_damage()/p1.getArmor(c))));
+    p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
   }
 
   // nothing happens if two creatures collide
