@@ -131,21 +131,6 @@ class Genome {
     yChromosome = new Chromosome(g.yChromosome);
   }
 
-
-  // Density of a creature for the box2D "physical" body.
-
-  // Box2D automatically handles the mass as density times area, so
-  // that when a force is applied to a body the correct acceleration
-  // is generated.
-  float getDensity() {
-    // TODO: refactor for density per segment
-    // if the value is negative, density approaches zero asympototically from 10
-    if (density.sum() < 0) return (10 * (1/1+abs(density.sum())));
-    // otherwise, the value is positive and density grows as 10 plus the square
-    // root of the evolved value
-    return (10 + sqrt(density.sum())); // limit 0 to infinity
-  }
-
   float getArmor(int index) {
     // TODO: refactor for armor per segment
     // the value mins at 0.1
