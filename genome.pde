@@ -131,13 +131,6 @@ class Genome {
     yChromosome = new Chromosome(g.yChromosome);
   }
 
-  // Returns the amount of turning force (just a decimal number) the
-  // creature has evolved to apply when it senses either food, another
-  // creature, a rock, or a (food) scent.
-  double getBehavior(Trait trait) {
-    // TODO: Move this to creature
-    return getTurningForce() * trait.sum(); // there's a turning force
-  }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
@@ -188,14 +181,6 @@ class Genome {
   int getForce() {
     // TODO: Move this to creature
     return((int)(500+10*forwardForce.sum())); // -infinity to infinity linear
-  }
-
-  // This is the base turning force, it is modified by getBehavior()
-  // above, depending on what type of object was sensed to start
-  // turning
-  int getTurningForce() {
-    // TODO: Move this to creature
-    return((int)(100+10*turningForce.sum())); // -infinity to infinity linear
   }
 
   // How bouncy a creature is, one of the basic box2D body parameters,

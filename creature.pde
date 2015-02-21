@@ -260,7 +260,22 @@ class creature {
     //return genome.getCompat();
     return 0;
   }
-  
+
+  // This is the base turning force, it is modified by getBehavior()
+  // above, depending on what type of object was sensed to start
+  // turning
+  private int getTurningForce() {
+    // -infinity to infinity linear
+    return (int)(100 + 10 * genome.turningForce.sum());
+  }
+
+  // Returns the amount of turning force (just a decimal number) the
+  // creature has evolved to apply when it senses either food, another
+  // creature, a rock, or a (food) scent.
+  private double getBehavior(Genome.Trait trait) {
+    return getTurningForce() * trait.sum(); // there's a turning force
+  }
+
   // This function calculates the torques the creature produces to turn, as a 
   // function of what it senses in the environment
   double calcTorque() { 
@@ -290,21 +305,21 @@ class creature {
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved torque
-    torque += foodAheadL * genome.getBehavior(genome.food);
+    torque += foodAheadL * getBehavior(genome.food);
     // If there's food ahead on the right, turn by the evolved torque
     // but in the opposite direction
-    torque += foodAheadR * -1 * genome.getBehavior(genome.food);
+    torque += foodAheadR * -1 * getBehavior(genome.food);
     // Similar turns for creatures and rocks
-    torque += creatureAheadL * genome.getBehavior(genome.creature);
-    torque += creatureAheadR * -1 * genome.getBehavior(genome.creature);
-    torque += rockAheadL * genome.getBehavior(genome.rock);
-    torque += rockAheadR * -1 * genome.getBehavior(genome.rock);
+    torque += creatureAheadL * getBehavior(genome.creature);
+    torque += creatureAheadR * -1 * getBehavior(genome.creature);
+    torque += rockAheadL * getBehavior(genome.rock);
+    torque += rockAheadR * -1 * getBehavior(genome.rock);
     // Take the square root of the amout of scent detected on the left
     // (right), factor in the evolved response to smelling food, and
     // add that to the torque Take the squareroot of the scent to
     // reduce over correction
-    torque += sqrt(scentAheadL) * genome.getBehavior(genome.scent);
-    torque += sqrt(scentAheadR) * -1 * genome.getBehavior(genome.scent);
+    torque += sqrt(scentAheadL) * getBehavior(genome.scent);
+    torque += sqrt(scentAheadR) * -1 * getBehavior(genome.scent);
     //println(torque);
     return torque;
   }
