@@ -1,6 +1,43 @@
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
 class Genome {
+  // a pair of chromosomes is the genome
+  Chromosome xChromosome;
+  Chromosome yChromosome;
+
+  // Speciation
+  Trait compatibility = new Trait(10);
+  Trait reproductionEnergy = new Trait(10);
+
+  // Environment interaction
+  Trait forwardForce = new Trait(10);
+  Trait turningForce = new Trait(10);
+  Trait food = new Trait(10);
+  Trait creature = new Trait(10);
+  Trait rock = new Trait(10);
+
+  // Body
+  // TODO: add gender
+  Trait scent = new Trait(10);
+  Trait control = new Trait(10);
+  Segment[] segments;
+  // encodes number of segments actually expressed
+  Trait expressedSegments = new Trait(10);
+  // maximum number of segments/ribs/spines that can be evolved
+  static final int MAX_SEGMENTS = 20;
+
+  // standard deviation of float added to each gene in meiosis
+  static final float MUTATION_RATE = 0.3;
+
+  // TODO: remove these traits when segment refactor is complete
+  Trait redColor = new Trait(10);
+  Trait greenColor = new Trait(10);
+  Trait blueColor = new Trait(10);
+  Trait density = new Trait(10);
+  Trait restitution = new Trait(10);
+
+  private int nGenes = 0; // subsequently known as genome.size()
+
   class Chromosome {
     FloatList genes;
 
@@ -18,18 +55,10 @@ class Genome {
 
     void mutate() {
       for (int i = 0; i < genes.size(); i++) {
-        genes.set(i, genes.get(i) + randomGaussian()*0.3);
+        genes.set(i, genes.get(i) + randomGaussian() * MUTATION_RATE);
       }
     }
   }
-
-  // a pair of chromosomes is the genome
-  Chromosome xChromosome;
-  Chromosome yChromosome;
-
-  int nGenes = 0; // subsequently known as genome.size()
-  // maximum number of segments/ribs/spines in a creature
-  static final int MAX_SEGMENTS = 20;
 
   // Represents a trait with a number of genes/loci and its index in the genome
   class Trait {
@@ -82,41 +111,14 @@ class Genome {
     }
   }
 
-  // need an extra point for the leading and trailing edge (spine)
-  Segment[] segments = new Segment[MAX_SEGMENTS + 1];
   {
+    // need an extra point for the leading and trailing edge (spine)
+    segments = new Segment[MAX_SEGMENTS + 1];
     // initialize the segments and their traits
     for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
       segments[i] = new Segment();
     }
   }
-
-  // encodes number of expressed traits
-  Trait expressedSegments = new Trait(10);
-
-  // Speciation
-  Trait compatibility = new Trait(10);
-  Trait reproductionEnergy = new Trait(10);
-  // TODO: add mutation rate
-
-  // Environment interaction
-  Trait forwardForce = new Trait(10);
-  Trait turningForce = new Trait(10);
-  Trait food = new Trait(10);
-  Trait creature = new Trait(10);
-  Trait rock = new Trait(10);
-
-  // Body
-  Trait scent = new Trait(10);
-  Trait control = new Trait(10);
-  // TODO: add gender
-
-  // TODO: remove these traits when segment refactor is complete
-  Trait redColor = new Trait(10);
-  Trait greenColor = new Trait(10);
-  Trait blueColor = new Trait(10);
-  Trait density = new Trait(10);
-  Trait restitution = new Trait(10);
 
   // Constructor: creates two new chromosomes
   Genome() {
