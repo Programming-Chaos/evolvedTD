@@ -18,7 +18,7 @@ class Genome {
   // Weights for the brain's artificial neural network
   static final int BRAIN_INPUTS = 10;
   static final int BRAIN_OUTPUTS = 100;
-  Trait[] brain = new Trait[BRAIN_INPUTS];
+  ArrayList<Trait> brain = new ArrayList<Trait>(BRAIN_INPUTS);
 
   // Speciation
   Trait compatibility = new Trait(10);
@@ -37,7 +37,7 @@ class Genome {
   // maximum number of segments/ribs/spines that can be evolved
   static final int MAX_SEGMENTS = 20;
   // need an extra point for the leading and trailing edge (spine)
-  Segment[] segments = new Segment[MAX_SEGMENTS + 1];
+  ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
   // encodes number of segments actually expressed
   Trait expressedSegments = new Trait(10);
 
@@ -164,12 +164,12 @@ class Genome {
   {
     // initialize the brain weights
     for (int i = 0; i < BRAIN_INPUTS; i++) {
-      brain[i] = new Trait(BRAIN_OUTPUTS);
+      brain.add(new Trait(BRAIN_OUTPUTS));
     }
 
     // initialize the segments and their traits
     for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
-      segments[i] = new Segment();
+      segments.add(new Segment());
     }
   }
 

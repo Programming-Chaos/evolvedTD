@@ -154,7 +154,7 @@ class creature {
   // the creatures body
   private Vec2 getPoint(int i) {
     Vec2 a = new Vec2();
-    float segment = genome.segments[i].endPoint.sum();
+    float segment = genome.segments.get(i).endPoint.sum();
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -173,7 +173,7 @@ class creature {
   private Vec2 getFlippedPoint(int i) {
     // TODO: reduce code duplication
     Vec2 a = new Vec2();
-    float segment = genome.segments[i].endPoint.sum();
+    float segment = genome.segments.get(i).endPoint.sum();
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -267,7 +267,7 @@ class creature {
     armor = new FloatList(numSegments);
     for (int i = 0; i < numSegments; i++) {
       // compute armor value for each segment [0.1, infinity]
-      float a = genome.segments[i].armor.avg();
+      float a = genome.segments.get(i).armor.avg();
       if (1 + a < 0.1)
         a = 0.1;
       else
