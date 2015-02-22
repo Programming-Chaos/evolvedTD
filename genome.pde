@@ -29,11 +29,12 @@ class Genome {
   // Body
   // TODO: add gender
   Trait scent = new Trait(10);
-  Segment[] segments;
-  // encodes number of segments actually expressed
-  Trait expressedSegments = new Trait(10);
   // maximum number of segments/ribs/spines that can be evolved
   static final int MAX_SEGMENTS = 20;
+  // need an extra point for the leading and trailing edge (spine)
+  Segment[] segments = new Segment[MAX_SEGMENTS + 1];
+  // encodes number of segments actually expressed
+  Trait expressedSegments = new Trait(10);
 
   // TODO: remove these traits when segment refactor is complete
   Trait redColor = new Trait(10);
@@ -156,8 +157,6 @@ class Genome {
   }
 
   {
-    // need an extra point for the leading and trailing edge (spine)
-    segments = new Segment[MAX_SEGMENTS + 1];
     // initialize the segments and their traits
     for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
       segments[i] = new Segment();
