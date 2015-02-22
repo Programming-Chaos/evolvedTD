@@ -15,6 +15,11 @@ class Genome {
   // additional control trait to estimate genetic evolution
   Trait control = new Trait(10);
 
+  // Weights for the brain's artificial neural network
+  static final int BRAIN_INPUTS = 10;
+  static final int BRAIN_OUTPUTS = 100;
+  Trait[] brain = new Trait[BRAIN_INPUTS];
+
   // Speciation
   Trait compatibility = new Trait(10);
   Trait reproductionEnergy = new Trait(10);
@@ -157,6 +162,11 @@ class Genome {
   }
 
   {
+    // initialize the brain weights
+    for (int i = 0; i < BRAIN_INPUTS; i++) {
+      brain[i] = new Trait(BRAIN_OUTPUTS);
+    }
+
     // initialize the segments and their traits
     for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
       segments[i] = new Segment();
