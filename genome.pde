@@ -4,8 +4,16 @@ class Genome {
   // a pair of chromosomes is the genome
   Chromosome xChromosome;
   Chromosome yChromosome;
-  // standard deviation of float added to each gene in meiosis
-  static final float MUTATION_RATE = 0.3;
+  // standard deviation of mutation added to each gene in meiosis
+  static final float MUTATION_DEVIATION = 0.3;
+  static final float MUTATION_RATE = 1.0;
+  // standard deviation of initial gene values
+  static final float INITIAL_DEVIATION = 0.05;
+  // multiplier for number of genes given to each trait (for
+  // protective dead code)
+  static final float GENE_MULTIPLIER = 1.0;
+  // additional control trait to estimate genetic evolution
+  Trait control = new Trait(10);
 
   // Speciation
   Trait compatibility = new Trait(10);
@@ -21,7 +29,6 @@ class Genome {
   // Body
   // TODO: add gender
   Trait scent = new Trait(10);
-  Trait control = new Trait(10);
   Segment[] segments;
   // encodes number of segments actually expressed
   Trait expressedSegments = new Trait(10);
@@ -44,7 +51,7 @@ class Genome {
       genes = new FloatList(n);
       for (int i = 0; i < n; i++) {
         // give each gene a random value near zero
-        genes.append(randomGaussian() * 0.05);
+        genes.append(randomGaussian() * INITIAL_DEVIATION);
       }
     }
 
@@ -54,7 +61,10 @@ class Genome {
 
     void mutate() {
       for (int i = 0; i < genes.size(); i++) {
-        genes.set(i, genes.get(i) + randomGaussian() * MUTATION_RATE);
+        // mutate only a select number of random genes
+        if (random(1) < MUTATION_RATE) {
+          genes.add(i, randomGaussian() * MUTATION_DEVIATION);
+        }
       }
     }
   }
@@ -98,11 +108,13 @@ class Genome {
     int index;
     // TODO: allow custom range with scaling
 
-    Trait(int genes) {
+    Trait(int g) {
       // For each trait, assign its index and count its genes
-      this.genes = genes;
-      this.index = nGenes;
-      nGenes += genes;
+      genes = g;
+      index = nGenes;
+      // add an extra GENE_MULTIPLIER number of genes to the end of
+      // each trait for even distribution of control (dead) genes
+      nGenes += round(GENE_MULTIPLIER * g);
     }
 
     // Returns a list of with 2 * genes number of floats
@@ -133,12 +145,12 @@ class Genome {
     Trait restitution;
 
     Segment() {
-      endPoint = new Trait(10);
-      redColor = new Trait(10);
-      greenColor = new Trait(10);
-      blueColor = new Trait(10);
-      armor = new Trait(10);
-      density = new Trait(10);
+      endPoint    = new Trait(10);
+      redColor    = new Trait(10);
+      greenColor  = new Trait(10);
+      blueColor   = new Trait(10);
+      armor       = new Trait(10);
+      density     = new Trait(10);
       restitution = new Trait(10);
     }
   }
