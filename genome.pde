@@ -50,64 +50,6 @@ class Genome {
 
   private int nGenes = 0;
 
-  class Chromosome {
-    FloatList genes;
-
-    Chromosome(int n) {
-      genes = new FloatList(n);
-      for (int i = 0; i < n; i++) {
-        // give each gene a random value near zero
-        genes.append(randomGaussian() * INITIAL_DEVIATION);
-      }
-    }
-
-    Chromosome(Chromosome chromosome) {
-      genes = chromosome.genes.copy();
-    }
-
-    void mutate() {
-      for (int i = 0; i < genes.size(); i++) {
-        // mutate only a select number of random genes
-        if (random(1) < MUTATION_RATE) {
-          genes.add(i, randomGaussian() * MUTATION_DEVIATION);
-        }
-      }
-    }
-  }
-
-  ArrayList getGametes() {
-    ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
-
-    // recombine
-    Chromosome x = new Chromosome(nGenes);
-    Chromosome y = new Chromosome(nGenes);
-
-    int start = int(random(nGenes));
-    int num = int(random(nGenes - start));
-
-    // TODO: fix this naive approach to allow for circular swap
-
-    // get first section from own chromosome
-    x.genes.append(xChromosome.genes.getSubset(0, start));
-    y.genes.append(yChromosome.genes.getSubset(0, start));
-
-    // get swapped section
-    x.genes.append(yChromosome.genes.getSubset(start, num));
-    y.genes.append(xChromosome.genes.getSubset(start, num));
-
-    // get last section from own chromosome
-    x.genes.append(xChromosome.genes.getSubset(start + num, nGenes - start - num));
-    y.genes.append(yChromosome.genes.getSubset(start + num, nGenes - start - num));
-
-    gametes.add(x);
-    gametes.add(y);
-
-    // mutate
-    for (Chromosome chromosome : gametes)
-      chromosome.mutate();
-    return gametes;
-  }
-
   // Represents a trait with a number of genes/loci and its index in the genome
   class Trait {
     int genes;
@@ -183,5 +125,63 @@ class Genome {
   Genome(Chromosome x, Chromosome y) {
     xChromosome = x;
     yChromosome = y;
+  }
+
+  class Chromosome {
+    FloatList genes;
+
+    Chromosome(int n) {
+      genes = new FloatList(n);
+      for (int i = 0; i < n; i++) {
+        // give each gene a random value near zero
+        genes.append(randomGaussian() * INITIAL_DEVIATION);
+      }
+    }
+
+    Chromosome(Chromosome chromosome) {
+      genes = chromosome.genes.copy();
+    }
+
+    void mutate() {
+      for (int i = 0; i < genes.size(); i++) {
+        // mutate only a select number of random genes
+        if (random(1) < MUTATION_RATE) {
+          genes.add(i, randomGaussian() * MUTATION_DEVIATION);
+        }
+      }
+    }
+  }
+
+  ArrayList getGametes() {
+    ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
+
+    // recombine
+    Chromosome x = new Chromosome(nGenes);
+    Chromosome y = new Chromosome(nGenes);
+
+    int start = int(random(nGenes));
+    int num = int(random(nGenes - start));
+
+    // TODO: fix this naive approach to allow for circular swap
+
+    // get first section from own chromosome
+    x.genes.append(xChromosome.genes.getSubset(0, start));
+    y.genes.append(yChromosome.genes.getSubset(0, start));
+
+    // get swapped section
+    x.genes.append(yChromosome.genes.getSubset(start, num));
+    y.genes.append(xChromosome.genes.getSubset(start, num));
+
+    // get last section from own chromosome
+    x.genes.append(xChromosome.genes.getSubset(start + num, nGenes - start - num));
+    y.genes.append(yChromosome.genes.getSubset(start + num, nGenes - start - num));
+
+    gametes.add(x);
+    gametes.add(y);
+
+    // mutate
+    for (Chromosome chromosome : gametes)
+      chromosome.mutate();
+    return gametes;
   }
 }
