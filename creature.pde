@@ -17,7 +17,12 @@ class creature {
   float scentStrength;   // how strong the creature's scent is
   int scentColor;        // store an integer for different colors
 
-  float energy;          // used for reproduction and movement, given to offspring? gained from resources/food
+  float energy_reproduction;  // energy for gamete produciton
+  float energy_locomotion;    // energy for locomotion and similar activites
+  float energy_health;        // energy for regeneration
+  float max_energy_reproduction;  // size of reproductive energy stores
+  float max_energy_locomotion;
+  float max_energy_health;
   float fitness;         // used for selection
   float health;          // 0 health, creature dies
   float maxHealth = 100; // should be evolved
@@ -44,7 +49,12 @@ class creature {
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
 
-    energy = 20000;             // Starting energy
+    energy_reproduction = 0;    // have to collect energy to reproduce
+    energy_locomotion = 20000;  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_health = 0;          // have to collect energy to regenerate, later this may be evolved
+    max_energy_reproduction = body.getMass() * 1000 * 0.33;  // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
+    max_energy_locomotion = body.getMass() * 1000 * 0.33;
+    max_energy_health =  body.getMass() * 1000 * 0.33;
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -71,8 +81,13 @@ class creature {
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
                         0.45 * worldWidth * cos(angle));
     makeBody(pos);
-    energy = e;         // starting energy
-    health = maxHealth; // probably should be evolved
+    energy_reproduction = 0;                                // have to collect energy to reproduce
+    energy_locomotion = e;                                  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
+    max_energy_reproduction = body.getMass() * 1000 * 0.33; // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
+    max_energy_locomotion = body.getMass() * 1000 * 0.33;
+    max_energy_health =  body.getMass() * 1000 * 0.33;
+    health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     body.setUserData(this);
     alive = true;
@@ -128,13 +143,12 @@ class creature {
   // adds some energy to the creature - called when the creature picks
   // up food/resource
   void addEnergy(int x) {
-    energy += x;
+    energy_locomotion += x;  // for now all energy goes into locomotion
+    energy_reproduction = min(energy_reproduction, max_energy_reproduction);
+    energy_locomotion = min(energy_locomotion, max_energy_locomotion);
+    energy_health = min(energy_health, max_energy_health);
   }
 
-  float getEnergy() {
-    return energy;
-  }
-  
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
   private color getColor() {
@@ -352,7 +366,7 @@ class creature {
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
-    fitness += energy;  // More energy = more fitness
+    fitness += energy_locomotion;  // More energy = more fitness;  for now only locomotion energy is counted because that's what's used
     fitness += health;  // More health = more fitness
     if (alive) {        // Staying alive = more fitness
       fitness *= 2;
@@ -384,9 +398,9 @@ class creature {
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
-    if (energy > 0) { // If there's energy left apply force
+    if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter()); 
-      energy = energy - abs(2 + (f * 0.005));
+      energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
     }
     
     // Creatures that run off one side of the world wrap to the other side.
