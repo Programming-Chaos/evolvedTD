@@ -25,9 +25,9 @@ class tower {
     resourceGain = 0.1;  // changes with upgrades
     projectiles = new ArrayList<projectile>();
     angle = 0;
-    gunbase = loadImage("Tower_base_02.png");
-    gun = loadImage("Gunturret04a.png");
-    gunalt = loadImage("Gunturret04b.png");
+    gunbase = loadImage("assets/Tower_base_02.png");
+    gun = loadImage("assets/Gunturret04a.png");
+    gunalt = loadImage("assets/Gunturret04b.png");
     imagetimer = 0;
   }
   

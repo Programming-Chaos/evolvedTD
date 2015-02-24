@@ -13,7 +13,7 @@ class projectile {
     damage = d;
     makebody(x, y);
     the_projectile.setUserData(this);
-    bullet = loadImage("Bullet48x48a-01.png");
+    bullet = loadImage("assets/Bullet48x48a-01.png");
   }
   
   void update(){
