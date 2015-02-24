@@ -19,7 +19,7 @@ class tile {
   int creatureScentColor; // value to set what color the creatures scent is
   
 
-  float scent;         // how much sent is present
+  float scent;         // how much scent is present
   float creatureScent; // how much creature scent is present
 
   

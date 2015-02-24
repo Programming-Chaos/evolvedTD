@@ -133,6 +133,18 @@ void draw() {
   if (state == 3) {
     display_controls();
   }
+
+  /*** RAINFALL ***/
+  float x, y;
+  fill(0, 0, 255, 50);
+  rect(0, 0, worldWidth, worldHeight);
+
+  for(int i = 0; i < 600; i++) {
+    x = random(worldWidth * (-1), worldWidth);
+    y = random(worldHeight * (-1), worldHeight);
+    stroke(0, 0, 200, 95);
+    line(x, y, x, y+30);
+  }
 }  // end of draw loop
 
 void keyPressed() { // if a key is pressed this function is called
