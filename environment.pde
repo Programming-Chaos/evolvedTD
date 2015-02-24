@@ -20,7 +20,7 @@ class tile {
   int creatureScentColor; // value to set what color the creatures scent is
   
 
-  float scent;         // how much sent is present
+  float scent;         // how much scent is present
   float creatureScent; // how much creature scent is present
 
   
@@ -142,7 +142,7 @@ class environment{
       }
     }
     
-    generateAltitdueMap();
+    generateAltitudeMap();
     generateWaterALT();
     generateWater(10, 15, 14);
     makeImage();
@@ -152,7 +152,7 @@ class environment{
   
   
   // Generates altitude for each tile 
-  void generateAltitdueMap() {
+  void generateAltitudeMap() {
     
   }
   
