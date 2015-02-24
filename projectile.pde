@@ -13,7 +13,7 @@ class projectile {
     damage = d;
     makebody(x, y);
     the_projectile.setUserData(this);
-    bullet = loadImage("Gunturret04a.png");
+    bullet = loadImage("Bullet48x48a-01.png");
   }
   
   void update(){
@@ -52,8 +52,8 @@ class projectile {
     pushMatrix();
     translate(pos.x, pos.y);
     float c = the_projectile.getAngle();
-    rotate(c + HALF_PI);
-    image(bullet, -128, -128);
+    rotate(c + PI);
+    image(bullet, -24, -24);
     /*
     fill(0, 0, 0);
     stroke(0);
