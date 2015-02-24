@@ -133,12 +133,11 @@ void draw() {
   if (state == 3) {
     display_controls();
   }
-
-  /*** RAINFALL ***/
+    
+  /*** RAINFALL ***/   
   float x, y;
   fill(0, 0, 255, 50);
   rect(0, 0, worldWidth, worldHeight);
-
   for(int i = 0; i < 600; i++) {
     x = random(worldWidth * (-1), worldWidth);
     y = random(worldHeight * (-1), worldHeight);
