@@ -10,6 +10,7 @@ int cellHeight = 20;
 int maxscent = 255;
 
 class tile {
+  int altitude;
   int coloring;      // 0 to 255 value that describes tile visually
   int weathering;    // 0 to 255 value that describes tile weathering visually
   int viscosity;     // 0 (solid) to 255 (water) value that describes the viscosity
@@ -19,7 +20,7 @@ class tile {
   int creatureScentColor; // value to set what color the creatures scent is
   
 
-  float scent;         // how much scent is present
+  float scent;         // how much sent is present
   float creatureScent; // how much creature scent is present
 
   
@@ -120,7 +121,7 @@ class environment{
     environAltitude = (int)random(255);
     temp = environAltitude - (int)random(30) - 200; 
     
-    gravityMap = new gravityVector[environHeight][environWidth]
+    gravityMap = new gravityVector[environHeight][environWidth];
     tileMap = new tile[environHeight][environWidth];
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
@@ -141,7 +142,7 @@ class environment{
       }
     }
     
-    generateAltitudeMap();
+    generateAltitdueMap();
     generateWaterALT();
     generateWater(10, 15, 14);
     makeImage();
@@ -161,7 +162,7 @@ class environment{
   }
   
   // Generate water bodies based on altitude
-  void generateLiquidALT() {
+  void generateWaterALT() {
     
   }
   
@@ -176,7 +177,9 @@ class environment{
   }
   
   
-  void generateRocky
+  void generateRocky() {
+    
+  }
 
   void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
     int totalSize = 0;
