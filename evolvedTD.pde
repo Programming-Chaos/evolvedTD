@@ -228,6 +228,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     } else{
       p1.change_health((int)(-1*(p2.get_damage()/p1.getArmor())));
     }
+    p2.setRemove(true);
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {

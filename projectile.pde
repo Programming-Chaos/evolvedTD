@@ -4,6 +4,7 @@ class projectile {
   float angle;
   boolean remove = false;
   int damage; // how much damge the projectile does
+  PImage bullet;    // declare image for gun
   
   // constructor, creates a projectile
   projectile(int x, int y, float a, int d) {
@@ -12,6 +13,7 @@ class projectile {
     damage = d;
     makebody(x, y);
     the_projectile.setUserData(this);
+    bullet = loadImage("Gunturret04a.png");
   }
   
   void update(){
@@ -49,9 +51,14 @@ class projectile {
     Vec2 pos = box2d.getBodyPixelCoord(the_projectile);
     pushMatrix();
     translate(pos.x, pos.y);
+    float c = the_projectile.getAngle();
+    rotate(c + HALF_PI);
+    image(bullet, -128, -128);
+    /*
     fill(0, 0, 0);
     stroke(0);
     ellipse(0,0, radius*2, radius*2);
+*/    
     popMatrix();
   }
   
