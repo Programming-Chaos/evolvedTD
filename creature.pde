@@ -17,36 +17,44 @@ class creature {
   float scentStrength;   // how strong the creature's scent is
   int scentColor;        // store an integer for different colors
 
-  float energy;          // used for reproduction and movement, given to offspring? gained from resources/food
+  float energy_reproduction;  // energy for gamete produciton
+  float energy_locomotion;    // energy for locomotion and similar activites
+  float energy_health;        // energy for regeneration
+  float max_energy_reproduction;  // size of reproductive energy stores
+  float max_energy_locomotion;
+  float max_energy_health;
   float fitness;         // used for selection
   float health;          // 0 health, creature dies
   float maxHealth = 100; // should be evolved
   float angle;
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   int round_counter;     //Counter to track how many rounds/generations the individual creature has been alive
-  float[] armor;
+  int numSegments;
+  FloatList armor;
   float density;
 
   // Constructor, creates a new creature at the given location and angle
-  // This constructor is generally only used for the first wave, after that creatures are created from parents.
+
+  // This constructor is generally only used for the first wave, after
+  // that creatures are created from parents.
   creature(float x, float y, float a) {
     angle = a;
     genome = new Genome();
 
-    armor = new float[genome.numSegments];
-    for (int c = 0; c < genome.numSegments; c++)
-      armor[c] = genome.getArmor(c);
-
-    float avgarmor = 0;
-    for (int c = 0; c < genome.numSegments; c++)
-      avgarmor += armor[c];
-    avgarmor /= genome.numSegments;
-    density = (genome.getDensity()*avgarmor);
+    numSegments = getNumSegments();
+    computeArmor();
+    float averageArmor = armor.sum() / numSegments;
+    density = (getDensity() * averageArmor);
 
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
 
-    energy = 20000;             // Starting energy
+    energy_reproduction = 0;    // have to collect energy to reproduce
+    energy_locomotion = 20000;  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_health = 0;          // have to collect energy to regenerate, later this may be evolved
+    max_energy_reproduction = body.getMass() * 1000 * 0.33;  // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
+    max_energy_locomotion = body.getMass() * 1000 * 0.33;
+    max_energy_health =  body.getMass() * 1000 * 0.33;
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -56,22 +64,16 @@ class creature {
     scentColor = setScentColor(this); // what color is the scent
 
   }
-  
-  // copy constructor - this constucts a creature from a parent
-  // notice that the starting energy, e, is supplied by the parent
-  creature(creature cs, float e) {
+
+  // construct a new creature with the given genome and energy
+  creature(Genome g, float e) {
     angle = random(0, 2 * PI); // start at a random angle
-    genome = new Genome(cs.genome);
+    genome = g;
 
-    armor = new float[genome.numSegments];
-    for (int c = 0; c < genome.numSegments; c++)
-      armor[c] = genome.getArmor(c);
-    float avgarmor = 0;
-
-    for (int c = 0; c < genome.numSegments; c++)
-      avgarmor += armor[c];
-    avgarmor /= genome.numSegments;
-    density = (genome.getDensity()*avgarmor);
+    numSegments = getNumSegments();
+    computeArmor();
+    float averageArmor = armor.sum() / numSegments;
+    density = (getDensity() * averageArmor);
 
     // Currently creatures are 'born' around a circle a fixed distance
     // from the tower. Birth locations should probably be evolved as
@@ -79,8 +81,13 @@ class creature {
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
                         0.45 * worldWidth * cos(angle));
     makeBody(pos);
-    energy = e;         // starting energy comes from parent
-    health = maxHealth; // probably should be evolved
+    energy_reproduction = 0;                                // have to collect energy to reproduce
+    energy_locomotion = e;                                  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
+    max_energy_reproduction = body.getMass() * 1000 * 0.33; // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
+    max_energy_locomotion = body.getMass() * 1000 * 0.33;
+    max_energy_health =  body.getMass() * 1000 * 0.33;
+    health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     body.setUserData(this);
     alive = true;
@@ -128,11 +135,6 @@ class creature {
     }
   }
 
-  // TODO: factor out with meiosis
-  void mutate() {
-    genome.mutate(); // mutate the genome
-  }
-   
   // returns a vector to the creature's postion 
   Vec2 getPos() {
     return(box2d.getBodyPixelCoord(body));
@@ -141,43 +143,178 @@ class creature {
   // adds some energy to the creature - called when the creature picks
   // up food/resource
   void addEnergy(int x) {
-    energy += x;
+    energy_locomotion += x;  // for now all energy goes into locomotion
+    energy_reproduction = min(energy_reproduction, max_energy_reproduction);
+    energy_locomotion = min(energy_locomotion, max_energy_locomotion);
+    energy_health = min(energy_health, max_energy_health);
   }
 
-  float getEnergy() {
-    return energy;
+  // Mapping from allele value to color is a sigmoid mapping to 0 to
+  // 255 centered on 126
+  private color getColor() {
+    // TODO: refactor for color per segment
+    float redColor = genome.redColor.sum();
+    float greenColor = genome.greenColor.sum();
+    float blueColor = genome.blueColor.sum();
+
+    int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
+    int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
+    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
+
+    return color(r, g, b);
   }
-  
+
+  // Gets the end point of the ith segment/rib/spine used to create
+  // the creatures body
+  private Vec2 getPoint(int i) {
+    Vec2 a = new Vec2();
+    float segment = genome.segments.get(i).endPoint.sum();
+    int lengthbase = 20;
+    float l;
+    if (segment < 0) {
+      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
+    }
+    else {
+      l = lengthbase + (2*lengthbase*(segment/(1+segment)));;
+    }
+    a.x = (float)(l * Math.sin((i)*PI/(numSegments)) );
+    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
+    return a;
+  }
+
+  // Gets the end point of the ith segment/rib/spine on the other side
+  // of the creatures body
+  private Vec2 getFlippedPoint(int i) {
+    // TODO: reduce code duplication
+    Vec2 a = new Vec2();
+    float segment = genome.segments.get(i).endPoint.sum();
+    int lengthbase = 20;
+    float l;
+    if (segment < 0) {
+      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
+    }
+    else {
+      l = lengthbase + (2*lengthbase*(segment/(1+segment)));
+    }
+    a.x = (float)(-1 * l * Math.sin((i)*PI/(numSegments)) );
+    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
+    return a;
+  }
+
+  // Calculate and return the width of the creature
+  private float getWidth() {
+    // TODO: Move this to creature
+    float maxX = 0;
+    Vec2 temp;
+    for (int i = 0; i < numSegments; i++) {
+      temp = getPoint(i);
+      if (temp.x > maxX) {
+        maxX = temp.x;
+      }
+    }
+    return 2*maxX;
+  }
+
+  // Calculate and return the length of the creature
+  private float getLength() {
+    float maxY = 0;
+    float minY = 0;
+    Vec2 temp;
+    for (int i = 0; i < numSegments; i++) {
+      temp = getPoint(i);
+      if (temp.y > maxY) {
+        maxY = temp.y;
+      }
+      if (temp.y < minY) {
+        minY = temp.y;
+      }
+    }
+    return (maxY - minY);
+  }
+
   float getMass() {
     return body.getMass();
   }
-  
-  float getForce() {
-    return genome.getForce();
+
+  // Forward force to accelerate the creature, evolved, but
+  // (currently) doesn't change anytime durning a wave
+  private float getForce() {
+    // -infinity to infinity linear
+    return (500 + 10 * genome.forwardForce.sum());
   }
-  
-  float getDensity() {
-    return density;
+
+  // How bouncy a creature is, one of the basic box2D body parameters,
+  // no idea how it evolves or if it has any value to the creatures
+  private float getRestitution() {
+    // TODO: refactor for restitution per segment
+    float r = genome.restitution.sum();
+    return 0.5 + (0.5 * (r / (1 + abs(r))));
   }
-  
-  float getArmor(int c){
-    return armor[c];
+
+  // can be from 2 to Genome.MAX_SEGMENTS
+  int getNumSegments() {
+    int ret = round(genome.expressedSegments.avg() + 8);
+    if (ret < 2)
+      return 2;
+    if (ret > Genome.MAX_SEGMENTS)
+      return Genome.MAX_SEGMENTS;
+    return ret;
   }
-  
+
+  // Density of a creature for the box2D "physical" body.
+
+  // Box2D automatically handles the mass as density times area, so
+  // that when a force is applied to a body the correct acceleration
+  // is generated.
+  private float getDensity() {
+    // TODO: refactor for density per segment
+
+    // if the value is negative, density approaches zero asympototically from 10
+    if (genome.density.sum() < 0)
+      return 10 * (1 / (1 + abs(genome.density.sum())));
+    // otherwise, the value is positive and density grows as 10 plus the square
+    // root of the evolved value
+    return 10 + sqrt(genome.density.sum()); // limit 0 to infinity
+  }
+
+  private void computeArmor() {
+    armor = new FloatList(numSegments);
+    for (int i = 0; i < numSegments; i++) {
+      // compute armor value for each segment [0.1, infinity]
+      float a = genome.segments.get(i).armor.avg();
+      if (1 + a < 0.1)
+        a = 0.1;
+      else
+        a = 1 + a;
+      armor.append(a);
+    }
+  }
+
   // This function removes the body from the box2d world
   void killBody() {
       box2d.destroyBody(body);
-  }
-  
-  boolean alive() {
-    return alive;
   }
   
   double getCompat() {
     //return genome.getCompat();
     return 0;
   }
-  
+
+  // This is the base turning force, it is modified by getBehavior()
+  // above, depending on what type of object was sensed to start
+  // turning
+  private int getTurningForce() {
+    // -infinity to infinity linear
+    return (int)(100 + 10 * genome.turningForce.sum());
+  }
+
+  // Returns the amount of turning force (just a decimal number) the
+  // creature has evolved to apply when it senses either food, another
+  // creature, a rock, or a (food) scent.
+  private double getBehavior(Genome.Trait trait) {
+    return getTurningForce() * trait.sum(); // there's a turning force
+  }
+
   // This function calculates the torques the creature produces to turn, as a 
   // function of what it senses in the environment
   double calcTorque() { 
@@ -207,35 +344,29 @@ class creature {
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved torque
-    torque += foodAheadL * genome.getBehavior(genome.food);
+    torque += foodAheadL * getBehavior(genome.food);
     // If there's food ahead on the right, turn by the evolved torque
     // but in the opposite direction
-    torque += foodAheadR * -1 * genome.getBehavior(genome.food);
+    torque += foodAheadR * -1 * getBehavior(genome.food);
     // Similar turns for creatures and rocks
-    torque += creatureAheadL * genome.getBehavior(genome.creature);
-    torque += creatureAheadR * -1 * genome.getBehavior(genome.creature);
-    torque += rockAheadL * genome.getBehavior(genome.rock);
-    torque += rockAheadR * -1 * genome.getBehavior(genome.rock);
+    torque += creatureAheadL * getBehavior(genome.creature);
+    torque += creatureAheadR * -1 * getBehavior(genome.creature);
+    torque += rockAheadL * getBehavior(genome.rock);
+    torque += rockAheadR * -1 * getBehavior(genome.rock);
     // Take the square root of the amout of scent detected on the left
     // (right), factor in the evolved response to smelling food, and
     // add that to the torque Take the squareroot of the scent to
     // reduce over correction
-    torque += sqrt(scentAheadL) * genome.getBehavior(genome.scent);
-    torque += sqrt(scentAheadR) * -1 * genome.getBehavior(genome.scent);
+    torque += sqrt(scentAheadL) * getBehavior(genome.scent);
+    torque += sqrt(scentAheadR) * -1 * getBehavior(genome.scent);
     //println(torque);
     return torque;
-  }
-  
-  // Amount of forward force applied to the creature, this is evolved, hence gotten from the genome (genome.getForce())
-  float calcForce() {
-    float f = genome.getForce();
-    return f;
   }
   
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
-    fitness += energy;  // More energy = more fitness
+    fitness += energy_locomotion;  // More energy = more fitness;  for now only locomotion energy is counted because that's what's used
     fitness += health;  // More health = more fitness
     if (alive) {        // Staying alive = more fitness
       fitness *= 2;
@@ -261,15 +392,15 @@ class creature {
     }
     float a = body.getAngle();
     float m = body.getMass();
-    float f = calcForce();
+    float f = getForce();
     double torque = 0;
     torque = calcTorque();
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
-    if (energy > 0) { // If there's energy left apply force
+    if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter()); 
-      energy = energy - abs(2 + (f * 0.005));
+      energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
     }
     
     // Creatures that run off one side of the world wrap to the other side.
@@ -290,9 +421,14 @@ class creature {
       body.setTransform(box2d.coordPixelsToWorld(pos2), a);
     }
 
-    if (health <=0) { // if out of health have the creature "die".  Stops participating in the world, still exists for reproducton
+    // if out of health have the creature "die". Stops participating
+    // in the world, still exists for reproducton
+    if (health <= 0) {
       alive = false;
-      killBody(); // if its no longer alive the body can be killed - otherwise it still "in" the world.  Have to make sure the body isn't referenced elsewhere
+      // if its no longer alive the body can be killed - otherwise it
+      // still "in" the world.  Have to make sure the body isn't
+      // referenced elsewhere
+      killBody();
     }
   }
   
@@ -316,10 +452,9 @@ class creature {
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      if (c > genome.numSegments - 1)
-        c %= genome.numSegments;
-      fill(genome.getColor());  // Get the creature's color, creatures could evolve a different color for each segement
-      strokeWeight(armor[c]);
+      c %= numSegments;
+      fill(getColor()); // Get the creature's color
+      strokeWeight(armor.get(c));
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
@@ -332,7 +467,7 @@ class creature {
     strokeWeight(1);
     // Add some eyespots
     fill(0);
-    Vec2 eye = genome.getPoint(6);
+    Vec2 eye = getPoint(6);
     ellipse(eye.x, eye.y, 5, 5);
     ellipse(-1 * eye.x, eye.y, 5, 5);
     fill(255);
@@ -342,7 +477,8 @@ class creature {
     
     // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
-    // Note that the length (50) and angles PI*40 and PI*60 are the same as when calculating the sensor postions in getTorque()
+    // Note that the length (50) and angles PI*40 and PI*60 are the
+    // same as when calculating the sensor postions in getTorque()
     int l = 50;
     sensorX = pos.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
     sensorY = pos.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
@@ -360,7 +496,8 @@ class creature {
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
-    int offset = (int)max(genome.getWidth(), genome.getLength()); // get the largest dimension of the creature
+    // get the largest dimension of the creature
+    int offset = (int)max(getWidth(), getLength());
     rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it  
     noStroke();
     fill(0, 0, 255);
@@ -388,21 +525,30 @@ class creature {
     PolygonShape sd;
 
     Vec2[] vertices3;  // Define an array of (3) vertices that will be used to define each fixture
-    
-    for (int i = 0; i < genome.numSegments; i++) {  // For each segment
+
+    // For each segment
+    for (int i = 0; i < numSegments; i++) {
       sd = new PolygonShape();  // Create a new polygon
 
       vertices3  = new Vec2[3];  // Create an array of 3 new vectors
-      // Next create a segment, pie slice, of the creature by defining 3 vertices of a poly gone
-      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));  // First vertex is at the center of the creature
-      vertices3[1] = box2d.vectorPixelsToWorld(genome.getPoint(i));   // Second and third vertices are evolved, so get from the genome
-      vertices3[2] = box2d.vectorPixelsToWorld(genome.getPoint(i + 1));
-      //  sd is the polygon shape, create it from the array of 3 vertices
+
+      // Next create a segment, pie slice, of the creature by defining
+      // 3 vertices of a poly gone
+
+      // First vertex is at the center of the creature
+      vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));
+      // Second and third vertices are evolved, so get from the genome
+      vertices3[1] = box2d.vectorPixelsToWorld(getPoint(i));
+      vertices3[2] = box2d.vectorPixelsToWorld(getPoint(i + 1));
+
+      // sd is the polygon shape, create it from the array of 3 vertices
       sd.set(vertices3, vertices3.length);
-      FixtureDef fd = new FixtureDef();  // Create a new Box2d fixture
-      fd.shape = sd;  // Give the fixture a shape = polygon that was just created
-      fd.density = density;  // give it a density
-      fd.restitution = genome.getRestitution();  // Give it a restitution (bounciness)
+      // Create a new Box2d fixture
+      FixtureDef fd = new FixtureDef();
+      // Give the fixture a shape = polygon that was just created
+      fd.shape = sd;
+      fd.density = density;
+      fd.restitution = getRestitution();
       fd.filter.categoryBits = 1; // creatures are in filter category 1
       fd.filter.maskBits = 65535;  // interacts with everything
 //      fd.userData = new segIndex();
@@ -411,20 +557,20 @@ class creature {
     }
     
     // now repeat the whole process for the other side of the creature
-    for (int i = 0; i < genome.numSegments; i++) {
+    for (int i = 0; i < numSegments; i++) {
       sd = new PolygonShape();
       vertices3  = new Vec2[3];
-      //vertices[i] = box2d.vectorPixelsToWorld(genome.getpoint(i));
+      //vertices[i] = box2d.vectorPixelsToWorld(getpoint(i));
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0,0));
-      vertices3[1] = box2d.vectorPixelsToWorld(genome.getFlippedPoint(i));
-      vertices3[2] = box2d.vectorPixelsToWorld(genome.getFlippedPoint(i + 1));
+      vertices3[1] = box2d.vectorPixelsToWorld(getFlippedPoint(i));
+      vertices3[2] = box2d.vectorPixelsToWorld(getFlippedPoint(i + 1));
       sd.set(vertices3, vertices3.length);
       FixtureDef fd = new FixtureDef();
       fd.shape = sd;
       fd.density = density;
-      fd.restitution = genome.getRestitution();
+      fd.restitution = getRestitution();
       fd.filter.categoryBits = 1; // creatures are in filter category 1
-      fd.filter.maskBits = 65535;  // interacts with everything
+      fd.filter.maskBits = 65535; // interacts with everything
 //      fd.userData = new segIndex();
 //      fd.userData.segmentIndex = i;
       body.createFixture(fd);
