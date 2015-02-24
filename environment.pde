@@ -37,6 +37,7 @@ class tile {
   
   // FUNC
   tile() {
+    altitude = 0;
     coloring = 0;
     weathering = 0;
     viscosity = 0;
@@ -85,6 +86,24 @@ class tile {
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; } 
 }
 
+class gravityVector {
+  float x;
+  float y;
+  float z;
+    
+  gravityVector() {
+    x = 0;
+    y = 0;
+    z = 0;
+  }
+  
+  gravityVector(float a, float b, float c) {
+    x = a;
+    y = b;
+    z = c; 
+  }
+}
+
 class environment{
   int environWidth;
   int environHeight;
@@ -92,6 +111,7 @@ class environment{
   float temp; // celsius
   PGraphics image;
   
+  gravityVector[][] gravityMap;
   tile[][] tileMap;
  
   environment() {
@@ -100,6 +120,7 @@ class environment{
     environAltitude = (int)random(255);
     temp = environAltitude - (int)random(30) - 200; 
     
+    gravityMap = new gravityVector[environHeight][environWidth]
     tileMap = new tile[environHeight][environWidth];
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
@@ -115,14 +136,47 @@ class environment{
         tileMap[i][j].hasTower(false);
          
         tileMap[i][j].DEBUG_sensing(false);    // used for debugging to tell which squares are being sensed
+        
+        gravityMap[i][j] = new gravityVector();
       }
     }
     
+    generateAltitudeMap();
+    generateWaterALT();
     generateWater(10, 15, 14);
     makeImage();
     // makeImageFood();
     // updateEnviron();
   }
+  
+  
+  // Generates altitude for each tile 
+  void generateAltitdueMap() {
+    
+  }
+  
+  // Simulates gravity by generating force vectors based on a tile's altidue and surrounding gravity.
+  void generateGravityVectors() {
+    
+  }
+  
+  // Generate water bodies based on altitude
+  void generateLiquidALT() {
+    
+  }
+  
+  // Generate rocky land bodies based on altitude
+  void generateRockyALT() {
+    
+  }
+  
+  // Spawn rocks with respect to rocky terrian (color); spawn more on rock terrain
+  void spawnRocks() {
+    
+  }
+  
+  
+  void generateRocky
 
   void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
     int totalSize = 0;
