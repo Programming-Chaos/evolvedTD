@@ -279,7 +279,7 @@ class environment{
     the_pop.set_creatures(); // the_pop() is a global, set_creatures() tells the environment where each creature is.
     int x, y;
     for (rock r: rocks) {
-      p = r.get_pos();
+      p = r.getPos();
       x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
       y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
       x = (x+environWidth)%environWidth; // in case creature was temporarily bumped out of bounds
@@ -288,7 +288,7 @@ class environment{
     }
     
     for (food fd: foods) {
-      p = fd.get_pos();
+      p = fd.getPos();
       if (fd != null && p != null) {
         x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
         y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
@@ -382,8 +382,10 @@ class environment{
         }
       }
     }
-    display_scent();
-    display_creature_scent();
+    if (displayScent) {
+      display_scent();
+      display_creature_scent();
+    }
     display_water();
   }
   

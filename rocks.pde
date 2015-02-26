@@ -27,7 +27,7 @@ class rock {
     box2d.destroyBody(the_rock);
   }
   
-  Vec2 get_pos() {
+  Vec2 getPos() {
     return(box2d.getBodyPixelCoord(the_rock));
   }
   
