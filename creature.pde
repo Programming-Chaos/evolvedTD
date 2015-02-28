@@ -14,7 +14,7 @@ class creature {
 
   // communication traits
   boolean scent;         // used to determine if creature is capable of producing scent
-  float scentStrength;   // how strong the creature's scent is
+  int scentStrength;   // how strong the creature's scent is
   int scentColor;        // store an integer for different colors
 
   float energy_reproduction;  // energy for gamete produciton
@@ -98,7 +98,7 @@ class creature {
  }
 
   boolean getScent()        { return scent; }
-  float getScentStrength()  { return scentStrength; }
+  int getScentStrength()  { return scentStrength; }
   int getScentColor()       { return scentColor; }
   
   int setScentColor( creature c ) {
@@ -116,11 +116,14 @@ class creature {
   }
 
   // set scentStrength
-  float setScentStrength( creature c ) {
+  int setScentStrength( creature c ) {
     float s;
+    int str = 0;
     s = c.genome.scent.avg();
+    if( s > 0 ) str = 1;
+    if( s <= 0 ) str = 2;
     // mapping function goes here
-    return s;
+    return str;
   }
   
   // function setScent will calculate the creatures scent value
