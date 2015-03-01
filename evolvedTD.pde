@@ -47,7 +47,7 @@ void setup() {
   the_tower = new tower();
   
   minim = new Minim(this);
-  gunshot = minim.loadFile("Cannon.mp3");
+  gunshot = minim.loadFile("assets/Cannon.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -258,6 +258,8 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
+    
+    p2.setRemove(true);
   }
 
   if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
@@ -272,6 +274,8 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
+    
+    p2.setRemove(true);
   }
 
   // nothing happens if two creatures collide
