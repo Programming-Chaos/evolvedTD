@@ -15,6 +15,12 @@ class Genome {
   // additional control trait to estimate genetic evolution
   Trait control = new Trait(10);
 
+  // Reproduction
+  Trait gameteCost = new Trait(10);
+  Trait gameteTime = new Trait(10);
+  Trait gameteChance = new Trait(10);
+  Trait gameteEnergy = new Trait(10);
+
   // Weights for the brain's artificial neural network
   static final int BRAIN_INPUTS = 10;
   static final int BRAIN_OUTPUTS = 100;
