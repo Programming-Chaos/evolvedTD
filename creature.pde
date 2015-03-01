@@ -28,10 +28,11 @@ class creature {
   float maxHealth = 100; // should be evolved
   float angle;
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
-  int round_counter;     //Counter to track how many rounds/generations the individual creature has been alive
+  int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   int numSegments;
   FloatList armor;
   float density;
+  int REGEN_DEBUG = 20;  // debug value for energy for regeneration when food is picked up
 
   // Constructor, creates a new creature at the given location and angle
 
@@ -146,7 +147,8 @@ class creature {
     energy_locomotion += x;  // for now all energy goes into locomotion
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
-    energy_health = min(energy_health, max_energy_health);
+    // energy_health = min(energy_health, max_energy_health);
+    energy_health += REGEN_DEBUG; //this value is just for debugging
   }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
@@ -429,6 +431,13 @@ class creature {
       // still "in" the world.  Have to make sure the body isn't
       // referenced elsewhere
       killBody();
+    }
+    if (energy_health >= 0) {  // Spends energy devoted to health regen to
+      health += energy_health; // the creature health
+      if(health > maxHealth){
+        health = maxHealth; 
+      }
+      energy_health = 0; 
     }
   }
   
