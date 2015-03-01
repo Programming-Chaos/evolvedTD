@@ -6,7 +6,7 @@ class Genome {
   Chromosome yChromosome;
   // standard deviation of mutation added to each gene in meiosis
   static final float MUTATION_DEVIATION = 0.3;
-  static final float MUTATION_RATE = 1.0;
+  static final float MUTATION_RATE = 0.05;
   // standard deviation of initial gene values
   static final float INITIAL_DEVIATION = 0.05;
   // multiplier for number of genes given to each trait (for
