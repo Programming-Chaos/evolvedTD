@@ -11,7 +11,7 @@ class Genome {
   static final float INITIAL_DEVIATION = 0.05;
   // multiplier for number of genes given to each trait (for
   // protective dead code)
-  static final float GENE_MULTIPLIER = 1.0;
+  static final float GENE_MULTIPLIER = 4.0/3.0;
   // additional control trait to estimate genetic evolution
   Trait control = new Trait(10);
 
