@@ -6,14 +6,27 @@ class Genome {
   Chromosome yChromosome;
   // standard deviation of mutation added to each gene in meiosis
   static final float MUTATION_DEVIATION = 0.3;
-  static final float MUTATION_RATE = 1.0;
+  static final float MUTATION_RATE = 0.05;
   // standard deviation of initial gene values
   static final float INITIAL_DEVIATION = 0.05;
   // multiplier for number of genes given to each trait (for
   // protective dead code)
-  static final float GENE_MULTIPLIER = 1.0;
+  static final float GENE_MULTIPLIER = 4.0/3.0;
   // additional control trait to estimate genetic evolution
   Trait control = new Trait(10);
+
+  // Metabolism
+  Trait maxReproductiveEnergy = new Trait(10);
+  Trait maxLocomotionEnergy = new Trait(10);
+  Trait maxHealthEnergy = new Trait(10);
+  static final int METABOLIC_WEIGHTS = 15;
+  ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
+
+  // Reproduction
+  Trait gameteCost = new Trait(10);
+  Trait gameteTime = new Trait(10);
+  Trait gameteChance = new Trait(10);
+  Trait gameteEnergy = new Trait(10);
 
   // Weights for the brain's artificial neural network
   static final int BRAIN_INPUTS = 10;
@@ -104,6 +117,11 @@ class Genome {
   }
 
   {
+    // initialize the metabolic weights
+    for (int i = 0; i < METABOLIC_WEIGHTS; i++) {
+      metabolicNetwork.add(new Trait(10));
+    }
+
     // initialize the brain weights
     for (int i = 0; i < BRAIN_INPUTS; i++) {
       brain.add(new Trait(BRAIN_OUTPUTS));
