@@ -91,9 +91,57 @@ class population {
     }
   }
 
+  /* Computes compatibility of two gametes
+   *
+   * Looks at the compatibility loci of the parents passed in, and
+   * determines whether they are reproductively compatible.  Viability
+   * is based on the difference between the loci, with the probability
+   * being the normal distribution value at the point where the
+   * difference is.  Visually, the probability that an offspring is
+   * viable is the Y-value of the point on a normal distribution where
+   * x = difference between compat genes.  If the difference is more
+   * than 2 standard deviations, then the parents are by default
+   * incompatible
+   */
+  boolean areGametesCompatible(Genome.Chromosome gamete1,
+                               Genome.Chromosome gamete2) {
+    if (gamete1 == null || gamete2 == null)
+      return false;
+
+    // standard deviation: 5.0 ---- This determines the "speciation
+    // rate" by restricting the range of compatible values in the
+    // genome
+    double sDev = 5.0;
+
+    // mean at the Y axis --------- Changing this // will move the
+    // "most compatibility" value // left or right of zero
+    double mean = 0.0;
+
+    Genome genome1 = new Genome(gamete1, gamete1);
+    Genome genome2 = new Genome(gamete2, gamete2);
+
+    // This is the location to evaluate the probability.  The further
+    // away from the center of the curve, the less likely to be
+    // compatible.
+    double x_val = Utilities.Sigmoid(genome1.compatibility.sum(), 50, 50)
+      - Utilities.Sigmoid(genome2.compatibility.sum(), 50, 50);
+
+    double r = Math.random();
+
+    // returns whether r is at or below the curve at the x_val point
+    return r <= (1.0 / (sDev * sqrt((float)(2 * Math.PI)))
+                 * Math.exp(-1 * ((x_val - mean)*(x_val - mean)
+                                  / (2 * sDev * sDev))));
+  }
+
   // scales fitness to O(10)
   int nGametes(float fitness) {
     return int(fitness/1000);
+  }
+
+  // get random gamete from gametes pool n
+  Genome.Chromosome getRandomGamete(int n) {
+    return gametes[n].get(int(random(gametes[n].size())));
   }
 
   // creates the next generation
@@ -120,8 +168,13 @@ class population {
     while (generation.size() < POP_SIZE) {
       // broadcast breeding, i.e. random selection
       // TODO: refactor for proximity breeding
-      Genome.Chromosome x = gametes[0].get(int(random(gametes[0].size())));
-      Genome.Chromosome y = gametes[0].get(int(random(gametes[0].size())));
+      Genome.Chromosome x = null;
+      Genome.Chromosome y = null;
+
+      while (!areGametesCompatible(x, y)) {
+        x = getRandomGamete(0);
+        y = getRandomGamete(0);
+      }
 
       generation.add(new creature(new Genome(x, y), 20000.0));
     }
