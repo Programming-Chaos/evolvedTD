@@ -15,6 +15,13 @@ class Genome {
   // additional control trait to estimate genetic evolution
   Trait control = new Trait(10);
 
+  // Metabolism
+  Trait maxReproductiveEnergy = new Trait(10);
+  Trait maxLocomotionEnergy = new Trait(10);
+  Trait maxHealthEnergy = new Trait(10);
+  static final int METABOLIC_WEIGHTS = 15;
+  ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
+
   // Reproduction
   Trait gameteCost = new Trait(10);
   Trait gameteTime = new Trait(10);
@@ -110,6 +117,11 @@ class Genome {
   }
 
   {
+    // initialize the metabolic weights
+    for (int i = 0; i < METABOLIC_WEIGHTS; i++) {
+      metabolicNetwork.add(new Trait(10));
+    }
+
     // initialize the brain weights
     for (int i = 0; i < BRAIN_INPUTS; i++) {
       brain.add(new Trait(BRAIN_OUTPUTS));
