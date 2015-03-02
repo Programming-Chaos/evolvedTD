@@ -23,6 +23,7 @@ class creature {
   float max_energy_reproduction;  // size of reproductive energy stores
   float max_energy_locomotion;
   float max_energy_health;
+  metabolic_network metabolism;
   float fitness;         // used for selection
   float health;          // 0 health, creature dies
   float maxHealth = 100; // should be evolved
@@ -55,6 +56,7 @@ class creature {
     max_energy_reproduction = body.getMass() * 1000 * 0.33;  // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
     max_energy_locomotion = body.getMass() * 1000 * 0.33;
     max_energy_health =  body.getMass() * 1000 * 0.33;
+    metabolism = new metabolic_network();
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -87,6 +89,7 @@ class creature {
     max_energy_reproduction = body.getMass() * 1000 * 0.33; // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
     max_energy_locomotion = body.getMass() * 1000 * 0.33;
     max_energy_health =  body.getMass() * 1000 * 0.33;
+    metabolism = new metabolic_network();
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     body.setUserData(this);
@@ -143,7 +146,24 @@ class creature {
   // adds some energy to the creature - called when the creature picks
   // up food/resource
   void addEnergy(int x) {
-    energy_locomotion += x;  // for now all energy goes into locomotion
+    float[] inputs = new float[metabolism.getNumInputs()];  // create the input array
+    inputs[0] = 1;   // set the input values, starting with a bias
+    inputs[1] = energy_reproduction/max_energy_reproduction;
+    inputs[2] = energy_locomotion/max_energy_locomotion;
+    inputs[3] = energy_health/max_energy_health;
+    inputs[4] = round_counter*0.01;  // scale the round counter
+    float[] outputs = new float[metabolism.getNumOutputs()];  // create the output array
+    metabolism.calculate(inputs,outputs);  // run the network
+    print(outputs[0] + " " + outputs[1] + " " + outputs[2]);  // debugging output
+    println();
+    float sum = 0;
+    for(int i = 0; i < metabolism.getNumOutputs(); i++){
+      outputs[i] = max(outputs[i],0);  // set negative outputs to zero - do something more clever later
+      sum+= outputs[i];  // sum the network outputs
+    }
+    energy_reproduction += x * outputs[0]/sum; 
+    energy_locomotion += x * outputs[1]/sum; 
+    energy_health += x * outputs[2]/sum;  
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
     energy_health = min(energy_health, max_energy_health);
