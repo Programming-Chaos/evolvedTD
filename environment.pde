@@ -10,7 +10,7 @@ int cellHeight = 20;
 int maxscent = 255;
 
 class tile {
-  int altitude;
+  float altitude;
   int coloring;      // 0 to 255 value that describes tile visually
   int weathering;    // 0 to 255 value that describes tile weathering visually
   int viscosity;     // 0 (solid) to 255 (water) value that describes the viscosity
@@ -57,6 +57,7 @@ class tile {
   }
   
   // GET
+  float getAlt()           { return altitude; }
   int getColor()           { return coloring; }
   int getWeather()         { return weathering; }
   int getViscosity()       { return viscosity; }
@@ -72,6 +73,7 @@ class tile {
   float getCreatureScent() {return creatureScent;}
   
   // SET
+  void setAlt(float a)           { altitude = a; }
   void setColor(int c)           { coloring = c; }
   void setWeather(int w)         { weathering = w; }
   void setViscosity(int v)       { viscosity = v; }
@@ -109,6 +111,7 @@ class environment{
   int environWidth;
   int environHeight;
   int environAltitude;
+  float liquidReservior; // Amount of water the environment is holding to expened into rain
   float temp; // celsius
   PGraphics image;
   
@@ -126,34 +129,98 @@ class environment{
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
         tileMap[i][j] = new tile();
-        tileMap[i][j].setColor(200 + (int)random(25));    // environment type
-        tileMap[i][j].setWeather(0);                      // weather type
-        tileMap[i][j].setViscosity(0);                    // how viscous the tile is;
-        tileMap[i][j].setScent(0);
-        tileMap[i][j].isLiquid(false);                    // viscosity > 200 liquid = true
-        tileMap[i][j].hasCreature(null);                 
-        tileMap[i][j].hasFood(false); 
-        tileMap[i][j].hasRock(false);
-        tileMap[i][j].hasTower(false);
-         
-        tileMap[i][j].DEBUG_sensing(false);    // used for debugging to tell which squares are being sensed
-        
+        tileMap[i][j].setColor(200 + (int)random(25));    // environment type        
         gravityMap[i][j] = new gravityVector();
       }
     }
     
     generateAltitudeMap();
-    generateWaterALT();
-    generateWater(10, 15, 14);
+    //generateWaterALT((float)random(0, 70) / 100.0f);
+    generateWaterALT(0.35f); // Just works out better this way
     makeImage();
     // makeImageFood();
     // updateEnviron();
   }
   
   
-  // Generates altitude for each tile 
+  // Generates altitude for each tile using the built in perlin noise generator "noise()".
   void generateAltitudeMap() {
+    addPerlinNoise(6.0f);
+    perturb(32.0f, 32.0f);
+    erode(8.0f);
+    smoothen();
+  }
+  
+  void addPerlinNoise(float freq) {
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        tileMap[i][j].setAlt(tileMap[i][j].getAlt() + noise(freq * i / (float)environWidth, freq * j / (float)environHeight, 0));  
+      }
+    } 
+  }
+  
+  // Modify generated noise to better match peaks of hills rather than spikes of mountains (makes it look more natural)
+  void perturb(float freq, float maxDist) {
+    int u, v;
+    u = 0;
+    v = 0;
+    float[][] temp = new float[environWidth][environHeight];
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        u = i + (int)(noise(freq * i / (float)environWidth, freq * j / (float)environHeight, 0) * maxDist);
+        v = j + (int)(noise(freq * i / (float)environWidth, freq * j / (float)environHeight, 1) * maxDist);
+        if(u < 0) { u = 0; }
+        if(u >= environWidth) u = environWidth - 1;
+        if(v < 0) { v = 0; }
+        if(v >= environWidth) v = environWidth - 1;
+        temp[i][j] = tileMap[i][j].getAlt();
+      }
+    }
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        tileMap[u][v].setAlt(temp[i][j]);
+      }
+    }
+  }
     
+  // Smooths out a generated altitude map
+  void erode(float smoothness) {
+    for(int i = 1; i < environWidth - 1; i++) {
+      for(int j = 1; j < environHeight - 1; j++) {
+        float distMax = 0.0f;
+        int[] match = { 0, 0 };
+        for(int u = -1; u <= 1; u++) {
+          for(int v = -1; v <= 1; v++) {
+            if(Math.abs(u) + Math.abs(v) > 0) {
+              float distI = tileMap[i][j].getAlt() - tileMap[i + u][j + v].getAlt();
+              if(distI > distMax) {
+                distMax = distI;
+                match[0] = u; match[1] = v;
+              }
+            }
+          } 
+        }
+        if(0 < distMax && distMax <= (smoothness / (float)environWidth)) {
+          float distH = 0.5f * distMax;
+          tileMap[i][j].setAlt(tileMap[i][j].getAlt() - distMax);
+          tileMap[i + match[0]][j + match[1]].setAlt(tileMap[i + match[0]][j + match[1]].getAlt() + distH);
+        }
+      }
+    }
+  }
+  
+  void smoothen() {
+    for(int i = 1; i < environWidth - 1; ++i) {
+      for(int j = 1; j < environHeight - 1; ++j) {
+        float total = 0.0f;
+        for(int u = -1; u <= 1; u++) {
+          for(int v = -1; v <= 1; v++) {
+            total += tileMap[i + u][j + v].getAlt();
+          }
+        }
+        tileMap[i][j].setAlt(total / 9.0f);
+      }
+    } 
   }
   
   // Simulates gravity by generating force vectors based on a tile's altidue and surrounding gravity.
@@ -161,9 +228,16 @@ class environment{
     
   }
   
-  // Generate water bodies based on altitude
-  void generateWaterALT() {
-    
+  // Generate water for every tile below the altitude alt
+  void generateWaterALT(float alt) {
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        if(tileMap[i][j].getAlt() <= alt) {
+          tileMap[i][j].isLiquid(true);
+          tileMap[i][j].setViscosity(255);
+        }
+      }
+    }
   }
   
   // Generate rocky land bodies based on altitude
@@ -456,7 +530,7 @@ class environment{
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         if(tileMap[x][y].isLiquid()) {
-          fill(20, 50, 200,200);
+          fill(20, 50, 200, (int)((abs((tileMap[x][y].getAlt()) - 1) + 0.2) * 255));
           rect(offset, offset, size, size);
         }
         translate(cellWidth, 0);
