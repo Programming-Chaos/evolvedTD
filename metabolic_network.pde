@@ -18,18 +18,19 @@ class metabolic_network{
   float[] weights;
   int num_weights;
   
-  metabolic_network(){
+  metabolic_network(Genome genome){
     input_size = 5;
     output_size = 3;
     num_weights = input_size*output_size;
     weights = new float[num_weights];
     for(int i = 0; i < num_weights; i++){
-      weights[i] = randomGaussian();  // these X weights will come from the genome
+      weights[i] = genome.metabolicNetwork.get(i).sum(); //randomGaussian();  // these X weights will come from the genome
     }
   }
   
   void calculate(float[] inputs, float[] outputs){  // note, the first input should be a 1 for the bias
     float sum = 0;
+    
     for(int outs = 0; outs < output_size; outs++){
       outputs[outs] = 0;
       for(int i = 0; i < input_size; i++){

@@ -49,14 +49,16 @@ class creature {
 
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
-
+    float energy_scale = 500; // scales the max energy pool size
+    float max_sum = abs(genome.maxReproductiveEnergy.sum()) + abs(genome.maxLocomotionEnergy.sum()) + abs(genome.maxHealthEnergy.sum());
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.maxReproductiveEnergy.sum())/max_sum; // initial mass is around 150, so factor of 1000 gives reasonable energy storage.
+    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.maxLocomotionEnergy.sum())/max_sum;
+    max_energy_health =  body.getMass() * energy_scale * abs(genome.maxHealthEnergy.sum())/max_sum;
     energy_reproduction = 0;    // have to collect energy to reproduce
-    energy_locomotion = 20000;  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_locomotion = min(20000,max_energy_locomotion);  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;          // have to collect energy to regenerate, later this may be evolved
-    max_energy_reproduction = body.getMass() * 1000 * 0.33;  // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
-    max_energy_locomotion = body.getMass() * 1000 * 0.33;
-    max_energy_health =  body.getMass() * 1000 * 0.33;
-    metabolism = new metabolic_network();
+    //println(max_energy_reproduction + " " + max_energy_locomotion + ":" +energy_locomotion + " "+ max_energy_health);  // for debugging
+    metabolism = new metabolic_network(genome);
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -83,13 +85,15 @@ class creature {
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
                         0.45 * worldWidth * cos(angle));
     makeBody(pos);
+    float energy_scale = 500;
+    float max_sum = abs(genome.maxReproductiveEnergy.sum()) + abs(genome.maxLocomotionEnergy.sum()) + abs(genome.maxHealthEnergy.sum());
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.maxReproductiveEnergy.sum())/max_sum; 
+    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.maxLocomotionEnergy.sum())/max_sum;
+    max_energy_health =  body.getMass() * energy_scale * abs(genome.maxHealthEnergy.sum())/max_sum;
     energy_reproduction = 0;                                // have to collect energy to reproduce
-    energy_locomotion = e;                                  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
-    max_energy_reproduction = body.getMass() * 1000 * 0.33; // initial mass is around 150.  Divided enevenly across all three "reservoirs", division should be evolved.
-    max_energy_locomotion = body.getMass() * 1000 * 0.33;
-    max_energy_health =  body.getMass() * 1000 * 0.33;
-    metabolism = new metabolic_network();
+    metabolism = new metabolic_network(genome);
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     body.setUserData(this);
@@ -154,16 +158,16 @@ class creature {
     inputs[4] = round_counter*0.01;  // scale the round counter
     float[] outputs = new float[metabolism.getNumOutputs()];  // create the output array
     metabolism.calculate(inputs,outputs);  // run the network
-    print(outputs[0] + " " + outputs[1] + " " + outputs[2]);  // debugging output
-    println();
+  //  println(outputs[0] + " " + outputs[1] + " " + outputs[2]);  // debugging output
     float sum = 0;
     for(int i = 0; i < metabolism.getNumOutputs(); i++){
-      outputs[i] = max(outputs[i],0);  // set negative outputs to zero - do something more clever later
-      sum+= outputs[i];  // sum the network outputs
+      outputs[i] = abs(outputs[i]);  // set negative outputs to positive - do something more clever later
+      sum += outputs[i];  // sum the network outputs
     }
     energy_reproduction += x * outputs[0]/sum; 
     energy_locomotion += x * outputs[1]/sum; 
     energy_health += x * outputs[2]/sum;  
+//    println(x * outputs[0]/sum + " " + x * outputs[1]/sum + " " + x * outputs[2]/sum + " " + ((x * outputs[0]/sum )+ (x * outputs[1]/sum )+ (x * outputs[2]/sum)) );  // for debugging
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
     energy_health = min(energy_health, max_energy_health);
