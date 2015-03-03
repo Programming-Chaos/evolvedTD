@@ -29,6 +29,7 @@ boolean displayScent = true;   // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
+player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
 
@@ -45,7 +46,9 @@ void setup() {
   size(800,800,P3D);             // window size, and makes it a 3D window
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
+  the_player = new player();
   the_tower = new tower();
+  the_player.addtower(the_tower);
   
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/Cannon.mp3");
@@ -108,11 +111,18 @@ void draw() {
       r.display();
     }
   }
+  
+  the_player.update();
+  if (display) {
+    the_player.display(); // display the interface for the player
+  }
 
+/*
   the_tower.update();
   if (display) {
     the_tower.display(); // display the tower
   }
+*/
 
   if (!paused) {
     the_pop.update(); // update the population, i.e. move the creatures
