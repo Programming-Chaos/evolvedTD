@@ -13,15 +13,12 @@
    
 
 class metabolic_network{
-  int input_size;
-  int output_size;
+  static final int input_size = 5;
+  static final int output_size = 3;
+  static final int num_weights = input_size*output_size;
   float[] weights;
-  int num_weights;
   
   metabolic_network(Genome genome){
-    input_size = 5;
-    output_size = 3;
-    num_weights = input_size*output_size;
     weights = new float[num_weights];
     for(int i = 0; i < num_weights; i++){
       weights[i] = genome.metabolicNetwork.get(i).sum(); //randomGaussian();  // these X weights will come from the genome

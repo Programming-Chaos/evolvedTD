@@ -19,7 +19,7 @@ class Genome {
   Trait maxReproductiveEnergy = new Trait(10);
   Trait maxLocomotionEnergy = new Trait(10);
   Trait maxHealthEnergy = new Trait(10);
-  static final int METABOLIC_WEIGHTS = 15;
+  static final int METABOLIC_WEIGHTS = metabolic_network.num_weights;
   ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
 
   // Reproduction
