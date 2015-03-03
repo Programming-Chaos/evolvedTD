@@ -1,6 +1,6 @@
 // standard deviation of mutation added to each gene in meiosis
 static final float MUTATION_DEVIATION = 0.3;
-static final float MUTATION_RATE = 0.05;
+static final float MUTATION_RATE = 0.20;
 // standard deviation of initial gene values
 static final float INITIAL_DEVIATION = 0.05;
 // multiplier for number of genes given to each trait
