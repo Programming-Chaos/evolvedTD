@@ -50,10 +50,10 @@ class creature {
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
     float energy_scale = 500; // scales the max energy pool size
-    float max_sum = abs(genome.maxReproductiveEnergy.sum()) + abs(genome.maxLocomotionEnergy.sum()) + abs(genome.maxHealthEnergy.sum());
-    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.maxReproductiveEnergy.sum())/max_sum; // initial mass is around 150, so factor of 1000 gives reasonable energy storage.
-    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.maxLocomotionEnergy.sum())/max_sum;
-    max_energy_health =  body.getMass() * energy_scale * abs(genome.maxHealthEnergy.sum())/max_sum;
+    float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; // initial mass is around 150, so factor of 1000 gives reasonable energy storage.
+    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
+    max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
     energy_reproduction = 0;    // have to collect energy to reproduce
     energy_locomotion = min(20000,max_energy_locomotion);  // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;          // have to collect energy to regenerate, later this may be evolved
@@ -86,10 +86,10 @@ class creature {
                         0.45 * worldWidth * cos(angle));
     makeBody(pos);
     float energy_scale = 500;
-    float max_sum = abs(genome.maxReproductiveEnergy.sum()) + abs(genome.maxLocomotionEnergy.sum()) + abs(genome.maxHealthEnergy.sum());
-    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.maxReproductiveEnergy.sum())/max_sum; 
-    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.maxLocomotionEnergy.sum())/max_sum;
-    max_energy_health =  body.getMass() * energy_scale * abs(genome.maxHealthEnergy.sum())/max_sum;
+    float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
+    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
+    max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
     energy_reproduction = 0;                                // have to collect energy to reproduce
     energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
@@ -112,7 +112,7 @@ class creature {
     FloatList l;
     float s;
     int val;
-    l = c.genome.scent.list();
+    l = c.genome.list(scentTrait);
     s = l.get(5); // the 5th gene determines scent color for now
     // map function goes here
     if( s >= 0 ) {
@@ -125,7 +125,7 @@ class creature {
   // set scentStrength
   float setScentStrength( creature c ) {
     float s;
-    s = c.genome.scent.avg();
+    s = c.genome.avg(scentTrait);
     // mapping function goes here
     return s;
   }
@@ -133,7 +133,7 @@ class creature {
   // function setScent will calculate the creatures scent value
   boolean setScent( creature c ) {
     float s;
-    s = c.genome.scent.sum();
+    s = c.genome.sum(scentTrait);
     // need to add a mapping function here
     if( s >= 0 ) {
       return true;
@@ -177,9 +177,9 @@ class creature {
   // 255 centered on 126
   private color getColor() {
     // TODO: refactor for color per segment
-    float redColor = genome.redColor.sum();
-    float greenColor = genome.greenColor.sum();
-    float blueColor = genome.blueColor.sum();
+    float redColor = genome.sum(redColorTrait);
+    float greenColor = genome.sum(greenColorTrait);
+    float blueColor = genome.sum(blueColorTrait);
 
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
@@ -192,7 +192,7 @@ class creature {
   // the creatures body
   private Vec2 getPoint(int i) {
     Vec2 a = new Vec2();
-    float segment = genome.segments.get(i).endPoint.sum();
+    float segment = genome.sum(segments.get(i).endPoint);
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -211,7 +211,7 @@ class creature {
   private Vec2 getFlippedPoint(int i) {
     // TODO: reduce code duplication
     Vec2 a = new Vec2();
-    float segment = genome.segments.get(i).endPoint.sum();
+    float segment = genome.sum(segments.get(i).endPoint);
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -264,24 +264,24 @@ class creature {
   // (currently) doesn't change anytime durning a wave
   private float getForce() {
     // -infinity to infinity linear
-    return (500 + 10 * genome.forwardForce.sum());
+    return (500 + 10 * genome.sum(forwardForce));
   }
 
   // How bouncy a creature is, one of the basic box2D body parameters,
   // no idea how it evolves or if it has any value to the creatures
   private float getRestitution() {
     // TODO: refactor for restitution per segment
-    float r = genome.restitution.sum();
+    float r = genome.sum(restitutionTrait);
     return 0.5 + (0.5 * (r / (1 + abs(r))));
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
-    int ret = round(genome.expressedSegments.avg() + 8);
+    int ret = round(genome.avg(expressedSegments) + 8);
     if (ret < 2)
       return 2;
-    if (ret > Genome.MAX_SEGMENTS)
-      return Genome.MAX_SEGMENTS;
+    if (ret > MAX_SEGMENTS)
+      return MAX_SEGMENTS;
     return ret;
   }
 
@@ -294,18 +294,18 @@ class creature {
     // TODO: refactor for density per segment
 
     // if the value is negative, density approaches zero asympototically from 10
-    if (genome.density.sum() < 0)
-      return 10 * (1 / (1 + abs(genome.density.sum())));
+    if (genome.sum(densityTrait) < 0)
+      return 10 * (1 / (1 + abs(genome.sum(densityTrait))));
     // otherwise, the value is positive and density grows as 10 plus the square
     // root of the evolved value
-    return 10 + sqrt(genome.density.sum()); // limit 0 to infinity
+    return 10 + sqrt(genome.sum(densityTrait)); // limit 0 to infinity
   }
 
   private void computeArmor() {
     armor = new FloatList(numSegments);
     for (int i = 0; i < numSegments; i++) {
       // compute armor value for each segment [0.1, infinity]
-      float a = genome.segments.get(i).armor.avg();
+      float a = genome.avg(segments.get(i).armor);
       if (1 + a < 0.1)
         a = 0.1;
       else
@@ -329,14 +329,14 @@ class creature {
   // turning
   private int getTurningForce() {
     // -infinity to infinity linear
-    return (int)(100 + 10 * genome.turningForce.sum());
+    return (int)(100 + 10 * genome.sum(turningForce));
   }
 
   // Returns the amount of turning force (just a decimal number) the
   // creature has evolved to apply when it senses either food, another
   // creature, a rock, or a (food) scent.
-  private double getBehavior(Genome.Trait trait) {
-    return getTurningForce() * trait.sum(); // there's a turning force
+  private double getBehavior(Trait trait) {
+    return getTurningForce() * genome.sum(trait); // there's a turning force
   }
 
   // This function calculates the torques the creature produces to turn, as a 
@@ -368,21 +368,21 @@ class creature {
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved torque
-    torque += foodAheadL * getBehavior(genome.food);
+    torque += foodAheadL * getBehavior(foodTrait);
     // If there's food ahead on the right, turn by the evolved torque
     // but in the opposite direction
-    torque += foodAheadR * -1 * getBehavior(genome.food);
+    torque += foodAheadR * -1 * getBehavior(foodTrait);
     // Similar turns for creatures and rocks
-    torque += creatureAheadL * getBehavior(genome.creature);
-    torque += creatureAheadR * -1 * getBehavior(genome.creature);
-    torque += rockAheadL * getBehavior(genome.rock);
-    torque += rockAheadR * -1 * getBehavior(genome.rock);
+    torque += creatureAheadL * getBehavior(creatureTrait);
+    torque += creatureAheadR * -1 * getBehavior(creatureTrait);
+    torque += rockAheadL * getBehavior(rockTrait);
+    torque += rockAheadR * -1 * getBehavior(rockTrait);
     // Take the square root of the amout of scent detected on the left
     // (right), factor in the evolved response to smelling food, and
     // add that to the torque Take the squareroot of the scent to
     // reduce over correction
-    torque += sqrt(scentAheadL) * getBehavior(genome.scent);
-    torque += sqrt(scentAheadR) * -1 * getBehavior(genome.scent);
+    torque += sqrt(scentAheadL) * getBehavior(scentTrait);
+    torque += sqrt(scentAheadR) * -1 * getBehavior(scentTrait);
     //println(torque);
     return torque;
   }
