@@ -21,7 +21,7 @@ class metabolic_network{
   metabolic_network(Genome genome){
     weights = new float[num_weights];
     for(int i = 0; i < num_weights; i++){
-      weights[i] = genome.metabolicNetwork.get(i).sum(); //randomGaussian();  // these X weights will come from the genome
+      weights[i] = genome.sum(metabolicNetwork.get(i)); //randomGaussian();  // these X weights will come from the genome
     }
   }
   
