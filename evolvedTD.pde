@@ -41,7 +41,8 @@ AudioPlayer gunshot;
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
 void setup() {
-  size(850,850,P3D);             // window size, and makes it a 3D window
+  //size(850,850,P3D);  // default window size
+  size(800,800,P3D);             // window size, and makes it a 3D window
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   the_tower = new tower();

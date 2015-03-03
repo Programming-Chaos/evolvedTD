@@ -120,6 +120,7 @@ class tower {
       text("Resources: "+(int)resources,0.2*width,-0.25*height); 
     hint(ENABLE_DEPTH_TEST); 
     popMatrix();
+
   }
   
   void next_generation() { // update the tower
