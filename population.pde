@@ -117,14 +117,11 @@ class population {
     // "most compatibility" value // left or right of zero
     double mean = 0.0;
 
-    Genome genome1 = new Genome(gamete1, gamete1);
-    Genome genome2 = new Genome(gamete2, gamete2);
-
     // This is the location to evaluate the probability.  The further
     // away from the center of the curve, the less likely to be
     // compatible.
-    double x_val = Utilities.Sigmoid(genome1.compatibility.sum(), 50, 50)
-      - Utilities.Sigmoid(genome2.compatibility.sum(), 50, 50);
+    double x_val = Utilities.Sigmoid(gamete1.sum(compatibility), 50, 50)
+      - Utilities.Sigmoid(gamete2.sum(compatibility), 50, 50);
 
     double r = Math.random();
 

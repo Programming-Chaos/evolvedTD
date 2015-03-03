@@ -1,121 +1,99 @@
-// Represents a creature's genomic data as an array of real values,
-// loosely modeling Additive Quantitative Genetics.
-class Genome {
-  // a pair of chromosomes is the genome
-  Chromosome xChromosome;
-  Chromosome yChromosome;
-  // standard deviation of mutation added to each gene in meiosis
-  static final float MUTATION_DEVIATION = 0.3;
-  static final float MUTATION_RATE = 0.05;
-  // standard deviation of initial gene values
-  static final float INITIAL_DEVIATION = 0.05;
-  // multiplier for number of genes given to each trait (for
-  // protective dead code)
-  static final float GENE_MULTIPLIER = 4.0/3.0;
-  // additional control trait to estimate genetic evolution
-  Trait control = new Trait(10);
+// standard deviation of mutation added to each gene in meiosis
+static final float MUTATION_DEVIATION = 0.3;
+static final float MUTATION_RATE = 0.05;
+// standard deviation of initial gene values
+static final float INITIAL_DEVIATION = 0.05;
+// multiplier for number of genes given to each trait
+static final float GENE_MULTIPLIER = 4.0/3.0;
 
-  // Metabolism
-  Trait maxReproductiveEnergy = new Trait(10);
-  Trait maxLocomotionEnergy = new Trait(10);
-  Trait maxHealthEnergy = new Trait(10);
-  static final int METABOLIC_WEIGHTS = 15;
-  ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
+// additional control trait to estimate genetic evolution
+Trait control = new Trait(10);
 
-  // Reproduction
-  Trait gameteCost = new Trait(10);
-  Trait gameteTime = new Trait(10);
-  Trait gameteChance = new Trait(10);
-  Trait gameteEnergy = new Trait(10);
+// Metabolism
+Trait maxReproductiveEnergy = new Trait(10);
+Trait maxLocomotionEnergy = new Trait(10);
+Trait maxHealthEnergy = new Trait(10);
+static final int METABOLIC_WEIGHTS = metabolic_network.num_weights;
+ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
 
-  // Weights for the brain's artificial neural network
-  static final int BRAIN_INPUTS = 10;
-  static final int BRAIN_OUTPUTS = 100;
-  ArrayList<Trait> brain = new ArrayList<Trait>(BRAIN_INPUTS);
+// Reproduction
+Trait gameteCost = new Trait(10);
+Trait gameteTime = new Trait(10);
+Trait gameteChance = new Trait(10);
+Trait gameteEnergy = new Trait(10);
 
-  // Speciation
-  Trait compatibility = new Trait(10);
-  Trait reproductionEnergy = new Trait(10);
+// Weights for the brain's artificial neural network
+static final int BRAIN_INPUTS = 10;
+static final int BRAIN_OUTPUTS = 100;
+ArrayList<Trait> brainTraits = new ArrayList<Trait>(BRAIN_INPUTS);
 
-  // Environment interaction
-  Trait forwardForce = new Trait(10);
-  Trait turningForce = new Trait(10);
-  Trait food = new Trait(10);
-  Trait creature = new Trait(10);
-  Trait rock = new Trait(10);
+// Speciation
+Trait compatibility = new Trait(10);
+Trait reproductionEnergy = new Trait(10);
 
-  // Body
-  // TODO: add gender
-  Trait scent = new Trait(10);
-  // maximum number of segments/ribs/spines that can be evolved
-  static final int MAX_SEGMENTS = 20;
-  // need an extra point for the leading and trailing edge (spine)
-  ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
-  // encodes number of segments actually expressed
-  Trait expressedSegments = new Trait(10);
+// Environment interaction
+Trait forwardForce = new Trait(10);
+Trait turningForce = new Trait(10);
+Trait foodTrait = new Trait(10);
+Trait creatureTrait = new Trait(10);
+Trait rockTrait = new Trait(10);
 
-  // TODO: remove these traits when segment refactor is complete
-  Trait redColor = new Trait(10);
-  Trait greenColor = new Trait(10);
-  Trait blueColor = new Trait(10);
-  Trait density = new Trait(10);
-  Trait restitution = new Trait(10);
+// Body
+Trait scentTrait = new Trait(10);
 
-  private int nGenes = 0;
+// maximum number of segments/ribs/spines that can be evolved
+static final int MAX_SEGMENTS = 20;
+// need an extra point for the leading and trailing edge (spine)
+ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
+// encodes number of segments actually expressed
+Trait expressedSegments = new Trait(10);
 
-  // Represents a trait with a number of genes/loci and its index in the genome
-  class Trait {
-    int genes;
-    int index;
-    // TODO: allow custom range with scaling
+// TODO: remove these traits when segment refactor is complete
+Trait redColorTrait = new Trait(10);
+Trait greenColorTrait = new Trait(10);
+Trait blueColorTrait = new Trait(10);
+Trait densityTrait = new Trait(10);
+Trait restitutionTrait = new Trait(10);
 
-    Trait(int g) {
-      // For each trait, assign its index and count its genes
-      genes = g;
-      index = nGenes;
-      // add an extra GENE_MULTIPLIER number of genes to the end of
-      // each trait for even distribution of control (dead) genes
-      nGenes += round(GENE_MULTIPLIER * g);
-    }
+private int nGenes = 0;
 
-    // Returns a list of with 2 * genes number of floats
-    FloatList list() {
-      FloatList l = xChromosome.genes.getSubset(index, genes);
-      l.append(yChromosome.genes.getSubset(index, genes));
-      return l;
-    }
+// Represents a trait with a number of genes/loci and its index in the genome
+class Trait {
+  int genes;
+  int index;
+  // TODO: allow custom range with scaling
 
-    // Returns the sum of the genes from both chromosomes for the trait
-    float sum() {
-      return list().sum();
-    }
-
-    // Returns the average of the genes of a trait
-    float avg() {
-      return sum()/(genes * 2);
-    }
+  Trait(int g) {
+    // For each trait, assign its index and count its genes
+    genes = g;
+    index = nGenes;
+    // add an extra GENE_MULTIPLIER number of genes to the end of
+    // each trait for even distribution of control (dead) genes
+    nGenes += round(GENE_MULTIPLIER * g);
   }
+}
 
-  class Segment {
-    Trait endPoint;
-    Trait redColor;
-    Trait greenColor;
-    Trait blueColor;
-    Trait armor;
-    Trait density;
-    Trait restitution;
+class Segment {
+  Trait endPoint;
+  Trait redColor;
+  Trait greenColor;
+  Trait blueColor;
+  Trait armor;
+  Trait density;
+  Trait restitution;
 
-    Segment() {
-      endPoint    = new Trait(10);
-      redColor    = new Trait(10);
-      greenColor  = new Trait(10);
-      blueColor   = new Trait(10);
-      armor       = new Trait(10);
-      density     = new Trait(10);
-      restitution = new Trait(10);
-    }
+  Segment() {
+    endPoint    = new Trait(10);
+    redColor    = new Trait(10);
+    greenColor  = new Trait(10);
+    blueColor   = new Trait(10);
+    armor       = new Trait(10);
+    density     = new Trait(10);
+    restitution = new Trait(10);
   }
+}
 
+// "Static" initialization of trait lists
   {
     // initialize the metabolic weights
     for (int i = 0; i < METABOLIC_WEIGHTS; i++) {
@@ -124,7 +102,7 @@ class Genome {
 
     // initialize the brain weights
     for (int i = 0; i < BRAIN_INPUTS; i++) {
-      brain.add(new Trait(BRAIN_OUTPUTS));
+      brainTraits.add(new Trait(BRAIN_OUTPUTS));
     }
 
     // initialize the segments and their traits
@@ -132,6 +110,13 @@ class Genome {
       segments.add(new Segment());
     }
   }
+
+// Represents a creature's genomic data as an array of real values,
+// loosely modeling Additive Quantitative Genetics.
+class Genome {
+  // a pair of chromosomes is the genome
+  Chromosome xChromosome;
+  Chromosome yChromosome;
 
   // creates two new chromosomes
   Genome() {
@@ -143,6 +128,42 @@ class Genome {
   Genome(Chromosome x, Chromosome y) {
     xChromosome = x;
     yChromosome = y;
+  }
+
+  // Returns a list of genes from the X chromosome
+  FloatList listX(Trait trait) {
+    return xChromosome.list(trait);
+  }
+
+  // Returns a list of genes from the Y chromosome
+  FloatList listY(Trait trait) {
+    return yChromosome.list(trait);
+  }
+
+  // Returns a combined list of genes from both chromosomes
+  FloatList list(Trait trait) {
+    FloatList l = listX(trait);
+    l.append(listY(trait));
+    return l;
+  }
+
+  // Returns the sum of the genes from the X chromosome
+  float sumX(Trait trait) {
+    return xChromosome.sum(trait);
+  }
+
+  // Returns the sum of the genes from the Y chromosome
+  float sumY(Trait trait) {
+    return yChromosome.sum(trait);
+  }
+
+  // Returns the sum of the genes from both chromosomes
+  float sum(Trait trait) {
+    return sumX(trait) + sumY(trait);
+  }
+
+  float avg(Trait trait) {
+    return (xChromosome.avg(trait) + yChromosome.avg(trait)) / 2;
   }
 
   class Chromosome {
@@ -158,6 +179,18 @@ class Genome {
 
     Chromosome(Chromosome chromosome) {
       genes = chromosome.genes.copy();
+    }
+
+    FloatList list(Trait trait) {
+      return genes.getSubset(trait.index, trait.genes);
+    }
+
+    float sum(Trait trait) {
+      return list(trait).sum();
+    }
+
+    float avg(Trait trait) {
+      return sum(trait) / trait.genes;
     }
 
     void mutate() {
