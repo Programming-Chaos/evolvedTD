@@ -6,15 +6,7 @@ class population {
   ArrayList<creature> swarm;
   static final int POP_SIZE = 20;
   
-  // create gamete hash table for storing gametes. Use global
-  // variables to find how many spaces are needed.
-  private int buckets = (worldWidth/20)*(worldHeight/20);
-  ArrayList<Genome.Chromosome>[] gametes = new ArrayList[buckets];
-  {
-    for (int i = 0; i < buckets; i++) {
-      gametes[i] = new ArrayList<Genome.Chromosome>();
-    }
-  }
+  ArrayList<Genome.Chromosome> gametes = new ArrayList();
 
   population() {
     swarm = new ArrayList<creature>();
@@ -138,7 +130,7 @@ class population {
 
   // get random gamete from gametes pool n
   Genome.Chromosome getRandomGamete(int n) {
-    return gametes[n].get(int(random(gametes[n].size())));
+    return gametes.get(int(random(gametes.size())));
   }
 
   // creates the next generation
@@ -158,7 +150,7 @@ class population {
       for (int i = 0; i < nGametes(c.fitness); i++) {
         // TODO: replace with an action which produces gametes in a
         // certain proximity
-        gametes[0].addAll(c.genome.getGametes());
+        gametes.addAll(c.genome.getGametes());
       }
     }
 
@@ -176,7 +168,7 @@ class population {
       generation.add(new creature(new Genome(x, y), 20000.0));
     }
 
-    gametes[0].clear(); // TODO: replace with sexual cannibalism
+    gametes.clear(); // TODO: replace with sexual cannibalism
     swarm = generation;
   }
 }
