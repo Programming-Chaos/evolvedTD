@@ -180,7 +180,7 @@ class creature {
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
-/*  private color getColor() {
+  private color getColor() {
     // TODO: refactor for color per segment
     float redColor = genome.sum(redColorTrait);
     float greenColor = genome.sum(greenColorTrait);
@@ -188,29 +188,17 @@ class creature {
 
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
-    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
-
-    return color(r, g, b);
-  }
-*/  
-  private color getColor() {
-    // TODO: refactor for color per segment
-    float redColor = genome.sum(redColorTrait);
-    float greenColor = genome.sum(greenColorTrait);
-    float blueColor = genome.sum(blueColorTrait);
+    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
     
 //    float[] inputs = new float
 //    inputs[0] = 1;   // bias
 //    inputs[1] = round_counter;
 //    inputs[2] = fitness;
 //    inputs[3] = time_in_water/timestep_counter; // percentage of time in water
-//    inputs[4] = int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
-//    inputs[5] = int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
-//    inputs[6] = int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
+//    inputs[4] = r
+//    inputs[5] = g 
+//    inputs[6] = b  
 
-    int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
-    int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
-    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
 
     return color(r, g, b);
   }
