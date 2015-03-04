@@ -30,10 +30,14 @@ class creature {
   float angle;
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
+  int timestep_counter;  // counter to track how many timesteps a creature has been alive
   int numSegments;
   FloatList armor;
   float density;
-  int REGEN_DEBUG = 20;  // debug value for energy for regeneration when food is picked up
+  int health_regen = 1; // value to set how much health is regenerated each timestep when energy is spent to regen
+  int regen_energy_cost = 1; // value to determine how much regenerating health costs
+  int time_in_water;     // tracks how much time the creature spends in water
+  int time_on_land;      // tracks how much time the creature spends on land
 
   // Constructor, creates a new creature at the given location and angle
 
@@ -171,17 +175,38 @@ class creature {
 //    println(x * outputs[0]/sum + " " + x * outputs[1]/sum + " " + x * outputs[2]/sum + " " + ((x * outputs[0]/sum )+ (x * outputs[1]/sum )+ (x * outputs[2]/sum)) );  // for debugging
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
-    // energy_health = min(energy_health, max_energy_health);
-    energy_health += REGEN_DEBUG; //this value is just for debugging
+    energy_health = min(energy_health, max_energy_health);
   }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
+/*  private color getColor() {
+    // TODO: refactor for color per segment
+    float redColor = genome.sum(redColorTrait);
+    float greenColor = genome.sum(greenColorTrait);
+    float blueColor = genome.sum(blueColorTrait);
+
+    int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
+    int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
+    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
+
+    return color(r, g, b);
+  }
+*/  
   private color getColor() {
     // TODO: refactor for color per segment
     float redColor = genome.sum(redColorTrait);
     float greenColor = genome.sum(greenColorTrait);
     float blueColor = genome.sum(blueColorTrait);
+    
+//    float[] inputs = new float
+//    inputs[0] = 1;   // bias
+//    inputs[1] = round_counter;
+//    inputs[2] = fitness;
+//    inputs[3] = time_in_water/timestep_counter; // percentage of time in water
+//    inputs[4] = int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
+//    inputs[5] = int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
+//    inputs[6] = int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
 
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
@@ -349,6 +374,7 @@ class creature {
     int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
     float scentAheadL,scentAheadR;
     double sensorX,sensorY;
+    int liquidFLAG = 0;
     // left sensor check
     // Begin by calculating the x,y position of the left sensor
     // (Currently the angle of the sensors is fixed, angle PI*0.40, length 50 pixels, these should be evolved
@@ -358,6 +384,10 @@ class creature {
     creatureAheadL = environ.checkForCreature(sensorX, sensorY);  // Check if there's a creature 'under' the left sensor
     rockAheadL = environ.checkForRock(sensorX, sensorY); // Check if there's a rock 'under' the left sensor
     scentAheadL = environ.getScent(sensorX, sensorY);  // Get the amount of scent at the left sensor
+    // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
+    if(environ.checkForLiquid(sensorX, sensorY) == 1){   // this checks if the creature is in water
+      liquidFLAG = 1;
+    }
     // right sensor check
     // Begin by calculating the x,y position of the right sensor
     sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60)); 
@@ -367,6 +397,11 @@ class creature {
     creatureAheadR = environ.checkForCreature(sensorX, sensorY); 
     rockAheadR = environ.checkForRock(sensorX, sensorY);
     scentAheadR = environ.getScent(sensorX, sensorY);
+    // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
+    if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1){   // this checks if the creature is in water
+      time_in_water++;
+      liquidFLAG = 0;
+    }
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved torque
@@ -456,12 +491,9 @@ class creature {
       // referenced elsewhere
       killBody();
     }
-    if (energy_health >= 0) {  // Spends energy devoted to health regen to
-      health += energy_health; // the creature health
-      if(health > maxHealth){
-        health = maxHealth; 
-      }
-      energy_health = 0; 
+    if (energy_health > 0 && health < maxHealth) {  // Spends energy devoted to health regen to increase the creature's health over time
+      health = health + health_regen; // the creature health is increased
+      energy_health = energy_health - regen_energy_cost; //the energy to regen is decreased
     }
   }
   
