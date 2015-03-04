@@ -12,6 +12,8 @@ int maxscent = 255;
 class tile {
   float altitude;
   int coloring;      // 0 to 255 value that describes tile visually
+  int opacity;
+  color colors; 
   int weathering;    // 0 to 255 value that describes tile weathering visually
   int viscosity;     // 0 (solid) to 255 (water) value that describes the viscosity
                        // of a tile and determines whether the tile can be considered
@@ -40,6 +42,8 @@ class tile {
   tile() {
     altitude = 0;
     coloring = 0;
+    opacity = 1;
+    colors = color(0, 0, 0, 0);
     weathering = 0;
     viscosity = 0;
     scent = 0;
@@ -129,7 +133,7 @@ class environment{
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
         tileMap[i][j] = new tile();
-        tileMap[i][j].setColor(200 + (int)random(25));    // environment type        
+        tileMap[i][j].colors = color(0, 200 + (int)random(25), 0);    // environment type        
         gravityMap[i][j] = new gravityVector();
       }
     }
@@ -137,6 +141,7 @@ class environment{
     generateAltitudeMap();
     //generateWaterALT((float)random(0, 70) / 100.0f);
     generateWaterALT(0.35f); // Just works out better this way
+    generateRockyALT(0.60f);
     makeImage();
     // makeImageFood();
     // updateEnviron();
@@ -235,14 +240,27 @@ class environment{
         if(tileMap[i][j].getAlt() <= alt) {
           tileMap[i][j].isLiquid(true);
           tileMap[i][j].setViscosity(255);
+          tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
+          tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
         }
       }
     }
   }
   
   // Generate rocky land bodies based on altitude
-  void generateRockyALT() {
-    
+  // NOTE: To let liquid and rock types combine maybe generate a second noise map and use it's "fake" altitude instead. 
+  //      That or generate it similar to gravity where the steepness of a slope determines how rocky it is. 
+  void generateRockyALT(float alt) {
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        if(tileMap[i][j].getAlt() >= alt) {
+          tileMap[i][j].isLiquid(false);
+          tileMap[i][j].setViscosity(0);
+          tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
+          tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
+        }
+      }
+    }
   }
   
   // Spawn rocks with respect to rocky terrian (color); spawn more on rock terrain
@@ -517,10 +535,11 @@ class environment{
       display_scent();
       display_creature_scent();
     }
-    display_water();
+    //display_water();
   }
   
-  void display_water() {
+  // Commented out; water was added to the image_draw function
+  /*void display_water() {
     float size = cellWidth;
     float offset = 0;
     pushMatrix();
@@ -538,7 +557,7 @@ class environment{
       translate(worldWidth*-1, cellHeight);  
     }
     popMatrix();  
-  }
+  }*/
   
   void display_scent() {
     float size = cellWidth;
@@ -547,7 +566,7 @@ class environment{
     translate(worldWidth*-0.5, worldHeight*-0.5, -1);
     noStroke();
     for (int y = 0; y < environHeight; y++) {
-      for (int x = 0; x < environWidth; x++) {
+      for (int x = 0; x < environWidth; x++) { 
         fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
          /* code that colors cells with any non-zero scent - shows that scent spreads very far
            if (scent[x][y] > 0) {
@@ -605,7 +624,7 @@ class environment{
     image.rectMode(CORNER);
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
-        image.fill(0, tileMap[i][j].getColor(), 0);
+        image.fill(tileMap[i][j].colors);
         image.rect(j*cellWidth, i*cellHeight, cellWidth, cellHeight);
       }
     }
