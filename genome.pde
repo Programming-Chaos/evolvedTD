@@ -108,11 +108,11 @@ class AppendageTrait {
   Trait length;
 
   AppendageTrait() {
-    scent = new Trait(10);
+    scent    = new Trait(10);
     pressure = new Trait(10);
-    taste = new Trait(10);
-    angle = new Trait(10);
-    length = new Trait(10);
+    taste    = new Trait(10);
+    angle    = new Trait(10);
+    length   = new Trait(10);
   }
 }
 
@@ -134,7 +134,7 @@ class AppendageTrait {
     }
 
     // initialize the appendages and their traits
-    for (int i = 0; i < (MAX_APPENDAGES + 1); i++) {
+    for (int i = 0; i < (MAX_APPENDAGES); i++) {
       appendages.add(new AppendageTrait());
     }
   }
