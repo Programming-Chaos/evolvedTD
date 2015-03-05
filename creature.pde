@@ -101,6 +101,7 @@ class creature {
     energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
     metabolism = new metabolic_network(genome);
+    coloration = new color_network(genome);
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     body.setUserData(this);
@@ -184,6 +185,7 @@ class creature {
   // 255 centered on 126
   private color getColor() {
     // TODO: refactor for color per segment
+    float[] inputs = new float[coloration.getNumInputs()];
     float redColor = genome.sum(redColorTrait);
     float greenColor = genome.sum(greenColorTrait);
     float blueColor = genome.sum(blueColorTrait);
@@ -192,9 +194,8 @@ class creature {
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
     int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
     //int alpha;
-   float[] inputs = new float[coloration.getNumInputs()];
     inputs[0] = 1;   // bias
-    inputs[1] = .5;//timestep_counter*0.0001;
+    inputs[1] = timestep_counter*0.0001;
     inputs[2] = health/maxHealth;
     inputs[3] = time_in_water/(timestep_counter+1); // percentage of time in water
     inputs[4] = r;
