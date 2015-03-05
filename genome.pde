@@ -48,6 +48,13 @@ ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 
+// maximum number of apendages that can be evolved
+static final int MAX_APPENDAGES = 40;
+ArrayList<AppendageTrait> appendages
+  = new ArrayList<AppendageTrait>(MAX_APPENDAGES);
+// encodes number of appendages actually expressed
+Trait expressedAppendages = new Trait(10);
+
 // TODO: remove these traits when segment refactor is complete
 Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
@@ -93,6 +100,22 @@ class Segment {
   }
 }
 
+class AppendageTrait {
+  Trait scent;
+  Trait pressure;
+  Trait taste;
+  Trait angle;
+  Trait length;
+
+  AppendageTrait() {
+    scent    = new Trait(10);
+    pressure = new Trait(10);
+    taste    = new Trait(10);
+    angle    = new Trait(10);
+    length   = new Trait(10);
+  }
+}
+
 // "Static" initialization of trait lists
   {
     // initialize the metabolic weights
@@ -108,6 +131,11 @@ class Segment {
     // initialize the segments and their traits
     for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
       segments.add(new Segment());
+    }
+
+    // initialize the appendages and their traits
+    for (int i = 0; i < (MAX_APPENDAGES); i++) {
+      appendages.add(new AppendageTrait());
     }
   }
 
