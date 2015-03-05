@@ -34,6 +34,7 @@ class creature {
   int numSegments;
   FloatList armor;
   float density;
+  color_network coloration;
   int health_regen = 1; // value to set how much health is regenerated each timestep when energy is spent to regen
   int regen_energy_cost = 1; // value to determine how much regenerating health costs
   int time_in_water;     // tracks how much time the creature spends in water
@@ -64,6 +65,7 @@ class creature {
     energy_health = 0;          // have to collect energy to regenerate, later this may be evolved
     //println(max_energy_reproduction + " " + max_energy_locomotion + ":" +energy_locomotion + " "+ max_energy_health);  // for debugging
     metabolism = new metabolic_network(genome);
+    coloration = new color_network(genome);
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -189,17 +191,31 @@ class creature {
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
     int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
+    //int alpha;
+   float[] inputs = new float[coloration.getNumInputs()];
+    inputs[0] = 1;   // bias
+    inputs[1] = .5;//timestep_counter*0.0001;
+    inputs[2] = health/maxHealth;
+    inputs[3] = time_in_water/(timestep_counter+1); // percentage of time in water
+    inputs[4] = r;
+    inputs[5] = g; 
+    inputs[6] = b;  
+    float[] outputs = new float[coloration.getNumOutputs()];
+    coloration.calculate(inputs, outputs);
+    float sum = 0;
+    for(int i = 0; i < coloration.getNumOutputs(); i++){
+      outputs[i] = abs(outputs[i]);
+      sum += outputs[i];
+    }
     
-//    float[] inputs = new float
-//    inputs[0] = 1;   // bias
-//    inputs[1] = round_counter;
-//    inputs[2] = fitness;
-//    inputs[3] = time_in_water/timestep_counter; // percentage of time in water
-//    inputs[4] = r
-//    inputs[5] = g 
-//    inputs[6] = b  
+    r = (int)outputs[0];
+    g = (int)outputs[1];
+    b = (int)outputs[2];
 
-
+/*    int dr = 126 + (int)(126*(outputs[0]/(1+abs(outputs[0]))));
+    int dg = 126 + (int)(126*(outputs[1]/(1+abs(outputs[1]))));
+    int db = 126 + (int)(126*(outputs[2]/(1+abs(outputs[2]))));  
+*/   
     return color(r, g, b);
   }
 
