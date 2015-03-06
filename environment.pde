@@ -45,7 +45,7 @@ class tile {
     opacity = 1;
     colors = color(0, 0, 0, 0);
     weathering = 0;
-    viscosity = 0;
+    viscosity = 10;
     scent = 0;
     creatureScent = 0;
     creatureScentColor = 0;
@@ -115,6 +115,7 @@ class environment{
   int environWidth;
   int environHeight;
   int environAltitude;
+  int rockFrequency;
   float liquidReservior; // Amount of water the environment is holding to expened into rain
   float temp; // celsius
   PGraphics image;
@@ -127,6 +128,8 @@ class environment{
     environHeight = worldHeight / cellHeight;   
     environAltitude = (int)random(255);
     temp = environAltitude - (int)random(30) - 200; 
+    
+    rockFrequency = 0;
     
     gravityMap = new gravityVector[environHeight][environWidth];
     tileMap = new tile[environHeight][environWidth];
@@ -142,6 +145,7 @@ class environment{
     //generateWaterALT((float)random(0, 70) / 100.0f);
     generateWaterALT(0.35f); // Just works out better this way
     generateRockyALT(0.60f);
+    spawnRocks();
     makeImage();
     // makeImageFood();
     // updateEnviron();
@@ -265,12 +269,20 @@ class environment{
   
   // Spawn rocks with respect to rocky terrian (color); spawn more on rock terrain
   void spawnRocks() {
-    
-  }
-  
-  
-  void generateRocky() {
-    
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        if(tileMap[i][j].getViscosity() == 0) {
+          int x = (i * cellWidth) - (worldWidth / 2);
+          int y = (j * cellHeight) - (worldHeight / 2);
+          int f = (int)random(100);
+          println("fxrF: " + f + " " + rockFrequency);
+          if(f <= rockFrequency) {
+            rock r = new rock(y, x, (int)random(10, 30));
+            rocks.add(r);
+          }
+        }
+      } 
+    }
   }
 
   void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
