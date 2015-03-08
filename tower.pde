@@ -16,9 +16,14 @@ class tower {
   boolean showgun = true; // show base gun image
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
-  
+  int x_loc;
+  int y_loc;
   // constructor function, initializes the tower
-  tower() {
+  tower(int _x_loc, int _y_loc) {
+    x_loc = _x_loc;
+    y_loc = _y_loc;
+    
+    
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
@@ -80,7 +85,8 @@ class tower {
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
     */
-    image(gunbase,-128,-128);
+    
+    image(gunbase,x_loc,y_loc);
     showgunalt = false;
     showgun = true;
     imagetimer++;
@@ -95,8 +101,8 @@ class tower {
       pushMatrix();
       float c = angle;
       rotate(c + HALF_PI);
-      if(showgun)image(gun,-128,-128);
-      if(showgunalt)image(gunalt,-128,-128);
+      if(showgun)image(gun,x_loc, x_loc);
+      if(showgunalt)image(gunalt,x_loc,y_loc);
       popMatrix();
     
     for (projectile p: projectiles) { // display the active projectiles

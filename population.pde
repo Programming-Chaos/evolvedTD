@@ -10,6 +10,7 @@ class population {
   // variables to find how many spaces are needed.
   private int buckets = (worldWidth/20)*(worldHeight/20);
   ArrayList<Genome.Chromosome>[] gametes = new ArrayList[buckets];
+  
   {
     for (int i = 0; i < buckets; i++) {
       gametes[i] = new ArrayList<Genome.Chromosome>();

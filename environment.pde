@@ -22,6 +22,7 @@ class tile {
   float scent;         // how much sent is present
   float creatureScent; // how much creature scent is present
 
+  ;
   
   boolean isLiquid;    // is the cell traversable as a liquid
   boolean hasFood;     // is there food present
@@ -30,6 +31,7 @@ class tile {
   boolean hasCreatureScent; // is creature scent present
 
   boolean hasTower;    // is there a tower present
+  int []taste;
   
   creature hasCreature; // is there a creature present
 
@@ -37,6 +39,7 @@ class tile {
   
   // FUNC
   tile() {
+    taste = null;
     coloring = 0;
     weathering = 0;
     viscosity = 0;
@@ -55,6 +58,7 @@ class tile {
   }
   
   // GET
+  int []getTaste()         { return taste; }
   int getColor()           { return coloring; }
   int getWeather()         { return weathering; }
   int getViscosity()       { return viscosity; }
@@ -70,6 +74,7 @@ class tile {
   float getCreatureScent() {return creatureScent;}
   
   // SET
+  void setTaste(int []_taste)    { taste = _taste; }
   void setColor(int c)           { coloring = c; }
   void setWeather(int w)         { weathering = w; }
   void setViscosity(int v)       { viscosity = v; }
@@ -273,6 +278,7 @@ class environment{
       for (int j = 0; j < environWidth; j++) {
         tileMap[i][j].hasCreature(null); 
         tileMap[i][j].hasFood(false);
+        tileMap[i][j].setTaste(null);
         tileMap[i][j].hasRock(false);
       }
     }
@@ -294,6 +300,7 @@ class environment{
         y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
         x = (x+environWidth)%environWidth; // in case ccreature was temporarily bumped out of bounds
         y = (y+environHeight)%environHeight;
+        tileMap[x][y].setTaste(fd.getTaste());
         tileMap[x][y].hasFood(true);
       }
     }
@@ -313,6 +320,18 @@ class environment{
     }
     return 0;
   }
+
+  int checkForPressure(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getViscosity();
+    
+  }
+
   
   float getScent(double x1, double y1) {
     int x, y;
@@ -347,6 +366,17 @@ class environment{
     }
     return 0;
   }
+
+  int []checkForTaste(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    return tileMap[x][y].getTaste();
+  }
+  
+
   
   void display() {
     updateEnviron();

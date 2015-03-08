@@ -32,7 +32,7 @@ class creature {
   int numSegments;
   FloatList armor;
   float density;
-
+  Sensory_Systems senses;
   // Constructor, creates a new creature at the given location and angle
 
   // This constructor is generally only used for the first wave, after
@@ -40,7 +40,7 @@ class creature {
   creature(float x, float y, float a) {
     angle = a;
     genome = new Genome();
-
+    senses = new Sensory_Systems();
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
@@ -62,14 +62,13 @@ class creature {
     scent = setScent(this);     // does creature produce scent
     scentStrength = setScentStrength(this);        // how strong is the scent
     scentColor = setScentColor(this); // what color is the scent
-
   }
 
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-
+    senses = new Sensory_Systems();
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
@@ -376,6 +375,7 @@ class creature {
   
   void changeHealth(int h) {
     health += h;
+    senses.Set_Current_Pain(-h);
   }
   
   float getFitness() {
@@ -386,13 +386,20 @@ class creature {
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
   void update() {
+    senses.Update_Pain();
+    
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     if (!alive) { // dead creatures don't update
       return;
     }
+    senses.Update_Pain();
+    //senses.Update_Senses();
+    
     float a = body.getAngle();
     float m = body.getMass();
     float f = getForce();
+    
+    senses.Set_Stats(this);
     double torque = 0;
     torque = calcTorque();
     body.applyTorque((float)torque);
@@ -460,7 +467,9 @@ class creature {
       for (int i = 0; i < 3; i++) {
         Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
+        
       }
+       
       endShape(CLOSE);
       f = f.getNext();  // Get the next fixture from the fixture list
     }
@@ -476,22 +485,12 @@ class creature {
     popMatrix();
     
     // Draw the "feelers", this is mostly for debugging
-    float sensorX,sensorY;
     // Note that the length (50) and angles PI*40 and PI*60 are the
     // same as when calculating the sensor postions in getTorque()
-    int l = 50;
-    sensorX = pos.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
-    sensorY = pos.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
-    sensorX = round((sensorX) / 20) * 20;
-    sensorY = round((sensorY) / 20) * 20;
-    line(pos.x, pos.y, sensorX, sensorY);
-    //foodAhead = environ.checkForFood(sensorX,sensorY); // environ is a global
-    sensorX = pos.x + l * cos(-1 * (body.getAngle() + PI * 0.60));
-    sensorY = pos.y + l * sin(-1 * (body.getAngle() + PI * 0.60));
-    sensorX = round((sensorX) / 20) * 20;
-    sensorY = round((sensorY) / 20) * 20;
-    line(pos.x, pos.y, sensorX, sensorY);
     
+    
+    senses.Draw_Sense(pos.x, pos.y, body.getAngle());
+
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();

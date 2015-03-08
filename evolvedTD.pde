@@ -28,7 +28,7 @@ boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = true;   // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
-tower the_tower;               // a tower object
+ArrayList<tower> the_tower;               // a tower object
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
 
@@ -41,11 +41,15 @@ AudioPlayer gunshot;
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
 void setup() {
-  size(850,850,P3D);             // window size, and makes it a 3D window
+  size(850,850,P3D);  // window size, and makes it a 3D window
+  
+  
+ // panel = new Panel();
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
-  the_tower = new tower();
-  
+  the_tower = new ArrayList<tower>();
+  the_tower.add(new tower(-128, -128));
+
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/Cannon.mp3");
 
@@ -107,10 +111,18 @@ void draw() {
       r.display();
     }
   }
-
-  the_tower.update();
+      
+      
+  for (int i = 0; i < the_tower.size(); i++) {
+    tower twr = the_tower.get(i);
+    twr.update();;
+  }
+  
   if (display) {
-    the_tower.display(); // display the tower
+      for (int i = 0; i < the_tower.size(); i++) {
+        tower twr = the_tower.get(i);
+        twr.display(); ;
+      }
   }
 
   if (!paused) {
@@ -133,6 +145,7 @@ void draw() {
   if (state == 3) {
     display_controls();
   }
+  //.DisplayWhich();
 }  // end of draw loop
 
 void keyPressed() { // if a key is pressed this function is called
@@ -156,7 +169,10 @@ void keyPressed() { // if a key is pressed this function is called
   else {
     switch(key) { // else its a regular character
     case 'a':
-      the_tower.toggleautofire();
+      for (int i = 0; i < the_tower.size(); i++) {
+        tower twr = the_tower.get(i);
+        twr.toggleautofire();
+      }
       break;
     case 'z':
       cameraZ = 2150; // zoom all the way out
@@ -188,7 +204,11 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case '1':
     case '2':
-      the_tower.switchweapon(key);
+      //the_tower.switchweapon(key);
+      for (int i = 0; i < the_tower.size(); i++) {
+        tower twr = the_tower.get(i);
+        twr.switchweapon(key);
+      }
       break;
     default:
 
@@ -267,6 +287,9 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     p2.setRemove(true);
   }
 
+
+
+
   // nothing happens if two creatures collide
   // Nothing happens if rocks collide with creatures, food with rocks, etc.
 }
@@ -289,8 +312,12 @@ void nextgeneration() {
   println(generation);
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
-  the_tower.next_generation(); // have the tower update itself, reset energy etc.
-  if (!the_tower.autofire) { // if in autofire mode don't both pausing - useful for evolving in the background
+  for (int i = 0; i < the_tower.size(); i++) {
+    tower twr = the_tower.get(i);
+    twr.next_generation();
+  }
+  //the_tower.next_generation(); // have the tower update itself, reset energy etc.
+  if (!the_tower.get(0).autofire) { // if in autofire mode don't both pausing - useful for evolving in the background
     paused = true; // pause the game
   }
 }
@@ -309,14 +336,20 @@ void mousePressed() { // called if the (left) mouse button is pressed
   x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
   y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 
-  if (!paused)
-    the_tower.fire(); // have the tower fire its active weapon if unpaused
-
+  if (!paused) {
+    for (int i = 0; i < the_tower.size(); i++) {
+      tower twr = the_tower.get(i);
+      twr.fire();
+    }
+}
+    //the_tower.fire(); // have the tower fire its active weapon if unpaused
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
+  
+  //panel.IdleOrActivePanel(mouseX, mouseY);
 }
 
 void controls() {
