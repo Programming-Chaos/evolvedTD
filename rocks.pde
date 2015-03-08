@@ -3,19 +3,28 @@
    It could be expanded or copied to create other box2d objects to put in the environment:
    boulders, walls, fallen trees, etc. including ones that move, rotate, are static (can't move), etc.
    */
+  
+  
+/*I need this to create a unique ID for collisions*/
+static int rock_count = 0;
 
 class rock {
   Body the_rock;  // box2d body
   int radius;     // radius of the rock
   boolean remove = false;  // used to remember to remove it from the list of rocks
+  int rock_id;
   
   rock(int x, int y) {  // Construct a rock at the given location
+    rock_id = rock_count;
+    rock_count++;
     radius = (int)(10);
     makebody(x, y);
     the_rock.setUserData(this);
   }
   
   rock() {  // Construct a rock at a random location
+    rock_id = rock_count;
+    rock_count++;
     radius = (int)(10);
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));

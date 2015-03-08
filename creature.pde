@@ -5,6 +5,8 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
+static int creature_count = 0;
+
 class creature {
   // All creatures have a Box2D body, a genome, and some other qualities:
   // fitness, health, a max health, angle they are facing, etc.
@@ -32,12 +34,16 @@ class creature {
   int numSegments;
   FloatList armor;
   float density;
+  int creature_num;
+  
   Sensory_Systems senses;
   // Constructor, creates a new creature at the given location and angle
 
   // This constructor is generally only used for the first wave, after
   // that creatures are created from parents.
   creature(float x, float y, float a) {
+    creature_num = creature_count;
+    creature_count++;
     angle = a;
     genome = new Genome();
     senses = new Sensory_Systems();
@@ -66,6 +72,8 @@ class creature {
 
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
+    creature_num = creature_count;
+    creature_count++;
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
     senses = new Sensory_Systems();
@@ -386,18 +394,20 @@ class creature {
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
   void update() {
-    senses.Update_Pain();
+
     
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     if (!alive) { // dead creatures don't update
       return;
     }
-    senses.Update_Pain();
-    //senses.Update_Senses();
+
     
     float a = body.getAngle();
     float m = body.getMass();
     float f = getForce();
+    
+    senses.Update_Pain();
+    senses.Update_Senses(pos2.x, pos2.y, a);
     
     senses.Set_Stats(this);
     double torque = 0;

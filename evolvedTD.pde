@@ -289,13 +289,71 @@ void beginContact(Contact cp) { // called when two box2d objects collide
 
 
 
+  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+     
+     creature p1 = (creature)o1;
+     creature p2 = (creature)o2;
+    
+     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
+     Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
+    
+     int collision_1 = int(nf(p1.creature_num, 0) + nf(p2.creature_num, 0));
+     int collision_2 = int(nf(p2.creature_num, 0) + nf(p1.creature_num, 0));
+     int ID;    
+     if (collision_1 > collision_2) {
+      ID = collision_1;
+     } else {  
+       ID = collision_2;  
+     }
 
-  // nothing happens if two creatures collide
-  // Nothing happens if rocks collide with creatures, food with rocks, etc.
+      p1.senses.Add_Side_Pressure(ID, PI);
+      p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+
+
+    }
 }
+void endContact(Contact cp) { 
+  
+  if (paused) { // probably not necessary
+    return;
+  }
+  
+  
+  // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
+  Fixture f1 = cp.getFixtureA();
+  Fixture f2 = cp.getFixtureB();
+  // Get the bodies that the fixtures are attached to
+  Body b1 = f1.getBody();
+  Body b2 = f2.getBody();
+  // Get the objects that reference these bodies, i.e. the userData
+  Object o1 = b1.getUserData();
+  Object o2 = b2.getUserData();
+ 
+ 
+   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+     
+     creature p1 = (creature)o1;
+     creature p2 = (creature)o2;
+    
+     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
+     Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
+    
+     
+     int collision_1 = int(nf(p1.creature_num, 0) + nf(p2.creature_num, 0));
+     int collision_2 = int(nf(p2.creature_num, 0) + nf(p1.creature_num, 0));
+     int ID;    
+     
+     if (collision_1 > collision_2) {
+      ID = collision_1;
+     } else {  
+       ID = collision_2;  
+     }
 
-void endContact(Contact cp) { // a required function, but doesn't do anything
-  ;
+     p1.senses.Remove_Side_Pressure(ID);         
+     p2.senses.Remove_Side_Pressure(ID);         
+
+   }
+
 }
 
 void place_food() { // done once at the beginning of the game
