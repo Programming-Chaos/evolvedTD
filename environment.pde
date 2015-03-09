@@ -127,8 +127,8 @@ class environment{
     environWidth = worldWidth / cellWidth;
     environHeight = worldHeight / cellHeight;   
     environAltitude = (int)random(255);
-    temp = environAltitude - (int)random(30) - 200; 
-    
+    temp = (int)random(-40, 50); // celcius
+    println(temp);
     rockFrequency = 0;
     
     gravityMap = new gravityVector[environHeight][environWidth];
@@ -146,6 +146,7 @@ class environment{
     generateWaterALT(0.35f); // Just works out better this way
     generateRockyALT(0.60f);
     spawnRocks();
+    tempInfluence();
     makeImage();
     // makeImageFood();
     // updateEnviron();
@@ -275,7 +276,6 @@ class environment{
           int x = (i * cellWidth) - (worldWidth / 2);
           int y = (j * cellHeight) - (worldHeight / 2);
           int f = (int)random(100);
-          println("fxrF: " + f + " " + rockFrequency);
           if(f <= rockFrequency) {
             rock r = new rock(y, x, (int)random(10, 30));
             rocks.add(r);
@@ -316,6 +316,24 @@ class environment{
       }
     }
   }  
+  
+  void tempInfluence() {
+    int r = 0;
+    int b = 0;
+    int g = 0;
+    color c;
+    for(int i = 0; i < environHeight; i++) {
+      for(int j = 0; j < environWidth; j++) {
+        c = tileMap[i][j].colors;
+        r = (c >> 16) & 255;
+        b = (c >> 8) & 255;
+        g = (c) & 255;
+        tileMap[i][j].colors = new color(r, b, g, 1); 
+        // change values here and reconstruct color 
+      }
+    }
+    println("red: " + r + " blue: " + b + " green: " + g);
+  }
   
   void place_creature(creature cd, float x, float y) {
     x = (int)((worldWidth*0.5+x-1)/cellWidth);
