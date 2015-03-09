@@ -52,8 +52,7 @@ class tile {
     colors = color(0, 0, 0, 0);
     weathering = 0;
     viscosity = 10;
-    // weathering = 0;
-    viscosity = 0;
+    weathering = 0;
     scent = 0;
     creatureScent = 0;
     creatureScentColor = 0;
