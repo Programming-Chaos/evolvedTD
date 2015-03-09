@@ -5,6 +5,9 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
+
+static int creature_count = 0;
+
 class creature {
   // All creatures have a Box2D body, a genome, and some other qualities:
   // fitness, health, a max health, angle they are facing, etc.
@@ -33,15 +36,18 @@ class creature {
   int numSegments;
   FloatList armor;
   float density;
-
+  int creature_num;
+  
+  Sensory_Systems senses;
   // Constructor, creates a new creature at the given location and angle
 
   // This constructor is generally only used for the first wave, after
   // that creatures are created from parents.
   creature(float x, float y, float a) {
+        creature_num = creature_count;
     angle = a;
     genome = new Genome();
-
+    senses = new Sensory_Systems();
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
@@ -71,9 +77,10 @@ class creature {
 
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
+        creature_num = creature_count;
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-
+    senses = new Sensory_Systems();
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
@@ -400,6 +407,7 @@ class creature {
   
   void changeHealth(int h) {
     health += h;
+    senses.Set_Current_Pain(-h);
   }
   
   float getFitness() {
@@ -418,6 +426,10 @@ class creature {
     float m = body.getMass();
     float f = getForce();
     double torque = 0;
+    
+    senses.Update_Pain();
+    senses.Update_Senses(pos2.x, pos2.y, a);
+    
     torque = calcTorque();
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
@@ -499,6 +511,8 @@ class creature {
     ellipse(-1 * eye.x, eye.y - 1, 2, 2);
     popMatrix();
     
+    senses.Draw_Sense(pos.x, pos.y, body.getAngle());
+    /*
     // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
     // Note that the length (50) and angles PI*40 and PI*60 are the
@@ -515,6 +529,7 @@ class creature {
     sensorX = round((sensorX) / 20) * 20;
     sensorY = round((sensorY) / 20) * 20;
     line(pos.x, pos.y, sensorX, sensorY);
+    */
     
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
