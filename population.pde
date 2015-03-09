@@ -6,7 +6,10 @@ class population {
   ArrayList<creature> swarm;
   static final int POP_SIZE = 20;
   
-  ArrayList<Genome.Chromosome> gametes = new ArrayList();
+  float baseGameteChance = 0.4; // Base gamete success rate
+  int baseGameteRadius = 6; // Base gamete mating range
+  
+  ArrayList<Gamete> gametes = new ArrayList();
 
   population() {
     swarm = new ArrayList<creature>();
@@ -129,8 +132,22 @@ class population {
   }
 
   // get random gamete from gametes pool n
-  Genome.Chromosome getRandomGamete(int n) {
+/*  Genome.Chromosome getRandomGamete(int n) {
     return gametes.get(int(random(gametes.size())));
+  }
+*/ 
+  // orders gametes by spawn time
+  void OrderGametes(ArrayList<Gamete> gList) {
+    for (int i=0; i < gList.size()-1; i++) {
+      Gamete g1, g2;
+      g1 = gList.get(i);
+      g2 = gList.get(i+1);
+      if (g1.getTime() > g2.getTime()) { // swap
+        gList.set(i+1, g1);
+        gList.set(i, g2);
+        i = 0; // start back at the beginning.
+      }
+    }
   }
 
   // creates the next generation
@@ -145,27 +162,48 @@ class population {
         generation.add(c);
       }
 
-      // Add 2 * scaled fitness number of gametes to bucket for
-      // "fitness proportional selection"
-      for (int i = 0; i < nGametes(c.fitness); i++) {
-        // TODO: replace with an action which produces gametes in a
-        // certain proximity
-        gametes.addAll(c.genome.getGametes());
+      // Add all of a creatures gametes to the gamete pool
+      for(Gamete g : c.gameteStack) {
+        gametes.add(g);
       }
     }
+    OrderGametes(gametes); // Place gametes in order of time.
 
     while (generation.size() < POP_SIZE) {
-      // broadcast breeding, i.e. random selection
-      // TODO: refactor for proximity breeding
-      Genome.Chromosome x = null;
-      Genome.Chromosome y = null;
-
-      while (!areGametesCompatible(x, y)) {
-        x = getRandomGamete(0);
-        y = getRandomGamete(0);
+      // Map width/height in tiles
+      int tWidth   = worldWidth  / cellWidth;
+      int tHeight  = worldHeight / cellHeight;
+      
+      while (gametes.size() > 1) { // Get the next gamete (priority time placement)
+        Gamete x = gametes.get(0);
+        gametes.remove(0); // remove it from gametes list
+        ArrayList<Integer> proxGametes = new ArrayList();
+    System.out.println("stack Size : " + gametes.size());
+        
+        for (int i=0; i < gametes.size(); i++) {
+          System.out.println("Test 2");
+          // Get gametes in range of our selected gamete
+          Gamete g2 = gametes.get(i);
+          if (g2.xPos > x.xPos - 5 && g2.xPos < x.xPos + 5 &&     //within x range
+              g2.yPos > x.yPos - 5 && g2.yPos < x.yPos + 5) {     //within y range"
+          System.out.println("Test 3");
+            proxGametes.add(i);  //store array position of nearby gamete
+          }
+        }
+        
+        if (proxGametes.size() == 0 ) {
+          // do nothing
+        }
+        else {
+          Gamete y = gametes.get(proxGametes.get(0)); //get first gamete layed in range.
+          gametes.remove(proxGametes.get(0)); //remove from gamete list
+        
+          if (areGametesCompatible( x.gamete, y.gamete )) {
+            generation.add(new creature(new Genome( x.gamete, y.gamete), 10000 + x.energy + y.energy));
+          }
+        }
       }
-
-      generation.add(new creature(new Genome(x, y), 20000.0));
+      
     }
 
     gametes.clear(); // TODO: replace with sexual cannibalism

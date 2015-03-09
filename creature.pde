@@ -5,6 +5,27 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
+class Gamete {
+  int xPos, yPos;
+  int time;
+  int energy;
+  Genome.Chromosome gamete;
+  
+  Gamete(int x, int y, int e, Genome.Chromosome g){
+    xPos = x;
+    yPos = y;
+    time = timesteps;
+    energy = e;
+    gamete = g; 
+  }
+  
+  int getX()                      { return xPos; }
+  int getY()                      { return yPos; }
+  int getTime()                   { return time; }
+  int getEnergy()                 { return energy; }
+  Genome.Chromosome getGamete()   { return gamete; }
+}
+
 class creature {
   // All creatures have a Box2D body, a genome, and some other qualities:
   // fitness, health, a max health, angle they are facing, etc.
@@ -33,6 +54,14 @@ class creature {
   int numSegments;
   FloatList armor;
   float density;
+  
+  // Reproduction variables
+  int baseGameteCost = 100;  // Gametes base energy cost
+  int baseGameteTime = 400;  // Gametes base create time in screen updates.
+  int baseGameteEnergy = 500;// Gametes base extra energy
+  int gameteTimeLapse = 0;   // Keeps track of time since last gamete
+  
+  ArrayList<Gamete> gameteStack = new ArrayList(); // Holds the gametes and their map positions.
 
   // Constructor, creates a new creature at the given location and angle
 
@@ -454,6 +483,29 @@ class creature {
       // referenced elsewhere
       killBody();
     }
+    
+    // if creature has enough energy and enough time has passed,
+    // lay a gamete at current position on the map.
+    if (gameteTimeLapse > baseGameteTime * (1+genome.avg(gameteTime)) &&
+        energy_reproduction > (baseGameteCost * (1+genome.avg(gameteCost)) + baseGameteEnergy * (1+genome.avg(gameteEnergy)))) {
+      ArrayList<Genome.Chromosome> temp = genome.getGametes(); // Gets mutated gametes
+      temp.remove((int)random(2)); // only one chromosome
+      
+      // Get the tile position of the creature
+      int xPos = (int) (box2d.getBodyPixelCoord(body).x / cellWidth);
+      int yPos = (int) (box2d.getBodyPixelCoord(body).y / cellHeight);
+      int energy = (int) (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      
+      // Create gamete and place in gameteSack
+      Gamete g = new Gamete(xPos, yPos, energy, temp.get(0));
+      gameteStack.add(g);
+      
+      // remove energy from creature
+      energy_reproduction -= (baseGameteCost * (1+genome.avg(gameteCost)) + baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      
+      gameteTimeLapse = 0;
+    }
+    else gameteTimeLapse++;
   }
   
   // Called every timestep (if the display is on) draws the creature
