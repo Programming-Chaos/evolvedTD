@@ -196,11 +196,9 @@ class population {
         // get first gamete layed in range
         Gamete g2 = gametes.remove(proxGametes.get(0));
 
-        if (areGametesCompatible(g1.gamete, g2.gamete)) {
-          childrenBred++;
-          generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                      10000 + g1.energy + g2.energy));
-        }
+        childrenBred++;
+        generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+                                    10000 + g1.energy + g2.energy));
       }
     }
     println("made " + childrenBred + " and needed " + childrenNew + " more");
