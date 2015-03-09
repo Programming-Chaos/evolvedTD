@@ -16,7 +16,7 @@ class Sensory_Systems {
   int b_pain = 0;
   int b_pain_angle = 1;
 
-  int b_pressure_ground = 5;
+  int b_pressure_ground = 5; //not implemented
   int b_pressure_side = 45;
   int b_pressure_feeler = 85;
   
@@ -31,12 +31,16 @@ class Sensory_Systems {
   int b_speed_y = 807;
   int b_angular = 808;
   
+  
+  //0 -1 current / max fpr energy stats
+  
   int b_energy_reproduction = 809;
-  int b_energy_restore = 810;
-  int b_energy_move = 811;
+  int b_energy_health = 810;
+  int b_energy_move = 811;   
+  
   int b_mass = 812;
   int b_angle = 813;
-  int b_force = 814;
+
   
   int num_appendages;
   //Pain varaibles
@@ -190,8 +194,13 @@ class Sensory_Systems {
 
   
   void Set_Stats(creature c) {
+    
     brain_array[b_speed_x] = c.body.getLinearVelocity().x;
     brain_array[b_speed_y] = c.body.getLinearVelocity().y;
+    
+    brain_array[b_energy_reproduction] = c.energy_reproduction / c.max_energy_reproduction;
+    brain_array[b_energy_move] = c.energy_locomotion / c.max_energy_reproduction;
+    brain_array[b_energy_health] = c.energy_health / c.max_energy_reproduction;
     
     brain_array[b_angular] = c.body.getAngularVelocity();
     brain_array[b_mass] = c.body.getMass();
