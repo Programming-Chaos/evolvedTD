@@ -9,6 +9,11 @@ int cellWidth = 20;
 int cellHeight = 20;
 int maxscent = 255;
 
+boolean isRaining;    // returns whether or not it is raining
+
+int init;
+int gameStartRain()    { return init = (int)random(1,3); }
+
 class tile {
   float altitude;
   int coloring;      // 0 to 255 value that describes tile visually
@@ -21,6 +26,7 @@ class tile {
 
   int creatureScentColor; // value to set what color the creatures scent is
   
+  int waterReserve;    // the world is only allowed to contain a certain amount of water
 
   float scent;         // how much scent is present
   float creatureScent; // how much creature scent is present
@@ -37,7 +43,7 @@ class tile {
   creature hasCreature; // is there a creature present
 
   boolean DEBUG_sensing; // for debugging
-  
+    
   // FUNC
   tile() {
     altitude = 0;
@@ -46,6 +52,8 @@ class tile {
     colors = color(0, 0, 0, 0);
     weathering = 0;
     viscosity = 10;
+    // weathering = 0;
+    viscosity = 0;
     scent = 0;
     creatureScent = 0;
     creatureScentColor = 0;
@@ -71,10 +79,10 @@ class tile {
   boolean hasRock()        { return hasRock; }
   boolean hasTower()       { return hasTower; }
   creature hasCreature()   { return hasCreature; }
-  int getCreatureScentColor() {return creatureScentColor; }
+  int getCreatureScentColor() { return creatureScentColor; }
   
   boolean DEBUG_sensing()  { return DEBUG_sensing; }
-  float getCreatureScent() {return creatureScent;}
+  float getCreatureScent() { return creatureScent; }
   
   // SET
   void setAlt(float a)           { altitude = a; }
@@ -87,7 +95,7 @@ class tile {
   void hasRock(boolean r)        { hasRock = r; }
   void hasTower(boolean t)       { hasTower = t; }
   void hasCreature(creature c)   { hasCreature = c; }
-  void setCreatureScent(float s) { creatureScent = s;}
+  void setCreatureScent(float s) { creatureScent = s; }
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; } 
@@ -148,6 +156,13 @@ class environment{
     spawnRocks();
     tempInfluence();
     makeImage();
+    
+    if(gameStartRain() == 1) {
+      isRaining = true;  
+    } else {
+      isRaining = false;
+    }
+    
     // makeImageFood();
     // updateEnviron();
   }
@@ -328,7 +343,7 @@ class environment{
         r = (c >> 16) & 255;
         b = (c >> 8) & 255;
         g = (c) & 255;
-        tileMap[i][j].colors = new color(r, b, g, 1); 
+        //tileMap[i][j].colors = new color(r, b, g, 1); 
         // change values here and reconstruct color 
       }
     }
@@ -566,6 +581,14 @@ class environment{
       display_creature_scent();
     }
     //display_water();
+
+    if(isRaining == false) {
+      chanceOfRain();  
+    }
+    if(isRaining) {
+      rainfall();
+      whileRaining();
+    } 
   }
   
   // Commented out; water was added to the image_draw function
@@ -615,7 +638,7 @@ class environment{
     popMatrix();  
   }
 
-    void display_creature_scent() {
+  void display_creature_scent() {
     float size = cellWidth;
     float offset = 0;// cellWidth*0.5;
     pushMatrix();
@@ -660,4 +683,107 @@ class environment{
     }
     image.endDraw();
   }
+
+  /**** WEATHER ****/
+  void chanceOfRain() {
+    int chance = int(random(1, 1000)); // CHANGE ME!! :D
+    if (chance == 1) {
+      isRaining = true;  
+    }  
+  }
+  
+  void whileRaining() {
+    int chance = int(random(1, 1000));
+    if (chance == 1) {
+      isRaining = false;
+    }
+    chanceOfLightning();
+  }   
+  
+  void chanceOfLightning() {
+    int chance = int(random(1,2));
+    if (chance == 1) {
+      lightning();
+    }
+  }
+  
+  void rainfall() {
+    float x, y;
+    fill(0, 0, 255, 50);
+    rect((worldWidth * -1), (worldHeight * -1), (worldWidth * 2), (worldHeight * 2));
+    for(int i = 0; i < 600; i++) {
+      x = random(worldWidth * (-1), worldWidth);
+      y = random(worldHeight * (-1), worldHeight);
+      stroke(0, 0, 200, 95);
+      line(x, y, x, y+30);
+    }
+  }
+  
+  void lightning() {
+    //int randX = int(random((environWidth * -1), environWidth));
+    //int randY = int(random((environHeight * -1), environHeight));
+    
+    //int tileX = int(random(environWidth)); 
+    //int tileY = int(random(environHeight));
+    
+    int randX = int(random(worldWidth));
+    int randY = int(random(worldHeight));
+    
+    // Draw Lightning
+    // strokeWeight(3);
+    stroke(255, 255, 0);
+    line(randX, (worldHeight * -1),  randX, randY);
+
+    int tileX = randX / 20;
+    int tileY = randY / 20;
+
+    if(tileMap[tileX][tileY].hasCreature() != null) {
+      creature c = tileMap[tileX][tileY].hasCreature();
+      c.changeHealth(-1000);
+    }
+
+
+  }
 }
+
+
+
+    
+    /***************
+    
+    Randomly choose rainfall duration
+    initializeRain();
+    
+
+    
+    
+    ****************/
+    
+    /*
+    int time = 60;
+    int currentMinute = minute();
+    int currentSecond = second();
+
+    int waitMinute = (int)random(0, 59) + currentMinute;
+    int waitSecond = (int)random(0, 59) + currentSecond;
+    
+    
+    if(currentMinute == waitMinute && currentSecond == waitSecond) {
+      // stop rain 
+      isRaining == false;
+    } 
+    
+    if(chanceOfRain() == true) {
+      rainfall();
+      isRaining = true;
+    }   
+    
+    boolean decision = chanceOfRain();
+    if(isRaining == false) {
+      if(decision == true) {
+        initiateRain();
+      }
+    } else if(isRaining == true) {
+      whileRaining();  
+    }
+    */
