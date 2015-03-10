@@ -49,7 +49,7 @@ void setup() {
   the_player = new player();
   the_tower = new tower();
   the_player.addtower(the_tower);
-  
+
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/Cannon.mp3");
 
@@ -77,7 +77,7 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-  
+
 
   if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -111,18 +111,18 @@ void draw() {
       r.display();
     }
   }
-  
+
   the_player.update();
   if (display) {
     the_player.display(); // display the interface for the player
   }
 
-/*
-  the_tower.update();
-  if (display) {
+  /*
+    the_tower.update();
+    if (display) {
     the_tower.display(); // display the tower
-  }
-*/
+    }
+  */
 
   if (!paused) {
     the_pop.update(); // update the population, i.e. move the creatures
@@ -228,7 +228,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     p1.addEnergy(20000); // getting food is valuable
-    
+
     food p2 = (food)o2;
     p1.senses.Set_Taste(p2);
     if (p2 != null) {
@@ -261,7 +261,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-    
+
     p2.setRemove(true);
   }
 
@@ -277,30 +277,30 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-    
+
     p2.setRemove(true);
   }
- if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
     Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
-    int collision_1 = int(nf(p1.creature_num, 0) + nf(p2.creature_num, 0));
-    int collision_2 = int(nf(p2.creature_num, 0) + nf(p1.creature_num, 0));
+    int collision_1 = int(nf(p1.num, 0) + nf(p2.num, 0));
+    int collision_2 = int(nf(p2.num, 0) + nf(p1.num, 0));
     int ID;
-    
-      if (collision_1 > collision_2) {
-        ID = collision_1;
-      } else {
-          ID = collision_2;
-      }
-      
-     p1.senses.Add_Side_Pressure(ID, PI);
-     p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+
+    if (collision_1 > collision_2) {
+      ID = collision_1;
+    } else {
+      ID = collision_2;
+    }
+
+    p1.senses.Add_Side_Pressure(ID, PI);
+    p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
   }
 }
-  
-  
+
+
 void endContact(Contact cp) {
   if (paused) { // probably not necessary
     return;
@@ -314,27 +314,27 @@ void endContact(Contact cp) {
   // Get the objects that reference these bodies, i.e. the userData
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
-  
+
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
     Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
-    int collision_1 = int(nf(p1.creature_num, 0) + nf(p2.creature_num, 0));
-    int collision_2 = int(nf(p2.creature_num, 0) + nf(p1.creature_num, 0));
+    int collision_1 = int(nf(p1.num, 0) + nf(p2.num, 0));
+    int collision_2 = int(nf(p2.num, 0) + nf(p1.num, 0));
     int ID;
     if (collision_1 > collision_2) {
       ID = collision_1;
-   } else {
+    } else {
       ID = collision_2;
     }
     p1.senses.Remove_Side_Pressure(ID);
     p2.senses.Remove_Side_Pressure(ID);
   }
-  
-  
-  
-  
+
+
+
+
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
@@ -347,8 +347,8 @@ void endContact(Contact cp) {
     creature p1 = (creature)o2;
     p1.senses.Remove_Taste();
   }
-  
-  
+
+
 }
 
 void place_food() { // done once at the beginning of the game

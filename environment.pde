@@ -17,13 +17,11 @@ class tile {
                        // liquid
 
   int creatureScentColor; // value to set what color the creatures scent is
-  
+
 
   float scent;         // how much sent is present
   float creatureScent; // how much creature scent is present
 
-  ;
-  
   boolean isLiquid;    // is the cell traversable as a liquid
   boolean hasFood;     // is there food present
   boolean hasRock;     // is there a rock present
@@ -32,11 +30,11 @@ class tile {
 
   boolean hasTower;    // is there a tower present
   int []taste;
-  
+
   creature hasCreature; // is there a creature present
 
   boolean DEBUG_sensing; // for debugging
-  
+
   // FUNC
   tile() {
     taste = null;
@@ -52,11 +50,11 @@ class tile {
     hasTower = false;
     hasCreature = null;
     hasCreatureScent = false;
-    
+
     DEBUG_sensing = false;
 
   }
-  
+
   // GET
   int []getTaste()         { return taste; }
   int getColor()           { return coloring; }
@@ -69,10 +67,10 @@ class tile {
   boolean hasTower()       { return hasTower; }
   creature hasCreature()   { return hasCreature; }
   int getCreatureScentColor() {return creatureScentColor; }
-  
+
   boolean DEBUG_sensing()  { return DEBUG_sensing; }
   float getCreatureScent() {return creatureScent;}
-  
+
   // SET
   void setTaste(int []_taste)    { taste = _taste; }
   void setColor(int c)           { coloring = c; }
@@ -87,7 +85,7 @@ class tile {
   void setCreatureScent(float s) { creatureScent = s;}
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
-  void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; } 
+  void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; }
 }
 
 class environment{
@@ -96,15 +94,15 @@ class environment{
   int environAltitude;
   float temp; // celsius
   PGraphics image;
-  
+
   tile[][] tileMap;
- 
+
   environment() {
     environWidth = worldWidth / cellWidth;
-    environHeight = worldHeight / cellHeight;   
+    environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
-    temp = environAltitude - (int)random(30) - 200; 
-    
+    temp = environAltitude - (int)random(30) - 200;
+
     tileMap = new tile[environHeight][environWidth];
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
@@ -114,15 +112,15 @@ class environment{
         tileMap[i][j].setViscosity(0);                    // how viscous the tile is;
         tileMap[i][j].setScent(0);
         tileMap[i][j].isLiquid(false);                    // viscosity > 200 liquid = true
-        tileMap[i][j].hasCreature(null);                 
-        tileMap[i][j].hasFood(false); 
+        tileMap[i][j].hasCreature(null);
+        tileMap[i][j].hasFood(false);
         tileMap[i][j].hasRock(false);
         tileMap[i][j].hasTower(false);
-         
+
         tileMap[i][j].DEBUG_sensing(false);    // used for debugging to tell which squares are being sensed
       }
     }
-    
+
     generateWater(10, 15, 14);
     makeImage();
     // makeImageFood();
@@ -137,13 +135,13 @@ class environment{
       // water body origin
       x = (int)random(environWidth);
       y = (int)random(environHeight);
-      
+
       totalSize = initialSize + (int)(random(deltaSize) * random(-1, 1)); // noted extra chance of delta being 0
-      
+
       x = x + (totalSize / 2);
       y = y + (totalSize / 2);
-      
-      
+
+
       int a, b, r;
       for(int xOffset = x - (totalSize / 2); xOffset < (x + (totalSize / 2)); xOffset++) {
         for(int yOffset = y - (totalSize / 2); yOffset < (y + (totalSize / 2)); yOffset++) {
@@ -151,16 +149,16 @@ class environment{
           b = yOffset - y;
           r = (totalSize / 2);
           if(xOffset < environWidth && yOffset < environHeight && xOffset > 0 && yOffset > 0) {
-            if((a * a) + (b * b) <= (r * r) ){  
+            if((a * a) + (b * b) <= (r * r) ){
               tileMap[xOffset][yOffset].isLiquid(true);
               tileMap[xOffset][yOffset].setViscosity(255);
             }
-          }  
-        }  
+          }
+        }
       }
     }
-  }  
-  
+  }
+
   void place_creature(creature cd, float x, float y) {
     x = (int)((worldWidth*0.5+x-1)/cellWidth);
     y = (int)((worldHeight*0.5+y-1)/cellHeight);
@@ -168,7 +166,7 @@ class environment{
     y = (y+environHeight)%environHeight;
     tileMap[(int)x][(int)y].hasCreature(cd);
   }
-  
+
   void update_scent() {
     if(!paused){
     int range = 1, tempx, tempy;
@@ -242,7 +240,7 @@ class environment{
           tileMap[(x+1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
           tileMap[(x+1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
           tileMap[(x-1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );          
+          tileMap[(x-1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
           }
         }
         else {
@@ -271,12 +269,12 @@ class environment{
     }
     }
   }
-  
+
   void updateEnviron() {
     Vec2 p = new Vec2();
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
-        tileMap[i][j].hasCreature(null); 
+        tileMap[i][j].hasCreature(null);
         tileMap[i][j].hasFood(false);
         tileMap[i][j].setTaste(null);
         tileMap[i][j].hasRock(false);
@@ -292,7 +290,7 @@ class environment{
       y = (y+environHeight)%environHeight;
       tileMap[x][y].hasRock(true);
     }
-    
+
     for (food fd: foods) {
       p = fd.getPos();
       if (fd != null && p != null) {
@@ -307,7 +305,7 @@ class environment{
     update_scent();
     update_creature_scent();
   }
-  
+
   int checkForFood(double x1, double y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
@@ -329,10 +327,10 @@ class environment{
     y = (y+environHeight)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getViscosity();
-    
+
   }
 
-  
+
   float getScent(double x1, double y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
@@ -342,7 +340,7 @@ class environment{
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getScent();
   }
-  
+
   int checkForCreature(double x1, double y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
@@ -354,7 +352,7 @@ class environment{
     }
     return 1;
   }
-  
+
   int checkForRock(double x1, double y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
@@ -375,19 +373,31 @@ class environment{
     y = (y+environHeight)%environHeight;
     return tileMap[x][y].getTaste();
   }
-  
 
-  
+
+
+  int checkForLiquid(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    if (tileMap[x][y].isLiquid()) {
+      return 1;
+    }
+    return 0;
+  }
+
   void display() {
     updateEnviron();
     pushMatrix();
     translate(worldWidth*-0.5, worldHeight*-0.5, -1);
-    image(image, 0, 0); 
+    image(image, 0, 0);
     popMatrix();
     rectMode(CORNER);
     float offsetx = -0.5*worldWidth;// - cellWidth*0.5;
     float offsety = -0.5*worldHeight;// - cellHeight*0.5;
-   
+
     noFill();
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
@@ -396,7 +406,7 @@ class environment{
           rect(offsetx+i*cellHeight, offsety+j*cellWidth, cellHeight, cellWidth);
         }
         /*  debug code to make sure the correct cells are marked as food present
-            if (foodpresent[i][j]) {  
+            if (foodpresent[i][j]) {
             stroke(0, 255, 0);
             rect(offsetx+i*cellHeight, offsety+j*cellWidth, cellHeight, cellWidth);
             }
@@ -418,14 +428,14 @@ class environment{
     }
     display_water();
   }
-  
+
   void display_water() {
     float size = cellWidth;
     float offset = 0;
     pushMatrix();
     translate(worldWidth * -0.5, worldHeight * -0.5, -1);
     noStroke();
-    
+
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         if(tileMap[x][y].isLiquid()) {
@@ -433,12 +443,12 @@ class environment{
           rect(offset, offset, size, size);
         }
         translate(cellWidth, 0);
-      }  
-      translate(worldWidth*-1, cellHeight);  
+      }
+      translate(worldWidth*-1, cellHeight);
     }
-    popMatrix();  
+    popMatrix();
   }
-  
+
   void display_scent() {
     float size = cellWidth;
     float offset = 0;// cellWidth*0.5;
@@ -456,13 +466,13 @@ class environment{
            fill(100, 100, 100, 0);
            }
         */
-          
+
         rect(offset, offset, size, size);
         translate(cellWidth, 0);
       }
       translate(worldWidth*-1, cellHeight);
-    }    
-    popMatrix();  
+    }
+    popMatrix();
   }
 
     void display_creature_scent() {
@@ -476,7 +486,7 @@ class environment{
         if( tileMap[x][y].getCreatureScentColor() == 1 ) {
           fill(255, 0, 0, 255 * tileMap[x][y].getCreatureScent() / maxscent);
         } else if( tileMap[x][y].getCreatureScentColor() == 2 ) {
-          fill(242, 2, 232, 255 * tileMap[x][y].getCreatureScent() / maxscent);          
+          fill(242, 2, 232, 255 * tileMap[x][y].getCreatureScent() / maxscent);
         } else {
           fill(0 , 0, 0, 0);
         }
@@ -488,15 +498,15 @@ class environment{
            fill(100, 100, 100, 0);
            }
         */
-          
+
         rect(offset, offset, size, size);
         translate(cellWidth, 0);
       }
       translate(worldWidth*-1, cellHeight);
-    }    
-    popMatrix();  
+    }
+    popMatrix();
   }
-  
+
   void makeImage() { // creates a PImage of the environment instead having to draw each square individually
     image = createGraphics(worldWidth, worldHeight);
     image.beginDraw();

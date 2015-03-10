@@ -1,50 +1,53 @@
-import shiffman.box2d.*;
-import org.jbox2d.collision.shapes.*;
-import org.jbox2d.collision.AABB;
-import org.jbox2d.common.*;
-import org.jbox2d.dynamics.*;
-import org.jbox2d.dynamics.contacts.*;
-
-
 static int creature_count = 0;
 
 class creature {
-  // All creatures have a Box2D body, a genome, and some other qualities:
-  // fitness, health, a max health, angle they are facing, etc.
-  Body body;
-
-  Genome genome;         // encodes the creature's genetic information
-
-  // communication traits
-  boolean scent;         // used to determine if creature is capable of producing scent
-  float scentStrength;   // how strong the creature's scent is
-  int scentColor;        // store an integer for different colors
-
-  float energy_reproduction;  // energy for gamete produciton
-  float energy_locomotion;    // energy for locomotion and similar activites
-  float energy_health;        // energy for regeneration
-  float max_energy_reproduction;  // size of reproductive energy stores
-  float max_energy_locomotion;
-  float max_energy_health;
-  metabolic_network metabolism;
+  // stats
+  int num;               // unique creature identifier
+  boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   float fitness;         // used for selection
   float health;          // 0 health, creature dies
-  float maxHealth = 100; // should be evolved
+  float maxHealth = 100; // TODO: should be evolved
+  int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
+  int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
+
+  // timers
+  int timestep_counter;  // counter to track how many timesteps a creature has been alive
+  int time_in_water;     // tracks how much time the creature spends in water
+  int time_on_land;      // tracks how much time the creature spends on land
+
+  // encodes the creature's genetic information
+  Genome genome;
+
+  // metabolism
+  float energy_reproduction;     // energy for gamete produciton
+  float energy_locomotion;       // energy for locomotion and similar activites
+  float energy_health;           // energy for regeneration
+  float max_energy_reproduction; // size of reproductive energy stores
+  float max_energy_locomotion;
+  float max_energy_health;
+  int regen_energy_cost = 5; // value to determine how much regenerating health costs
+  metabolic_network metabolism;
+
+  // senses/communication
+  Sensory_Systems senses;
+  boolean scent;       // used to determine if creature is capable of producing scent
+  float scentStrength; // how strong the creature's scent is
+  int scentColor;      // store an integer for different colors
+
+  // body
+  Body body;
   float angle;
-  boolean alive;         // dead creatures remain in the swarm to have a breeding chance
-  int round_counter;     //Counter to track how many rounds/generations the individual creature has been alive
   int numSegments;
   FloatList armor;
   float density;
-  int creature_num;
-  
-  Sensory_Systems senses;
+  color_network coloration;
+
   // Constructor, creates a new creature at the given location and angle
 
   // This constructor is generally only used for the first wave, after
   // that creatures are created from parents.
   creature(float x, float y, float a) {
-        creature_num = creature_count;
+    num = creature_count++;
     angle = a;
     genome = new Genome();
     senses = new Sensory_Systems(genome);
@@ -64,6 +67,7 @@ class creature {
     energy_health = 0;          // have to collect energy to regenerate, later this may be evolved
     //println(max_energy_reproduction + " " + max_energy_locomotion + ":" +energy_locomotion + " "+ max_energy_health);  // for debugging
     metabolism = new metabolic_network(genome);
+    coloration = new color_network(genome);
     health = maxHealth;         // initial health
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -76,7 +80,7 @@ class creature {
 
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
-        creature_num = creature_count;
+    num = creature_count++;
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
     senses = new Sensory_Systems(genome);
@@ -93,13 +97,14 @@ class creature {
     makeBody(pos);
     float energy_scale = 500;
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
-    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum;
     max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
     max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
     energy_reproduction = 0;                                // have to collect energy to reproduce
     energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
     metabolism = new metabolic_network(genome);
+    coloration = new color_network(genome);
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     body.setUserData(this);
@@ -113,7 +118,7 @@ class creature {
   boolean getScent()        { return scent; }
   float getScentStrength()  { return scentStrength; }
   int getScentColor()       { return scentColor; }
-  
+
   int setScentColor( creature c ) {
     FloatList l;
     float s;
@@ -135,7 +140,7 @@ class creature {
     // mapping function goes here
     return s;
   }
-  
+
   // function setScent will calculate the creatures scent value
   boolean setScent( creature c ) {
     float s;
@@ -148,11 +153,11 @@ class creature {
     }
   }
 
-  // returns a vector to the creature's postion 
+  // returns a vector to the creature's postion
   Vec2 getPos() {
     return(box2d.getBodyPixelCoord(body));
   }
-  
+
   // adds some energy to the creature - called when the creature picks
   // up food/resource
   void addEnergy(int x) {
@@ -170,9 +175,9 @@ class creature {
       outputs[i] = abs(outputs[i]);  // set negative outputs to positive - do something more clever later
       sum += outputs[i];  // sum the network outputs
     }
-    energy_reproduction += x * outputs[0]/sum; 
-    energy_locomotion += x * outputs[1]/sum; 
-    energy_health += x * outputs[2]/sum;  
+    energy_reproduction += x * outputs[0]/sum;
+    energy_locomotion += x * outputs[1]/sum;
+    energy_health += x * outputs[2]/sum;
 //    println(x * outputs[0]/sum + " " + x * outputs[1]/sum + " " + x * outputs[2]/sum + " " + ((x * outputs[0]/sum )+ (x * outputs[1]/sum )+ (x * outputs[2]/sum)) );  // for debugging
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
@@ -181,17 +186,40 @@ class creature {
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
-  private color getColor() {
+  private color getColor(int n) {
     // TODO: refactor for color per segment
+    float[] inputs = new float[coloration.getNumInputs()];
     float redColor = genome.sum(redColorTrait);
     float greenColor = genome.sum(greenColorTrait);
     float blueColor = genome.sum(blueColorTrait);
+    float alphaColor = genome.sum(alphaTrait);
 
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
     int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
+    int a = 126 + (int)(126*(alphaColor/(1+abs(alphaColor))));
+    inputs[0] = 1;   // bias
+    inputs[1] = timestep_counter*0.001;
+    inputs[2] = health/maxHealth;
+    inputs[3] = time_in_water/(timestep_counter+1); // percentage of time in water
+    inputs[4] = r/255;
+    inputs[5] = g/255;
+    inputs[6] = b/255;
+    inputs[7] = a/255;
+    inputs[8] = n;
+    float[] outputs = new float[coloration.getNumOutputs()];
+    coloration.calculate(inputs, outputs);
+    float sum = 0;
+    for(int i = 0; i < coloration.getNumOutputs(); i++){
+      outputs[i] = abs(outputs[i]);
+      sum += outputs[i];
+    }
 
-    return color(r, g, b);
+    r = r*(1 + (int)outputs[0]);
+    g = g*(1 + (int)outputs[1]);
+    b = b*(1 + (int)outputs[2]);
+    a = a*(1 + (int)outputs[3]);
+    return color(r, g, b, a);
   }
 
   // Gets the end point of the ith segment/rib/spine used to create
@@ -324,7 +352,7 @@ class creature {
   void killBody() {
       box2d.destroyBody(body);
   }
-  
+
   double getCompat() {
     //return genome.getCompat();
     return 0;
@@ -345,32 +373,42 @@ class creature {
     return getTurningForce() * genome.sum(trait); // there's a turning force
   }
 
-  // This function calculates the torques the creature produces to turn, as a 
+  // This function calculates the torques the creature produces to turn, as a
   // function of what it senses in the environment
-  double calcTorque() { 
+  double calcTorque() {
     Vec2 pos2 = box2d.getBodyPixelCoord(body);  // get the creature's position
     int l = 50; // distance of the sensor from the body (should be evolved)
     int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
     float scentAheadL,scentAheadR;
     double sensorX,sensorY;
+    int liquidFLAG = 0;
     // left sensor check
     // Begin by calculating the x,y position of the left sensor
     // (Currently the angle of the sensors is fixed, angle PI*0.40, length 50 pixels, these should be evolved
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40)); 
+    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
     foodAheadL = environ.checkForFood(sensorX, sensorY);     // Check if there's food 'under' the left sensor
     creatureAheadL = environ.checkForCreature(sensorX, sensorY);  // Check if there's a creature 'under' the left sensor
     rockAheadL = environ.checkForRock(sensorX, sensorY); // Check if there's a rock 'under' the left sensor
     scentAheadL = environ.getScent(sensorX, sensorY);  // Get the amount of scent at the left sensor
+    // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
+    if(environ.checkForLiquid(sensorX, sensorY) == 1){   // this checks if the creature is in water
+      liquidFLAG = 1;
+    }
     // right sensor check
     // Begin by calculating the x,y position of the right sensor
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60)); 
+    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60));
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.60));
     // Then do all of the right sensor checks
-    foodAheadR = environ.checkForFood(sensorX, sensorY); 
-    creatureAheadR = environ.checkForCreature(sensorX, sensorY); 
+    foodAheadR = environ.checkForFood(sensorX, sensorY);
+    creatureAheadR = environ.checkForCreature(sensorX, sensorY);
     rockAheadR = environ.checkForRock(sensorX, sensorY);
     scentAheadR = environ.getScent(sensorX, sensorY);
+    // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
+    if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1){   // this checks if the creature is in water
+      time_in_water++;
+      liquidFLAG = 0;
+    }
     // Set the torque to zero, then add in the effect of the sensors
     double torque = 0;
     // If there's food ahead on the left, turn by the evolved torque
@@ -392,7 +430,7 @@ class creature {
     //println(torque);
     return torque;
   }
-  
+
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
@@ -403,16 +441,16 @@ class creature {
     }
     // Note that unrealistically dead creatures can reproduce, which is necessary in cases where a player kills a whole wave
   }
-  
+
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
   }
-  
+
   float getFitness() {
     return fitness;
   }
-  
+
   // The update function is called every timestep
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
@@ -421,23 +459,24 @@ class creature {
     if (!alive) { // dead creatures don't update
       return;
     }
+    timestep_counter++;
     float a = body.getAngle();
     float m = body.getMass();
     float f = getForce();
     double torque = 0;
-    
+
     senses.Update_Pain();
     senses.Update_Senses(pos2.x, pos2.y, a);
-    
+
     torque = calcTorque();
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
     if (energy_locomotion > 0) { // If there's energy left apply force
-      body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter()); 
+      body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
     }
-    
+
     // Creatures that run off one side of the world wrap to the other side.
     if (pos2.x < -0.5 * worldWidth) {
       pos2.x += worldWidth;
@@ -465,8 +504,12 @@ class creature {
       // referenced elsewhere
       killBody();
     }
+    if (energy_health > 0 && health < maxHealth) {  // Spends energy devoted to health regen to increase the creature's health over time
+      health = health + health_regen; // the creature health is increased
+      energy_health = energy_health - regen_energy_cost; //the energy to regen is decreased
+    }
   }
-  
+
   // Called every timestep (if the display is on) draws the creature
   void display() {
     if (!alive) { // dead creatures aren't displayed
@@ -488,7 +531,7 @@ class creature {
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       c %= numSegments;
-      fill(getColor()); // Get the creature's color
+      fill(getColor(c)); // Get the creature's color
       strokeWeight(armor.get(c));
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
@@ -509,7 +552,7 @@ class creature {
     ellipse(eye.x, eye.y - 1, 2, 2);
     ellipse(-1 * eye.x, eye.y - 1, 2, 2);
     popMatrix();
-    
+
     senses.Draw_Sense(pos.x, pos.y, body.getAngle());
     /*
     // Draw the "feelers", this is mostly for debugging
@@ -529,14 +572,14 @@ class creature {
     sensorY = round((sensorY) / 20) * 20;
     line(pos.x, pos.y, sensorX, sensorY);
     */
-    
+
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
     // get the largest dimension of the creature
     int offset = (int)max(getWidth(), getLength());
-    rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it  
+    rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it
     noStroke();
     fill(0, 0, 255);
     rect(0, -1 * offset, 0.1 * health, 3);
@@ -544,7 +587,7 @@ class creature {
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
   }
-  
+
   class segIndex {  // This class is a helper. One of these is attached to every segment of every creature
     int segmentIndex;  // This class's only variable is an index corresponding to of the creature's segments this is, so its armor can be referenced later
   }
@@ -558,7 +601,7 @@ class creature {
     bd.linearDamping = 0.9;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
     body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
-    
+
     // Define a polygon object, this will be used to make the body fixtures
     PolygonShape sd;
 
@@ -593,7 +636,7 @@ class creature {
 //      fd.userData.segmentIndex = i;
       body.createFixture(fd);  // Create the actual fixture, which adds it to the body
     }
-    
+
     // now repeat the whole process for the other side of the creature
     for (int i = 0; i < numSegments; i++) {
       sd = new PolygonShape();
