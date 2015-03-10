@@ -12,55 +12,51 @@ actions are the individual components that comprise behavior.
 
 */
 
+
+import java.util.Iterator;
+
 class Brain {
 
   //DATA
-  int[][] brain;
+  float[][] weights;
   int row_size;
   int col_size;
   
   //Default Constructor
   Brain(){
-    brain = new int[100][1000];
+    weights = new float[100][1000];
     row_size = 10;
     col_size = 1000;
     for(int i = 0; i < 10; i++){
       for(int j = 0; j < 100; j++){
-        brain[i][j] = (int)random(2);
+        weights[i][j] = (float)random(2);
       }
     }
   }
   
   //Custom Constructor - taking two ints
-  Brain(int rows, int col){
-    brain = new int[rows][col];
+  Brain(int col, int rows, ArrayList<Trait> w){
+    weights = new float[rows][col];
     row_size = rows;
     col_size = col;
+    int j = 0;
+    Trait t;
+    Iterator<Trait> it = w.iterator();
+    
     for(int i = 0; i < rows; i++){
-      for(int j = 0; j < col; j++){
-        brain[i][j] = (int)random(2);
-      }
+      while(it.hasNext()){
+        t = it.next();
+        weights[i][j] = t.genes;
+        j++;
+      }  
     }  
   }
-  
-  //Customer Constructor - taking genome
- Brain(genome g){
-    brain = new int[g.BRAIN_INPUTS][g.BRAIN_OUTPUTS];
-    row_size = rows;
-    col_size = col;
-    for(int i = 0; i < rows; i++){
-      for(int j = 0; j < col; j++){
-        brain[i][j] = (int)random(2);
-      }
-    }  
-  }
- 
  
  //basic print function for testing
  void print_weights(){
    for(int i = 0; i < row_size; i++){
       for(int j = 0; j < col_size; j++){
-         print(brain[i][j] + " ");     
+         print(weights[i][j] + " ");     
       }
       println();
     }   

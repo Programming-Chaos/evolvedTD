@@ -22,9 +22,9 @@ Trait gameteChance = new Trait(10);
 Trait gameteEnergy = new Trait(10);
 
 // Weights for the brain's artificial neural network
-static final int BRAIN_INPUTS = 10;
-static final int BRAIN_OUTPUTS = 100;
-ArrayList<Trait> brainTraits = new ArrayList<Trait>(BRAIN_INPUTS);
+static final int BRAIN_INPUTS = 1000;
+static final int BRAIN_OUTPUTS = 3;
+ArrayList<Trait> brainTraits = new ArrayList<Trait>(BRAIN_OUTPUTS);
 
 // Speciation
 Trait compatibility = new Trait(10);
@@ -132,8 +132,8 @@ class AppendageTrait {
     }
 
     // initialize the brain weights
-    for (int i = 0; i < BRAIN_INPUTS; i++) {
-      brainTraits.add(new Trait(BRAIN_OUTPUTS));
+    for (int i = 0; i < BRAIN_OUTPUTS; i++) {
+      brainTraits.add(new Trait(BRAIN_INPUTS));
     }
 
     // initialize the segments and their traits
@@ -244,6 +244,18 @@ class Genome {
     }
   }
 
+  int get_brain_inputs(){
+    return BRAIN_INPUTS;
+  }
+
+ int get_brain_outputs(){
+    return BRAIN_OUTPUTS;
+  }
+  
+  ArrayList<Trait> get_brain_traits(){
+    return brainTraits;
+  }
+  
   ArrayList getGametes() {
     ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
 

@@ -50,9 +50,11 @@ class creature {
   creature(float x, float y, float a) {
     num = creature_count++;
     angle = a;
+    
     genome = new Genome();
     senses = new Sensory_Systems(genome);
-    brain = new Brain(genome.BRAIN_INPUTS, genome.BRAIN_OUTPUTS);
+    brain = new Brain(genome.get_brain_inputs(), genome.get_brain_outputs(), genome.get_brain_traits());
+    
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
@@ -360,6 +362,7 @@ class creature {
     return 0;
   }
 
+
   // This is the base turning force, it is modified by getBehavior()
   // above, depending on what type of object was sensed to start
   // turning
@@ -433,6 +436,8 @@ class creature {
     return torque;
   }
 
+
+  
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
@@ -469,7 +474,7 @@ class creature {
 
     senses.Update_Pain();
     senses.Update_Senses(pos2.x, pos2.y, a);
-
+    
     torque = calcTorque();
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
