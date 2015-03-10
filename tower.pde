@@ -26,8 +26,8 @@ class tower {
     projectiles = new ArrayList<projectile>();
     angle = 0;
     gunbase = loadImage("assets/Tower_base_02.png");
-    gun = loadImage("assets/Gunturret04a.png");
-    gunalt = loadImage("assets/Gunturret04b.png");
+    gun = loadImage("assets/RailGun-01.png");
+    gunalt = loadImage("assets/RailGun-a-01.png");
     imagetimer = 0;
   }
   
@@ -120,6 +120,7 @@ class tower {
       text("Resources: "+(int)resources,0.2*width,-0.25*height); 
     hint(ENABLE_DEPTH_TEST); 
     popMatrix();
+
   }
   
   void next_generation() { // update the tower
