@@ -685,7 +685,7 @@ class environment{
 
   /**** WEATHER ****/
   void chanceOfRain() {
-    int chance = int(random(1, 1000)); // CHANGE ME!! :D
+    int chance = int(random(1, 1000)); 
     if (chance == 1) {
       isRaining = true;  
     }  
@@ -700,7 +700,7 @@ class environment{
   }   
   
   void chanceOfLightning() {
-    int chance = int(random(1,2));
+    int chance = int(random(1,20));
     if (chance == 1) {
       lightning();
     }
@@ -719,29 +719,40 @@ class environment{
   }
   
   void lightning() {
-    //int randX = int(random((environWidth * -1), environWidth));
-    //int randY = int(random((environHeight * -1), environHeight));
+    int randX = int(random(-worldWidth, worldWidth));
+    int randY = int(random(-worldHeight, worldHeight));
     
-    //int tileX = int(random(environWidth)); 
-    //int tileY = int(random(environHeight));
+    int xOffset = randX;
+    int yOffset = -worldHeight;
+    int yFinal = randY; 
     
-    int randX = int(random(worldWidth));
-    int randY = int(random(worldHeight));
-    
-    // Draw Lightning
-    // strokeWeight(3);
-    stroke(255, 255, 0);
-    line(randX, (worldHeight * -1),  randX, randY);
+    noFill();
+    strokeWeight(5);
+    stroke(255, 255, 200);
 
-    int tileX = randX / 20;
-    int tileY = randY / 20;
+    beginShape();
+    curveVertex(xOffset, yOffset);
+    curveVertex(xOffset, yOffset);
+    yOffset += (int(random(50,200)));
+    for(int i = 0; i < 100; i++) {
+      curveVertex(xOffset+(int(random(2,15))), yOffset);
+      yOffset += (int(random(50,200)));
+      if(yOffset > yFinal)
+        break;
+      curveVertex(xOffset-(int(random(2,15))), yOffset);
+    }
+    curveVertex(xOffset, yFinal);
+    curveVertex(xOffset, yFinal);
+    endShape();
+
+    int tileX = ((randX + (worldWidth)) / 40);
+    int tileY = ((randY + (worldHeight)) / 40);
 
     if(tileMap[tileX][tileY].hasCreature() != null) {
       creature c = tileMap[tileX][tileY].hasCreature();
       c.changeHealth(-1000);
     }
-
-
+    strokeWeight(1);
   }
 }
 
