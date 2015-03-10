@@ -140,6 +140,37 @@ class creature {
     scentStrength = setScentStrength(this); // how strong is the scent
     scentColor = setScentColor(this);       // what color is the scent
  }
+ 
+  // construct a new creature with the given genome, energy and position
+  creature(Genome g, float e, Vec2 pos) {
+    angle = random(0, 2 * PI); // start at a random angle
+    genome = g;
+
+    numSegments = getNumSegments();
+    computeArmor();
+    float averageArmor = armor.sum() / numSegments;
+    density = (getDensity() * averageArmor);
+
+    makeBody(pos);
+    float energy_scale = 500;
+    float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
+    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
+    max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
+    energy_reproduction = 0;                                // have to collect energy to reproduce
+    energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
+    metabolism = new metabolic_network(genome);
+    coloration = new color_network(genome);
+    health = maxHealth;                                     // probably should be evolved
+    fitness = 0;
+    body.setUserData(this);
+    alive = true;
+
+    scent = setScent(this);                 // does creature produce scent
+    scentStrength = setScentStrength(this); // how strong is the scent
+    scentColor = setScentColor(this);       // what color is the scent
+ }
 
   boolean getScent()        { return scent; }
   float getScentStrength()  { return scentStrength; }

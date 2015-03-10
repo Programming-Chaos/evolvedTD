@@ -195,10 +195,14 @@ class population {
       if (proxGametes.size() > 0) {
         // get first gamete layed in range
         Gamete g2 = gametes.remove(proxGametes.get(0));
-
+        // get the point between the two gametes.
+        int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
+        int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
+        Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
+        
         childrenBred++;
         generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                    10000 + g1.energy + g2.energy));
+                                    10000 + g1.energy + g2.energy, pos));
       }
     }
     println("made " + childrenBred + " and needed " + childrenNew + " more");
