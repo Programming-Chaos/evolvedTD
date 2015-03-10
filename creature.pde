@@ -194,15 +194,15 @@ class creature {
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
     int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
-    float alpha = 126;
+    int a = 126 + (int)(126*(alphaColor/(1+abs(alphaColor))));
     inputs[0] = 1;   // bias 
     inputs[1] = timestep_counter*0.001;
     inputs[2] = health/maxHealth;
-    inputs[3] = .5;//time_in_water/(timestep_counter+1); // percentage of time in water
+    inputs[3] = time_in_water/(timestep_counter+1); // percentage of time in water
     inputs[4] = r/255;
     inputs[5] = g/255; 
     inputs[6] = b/255; 
-    inputs[7] = alpha/255;
+    inputs[7] = a/255;
     float[] outputs = new float[coloration.getNumOutputs()];
     coloration.calculate(inputs, outputs);
     float sum = 0;
@@ -210,16 +210,12 @@ class creature {
       outputs[i] = abs(outputs[i]);
       sum += outputs[i];
     }
-/*    
-    r = (int)outputs[0];
-    g = (int)outputs[1];
-    b = (int)outputs[2];
-*/
+
     r = r*(1 + (int)outputs[0]);
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
-    alpha = alpha*(1 + (int)outputs[3]);
-    return color(r, g, b, alpha);
+    a = a*(1 + (int)outputs[3]);
+    return color(r, g, b, a);
   }
 
   // Gets the end point of the ith segment/rib/spine used to create
