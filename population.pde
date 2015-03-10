@@ -205,7 +205,7 @@ class population {
                                     10000 + g1.energy + g2.energy, pos));
       }
     }
-    println("made " + childrenBred + " and needed " + childrenNew + " more");
+    //println("made " + childrenBred + " and needed " + childrenNew + " more");
     swarm = generation;
   }
 }
