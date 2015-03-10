@@ -36,7 +36,7 @@ class creature {
   float density;
   color_network coloration;
   int health_regen = 1; // value to set how much health is regenerated each timestep when energy is spent to regen
-  int regen_energy_cost = 1; // value to determine how much regenerating health costs
+  int regen_energy_cost = 5; // value to determine how much regenerating health costs
   int time_in_water;     // tracks how much time the creature spends in water
   int time_on_land;      // tracks how much time the creature spends on land
 
@@ -193,14 +193,15 @@ class creature {
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
     int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));    
-    //int alpha;
-    inputs[0] = 1;   // bias
-    inputs[1] = timestep_counter*0.0001;
+    float alpha = 126;
+    inputs[0] = 1;   // bias 
+    inputs[1] = timestep_counter*0.001;
     inputs[2] = health/maxHealth;
-    inputs[3] = time_in_water/(timestep_counter+1); // percentage of time in water
-    inputs[4] = r;
-    inputs[5] = g; 
-    inputs[6] = b;  
+    inputs[3] = .5;//time_in_water/(timestep_counter+1); // percentage of time in water
+    inputs[4] = r/255;
+    inputs[5] = g/255; 
+    inputs[6] = b/255; 
+    inputs[7] = alpha/255;
     float[] outputs = new float[coloration.getNumOutputs()];
     coloration.calculate(inputs, outputs);
     float sum = 0;
@@ -208,16 +209,16 @@ class creature {
       outputs[i] = abs(outputs[i]);
       sum += outputs[i];
     }
-    
+/*    
     r = (int)outputs[0];
     g = (int)outputs[1];
     b = (int)outputs[2];
-
-/*    int dr = 126 + (int)(126*(outputs[0]/(1+abs(outputs[0]))));
-    int dg = 126 + (int)(126*(outputs[1]/(1+abs(outputs[1]))));
-    int db = 126 + (int)(126*(outputs[2]/(1+abs(outputs[2]))));  
-*/   
-    return color(r, g, b);
+*/
+    r = r*(1 + (int)outputs[0]);
+    g = g*(1 + (int)outputs[1]);
+    b = b*(1 + (int)outputs[2]);
+    alpha = alpha*(1 + (int)outputs[3]);
+    return color(r, g, b, alpha);
   }
 
   // Gets the end point of the ith segment/rib/spine used to create
