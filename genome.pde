@@ -13,8 +13,7 @@ Trait control = new Trait(10);
 Trait maxReproductiveEnergy = new Trait(10);
 Trait maxLocomotionEnergy = new Trait(10);
 Trait maxHealthEnergy = new Trait(10);
-static final int METABOLIC_WEIGHTS = metabolic_network.num_weights;
-ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
+ArrayList<Trait> metabolicTraits = new ArrayList<Trait>(metabolic_network.num_weights);
 
 // Reproduction
 Trait gameteCost = new Trait(10);
@@ -96,8 +95,8 @@ class Segment {
 // "Static" initialization of trait lists
   {
     // initialize the metabolic weights
-    for (int i = 0; i < METABOLIC_WEIGHTS; i++) {
-      metabolicNetwork.add(new Trait(10));
+    for (int i = 0; i < metabolic_network.num_weights; i++) {
+      metabolicTraits.add(new Trait(10));
     }
 
     // initialize the brain weights
