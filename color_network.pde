@@ -7,11 +7,11 @@ class color_network{
   color_network(Genome genome){
     weights = new float[num_weights];
     for(int i = 0; i < num_weights; i++){
-    //  weights[i] = genome.sum(colorNetwork.get(i)); // these X weights will come from the genome
-      weights[i] = randomGaussian(); 
+      // these X weights come from the genome
+      weights[i] = genome.sum(colorTraits.get(i));
     }
   }
-  
+
   void calculate(float[] inputs, float[] outputs){  // note, the first input should be a 1 for the bias
     float sum = 0;
 /*    outputs[0] += (inputs[0] * weights[0]) + (inputs[1] * weights[1]) - (inputs[2] * weights[2]) + (inputs[4] * weights[4]);

@@ -51,6 +51,7 @@ Trait expressedSegments = new Trait(10);
 Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
+ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
 Trait densityTrait = new Trait(10);
 Trait restitutionTrait = new Trait(10);
 
@@ -107,6 +108,11 @@ class Segment {
     // initialize the segments and their traits
     for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
       segments.add(new Segment());
+    }
+
+    // initialize the color network weights
+    for (int i = 0; i < color_network.num_weights; i++) {
+      colorTraits.add(new Trait(10));
     }
   }
 
