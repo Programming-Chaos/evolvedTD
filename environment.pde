@@ -647,7 +647,7 @@ class environment{
       }
     }
     if (displayScent) {
-      display_scent();
+       display_scent();
       display_creature_scent();
     }
     //display_water();
