@@ -31,7 +31,7 @@ class Brain {
     }
   }
   
-  //Custom Constructor
+  //Custom Constructor - taking two ints
   Brain(int rows, int col){
     brain = new int[rows][col];
     row_size = rows;
@@ -42,6 +42,19 @@ class Brain {
       }
     }  
   }
+  
+  //Customer Constructor - taking genome
+ Brain(genome g){
+    brain = new int[g.BRAIN_INPUTS][g.BRAIN_OUTPUTS];
+    row_size = rows;
+    col_size = col;
+    for(int i = 0; i < rows; i++){
+      for(int j = 0; j < col; j++){
+        brain[i][j] = (int)random(2);
+      }
+    }  
+  }
+ 
  
  //basic print function for testing
  void print_weights(){

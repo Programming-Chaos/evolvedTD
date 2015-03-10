@@ -17,6 +17,7 @@ class creature {
 
   // encodes the creature's genetic information
   Genome genome;
+  Brain brain;
 
   // metabolism
   float energy_reproduction;     // energy for gamete produciton
@@ -51,6 +52,7 @@ class creature {
     angle = a;
     genome = new Genome();
     senses = new Sensory_Systems(genome);
+    brain = new Brain(genome.BRAIN_INPUTS, genome.BRAIN_OUTPUTS);
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
