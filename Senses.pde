@@ -274,11 +274,16 @@ class Sensory_Systems {
     brain_array[b_angle] = c.body.getAngle();
   }
 
+
+/* Since fixtures do not work the way I expected I need to d a tricky thing to detect pressure on side
+   in the contact and endcontact function in evolveTD, if two creatures touch, a unique key is created, the largest
+   is kept and then the ID is added, and the angle is added to the brain*/
+   
   void Add_Side_Pressure(int ID, float angle) {
     int i = 0;
     int zero_location;
 
-    while (pressure_side_ids[i] != 0 && pressure_side_ids[i] != ID) {
+    while (pressure_side_ids[i] != 0 && pressure_side_ids[i] != ID && i < 39) {
       i++;
     }
 
