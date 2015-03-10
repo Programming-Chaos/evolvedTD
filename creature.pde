@@ -5,6 +5,27 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
+class Gamete {
+  int xPos, yPos;
+  int time;
+  int energy;
+  Genome.Chromosome gamete;
+
+  Gamete(int x, int y, int e, Genome.Chromosome g){
+    xPos = x;
+    yPos = y;
+    time = timesteps;
+    energy = e;
+    gamete = g;
+  }
+
+  int getX()                      { return xPos; }
+  int getY()                      { return yPos; }
+  int getTime()                   { return time; }
+  int getEnergy()                 { return energy; }
+  Genome.Chromosome getGamete()   { return gamete; }
+}
+
 class creature {
   // All creatures have a Box2D body, a genome, and some other qualities:
   // fitness, health, a max health, angle they are facing, etc.
@@ -39,6 +60,14 @@ class creature {
   int regen_energy_cost = 5; // value to determine how much regenerating health costs
   int time_in_water;     // tracks how much time the creature spends in water
   int time_on_land;      // tracks how much time the creature spends on land
+
+  // Reproduction variables
+  int baseGameteCost = 100;  // Gametes base energy cost
+  int baseGameteTime = 200;  // Gametes base create time in screen updates.
+  int baseGameteEnergy = 500;// Gametes base extra energy
+  int gameteTimeLapse = 0;   // Keeps track of time since last gamete
+
+  ArrayList<Gamete> gameteStack = new ArrayList(); // Holds the gametes and their map positions.
 
   // Constructor, creates a new creature at the given location and angle
 
@@ -111,11 +140,42 @@ class creature {
     scentStrength = setScentStrength(this); // how strong is the scent
     scentColor = setScentColor(this);       // what color is the scent
  }
+ 
+  // construct a new creature with the given genome, energy and position
+  creature(Genome g, float e, Vec2 pos) {
+    angle = random(0, 2 * PI); // start at a random angle
+    genome = g;
+
+    numSegments = getNumSegments();
+    computeArmor();
+    float averageArmor = armor.sum() / numSegments;
+    density = (getDensity() * averageArmor);
+
+    makeBody(pos);
+    float energy_scale = 500;
+    float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
+    max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
+    max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
+    energy_reproduction = 0;                                // have to collect energy to reproduce
+    energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
+    energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
+    metabolism = new metabolic_network(genome);
+    coloration = new color_network(genome);
+    health = maxHealth;                                     // probably should be evolved
+    fitness = 0;
+    body.setUserData(this);
+    alive = true;
+
+    scent = setScent(this);                 // does creature produce scent
+    scentStrength = setScentStrength(this); // how strong is the scent
+    scentColor = setScentColor(this);       // what color is the scent
+ }
 
   boolean getScent()        { return scent; }
   float getScentStrength()  { return scentStrength; }
   int getScentColor()       { return scentColor; }
-  
+
   int setScentColor( creature c ) {
     FloatList l;
     float s;
@@ -137,7 +197,7 @@ class creature {
     // mapping function goes here
     return s;
   }
-  
+
   // function setScent will calculate the creatures scent value
   boolean setScent( creature c ) {
     float s;
@@ -154,7 +214,7 @@ class creature {
   Vec2 getPos() {
     return(box2d.getBodyPixelCoord(body));
   }
-  
+
   // adds some energy to the creature - called when the creature picks
   // up food/resource
   void addEnergy(int x) {
@@ -349,7 +409,7 @@ class creature {
   void killBody() {
       box2d.destroyBody(body);
   }
-  
+
   double getCompat() {
     //return genome.getCompat();
     return 0;
@@ -427,7 +487,7 @@ class creature {
     //println(torque);
     return torque;
   }
-  
+
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
     fitness = 0;
@@ -438,15 +498,15 @@ class creature {
     }
     // Note that unrealistically dead creatures can reproduce, which is necessary in cases where a player kills a whole wave
   }
-  
+
   void changeHealth(int h) {
     health += h;
   }
-  
+
   float getFitness() {
     return fitness;
   }
-  
+
   // The update function is called every timestep
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
@@ -468,7 +528,7 @@ class creature {
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter()); 
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
     }
-    
+
     // Creatures that run off one side of the world wrap to the other side.
     if (pos2.x < -0.5 * worldWidth) {
       pos2.x += worldWidth;
@@ -496,12 +556,38 @@ class creature {
       // referenced elsewhere
       killBody();
     }
+    
+    
+    // if creature has enough energy and enough time has passed,
+    // lay a gamete at current position on the map.
+    if (gameteTimeLapse > baseGameteTime * (1 + genome.avg(gameteTime))
+        && energy_reproduction > (baseGameteCost * (1 + genome.avg(gameteCost))
+                                  + baseGameteEnergy * (1 + genome.avg(gameteEnergy)))) {
+
+      // Get the tile position of the creature
+      int xPos = (int) (box2d.getBodyPixelCoord(body).x / cellWidth);
+      int yPos = (int) (box2d.getBodyPixelCoord(body).y / cellHeight);
+      int energy = (int) (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+
+      // Create gamete and place in gameteSack
+      Gamete g = new Gamete(xPos, yPos, energy,
+                            (Genome.Chromosome)genome.getGametes().get(0));
+      gameteStack.add(g);
+
+      // remove energy from creature
+      energy_reproduction -= (baseGameteCost * (1+genome.avg(gameteCost)) + baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+
+      gameteTimeLapse = 0;
+    }
+    else gameteTimeLapse++;
+
+
     if (energy_health > 0 && health < maxHealth) {  // Spends energy devoted to health regen to increase the creature's health over time
       health = health + health_regen; // the creature health is increased
       energy_health = energy_health - regen_energy_cost; //the energy to regen is decreased
     }
   }
-  
+
   // Called every timestep (if the display is on) draws the creature
   void display() {
     if (!alive) { // dead creatures aren't displayed
@@ -544,7 +630,7 @@ class creature {
     ellipse(eye.x, eye.y - 1, 2, 2);
     ellipse(-1 * eye.x, eye.y - 1, 2, 2);
     popMatrix();
-    
+
     // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
     // Note that the length (50) and angles PI*40 and PI*60 are the
@@ -561,7 +647,7 @@ class creature {
     sensorX = round((sensorX) / 20) * 20;
     sensorY = round((sensorY) / 20) * 20;
     line(pos.x, pos.y, sensorX, sensorY);
-    
+
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
@@ -576,7 +662,7 @@ class creature {
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
   }
-  
+
   class segIndex {  // This class is a helper. One of these is attached to every segment of every creature
     int segmentIndex;  // This class's only variable is an index corresponding to of the creature's segments this is, so its armor can be referenced later
   }
@@ -590,7 +676,7 @@ class creature {
     bd.linearDamping = 0.9;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
     body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
-    
+
     // Define a polygon object, this will be used to make the body fixtures
     PolygonShape sd;
 
@@ -625,7 +711,7 @@ class creature {
 //      fd.userData.segmentIndex = i;
       body.createFixture(fd);  // Create the actual fixture, which adds it to the body
     }
-    
+
     // now repeat the whole process for the other side of the creature
     for (int i = 0; i < numSegments; i++) {
       sd = new PolygonShape();
