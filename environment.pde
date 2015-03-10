@@ -348,6 +348,18 @@ class environment{
     return 0;
   }
   
+  int checkForLiquid(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    if (tileMap[x][y].isLiquid()) {
+      return 1;
+    }
+    return 0;
+  }
+  
   void display() {
     updateEnviron();
     pushMatrix();

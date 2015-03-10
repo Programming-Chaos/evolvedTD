@@ -13,8 +13,7 @@ Trait control = new Trait(10);
 Trait maxReproductiveEnergy = new Trait(10);
 Trait maxLocomotionEnergy = new Trait(10);
 Trait maxHealthEnergy = new Trait(10);
-static final int METABOLIC_WEIGHTS = metabolic_network.num_weights;
-ArrayList<Trait> metabolicNetwork = new ArrayList<Trait>(METABOLIC_WEIGHTS);
+ArrayList<Trait> metabolicTraits = new ArrayList<Trait>(metabolic_network.num_weights);
 
 // Reproduction
 Trait gameteCost = new Trait(10);
@@ -55,10 +54,23 @@ ArrayList<AppendageTrait> appendages
 // encodes number of appendages actually expressed
 Trait expressedAppendages = new Trait(10);
 
-// TODO: remove these traits when segment refactor is complete
+// sensory thresholds
+Trait painTrait = new Trait(10);
+Trait painDampeningTrait = new Trait(10);
+Trait painThresholdTrait = new Trait(10);
+Trait sidePressureTrait = new Trait(10);
+Trait tasteTrait = new Trait(10);
+Trait speedTrait = new Trait(10);
+Trait angularMomentumTrait = new Trait(10);
+
+ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
+// TODO: will these traits be gone with the use of a color network?
 Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
+Trait alphaTrait = new Trait(10);
+
+// TODO: remove these traits when segment refactor is complete
 Trait densityTrait = new Trait(10);
 Trait restitutionTrait = new Trait(10);
 
@@ -82,18 +94,12 @@ class Trait {
 
 class Segment {
   Trait endPoint;
-  Trait redColor;
-  Trait greenColor;
-  Trait blueColor;
   Trait armor;
   Trait density;
   Trait restitution;
 
   Segment() {
     endPoint    = new Trait(10);
-    redColor    = new Trait(10);
-    greenColor  = new Trait(10);
-    blueColor   = new Trait(10);
     armor       = new Trait(10);
     density     = new Trait(10);
     restitution = new Trait(10);
@@ -119,8 +125,8 @@ class AppendageTrait {
 // "Static" initialization of trait lists
   {
     // initialize the metabolic weights
-    for (int i = 0; i < METABOLIC_WEIGHTS; i++) {
-      metabolicNetwork.add(new Trait(10));
+    for (int i = 0; i < metabolic_network.num_weights; i++) {
+      metabolicTraits.add(new Trait(10));
     }
 
     // initialize the brain weights
@@ -136,6 +142,11 @@ class AppendageTrait {
     // initialize the appendages and their traits
     for (int i = 0; i < (MAX_APPENDAGES); i++) {
       appendages.add(new AppendageTrait());
+    }
+
+    // initialize the color network weights
+    for (int i = 0; i < color_network.num_weights; i++) {
+      colorTraits.add(new Trait(10));
     }
   }
 
