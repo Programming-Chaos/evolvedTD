@@ -9,10 +9,16 @@ int cellWidth = 20;
 int cellHeight = 20;
 int maxscent = 255;
 
-boolean isRaining;    // returns whether or not it is raining
+boolean isRaining;     // returns whether or not it is raining
 
-int init;
-int gameStartRain()    { return init = (int)random(1,3); }
+int waitRainOff, waitRainOn; // will wait 1 minute before raining again after stopping
+int tempWaitOff, tempWaitOn; // temp time holders to compare againsr waitRain time
+int timeStepTemp = timesteps;
+
+int waterReserveMax = 10000; // the world is only allowed to contain a certain amount of water
+int waterReserve = int(random(1, 10000)); // start of game water reserve amount
+
+int initializeRain() { return int(random(1,3)); }
 
 class tile {
   float altitude;
@@ -26,8 +32,6 @@ class tile {
 
   int creatureScentColor; // value to set what color the creatures scent is
   
-  int waterReserve;    // the world is only allowed to contain a certain amount of water
-
   float scent;         // how much scent is present
   float creatureScent; // how much creature scent is present
 
@@ -156,12 +160,14 @@ class environment{
     tempInfluence();
     makeImage();
     
-    if(gameStartRain() == 1) {
-      isRaining = true;  
-    } else {
+    int chance = initializeRain();
+    if(chance == 1) {
       isRaining = false;
+      waitRainOff = minute();
+    } else {
+      isRaining = true;
+      waitRainOn = minute();
     }
-    
     // makeImageFood();
     // updateEnviron();
   }
@@ -593,13 +599,19 @@ class environment{
     }
     //display_water();
 
-    if(isRaining == false) {
+
+    // checks to see if it can rain or not
+    if(timesteps == 0)
+      timeStepTemp = 0;
+    updateWaterReserve();
+    if(!isRaining)
       chanceOfRain();  
-    }
+      
     if(isRaining) {
       rainfall();
       whileRaining();
-    } 
+    }
+    timeStepTemp = timesteps;
   }
   
   // Commented out; water was added to the image_draw function
@@ -696,40 +708,66 @@ class environment{
   }
 
   /**** WEATHER ****/
-  void chanceOfRain() {
-    int chance = int(random(1, 1000)); 
-    if (chance == 1) {
-      isRaining = true;  
-    }  
+  
+  // updates the amount of water in the water reserve
+  void updateWaterReserve() {
+    if(isRaining) {
+      if(waterReserve <= 0) {}
+      else
+        waterReserve = (waterReserve - (timesteps - timeStepTemp));
+    }
+    if(!isRaining) {
+      if(waterReserve >= waterReserveMax) {}
+      else 
+        waterReserve = (waterReserve + (timesteps - timeStepTemp));
+    }
   }
   
+  // checks to see if it can rain
+  void chanceOfRain() {
+    int chance = int(waterReserve / 100);
+    int rand = int(random(0,100));
+    tempWaitOff = minute();
+    if(tempWaitOff >= waitRainOff+1 && rand <= chance) 
+      isRaining = true;
+    if(isRaining == true)
+      waitRainOn = minute();
+  }
+  
+  // checks water reserve amounts and lightning
   void whileRaining() {
-    int chance = int(random(1, 1000));
-    if (chance == 1) {
+    int chance = int(waterReserve / 100);
+    int rand = int(random(0,100));
+    tempWaitOn = minute();
+    if(tempWaitOn >= waitRainOn+1 && (chance - rand) <= 0)
       isRaining = false;
-    }
     chanceOfLightning();
+    if(isRaining == false) 
+      waitRainOff = minute(); 
   }   
   
+  // Randomly decides if lightning should strike
   void chanceOfLightning() {
-    int chance = int(random(1,20));
+    int chance = int(random(1,30));
     if (chance == 1) {
       lightning();
     }
   }
   
+  // Draws rain animation
   void rainfall() {
     float x, y;
     fill(0, 0, 255, 50);
-    rect((worldWidth * -1), (worldHeight * -1), (worldWidth * 2), (worldHeight * 2));
+    rect((-worldWidth), (-worldHeight), (worldWidth*2), (worldHeight*2));
     for(int i = 0; i < 600; i++) {
-      x = random(worldWidth * (-1), worldWidth);
-      y = random(worldHeight * (-1), worldHeight);
+      x = random(-worldWidth, worldWidth);
+      y = random(-worldHeight, worldHeight);
       stroke(0, 0, 200, 95);
       line(x, y, x, y+30);
     }
   }
   
+  // Draws lightning and kills a creature if it is on the tile
   void lightning() {
     int randX = int(random(-worldWidth, worldWidth));
     int randY = int(random(-worldHeight, worldHeight));
@@ -765,47 +803,8 @@ class environment{
       c.changeHealth(-1000);
     }
     strokeWeight(1);
+    //thunder.rewind();
+    //thunder.play();  
   }
 }
 
-
-
-    
-    /***************
-    
-    Randomly choose rainfall duration
-    initializeRain();
-    
-
-    
-    
-    ****************/
-    
-    /*
-    int time = 60;
-    int currentMinute = minute();
-    int currentSecond = second();
-
-    int waitMinute = (int)random(0, 59) + currentMinute;
-    int waitSecond = (int)random(0, 59) + currentSecond;
-    
-    
-    if(currentMinute == waitMinute && currentSecond == waitSecond) {
-      // stop rain 
-      isRaining == false;
-    } 
-    
-    if(chanceOfRain() == true) {
-      rainfall();
-      isRaining = true;
-    }   
-    
-    boolean decision = chanceOfRain();
-    if(isRaining == false) {
-      if(decision == true) {
-        initiateRain();
-      }
-    } else if(isRaining == true) {
-      whileRaining();  
-    }
-    */
