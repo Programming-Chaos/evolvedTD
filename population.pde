@@ -5,8 +5,9 @@
 class population {
   ArrayList<creature> swarm;
   static final int POP_SIZE = 20;
-  
-  ArrayList<Genome.Chromosome> gametes = new ArrayList();
+
+  float baseGameteChance = 0.4; // Base gamete success rate
+  int baseGameteRadius = 6; // Base gamete mating range
 
   population() {
     swarm = new ArrayList<creature>();
@@ -17,7 +18,7 @@ class population {
       swarm.add(c);
     }
   }
-  
+
   void update() {
     for (creature c : swarm) {
       c.update();
@@ -29,7 +30,7 @@ class population {
       c.display();
     }
   }
-   
+
   Vec2 vec_to_random_creature() {
     Vec2 v = new Vec2(0,0);
     creature c;
@@ -42,7 +43,7 @@ class population {
     }
     return c.getPos();
   }
-   
+
   Vec2 closest(Vec2 v) {
     Vec2 closest = new Vec2(0,0), temp;
     float distance, tempd;
@@ -71,7 +72,7 @@ class population {
     }
     return counter;
   }
-   
+
   void set_creatures() {
     Vec2 p = new Vec2();
     for (creature c: swarm) {
@@ -128,13 +129,23 @@ class population {
     return int(fitness/1000);
   }
 
-  // get random gamete from gametes pool n
-  Genome.Chromosome getRandomGamete(int n) {
-    return gametes.get(int(random(gametes.size())));
+  // orders gametes by spawn time
+  void OrderGametes(ArrayList<Gamete> gList) {
+    for (int i=0; i < gList.size()-1; i++) {
+      Gamete g1, g2;
+      g1 = gList.get(i);
+      g2 = gList.get(i+1);
+      if (g1.getTime() > g2.getTime()) { // swap
+        gList.set(i+1, g1);
+        gList.set(i, g2);
+        i = 0; // start back at the beginning.
+      }
+    }
   }
 
   // creates the next generation
   void next_generation() {
+    ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
 
     for (creature c : swarm) {
@@ -145,30 +156,56 @@ class population {
         generation.add(c);
       }
 
-      // Add 2 * scaled fitness number of gametes to bucket for
-      // "fitness proportional selection"
-      for (int i = 0; i < nGametes(c.fitness); i++) {
-        // TODO: replace with an action which produces gametes in a
-        // certain proximity
-        gametes.addAll(c.genome.getGametes());
+      // Add all of a creatures gametes to the gamete pool
+      for(Gamete g : c.gameteStack) {
+        gametes.add(g);
       }
     }
+    // Place gametes in order of time.
+    OrderGametes(gametes);
 
+    int childrenBred = 0;
+    int childrenNew = 0;
     while (generation.size() < POP_SIZE) {
-      // broadcast breeding, i.e. random selection
-      // TODO: refactor for proximity breeding
-      Genome.Chromosome x = null;
-      Genome.Chromosome y = null;
-
-      while (!areGametesCompatible(x, y)) {
-        x = getRandomGamete(0);
-        y = getRandomGamete(0);
+      // add random creatures if no gametes
+      if (gametes.size() == 0) {
+        childrenNew++;
+        generation.add(new creature(new Genome(), 20000));
+        continue;
       }
 
-      generation.add(new creature(new Genome(x, y), 20000.0));
-    }
+      // Get the next gamete (priority time placement)
+      Gamete g1 = gametes.remove(0);
+      IntList proxGametes = new IntList();
 
-    gametes.clear(); // TODO: replace with sexual cannibalism
+      // Get gametes in widening range search of our selected gamete
+      int multiplier = 0;
+      while (proxGametes.size() < 1) {
+        int range = multiplier++ * 5;
+        for (int i = 0; i < gametes.size(); i++) {
+          Gamete g2 = gametes.get(i);
+          if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
+              g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
+            // store index of nearby gamete
+            proxGametes.append(i);
+          }
+        }
+      }
+
+      if (proxGametes.size() > 0) {
+        // get first gamete layed in range
+        Gamete g2 = gametes.remove(proxGametes.get(0));
+        // get the point between the two gametes.
+        int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
+        int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
+        Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
+        
+        childrenBred++;
+        generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+                                    10000 + g1.energy + g2.energy, pos));
+      }
+    }
+    println("made " + childrenBred + " and needed " + childrenNew + " more");
     swarm = generation;
   }
 }

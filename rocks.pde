@@ -15,6 +15,12 @@ class rock {
     the_rock.setUserData(this);
   }
   
+  rock(int x, int y, int r) {  // Construct a rock at the given location
+    radius = r;
+    makebody(x, y);
+    the_rock.setUserData(this);
+  }
+  
   rock() {  // Construct a rock at a random location
     radius = (int)(10);
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
