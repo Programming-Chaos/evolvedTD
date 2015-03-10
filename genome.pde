@@ -47,11 +47,12 @@ ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 
-// TODO: remove these traits when segment refactor is complete
 Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
+
+// TODO: remove these traits when segment refactor is complete
 Trait densityTrait = new Trait(10);
 Trait restitutionTrait = new Trait(10);
 
@@ -75,18 +76,12 @@ class Trait {
 
 class Segment {
   Trait endPoint;
-  Trait redColor;
-  Trait greenColor;
-  Trait blueColor;
   Trait armor;
   Trait density;
   Trait restitution;
 
   Segment() {
     endPoint    = new Trait(10);
-    redColor    = new Trait(10);
-    greenColor  = new Trait(10);
-    blueColor   = new Trait(10);
     armor       = new Trait(10);
     density     = new Trait(10);
     restitution = new Trait(10);
