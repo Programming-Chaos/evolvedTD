@@ -183,7 +183,7 @@ class creature {
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
-  private color getColor() {
+  private color getColor(int n) {
     // TODO: refactor for color per segment
     float[] inputs = new float[coloration.getNumInputs()];
     float redColor = genome.sum(redColorTrait);
@@ -203,6 +203,7 @@ class creature {
     inputs[5] = g/255; 
     inputs[6] = b/255; 
     inputs[7] = a/255;
+    inputs[8] = n;
     float[] outputs = new float[coloration.getNumOutputs()];
     coloration.calculate(inputs, outputs);
     float sum = 0;
@@ -454,6 +455,7 @@ class creature {
     if (!alive) { // dead creatures don't update
       return;
     }
+    timestep_counter++;
     float a = body.getAngle();
     float m = body.getMass();
     float f = getForce();
@@ -521,7 +523,7 @@ class creature {
     stroke(0);   // Draw polygons with edges
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       c %= numSegments;
-      fill(getColor()); // Get the creature's color
+      fill(getColor(c)); // Get the creature's color
       strokeWeight(armor.get(c));
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape

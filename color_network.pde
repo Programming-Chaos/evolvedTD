@@ -1,5 +1,5 @@
 class color_network{
-  static final int input_size = 8;
+  static final int input_size = 9;
   static final int output_size = 4;
   static final int num_weights = input_size*output_size;
   float[] weights;
