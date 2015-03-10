@@ -28,6 +28,8 @@ class tile {
   boolean hasRock;     // is there a rock present
   boolean hasScent;    // is scent present
   boolean hasCreatureScent; // is creature scent present
+  boolean hasReproScent;
+  boolean hasPainScent;
 
   boolean hasTower;    // is there a tower present
   
@@ -175,15 +177,7 @@ class environment{
         if (tileMap[x][y].hasFood()) {
           count = tileMap[x][y].getScent() + 10; // food causes scent to increase
           tileMap[x][y].setScent(min(count,maxscent)); // increase scent up to the max
-
-          /* if creature that has scent add scent to map
-        } else if( (tileMap[x][y].hasCreature != null) &&
-                   (tileMap[x][y].hasCreature.scent >= 5) ) {
-          count = tileMap[x][y].getScent() + 10;
-          tileMap[x][y].setScent(min(count,maxscent));
-        }
-
-          */
+          tileMap[x][y].hasScent = true;
         }
         else {
           count = 0;
@@ -207,6 +201,7 @@ class environment{
       for (int x = 0; x < environWidth; x++) {
         //scent[x][y] = min(maxscent,temparray[x][y]);
         tileMap[x][y].setScent(temparray[x][y]);
+        tileMap[x][y].hasScent = true;
       }
     }
     }
@@ -223,21 +218,15 @@ class environment{
       for (int x = 0; x < environWidth; x++) {
         if (tileMap[x][y].hasCreature != null) {
           if ( tileMap[x][y].hasCreature.getScent() == true ) {
-          count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
-          tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the max
-
-          // need to check bounds here
-          // environWidth
-          // environHeight
-          tileMap[x][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x+1+environWidth)%environWidth][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x+1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x+1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );          
+            count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
+            tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the max
+            if( tileMap[x][y].hasCreature.getScentType() == 1 ) {
+              tileMap[x][y].hasCreatureScent = true;
+            } else if( tileMap[x][y].hasCreature.getScentType() == 2 ) {
+              tileMap[x][y].hasReproScent = true;
+            } else if( tileMap[x][y].hasCreature.getScentType() == 3 ) {
+              tileMap[x][y].hasPainScent = true;
+            }
           }
         }
         else {
@@ -429,16 +418,12 @@ class environment{
     noStroke();
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
+        if( tileMap[x][y].hasScent ) {
         fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
-         /* code that colors cells with any non-zero scent - shows that scent spreads very far
-           if (scent[x][y] > 0) {
-           fill(100, 100, 100);
-           }
-           else {
-           fill(100, 100, 100, 0);
-           }
-        */
-          
+        } else {
+          noFill();
+          noStroke();
+        }
         rect(offset, offset, size, size);
         translate(cellWidth, 0);
       }
@@ -455,29 +440,25 @@ class environment{
     noStroke();
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
-        if( tileMap[x][y].getCreatureScentColor() == 1 ) {
+
+        if( tileMap[x][y].hasCreatureScent ) {
           fill(255, 0, 0, 255 * tileMap[x][y].getCreatureScent() / maxscent);
-        } else if( tileMap[x][y].getCreatureScentColor() == 2 ) {
-          fill(242, 2, 232, 255 * tileMap[x][y].getCreatureScent() / maxscent);          
-        } else {
-          fill(0 , 0, 0, 0);
+        } else if( tileMap[x][y].hasReproScent ) {
+            fill(242, 2, 232, 255 * tileMap[x][y].getCreatureScent() / maxscent);
         }
-         /* code that colors cells with any non-zero scent - shows that scent spreads very far
-           if (scent[x][y] > 0) {
-           fill(100, 100, 100);
-           }
-           else {
-           fill(100, 100, 100, 0);
-           }
-        */
-          
+        else if( tileMap[x][y].hasPainScent ) {
+            fill(50, 2, 100, 255 * tileMap[x][y].getCreatureScent() / maxscent);            
+        } else {
+          noFill();
+          noStroke();
+        }
         rect(offset, offset, size, size);
         translate(cellWidth, 0);
       }
       translate(worldWidth*-1, cellHeight);
     }    
     popMatrix();  
-  }
+}
   
   void makeImage() { // creates a PImage of the environment instead having to draw each square individually
     image = createGraphics(worldWidth, worldHeight);

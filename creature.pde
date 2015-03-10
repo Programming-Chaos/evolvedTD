@@ -15,7 +15,10 @@ class creature {
   // communication traits
   boolean scent;         // used to determine if creature is capable of producing scent
   float scentStrength;   // how strong the creature's scent is
-  int scentColor;        // store an integer for different colors
+  int scentType;        // store an integer for different colors
+  boolean CreatureScent = false;
+  boolean ReproScent = false;
+  boolean PainScent = false;
 
   float energy_reproduction;  // energy for gamete produciton
   float energy_locomotion;    // energy for locomotion and similar activites
@@ -72,7 +75,7 @@ class creature {
 
     scent = setScent(this);     // does creature produce scent
     scentStrength = setScentStrength(this);        // how strong is the scent
-    scentColor = setScentColor(this); // what color is the scent
+    scentType = setScentType(this); // what color is the scent
 
   }
 
@@ -109,26 +112,59 @@ class creature {
 
     scent = setScent(this);                 // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
-    scentColor = setScentColor(this);       // what color is the scent
+    scentType = setScentType(this);       // what color is the scent
  }
 
   boolean getScent()        { return scent; }
   float getScentStrength()  { return scentStrength; }
-  int getScentColor()       { return scentColor; }
+  int getScentType()       { return scentType; }
   
-  int setScentColor( creature c ) {
-    FloatList l;
-    float s;
-    int val;
-    l = c.genome.list(scentTrait);
-    s = l.get(5); // the 5th gene determines scent color for now
-    // map function goes here
-    if( s >= 0 ) {
+  int setScentType( creature c ) {
+    if( c.scent == true ) {
       return 1;
     } else {
-      return 2;
+      return 0;
     }
   }
+
+  void TurnOnReproScent( creature c ) {
+    if( c.scent == false ) {
+      return;
+    } else {
+      if( c.genome.sumX(scentTrait) >= 0 ) {
+        c.ReproScent = true;
+        c.CreatureScent = false;
+        c.PainScent = false;
+      }
+    }
+  }
+
+  void TurnOffReproScent( creature c ) {
+    c.ReproScent = false;
+    if( c.scent == true ) {
+      c.CreatureScent = true;
+    }
+  }
+
+    void TurnOnPainScent( creature c ) {
+    if( c.scent == false ) {
+      return;
+    } else {
+      if( c.genome.sumY(scentTrait) >= 0 ) {
+        c.ReproScent = false;
+        c.CreatureScent = false;
+        c.PainScent = true;
+      }
+    }
+  }
+
+  void TurnOffPainScent( creature c ) {
+    c.PainScent = false;
+    if( c.scent == true ) {
+      c.CreatureScent = true;
+    }
+  }
+
 
   // set scentStrength
   float setScentStrength( creature c ) {
