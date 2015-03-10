@@ -47,12 +47,11 @@ class creature {
         creature_num = creature_count;
     angle = a;
     genome = new Genome();
-    senses = new Sensory_Systems();
+    senses = new Sensory_Systems(genome);
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
     density = (getDensity() * averageArmor);
-
     makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
     float energy_scale = 500; // scales the max energy pool size
@@ -80,7 +79,7 @@ class creature {
         creature_num = creature_count;
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-    senses = new Sensory_Systems();
+    senses = new Sensory_Systems(genome);
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;

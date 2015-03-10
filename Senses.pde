@@ -1,3 +1,13 @@
+/* SENSORY SYSTEMS 
+
+Here have added feelers evolution, and the ability for each of the
+feelers to detect different things
+
+Additionally we implemented taste, pain, speed, mass, and energy detection*/
+
+
+
+
 import shiffman.box2d.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.collision.AABB;
@@ -24,7 +34,7 @@ class Sensory_Systems {
   int b_temperature_feelers = 165;
   
   int b_taste_feelers = 205;
-  int b_taste = 405;
+  int b_taste = 405;  // should be single
   int b_scent_feelers = 605;
   
   int b_speed_x = 806;
@@ -64,9 +74,10 @@ class Sensory_Systems {
   int scent_appendages;
   
   //Speed/balance receptors
-  boolean speed;
-  
- 
+  boolean speed = false;
+  boolean angular = false;
+  boolean mass = false;
+  boolean energy = false;
   float [] apend_angles;
   float [] apend_length;
   float [] pressure_side_ids;
@@ -75,34 +86,82 @@ class Sensory_Systems {
   boolean [] appendage_taste;
   boolean [] appendage_scent;
   
-  Sensory_Systems() {
-    Set_Pain(true, 0, .50, 100); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
-    num_appendages = 40;
+  Sensory_Systems(Genome g) {
+    double can_feel_pain = Utilities.Sigmoid(g.sum(painTrait), 5, 1);
+    boolean canPain = false;
+    
+    if (can_feel_pain > 0) {
+        canPain = true;
+    }
+
+    double canMass = Utilities.Sigmoid(g.sum(massTrait), 5, 1);
+    if (canMass > 0) {
+        mass = true;
+    }
+    
+    double canAngular = Utilities.Sigmoid(g.sum(angularMomentumTrait), 5, 1);
+    if (canAngular > 0) {
+        angular = true;
+    }
+    
+    double canSpeed = Utilities.Sigmoid(g.sum(speedTrait), 5, 1);
+    if (canSpeed > 0) {
+        speed = true;
+    }
+
+    double canTaste = Utilities.Sigmoid(g.sum(tasteTrait), 5, 1);
+    if (canTaste > 0) {
+        taste = true;
+    }
+
+    double canEnergy = Utilities.Sigmoid(g.sum(energyTrait), 5, 1);
+    if (canEnergy > 0) {
+        energy = true;
+    }
+
+    Set_Pain(pain, 0, abs((float)Utilities.Sigmoid(g.sum(painDampeningTrait), 5, 1)), abs((float)Utilities.Sigmoid(g.sum(painThresholdTrait), 5, 100))); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
+    
+    num_appendages = (int)abs((float)Utilities.Sigmoid(g.sum(expressedAppendages), 10, 3));
+    
     apend_angles = new float[num_appendages];
     apend_length = new float[num_appendages];
     pressure_side_ids = new float[40];
-    
     
     brain_array = new float[1000];
     appendage_pressure = new boolean[num_appendages];
     appendage_taste = new boolean[num_appendages];
     appendage_scent = new boolean[num_appendages];
-    Set_Appendage();
+
+    Set_Appendage(g);
   }
   
   float [] Get_Brain_Array() { return brain_array; };
   
-  void Set_Appendage() {
+  void Set_Appendage(Genome g) {
    for (int i = 0; i < num_appendages; i++) {
-    apend_angles[i]= random(0, 2*PI);
-    apend_length[i] = random(0, 200);
+
+    apend_angles[i]= abs((float)Utilities.Sigmoid(g.sum(appendages.get(i).angle), 3, 2*PI));
+    apend_length[i] = abs((float)Utilities.Sigmoid(g.sum(appendages.get(i).length), 5, 100));
     
-    appendage_pressure[i] = true;
-    appendage_taste[i] = true;
-    appendage_scent[i] = true;
-   } 
+    if (Utilities.Sigmoid(g.sum(appendages.get(i).pressure), 5, 1) > 0) {
+      appendage_pressure[i] = true;
+    } else {
+      appendage_pressure[i] = true;
+    }
+    
+    if (Utilities.Sigmoid(g.sum(appendages.get(i).taste), 5, 1) > 0) {
+      appendage_taste[i] = true;
+    } else {
+      appendage_taste[i] = false;
+    }
+    
+    if (Utilities.Sigmoid(g.sum(appendages.get(i).scent), 5, 1) > 0) {
+      appendage_scent[i] = true;
+    } else {
+     appendage_scent[i] = false;
+    }
+    }
   }
-  
   void Update_Senses(float x, float y, float angle) {
     for (int i = 0; i < num_appendages;  i++) {
       Update_Sense(x, y, angle, apend_angles[i], apend_length[i], i);
@@ -143,14 +202,29 @@ class Sensory_Systems {
     if (appendage_scent[i]) {
       brain_array[b_scent_feelers+i] = environ.getScent(sensorX, sensorY);
     }
-
-    //update to evolve pressure
-    /*environ.checkForFood(sensorX, sensorY);     // Check if there's food 'under' the left sensor
-    creatureAheadL = environ.checkForCreature(sensorX, sensorY);  // Check if there's a creature 'under' the left sensor
-    rockAheadL = environ.checkForRock(sensorX, sensorY); // Check if there's a rock 'under' the left sensor
-    scentAheadL = environ.getScent(sensorX, sensorY);  // Get the amount of scent at the left sensor
- */
   
+  }
+  
+  void Set_Taste(food f) {
+    if (taste) {
+      int []tmp_taste = f.getTaste();
+      brain_array[b_taste] = tmp_taste[0];
+      brain_array[b_taste+1] = tmp_taste[1];
+      brain_array[b_taste+2] = tmp_taste[2];
+      brain_array[b_taste+3] = tmp_taste[3];
+      brain_array[b_taste+4] = tmp_taste[4];
+    }
+  }
+  
+  void Remove_Taste() {
+    if (taste) {
+      brain_array[b_taste] = 0;
+      brain_array[b_taste+1] = 0;
+      brain_array[b_taste+2] = 0;
+      brain_array[b_taste+3] = 0;
+      brain_array[b_taste+4] = 0;
+    } 
+
   }
   
   
@@ -188,22 +262,31 @@ class Sensory_Systems {
   }
   
   void Update_Pain() {
-   brain_array[b_pain] = pain_current/pain_threshold;
-   pain_current *= pain_dampening;
+   if (pain) {
+     brain_array[b_pain] = pain_current/pain_threshold;
+     pain_current *= pain_dampening;
+   }
   }
 
   
   void Set_Stats(creature c) {
+    if (speed) {
+      brain_array[b_speed_x] = c.body.getLinearVelocity().x;
+      brain_array[b_speed_y] = c.body.getLinearVelocity().y;
+    }
+    if (energy) {
+      brain_array[b_energy_reproduction] = c.energy_reproduction / c.max_energy_reproduction;
+      brain_array[b_energy_move] = c.energy_locomotion / c.max_energy_reproduction;
+      brain_array[b_energy_health] = c.energy_health / c.max_energy_reproduction;
+    }
     
-    brain_array[b_speed_x] = c.body.getLinearVelocity().x;
-    brain_array[b_speed_y] = c.body.getLinearVelocity().y;
+    if (angular) {
+      brain_array[b_angular] = c.body.getAngularVelocity();
+    }
+    if (mass) {
+      brain_array[b_mass] = c.body.getMass();
+    }
     
-    brain_array[b_energy_reproduction] = c.energy_reproduction / c.max_energy_reproduction;
-    brain_array[b_energy_move] = c.energy_locomotion / c.max_energy_reproduction;
-    brain_array[b_energy_health] = c.energy_health / c.max_energy_reproduction;
-    
-    brain_array[b_angular] = c.body.getAngularVelocity();
-    brain_array[b_mass] = c.body.getMass();
     brain_array[b_angle] = c.body.getAngle();  
   }
    

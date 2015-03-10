@@ -54,6 +54,16 @@ ArrayList<AppendageTrait> appendages
   = new ArrayList<AppendageTrait>(MAX_APPENDAGES);
 // encodes number of appendages actually expressed
 Trait expressedAppendages = new Trait(10);
+// sensory thresholds
+Trait painTrait = new Trait(10);
+Trait painDampeningTrait = new Trait(10);
+Trait painThresholdTrait = new Trait(10);
+Trait sidePressureTrait = new Trait(10);
+Trait tasteTrait = new Trait(10);
+Trait speedTrait = new Trait(10);
+Trait angularMomentumTrait = new Trait(10);
+Trait massTrait = new Trait(10);
+Trait energyTrait = new Trait(10);
 
 // TODO: remove these traits when segment refactor is complete
 Trait redColorTrait = new Trait(10);

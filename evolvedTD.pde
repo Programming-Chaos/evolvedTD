@@ -228,7 +228,9 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     p1.addEnergy(20000); // getting food is valuable
+    
     food p2 = (food)o2;
+    p1.senses.Set_Taste(p2);
     if (p2 != null) {
       p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
@@ -240,6 +242,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     p1.addEnergy(20000); // getting food is valuable
     food p2 = (food)o1;
+    p1.senses.Set_Taste(p2);
     if (p2 != null) {
       p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
@@ -311,22 +314,41 @@ void endContact(Contact cp) {
   // Get the objects that reference these bodies, i.e. the userData
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
+  
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
-  creature p1 = (creature)o1;
-  creature p2 = (creature)o2;
-  Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
-  Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
-  int collision_1 = int(nf(p1.creature_num, 0) + nf(p2.creature_num, 0));
-  int collision_2 = int(nf(p2.creature_num, 0) + nf(p1.creature_num, 0));
-  int ID;
-if (collision_1 > collision_2) {
-    ID = collision_1;
- } else {
-    ID = collision_2;
+    creature p1 = (creature)o1;
+    creature p2 = (creature)o2;
+    Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
+    Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
+    int collision_1 = int(nf(p1.creature_num, 0) + nf(p2.creature_num, 0));
+    int collision_2 = int(nf(p2.creature_num, 0) + nf(p1.creature_num, 0));
+    int ID;
+    if (collision_1 > collision_2) {
+      ID = collision_1;
+   } else {
+      ID = collision_2;
+    }
+    p1.senses.Remove_Side_Pressure(ID);
+    p2.senses.Remove_Side_Pressure(ID);
   }
-  p1.senses.Remove_Side_Pressure(ID);
-  p2.senses.Remove_Side_Pressure(ID);
+  
+  
+  
+  
+  if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
+    // creatures grab food
+    creature p1 = (creature)o1;
+    p1.senses.Remove_Taste();
   }
+
+  // check the class of the objects and respond accordingly
+  if (o1.getClass() == food.class && o2.getClass() == creature.class) {
+    // creatures grab food
+    creature p1 = (creature)o2;
+    p1.senses.Remove_Taste();
+  }
+  
+  
 }
 
 void place_food() { // done once at the beginning of the game
