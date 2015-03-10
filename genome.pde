@@ -50,6 +50,7 @@ Trait expressedSegments = new Trait(10);
 Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
+Trait alphaTrait = new Trait(10);
 ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
 
 // TODO: remove these traits when segment refactor is complete

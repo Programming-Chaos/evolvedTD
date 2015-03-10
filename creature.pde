@@ -189,6 +189,7 @@ class creature {
     float redColor = genome.sum(redColorTrait);
     float greenColor = genome.sum(greenColorTrait);
     float blueColor = genome.sum(blueColorTrait);
+    float alphaColor = genome.sum(alphaTrait);
 
     int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
     int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
