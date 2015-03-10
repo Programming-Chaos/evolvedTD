@@ -53,7 +53,7 @@ class creature {
     
     genome = new Genome();
     senses = new Sensory_Systems(genome);
-    brain = new Brain(genome.get_brain_inputs(), genome.get_brain_outputs(), genome.get_brain_traits());
+    brain = new Brain(genome);
     
     numSegments = getNumSegments();
     computeArmor();
