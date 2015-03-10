@@ -14,7 +14,7 @@ class creature {
 
   // communication traits
   boolean scent;         // used to determine if creature is capable of producing scent
-  float scentStrength;   // how strong the creature's scent is
+  int scentStrength;   // how strong the creature's scent is
   int scentType;        // store an integer for different colors
   boolean CreatureScent = false;
   boolean ReproScent = false;
@@ -116,7 +116,7 @@ class creature {
  }
 
   boolean getScent()        { return scent; }
-  float getScentStrength()  { return scentStrength; }
+  int getScentStrength()  { return scentStrength; }
   int getScentType()       { return scentType; }
   
   int setScentType( creature c ) {
@@ -167,9 +167,14 @@ class creature {
 
 
   // set scentStrength
-  float setScentStrength( creature c ) {
-    float s;
-    s = c.genome.avg(scentTrait);
+  int setScentStrength( creature c ) {
+    int s;
+    float tmp;
+    tmp = c.genome.avg(scentTrait);
+    if( tmp < -1 ) s = 0;
+    else if( tmp >= -1 && tmp < 0 ) s = 1;
+    else if( tmp >= 0 && tmp < 1 ) s = 2;
+    else s = 3;
     // mapping function goes here
     return s;
   }
@@ -413,6 +418,9 @@ class creature {
     int l = 50; // distance of the sensor from the body (should be evolved)
     int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
     float scentAheadL,scentAheadR;
+    float cscentAheadL,cscentAheadR;
+    float rscentAheadL,rscentAheadR;
+    float pscentAheadL,pscentAheadR;
     double sensorX,sensorY;
     int liquidFLAG = 0;
     // left sensor check
@@ -424,6 +432,9 @@ class creature {
     creatureAheadL = environ.checkForCreature(sensorX, sensorY);  // Check if there's a creature 'under' the left sensor
     rockAheadL = environ.checkForRock(sensorX, sensorY); // Check if there's a rock 'under' the left sensor
     scentAheadL = environ.getScent(sensorX, sensorY);  // Get the amount of scent at the left sensor
+    cscentAheadL = environ.getCScent( sensorX, sensorY);
+    rscentAheadL = environ.getRScent( sensorX, sensorY);
+    pscentAheadL = environ.getPScent( sensorX, sensorY);    
     // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
     if(environ.checkForLiquid(sensorX, sensorY) == 1){   // this checks if the creature is in water
       liquidFLAG = 1;
@@ -437,6 +448,9 @@ class creature {
     creatureAheadR = environ.checkForCreature(sensorX, sensorY); 
     rockAheadR = environ.checkForRock(sensorX, sensorY);
     scentAheadR = environ.getScent(sensorX, sensorY);
+    cscentAheadR = environ.getCScent(sensorX, sensorY);
+    rscentAheadR = environ.getRScent(sensorX, sensorY);
+    pscentAheadR = environ.getPScent(sensorX, sensorY);    
     // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
     if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1){   // this checks if the creature is in water
       time_in_water++;

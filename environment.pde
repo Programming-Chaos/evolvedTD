@@ -21,6 +21,8 @@ class tile {
 
   float scent;         // how much sent is present
   float creatureScent; // how much creature scent is present
+  float reproScent;
+  float painScent;
 
   
   boolean isLiquid;    // is the cell traversable as a liquid
@@ -70,6 +72,8 @@ class tile {
   
   boolean DEBUG_sensing()  { return DEBUG_sensing; }
   float getCreatureScent() {return creatureScent;}
+  float getReproScent() {return reproScent;}
+  float getPainScent() {return painScent;}  
   
   // SET
   void setColor(int c)           { coloring = c; }
@@ -82,6 +86,8 @@ class tile {
   void hasTower(boolean t)       { hasTower = t; }
   void hasCreature(creature c)   { hasCreature = c; }
   void setCreatureScent(float s) { creatureScent = s;}
+  void setReproScent(float s) { reproScent = s;}
+  void setPainScent(float s) { painScent = s;}
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; } 
@@ -213,19 +219,41 @@ class environment{
     float count = 0;
     float[][] temparray;
     int col = 0;
+    int str;
     temparray = new float[environWidth][environHeight];
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         if (tileMap[x][y].hasCreature != null) {
           if ( tileMap[x][y].hasCreature.getScent() == true ) {
-            count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
-            tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the max
+ 
+            str = tileMap[x][y].hasCreature.getScentStrength();
             if( tileMap[x][y].hasCreature.getScentType() == 1 ) {
+              count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
+              tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the m
               tileMap[x][y].hasCreatureScent = true;
+              for( int i = 0 - str; i <= str; i++ ) {
+                for( int j = 0 - str; j <= str; j++ ) {
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                }
+              }
             } else if( tileMap[x][y].hasCreature.getScentType() == 2 ) {
+              count = tileMap[x][y].getReproScent() + 10; // creature causes scent to increase
+              tileMap[x][y].setReproScent(min(count,maxscent)); // increase scent up to the max  
               tileMap[x][y].hasReproScent = true;
+                for( int i = 0 - str; i <= str; i++ ) {
+                for( int j = 0 - str; j <= str; j++ ) {
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                }
+              }
             } else if( tileMap[x][y].hasCreature.getScentType() == 3 ) {
+              count = tileMap[x][y].getPainScent() + 10; // creature causes scent to increase
+              tileMap[x][y].setPainScent(min(count,maxscent)); // increase scent up to the max
               tileMap[x][y].hasPainScent = true;
+              for( int i = 0 - str; i <= str; i++ ) {
+                for( int j = 0 - str; j <= str; j++ ) {
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                }
+              }              
             }
           }
         }
@@ -311,6 +339,36 @@ class environment{
     y = (y+environHeight)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getScent();
+  }
+
+    float getCScent(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getCreatureScent();
+  }
+
+    float getRScent(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getReproScent();
+  }
+
+    float getPScent(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getPainScent();
   }
   
   int checkForCreature(double x1, double y1) {
@@ -419,7 +477,8 @@ class environment{
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         if( tileMap[x][y].hasScent ) {
-        fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
+          fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
+          if( tileMap[x][y].getScent() < 60 ) tileMap[x][y].hasScent = false;
         } else {
           noFill();
           noStroke();
@@ -443,11 +502,14 @@ class environment{
 
         if( tileMap[x][y].hasCreatureScent ) {
           fill(255, 0, 0, 255 * tileMap[x][y].getCreatureScent() / maxscent);
+          if( tileMap[x][y].getCreatureScent() < 60 ) tileMap[x][y].hasCreatureScent = false;          
         } else if( tileMap[x][y].hasReproScent ) {
             fill(242, 2, 232, 255 * tileMap[x][y].getCreatureScent() / maxscent);
+          if( tileMap[x][y].getCreatureScent() < 60 ) tileMap[x][y].hasReproScent = false;                      
         }
         else if( tileMap[x][y].hasPainScent ) {
-            fill(50, 2, 100, 255 * tileMap[x][y].getCreatureScent() / maxscent);            
+            fill(50, 2, 100, 255 * tileMap[x][y].getCreatureScent() / maxscent);
+          if( tileMap[x][y].getCreatureScent() < 60 ) tileMap[x][y].hasPainScent = false;                      
         } else {
           noFill();
           noStroke();
