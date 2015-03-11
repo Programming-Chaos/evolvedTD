@@ -60,7 +60,7 @@ void setup() {
   frameRate(200);                // sets the framerate, in many cases the actual framerate will be lower due to the number of objects moving nad interacting
   cameraX = 0;
   cameraY = 0;
-  cameraZ = 300;
+  cameraZ = 2150;
   the_pop = new population();
 
   place_food();                  // calls the place food function below
