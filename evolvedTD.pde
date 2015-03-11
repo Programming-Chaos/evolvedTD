@@ -38,6 +38,7 @@ environment environ;           // the environment object
 
 Minim minim;
 AudioPlayer gunshot;
+//AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
@@ -52,6 +53,7 @@ void setup() {
 
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/Cannon.mp3");
+  //thunder = minim.loadFile("assets/thunder.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
