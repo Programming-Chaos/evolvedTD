@@ -610,7 +610,8 @@ class creature {
     for(int c = 0; f != null; c++) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       c %= numSegments;
       fill(getColor(c)); // Get the creature's color
-      strokeWeight(armor.get(c));
+      if (armor.get(c) > 1) strokeWeight(((armor.get(c)-1)*1.5)+1);
+      else strokeWeight(armor.get(c));
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
