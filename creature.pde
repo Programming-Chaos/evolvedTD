@@ -90,6 +90,9 @@ class creature {
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
     senses = new Sensory_Systems(genome);
+    brain = new Brain(genome);
+    current_actions = new float[brain.OUTPUTS];
+    
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
