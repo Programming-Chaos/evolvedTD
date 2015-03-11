@@ -111,7 +111,7 @@ class Sensory_Systems {
 
     Set_Pain(pain, 0, abs((float)Utilities.Sigmoid(g.sum(painDampeningTrait), 5, 1)), abs((float)Utilities.Sigmoid(g.sum(painThresholdTrait), 5, 100))); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
 
-    num_appendages = (int)abs((float)Utilities.Sigmoid(g.sum(expressedAppendages), 10, 3));
+    num_appendages = (int)abs((float)Utilities.Sigmoid(g.sum(expressedAppendages), 1, 38));
 
     apend_angles = new float[num_appendages];
     apend_length = new float[num_appendages];
