@@ -6,7 +6,7 @@
    Additionally we implemented taste, pain, speed, mass, and energy detection
 */
 class Sensory_Systems {
-  float [] brain_array;
+  float []brain_array = new float[1000];
 
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
@@ -65,6 +65,8 @@ class Sensory_Systems {
   boolean angular = false;
   boolean mass = false;
   boolean energy = false;
+  boolean canPain = false;
+  
   float [] apend_angles;
   float [] apend_length;
   float [] pressure_side_ids;
@@ -74,8 +76,9 @@ class Sensory_Systems {
   boolean [] appendage_scent;
 
   Sensory_Systems(Genome g) {
-    double can_feel_pain = 0.1;
-    boolean canPain = false;
+    brain_array = new float[1000];
+    
+    double can_feel_pain =  Utilities.Sigmoid(g.sum(painTrait), 5, 100);
 
     if (can_feel_pain > 0) {
       canPain = true;
@@ -114,7 +117,6 @@ class Sensory_Systems {
     apend_length = new float[num_appendages];
     pressure_side_ids = new float[40];
 
-    brain_array = new float[1000];
     appendage_pressure = new boolean[num_appendages];
     appendage_taste = new boolean[num_appendages];
     appendage_scent = new boolean[num_appendages];
@@ -122,8 +124,11 @@ class Sensory_Systems {
     Set_Appendage(g);
   }
 
+  /*For the brain*/
   float [] Get_Brain_Array() { return brain_array; };
 
+
+  /*Determines what appendages can do and the lengths and angles of each*/
   void Set_Appendage(Genome g) {
     for (int i = 0; i < num_appendages; i++) {
 
@@ -149,20 +154,27 @@ class Sensory_Systems {
       }
     }
   }
+  
+  /*Goes through each feelers and updates the senses it can interpret*/
   void Update_Senses(float x, float y, float angle) {
     for (int i = 0; i < num_appendages;  i++) {
       Update_Sense(x, y, angle, apend_angles[i], apend_length[i], i);
     }
   }
 
+  /*Update feeler senses*/
   void Update_Sense(float x, float y, float angle, float evolved_angle, float evolved_length, int i) {
 
+    /*Calculate end location of feelers
+     */
     float sensorX,sensorY;
+    
     sensorX = x + evolved_length * cos(-1 * (angle + PI+evolved_angle));
     sensorY = y + evolved_length * sin(-1 * (angle + PI+evolved_angle));
     sensorX = round((sensorX) / 20) * 20;
     sensorY = round((sensorY) / 20) * 20;
 
+    /*If appendage can feel pressure*/
     if (appendage_pressure[i]) {
       if (environ.checkForRock(sensorX, sensorY) == 1) {
         brain_array[b_pressure_feeler + i] = ROCK_PRESSURE;
@@ -173,7 +185,7 @@ class Sensory_Systems {
       }
     }
 
-
+    /*If appendage can taste*/
     if (appendage_taste[i]) {
       int []tmp_taste = environ.checkForTaste(sensorX, sensorY);
       if (tmp_taste != null) {
@@ -182,16 +194,22 @@ class Sensory_Systems {
         brain_array[b_taste_feelers+i+2] = tmp_taste[2];
         brain_array[b_taste_feelers+i+3] = tmp_taste[3];
         brain_array[b_taste_feelers+i+4] = tmp_taste[4];
+      } else {
+        brain_array[b_taste_feelers+i] = 0;
+        brain_array[b_taste_feelers+i+1] = 0;
+        brain_array[b_taste_feelers+i+2] = 0;
+        brain_array[b_taste_feelers+i+3] = 0;
+        brain_array[b_taste_feelers+i+4] = 0;        
       }
-
     }
-
+    /*If appendage can pick up smell*/
     if (appendage_scent[i]) {
       brain_array[b_scent_feelers+i] = environ.getScent(sensorX, sensorY);
     }
 
   }
 
+ /*Sets taste once creature comes in contact with food*/
   void Set_Taste(food f) {
     if (taste) {
       int []tmp_taste = f.getTaste();
@@ -202,7 +220,7 @@ class Sensory_Systems {
       brain_array[b_taste+4] = tmp_taste[4];
     }
   }
-
+  /*Removes taste from eating*/
   void Remove_Taste() {
     if (taste) {
       brain_array[b_taste] = 0;
@@ -214,16 +232,18 @@ class Sensory_Systems {
 
   }
 
+  /*This functions calls Draw_Appendage
+  for each appendage the creature has*/
   void Draw_Sense(float x, float y, float angle) {
     for (int i = 0; i < num_appendages;  i++) {
       Draw_Appendage(x, y, angle, apend_angles[i], apend_length[i]);
     }
   }
 
+  /*This function draws the feelers for the creature*/
   void Draw_Appendage(float x, float y, float angle, float evolved_angle, float evolved_length) {
     // Draw the "feelers", this is mostly for debugging
     float sensorX,sensorY;
-    // Note that the length (50) and angles PI*40 and PI*60 are the same as when calculating the sensor postions in getTorque()
     sensorX = x + evolved_length * cos(-1 * (angle + PI+evolved_angle));
     sensorY = y + evolved_length * sin(-1 * (angle + PI+evolved_angle));
     sensorX = round((sensorX) / 20) * 20;
@@ -232,6 +252,7 @@ class Sensory_Systems {
 
   }
 
+  /*This is the constructor for the pain*/
   void Set_Pain(boolean _pain, float _curr_pain, float _pain_dampening, float _pain_threshold) {
     pain = _pain;
     pain_dampening = _pain_dampening;
@@ -239,6 +260,9 @@ class Sensory_Systems {
     Set_Current_Pain(_curr_pain);
   }
 
+
+  /*This will set the current amount of pain the creature is currently in
+  the creature will only get pain if it is hit by a projectile*/
   void Set_Current_Pain(float _curr_pain) {
     pain_current += _curr_pain;
     if (pain_current > pain_threshold) {
@@ -246,13 +270,19 @@ class Sensory_Systems {
     }
   }
 
+  /*Update pain is called in the update creature class to give the pain
+  infomration to the brain*/
   void Update_Pain() {
-    if (pain) {
-      brain_array[b_pain] = pain_current/pain_threshold;
-      pain_current *= pain_dampening;
+    if (canPain) {
+      if (pain_threshold != 0) {
+        brain_array[b_pain] = pain_current/pain_threshold;
+        pain_current *= pain_dampening;
+      }  
     }
   }
 
+  /*Gets the basic stats of the cruture such as velocity, mass
+  momentum, health and movement*/
   void Set_Stats(creature c) {
     if (speed) {
       brain_array[b_speed_x] = c.body.getLinearVelocity().x;

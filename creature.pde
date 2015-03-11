@@ -80,7 +80,6 @@ class creature {
   creature(float x, float y, float a) {
     num = creature_count++;
     angle = a;
-
     genome = new Genome();
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
@@ -118,6 +117,7 @@ class creature {
     num = creature_count++;
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
+    
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     current_actions = new float[brain.OUTPUTS];
@@ -157,6 +157,11 @@ class creature {
   creature(Genome g, float e, Vec2 pos) {
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
+
+    senses = new Sensory_Systems(genome);
+    brain = new Brain(genome);
+    current_actions = new float[brain.OUTPUTS];
+    
 
     numSegments = getNumSegments();
     computeArmor();
