@@ -25,7 +25,7 @@ int generation = 0;
 boolean paused = false;        // is it paused
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
-boolean displayScent = true;   // not displaying scent speeds things up a lot
+boolean displayScent = false;  // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -50,7 +50,7 @@ void setup() {
   the_player = new player();
   the_tower = new tower();
   the_player.addtower(the_tower);
-  
+
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/Cannon.mp3");
   //thunder = minim.loadFile("assets/thunder.mp3");
@@ -79,7 +79,7 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-  
+
 
   if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -113,7 +113,7 @@ void draw() {
       r.display();
     }
   }
-  
+
   the_player.update();
   if (display) {
     the_player.display(); // display the interface for the player
@@ -260,7 +260,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-    
+
     p2.setRemove(true);
   }
 
@@ -276,7 +276,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-    
+
     p2.setRemove(true);
   }
 
