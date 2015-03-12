@@ -598,6 +598,12 @@ class creature {
       body.setTransform(box2d.coordPixelsToWorld(pos2), a);
     }
 
+    // If a creature runs our of locomotion energy it starts to lose health
+    // It might make more sense to just be based on health energy, but creatures start with zero health energy and health energy doesn't always decrease
+    if(energy_locomotion <= 0){
+      health = health -1;
+    }
+
     // if out of health have the creature "die". Stops participating
     // in the world, still exists for reproducton
     if (health <= 0) {
