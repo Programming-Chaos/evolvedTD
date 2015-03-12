@@ -57,7 +57,7 @@ class food {
   void drawFoodScent( float x, float y ) {
     noStroke();
     float h = 1.0;
-      for (int r = 0; r < 100; r+=20) {
+      for (int r = 0; r < 140; r+=20) {
         fill(225, 165, 0, 255 * h);
         ellipse(x, y, r, r);
         h = h * 0.8;

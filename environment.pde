@@ -434,35 +434,47 @@ class environment{
             str = tileMap[x][y].hasCreature.getScentStrength();
             if( tileMap[x][y].hasCreature.getScentType() == 1 ) {
               count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
-              tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the m
+              tileMap[x][y].setCreatureScent(maxscent); // increase scent up to the m
               tileMap[x][y].hasCreatureScent = true;
               for( int i = 0 - str; i <= str; i++ ) {
                 for( int j = 0 - str; j <= str; j++ ) {
                   tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].setCreatureScent(maxscent/str);
                 }
               }
             } else if( tileMap[x][y].hasCreature.getScentType() == 2 ) {
               count = tileMap[x][y].getReproScent() + 10; // creature causes scent to increase
-              tileMap[x][y].setReproScent(min(count,maxscent)); // increase scent up to the max  
+              tileMap[x][y].setReproScent(maxscent); // increase scent up to the max  
               tileMap[x][y].hasReproScent = true;
                 for( int i = 0 - str; i <= str; i++ ) {
                 for( int j = 0 - str; j <= str; j++ ) {
-                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasReproScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].setReproScent(maxscent/str);                  
                 }
               }
             } else if( tileMap[x][y].hasCreature.getScentType() == 3 ) {
               count = tileMap[x][y].getPainScent() + 10; // creature causes scent to increase
-              tileMap[x][y].setPainScent(min(count,maxscent)); // increase scent up to the max
+              tileMap[x][y].setPainScent(maxscent); // increase scent up to the max
               tileMap[x][y].hasPainScent = true;
               for( int i = 0 - str; i <= str; i++ ) {
                 for( int j = 0 - str; j <= str; j++ ) {
-                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasPainScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].setPainScent(maxscent/str);
                 }
               }              
             }
           }
         }
         else {
+
+          if( tileMap[x][y].hasCreatureScent ) {
+            tileMap[x][y].setCreatureScent(tileMap[x][y].getCreatureScent() * .98 );
+          } else if( tileMap[x][y].hasReproScent ) {
+            tileMap[x][y].setReproScent(tileMap[x][y].getReproScent() * .98 );
+          } else if( tileMap[x][y].hasPainScent ) {
+            tileMap[x][y].setPainScent(tileMap[x][y].getPainScent() * .98 );
+          }
+          /*
           count = 0;
           for (int rx = -1*range; rx < range+1; rx++) {
             for (int ry = -1*range; ry < range+1; ry++) {
@@ -484,6 +496,9 @@ class environment{
       for (int x = 0; x < environWidth; x++) {
         //scent[x][y] = min(maxscent,temparray[x][y]);
         tileMap[x][y].setCreatureScent(temparray[x][y]);
+      }
+          */
+        }
       }
     }
     }
