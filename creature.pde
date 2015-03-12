@@ -562,7 +562,7 @@ class creature {
     senses.Update_Senses(pos2.x, pos2.y, a);
 
     calcBehavior();
-    torque = current_actions[0];
+    torque = current_actions[0]*0.01;
     f = 1+current_actions[1];
 
     body.applyTorque((float)torque);
@@ -571,6 +571,7 @@ class creature {
     if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
+      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.05)));
     }
 
     // Creatures that run off one side of the world wrap to the other side.
