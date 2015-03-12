@@ -43,13 +43,13 @@ Trait scentTrait = new Trait(10);
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
-ArrayList<Segment> segments = new ArrayList<Segment>();
+ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>();
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 
 // maximum number of apendages that can be evolved
 static final int MAX_APPENDAGES = MAX_SEGMENTS;
-ArrayList<Appendage> appendages = new ArrayList<Appendage>();
+ArrayList<AppendageTrait> appendageTraits = new ArrayList<AppendageTrait>();
 
 // sensory thresholds
 Trait painTrait = new Trait(10);
@@ -66,10 +66,9 @@ Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 Trait alphaTrait = new Trait(10);
+Trait trailingEndpoint = new Trait(10);
 
 // TODO: remove these traits when segment refactor is complete
-Trait densityTrait = new Trait(10);
-Trait restitutionTrait = new Trait(10);
 
 private int nGenes = 0;
 
@@ -89,15 +88,14 @@ class Trait {
   }
 }
 
-class Segment {
+class SegmentTraits {
   Trait endPoint;
   Trait armor;
   Trait density;
   Trait restitution;
   Trait appendageSize;
-  int index;
 
-  Segment(int i) {
+  SegmentTraits() {
     index = i;
     endPoint = new Trait(10);
     armor = new Trait(10);
@@ -107,26 +105,20 @@ class Segment {
   }
 }
 
-class Appendage {
-  Trait angle;
+class AppendageTrait {
   Trait armor;
   Trait density;
   Trait restitution;
   Trait waterForce;
+  Trait grassForce;
   Trait mountainForce;
-  int index;
-  double size;
 
-  Appendage(int i) {
-    index = i;
-    //size = avg(segments.get(index).appendageSize);
-    if (size < 0) size *= -1;
-    if (size < 1) size = 0;
-    angle = new Trait(10);
+  AppendageTrait() {
     armor = new Trait(10);
     density = new Trait(10);
     restitution = new Trait(10);
     waterForce = new Trait(10);
+    grassForce = new Trait(10);
     mountainForce = new Trait(10);
   }
 }
@@ -144,13 +136,13 @@ class Appendage {
     }
 
     // initialize the segments and their traits
-    for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
-      segments.add(new Segment(i));
+    for (int i = 0; i < MAX_SEGMENTS; i++) {
+      segmentTraits.add(new SegmentTraits(i));
     }
 
     // initialize the appendages and their traits
-    for (int i = 0; i < (MAX_APPENDAGES); i++) {
-      appendages.add(new Appendage(i));
+    for (int i = 0; i < MAX_APPENDAGES; i++) {
+      appendageTraits.add(new AppendageTrait(i));
     }
 
     // initialize the color network weights
