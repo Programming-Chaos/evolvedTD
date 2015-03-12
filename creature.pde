@@ -238,43 +238,30 @@ class creature {
     angle = a;
     genome = new Genome();
     float e = 20000;
-    
-    construct(e);
-
-    makeBody(new Vec2(x, y));   // call the function that makes a Box2D body
-    body.setUserData(this);     // required by Box2D
+    construct((float)20000, new Vec2(x, y));
   }
-
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-    
-    construct(e);
-
     // Currently creatures are 'born' around a circle a fixed distance
     // from the tower. Birth locations should probably be evolved as
     // part of the reproductive strategy and/or behavior
     Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
                         0.45 * worldWidth * cos(angle));
-    makeBody(pos);
-    body.setUserData(this);     // required by Box2D
- }
- 
+    construct(e, pos);
+  }
   // construct a new creature with the given genome, energy and position
   creature(Genome g, float e, Vec2 pos) {
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-    
-    construct(e);
-
-    makeBody(pos);
-    body.setUserData(this);     // required by Box2D
- }
- 
- void construct(float e) { // this function contains all the overlap of the constructors
+    construct(e, pos);
+  }
+  
+  void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
     numSegments = getNumSegments();
-    //density = (getDensity() * (armor.sum() / numSegments));
+    makeBody(pos);   // call the function that makes a Box2D body
+    body.setUserData(this);     // required by Box2D
     float energy_scale = 500; // scales the max energy pool size
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
     max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
@@ -292,7 +279,7 @@ class creature {
     scent = setScent(this);                 // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
     scentType = setScentType(this);       // what color is the scent
- }
+  }
 
   boolean getScent()        { return scent; }
 
