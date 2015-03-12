@@ -50,7 +50,9 @@ class food {
     fill(200,0,100);
     stroke(0);
     ellipse(pos.x, pos.y, radius*2, radius*2);
+    if(displayScent){
     drawFoodScent(pos.x, pos.y);
+    }
     //   popMatrix();
   }
 
