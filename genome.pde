@@ -66,6 +66,7 @@ Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 Trait alphaTrait = new Trait(10);
+
 Trait trailingEndpoint = new Trait(10);
 
 // TODO: remove these traits when segment refactor is complete
