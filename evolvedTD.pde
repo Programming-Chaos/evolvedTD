@@ -23,6 +23,8 @@ int timepergeneration = 1500;
 int generation = 0;
 
 boolean paused = false;        // is it paused
+boolean playSound = true;      // play game sounds
+boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
@@ -187,8 +189,18 @@ void keyPressed() { // if a key is pressed this function is called
     case 'p':  // toggle paused state
       paused = !paused;
       break;
+    case 'm':
+      playSound = !playSound;
+      break;
     case 'v':
       display = !display;
+      // mute on hide
+      if (!display) {
+        playSoundSave = playSound;
+        playSound = false;
+      } else {
+        playSound = playSoundSave;
+      }
       break;
     case 'q':
       displayFood = !displayFood;
