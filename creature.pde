@@ -275,10 +275,10 @@ class creature {
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     alive = true;
-    
+  
     scent = setScent(this);                 // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
-    scentType = setScentType(this);         // what color is the scent
+    scentType = setScentType(this); // what color is the scent
   }
 
   boolean getScent()        { return scent; }
