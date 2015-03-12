@@ -237,7 +237,6 @@ class creature {
   creature(float x, float y, float a) {
     angle = a;
     genome = new Genome();
-    float e = 20000;
     construct((float)20000, new Vec2(x, y));
   }
   // construct a new creature with the given genome and energy
@@ -262,12 +261,13 @@ class creature {
     numSegments = getNumSegments();
     makeBody(pos);   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
+    
     float energy_scale = 500; // scales the max energy pool size
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
-    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
+    max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum;
     max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
     max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
-    energy_reproduction = 0;
+    energy_reproduction = 0;                                // have to collect energy to reproduce
     energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
     metabolism = new metabolic_network(genome);
@@ -275,10 +275,10 @@ class creature {
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     alive = true;
-
+    
     scent = setScent(this);                 // does creature produce scent
     scentStrength = setScentStrength(this); // how strong is the scent
-    scentType = setScentType(this);       // what color is the scent
+    scentType = setScentType(this);         // what color is the scent
   }
 
   boolean getScent()        { return scent; }
