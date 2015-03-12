@@ -254,10 +254,10 @@ class creature {
   creature(Genome g, float e, Vec2 pos) {
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-    construct(e);
+    construct(e, pos);
   }
   
-  void construct(float e) { // this function contains all the overlap of the constructors
+  void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
     numSegments = getNumSegments();
     makeBody(pos);   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
