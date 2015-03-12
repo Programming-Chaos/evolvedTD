@@ -196,9 +196,11 @@ class population {
         // get first gamete layed in range
         Gamete g2 = gametes.remove(proxGametes.get(0));
         // get the point between the two gametes.
+        float angle = random(0, 2 * PI);
         int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
         int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
-        Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
+        Vec2 pos = new Vec2(px * cellWidth * sin(angle),
+                            py * cellHeight * cos(angle)) ;
         
         childrenBred++;
         generation.add(new creature(new Genome(g1.gamete, g2.gamete),
