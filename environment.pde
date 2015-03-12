@@ -24,23 +24,28 @@ class tile {
   float altitude;
   int coloring;      // 0 to 255 value that describes tile visually
   int opacity;
-  color colors; 
+  color colors;
   int weathering;    // 0 to 255 value that describes tile weathering visually
-  int viscosity;     // 0 (solid) to 255 (water) value that describes the viscosity
-                       // of a tile and determines whether the tile can be considered
-                       // liquid
+
+  // 0 (solid) to 255 (water) value that describes the viscosity of a
+  // tile and determines whether the tile can be considered liquid
+  int viscosity;
 
   int creatureScentColor; // value to set what color the creatures scent is
-  float scent;         // how much scent is present
-  float creatureScent; // how much creature scent is present
+  float scent;            // how much scent is present
+  float creatureScent;    // how much creature scent is present
+  float reproScent;
+  float painScent;
 
-  boolean isLiquid;    // is the cell traversable as a liquid
-  boolean hasFood;     // is there food present
-  boolean hasRock;     // is there a rock present
-  boolean hasScent;    // is scent present
-  boolean hasCreatureScent; // is creature scent present
+  boolean isLiquid;
+  boolean hasFood;
+  boolean hasRock;
+  boolean hasScent;
+  boolean hasCreatureScent;
+  boolean hasReproScent;
+  boolean hasPainScent;
 
-  boolean hasTower;    // is there a tower present
+  boolean hasTower;
   int[] taste;
 
   creature hasCreature; // is there a creature present
@@ -82,11 +87,13 @@ class tile {
   boolean hasTower()       { return hasTower; }
   creature hasCreature()   { return hasCreature; }
 
-  void setTaste(int[] _taste) { taste = _taste; }
-  int getCreatureScentColor() { return creatureScentColor; }
-  boolean DEBUG_sensing()     { return DEBUG_sensing; }
-  float getCreatureScent()    { return creatureScent; }
-  
+  void setTaste(int[] _taste)	{ taste = _taste; }
+  int getCreatureScentColor()	{ return creatureScentColor; }
+  boolean DEBUG_sensing()	{ return DEBUG_sensing; }
+  float getCreatureScent()	{ return creatureScent; }
+  float getReproScent()		{ return reproScent; }
+  float getPainScent()		{ return painScent; }
+
   void setAlt(float a)           { altitude = a; }
   void setColor(int c)           { coloring = c; }
   void setWeather(int w)         { weathering = w; }
@@ -97,7 +104,13 @@ class tile {
   void hasRock(boolean r)        { hasRock = r; }
   void hasTower(boolean t)       { hasTower = t; }
   void hasCreature(creature c)   { hasCreature = c; }
-  void setCreatureScent(float s) { creatureScent = s; }
+
+  void setCreatureScent(float s) { creatureScent = s;}
+  void setReproScent(float s) { reproScent = s;}
+  void setPainScent(float s) { painScent = s;}
+
+
+
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; }
@@ -107,17 +120,17 @@ class gravityVector {
   float x;
   float y;
   float z;
-    
+
   gravityVector() {
     x = 0;
     y = 0;
     z = 0;
   }
-  
+
   gravityVector(float a, float b, float c) {
     x = a;
     y = b;
-    z = c; 
+    z = c;
   }
 }
 
@@ -149,7 +162,7 @@ class environment{
         gravityMap[i][j] = new gravityVector();
       }
     }
-    
+
     generateAltitudeMap();
     //generateWaterALT((float)random(0, 70) / 100.0f);
     generateWaterALT(0.35f); // Just works out better this way
@@ -157,7 +170,7 @@ class environment{
     spawnRocks();
     tempInfluence();
     makeImage();
-    
+
     int chance = initializeRain();
     if(chance == 1) {
       isRaining = false;
@@ -169,8 +182,8 @@ class environment{
     // makeImageFood();
     // updateEnviron();
   }
-  
-  
+
+
   // Generates altitude for each tile using the built in perlin noise generator "noise()".
   void generateAltitudeMap() {
     addPerlinNoise(6.0f);
@@ -178,15 +191,15 @@ class environment{
     erode(8.0f);
     smoothen();
   }
-  
+
   void addPerlinNoise(float freq) {
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
-        tileMap[i][j].setAlt(tileMap[i][j].getAlt() + noise(freq * i / (float)environWidth, freq * j / (float)environHeight, 0));  
+        tileMap[i][j].setAlt(tileMap[i][j].getAlt() + noise(freq * i / (float)environWidth, freq * j / (float)environHeight, 0));
       }
-    } 
+    }
   }
-  
+
   // Modify generated noise to better match peaks of hills rather than spikes of mountains (makes it look more natural)
   void perturb(float freq, float maxDist) {
     int u, v;
@@ -210,7 +223,7 @@ class environment{
       }
     }
   }
-    
+
   // Smooths out a generated altitude map
   void erode(float smoothness) {
     for(int i = 1; i < environWidth - 1; i++) {
@@ -226,7 +239,7 @@ class environment{
                 match[0] = u; match[1] = v;
               }
             }
-          } 
+          }
         }
         if(0 < distMax && distMax <= (smoothness / (float)environWidth)) {
           float distH = 0.5f * distMax;
@@ -236,7 +249,7 @@ class environment{
       }
     }
   }
-  
+
   void smoothen() {
     for(int i = 1; i < environWidth - 1; ++i) {
       for(int j = 1; j < environHeight - 1; ++j) {
@@ -248,14 +261,14 @@ class environment{
         }
         tileMap[i][j].setAlt(total / 9.0f);
       }
-    } 
+    }
   }
-  
+
   // Simulates gravity by generating force vectors based on a tile's altidue and surrounding gravity.
   void generateGravityVectors() {
-    
+
   }
-  
+
   // Generate water for every tile below the altitude alt
   void generateWaterALT(float alt) {
     for(int i = 0; i < environWidth; i++) {
@@ -269,10 +282,13 @@ class environment{
       }
     }
   }
-  
+
   // Generate rocky land bodies based on altitude
-  // NOTE: To let liquid and rock types combine maybe generate a second noise map and use it's "fake" altitude instead. 
-  //      That or generate it similar to gravity where the steepness of a slope determines how rocky it is. 
+
+  // NOTE: To let liquid and rock types combine maybe generate a
+  // second noise map and use it's "fake" altitude instead. That or
+  // generate it similar to gravity where the steepness of a slope
+  // determines how rocky it is.
   void generateRockyALT(float alt) {
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
@@ -285,7 +301,7 @@ class environment{
       }
     }
   }
-  
+
   // Spawn rocks with respect to rocky terrian (color); spawn more on rock terrain
   void spawnRocks() {
     for(int i = 0; i < environWidth; i++) {
@@ -299,7 +315,7 @@ class environment{
             rocks.add(r);
           }
         }
-      } 
+      }
     }
   }
 
@@ -312,7 +328,8 @@ class environment{
       x = (int)random(environWidth);
       y = (int)random(environHeight);
 
-      totalSize = initialSize + (int)(random(deltaSize) * random(-1, 1)); // noted extra chance of delta being 0
+      // noted extra chance of delta being 0
+      totalSize = initialSize + (int)(random(deltaSize) * random(-1, 1));
 
       x = x + (totalSize / 2);
       y = y + (totalSize / 2);
@@ -324,7 +341,8 @@ class environment{
           a = xOffset - x;
           b = yOffset - y;
           r = (totalSize / 2);
-          if(xOffset < environWidth && yOffset < environHeight && xOffset > 0 && yOffset > 0) {
+          if(xOffset < environWidth && yOffset < environHeight
+             && xOffset > 0 && yOffset > 0) {
             if((a * a) + (b * b) <= (r * r) ){
               tileMap[xOffset][yOffset].isLiquid(true);
               tileMap[xOffset][yOffset].setViscosity(255);
@@ -333,8 +351,8 @@ class environment{
         }
       }
     }
-  }  
-  
+  }
+
   void tempInfluence() {
     int r = 0;
     int b = 0;
@@ -346,23 +364,25 @@ class environment{
         r = (c >> 16) & 255;
         b = (c >> 8) & 255;
         g = (c) & 255;
-        //tileMap[i][j].colors = new color(r, b, g, 1); 
-        // change values here and reconstruct color 
+        //tileMap[i][j].colors = new color(r, b, g, 1);
+        // change values here and reconstruct color
       }
     }
     println("red: " + r + " blue: " + b + " green: " + g);
   }
-  
+
   void place_creature(creature cd, float x, float y) {
     x = (int)((worldWidth*0.5+x-1)/cellWidth);
     y = (int)((worldHeight*0.5+y-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case creature was temporarily bumped out of bounds
+    // in case creature was temporarily bumped out of bounds
+    x = (x+environWidth)%environWidth;
     y = (y+environHeight)%environHeight;
     tileMap[(int)x][(int)y].hasCreature(cd);
   }
 
   void update_scent() {
-    if(!paused){
+    if (paused)
+      return;
     int range = 1, tempx, tempy;
     float count;
     float[][] temparray;
@@ -372,15 +392,7 @@ class environment{
         if (tileMap[x][y].hasFood()) {
           count = tileMap[x][y].getScent() + 10; // food causes scent to increase
           tileMap[x][y].setScent(min(count,maxscent)); // increase scent up to the max
-
-          /* if creature that has scent add scent to map
-        } else if( (tileMap[x][y].hasCreature != null) &&
-                   (tileMap[x][y].hasCreature.scent >= 5) ) {
-          count = tileMap[x][y].getScent() + 10;
-          tileMap[x][y].setScent(min(count,maxscent));
-        }
-
-          */
+          tileMap[x][y].hasScent = true;
         }
         else {
           count = 0;
@@ -404,63 +416,70 @@ class environment{
       for (int x = 0; x < environWidth; x++) {
         //scent[x][y] = min(maxscent,temparray[x][y]);
         tileMap[x][y].setScent(temparray[x][y]);
+        tileMap[x][y].hasScent = true;
       }
-    }
     }
   }
 
   void update_creature_scent() {
-    if(!paused){
+    if (paused)
+      return;
     int range = 1, tempx, tempy;
     float count = 0;
     float[][] temparray;
     int col = 0;
+    int str;
     temparray = new float[environWidth][environHeight];
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
         if (tileMap[x][y].hasCreature != null) {
           if ( tileMap[x][y].hasCreature.getScent() == true ) {
-          count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
-          tileMap[x][y].setCreatureScent(min(count,maxscent)); // increase scent up to the max
 
-          // need to check bounds here
-          // environWidth
-          // environHeight
-          tileMap[x][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x+1+environWidth)%environWidth][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][y].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[x][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x+1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x+1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][(y+1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
-          tileMap[(x-1+environWidth)%environWidth][(y-1+environHeight)%environHeight].setCreatureScentColor(tileMap[x][y].hasCreature.getScentColor() );
+            str = tileMap[x][y].hasCreature.getScentStrength();
+            if( tileMap[x][y].hasCreature.getScentType() == 1 ) {
+              count = tileMap[x][y].getCreatureScent() + 10; // creature causes scent to increase
+              tileMap[x][y].setCreatureScent(maxscent); // increase scent up to the m
+              tileMap[x][y].hasCreatureScent = true;
+              for( int i = 0 - str; i <= str; i++ ) {
+                for( int j = 0 - str; j <= str; j++ ) {
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasCreatureScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].setCreatureScent(maxscent/str);
+                }
+              }
+            } else if( tileMap[x][y].hasCreature.getScentType() == 2 ) {
+              count = tileMap[x][y].getReproScent() + 10; // creature causes scent to increase
+              tileMap[x][y].setReproScent(maxscent); // increase scent up to the max
+              tileMap[x][y].hasReproScent = true;
+              for( int i = 0 - str; i <= str; i++ ) {
+                for( int j = 0 - str; j <= str; j++ ) {
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasReproScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].setReproScent(maxscent/str);
+                }
+              }
+            } else if( tileMap[x][y].hasCreature.getScentType() == 3 ) {
+              count = tileMap[x][y].getPainScent() + 10; // creature causes scent to increase
+              tileMap[x][y].setPainScent(maxscent); // increase scent up to the max
+              tileMap[x][y].hasPainScent = true;
+              for( int i = 0 - str; i <= str; i++ ) {
+                for( int j = 0 - str; j <= str; j++ ) {
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].hasPainScent = true;
+                  tileMap[(x+i+environWidth)%environWidth][(y+j+environHeight)%environHeight].setPainScent(maxscent/str);
+                }
+              }
+            }
           }
         }
         else {
-          count = 0;
-          for (int rx = -1*range; rx < range+1; rx++) {
-            for (int ry = -1*range; ry < range+1; ry++) {
-              tempx = x+rx;
-              tempy = y+ry;
-              tempx = max(min(environWidth-1, tempx), 0);
-              tempy = max(min(environHeight-1, tempy), 0);
-              count += tileMap[tempx][tempy].getCreatureScent();
-            }
+
+          if( tileMap[x][y].hasCreatureScent ) {
+            tileMap[x][y].setCreatureScent(tileMap[x][y].getCreatureScent() * .98 );
+          } else if( tileMap[x][y].hasReproScent ) {
+            tileMap[x][y].setReproScent(tileMap[x][y].getReproScent() * .98 );
+          } else if( tileMap[x][y].hasPainScent ) {
+            tileMap[x][y].setPainScent(tileMap[x][y].getPainScent() * .98 );
           }
-          count /= 9.0; // scent is average contribution of 9 cells
-          //scent[x][y] = count;
         }
-        count *= 0.98; // scent decays over time
-        temparray[x][y] = count;
       }
-    }
-    for (int y = 0; y < environHeight; y++) {
-      for (int x = 0; x < environWidth; x++) {
-        //scent[x][y] = min(maxscent,temparray[x][y]);
-        tileMap[x][y].setCreatureScent(temparray[x][y]);
-      }
-    }
     }
   }
 
@@ -533,6 +552,36 @@ class environment{
     y = (y+environHeight)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getScent();
+  }
+
+  float getCScent(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getCreatureScent();
+  }
+
+  float getRScent(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getReproScent();
+  }
+
+  float getPScent(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    y = (y+environHeight)%environHeight;
+    tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
+    return tileMap[x][y].getPainScent();
   }
 
   int checkForCreature(double x1, double y1) {
@@ -617,7 +666,7 @@ class environment{
       }
     }
     if (displayScent) {
-      display_scent();
+      //     display_scent();
       display_creature_scent();
     }
     //display_water();
@@ -628,8 +677,8 @@ class environment{
       timeStepTemp = 0;
     updateWaterReserve();
     if(!isRaining)
-      chanceOfRain();  
-      
+      chanceOfRain();
+
     if(isRaining) {
       rainfall();
       whileRaining();
@@ -644,17 +693,14 @@ class environment{
     translate(worldWidth*-0.5, worldHeight*-0.5, -1);
     noStroke();
     for (int y = 0; y < environHeight; y++) {
-      for (int x = 0; x < environWidth; x++) { 
-        fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
-         /* code that colors cells with any non-zero scent - shows that scent spreads very far
-           if (scent[x][y] > 0) {
-           fill(100, 100, 100);
-           }
-           else {
-           fill(100, 100, 100, 0);
-           }
-        */
-
+      for (int x = 0; x < environWidth; x++) {
+        if( tileMap[x][y].hasScent ) {
+          fill(225, 165, 0, 255 * tileMap[x][y].getScent() / maxscent);
+          if( tileMap[x][y].getScent() < 60 ) tileMap[x][y].hasScent = false;
+        } else {
+          noFill();
+          noStroke();
+        }
         rect(offset, offset, size, size);
         translate(cellWidth, 0);
       }
@@ -671,22 +717,26 @@ class environment{
     noStroke();
     for (int y = 0; y < environHeight; y++) {
       for (int x = 0; x < environWidth; x++) {
-        if( tileMap[x][y].getCreatureScentColor() == 1 ) {
+        if (tileMap[x][y].hasCreatureScent) {
           fill(255, 0, 0, 255 * tileMap[x][y].getCreatureScent() / maxscent);
-        } else if( tileMap[x][y].getCreatureScentColor() == 2 ) {
+          if (tileMap[x][y].getCreatureScent() < 60 ) {
+            tileMap[x][y].hasCreatureScent = false;
+          }
+        } else if (tileMap[x][y].hasReproScent) {
           fill(242, 2, 232, 255 * tileMap[x][y].getCreatureScent() / maxscent);
-        } else {
-          fill(0 , 0, 0, 0);
+          if (tileMap[x][y].getCreatureScent() < 60 ) {
+            tileMap[x][y].hasReproScent = false;
+          }
         }
-         /* code that colors cells with any non-zero scent - shows that scent spreads very far
-           if (scent[x][y] > 0) {
-           fill(100, 100, 100);
-           }
-           else {
-           fill(100, 100, 100, 0);
-           }
-        */
-
+        else if (tileMap[x][y].hasPainScent ) {
+          fill(50, 2, 100, 255 * tileMap[x][y].getCreatureScent() / maxscent);
+          if (tileMap[x][y].getCreatureScent() < 60 ) {
+            tileMap[x][y].hasPainScent = false;
+          }
+        } else {
+          noFill();
+          noStroke();
+        }
         rect(offset, offset, size, size);
         translate(cellWidth, 0);
       }
@@ -710,7 +760,7 @@ class environment{
   }
 
   /**** WEATHER ****/
-  
+
   // updates the amount of water in the water reserve
   void updateWaterReserve() {
     if(isRaining) {
@@ -720,22 +770,22 @@ class environment{
     }
     if(!isRaining) {
       if(waterReserve >= waterReserveMax) {}
-      else 
+      else
         waterReserve = (waterReserve + (timesteps - timeStepTemp));
     }
   }
-  
+
   // checks to see if it can rain
   void chanceOfRain() {
     int chance = int(waterReserve / 100);
     int rand = int(random(0,100));
     tempWaitOff = minute();
-    if(tempWaitOff >= waitRainOff+1 && rand <= chance) 
+    if(tempWaitOff >= waitRainOff+1 && rand <= chance)
       isRaining = true;
     if(isRaining == true)
       waitRainOn = minute();
   }
-  
+
   // checks water reserve amounts and lightning
   void whileRaining() {
     int chance = int(waterReserve / 100);
@@ -744,10 +794,10 @@ class environment{
     if(tempWaitOn >= waitRainOn+1 && (chance - rand) <= 0)
       isRaining = false;
     chanceOfLightning();
-    if(isRaining == false) 
-      waitRainOff = minute(); 
-  }   
-  
+    if(isRaining == false)
+      waitRainOff = minute();
+  }
+
   // Randomly decides if lightning should strike
   void chanceOfLightning() {
     int chance = int(random(1,30));
@@ -755,7 +805,7 @@ class environment{
       lightning();
     }
   }
-  
+
   // Draws rain animation
   void rainfall() {
     float x, y;
@@ -768,16 +818,16 @@ class environment{
       line(x, y, x, y+30);
     }
   }
-  
+
   // Draws lightning and kills a creature if it is on the tile
   void lightning() {
     int randX = int(random(-worldWidth, worldWidth));
     int randY = int(random(-worldHeight, worldHeight));
-    
+
     int xOffset = randX;
     int yOffset = -worldHeight;
-    int yFinal = randY; 
-    
+    int yFinal = randY;
+
     noFill();
     strokeWeight(5);
     stroke(255, 255, 200);
@@ -806,7 +856,7 @@ class environment{
     }
     strokeWeight(1);
     //thunder.rewind();
-    //thunder.play();  
+    //thunder.play();
   }
 }
 

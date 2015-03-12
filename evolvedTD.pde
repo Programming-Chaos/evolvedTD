@@ -24,9 +24,11 @@ int timepergeneration = 1500;
 int generation = 0;
 
 boolean paused = false;        // is it paused
+boolean playSound = true;      // play game sounds
+boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
-boolean displayScent = true;   // not displaying scent speeds things up a lot
+boolean displayScent = false;  // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -61,7 +63,7 @@ void setup() {
   frameRate(200);                // sets the framerate, in many cases the actual framerate will be lower due to the number of objects moving nad interacting
   cameraX = 0;
   cameraY = 0;
-  cameraZ = 300;
+  cameraZ = 2150;
   the_pop = new population();
 
   place_food();                  // calls the place food function below
@@ -188,8 +190,18 @@ void keyPressed() { // if a key is pressed this function is called
     case 'p':  // toggle paused state
       paused = !paused;
       break;
+    case 'm':
+      playSound = !playSound;
+      break;
     case 'v':
       display = !display;
+      // mute on hide
+      if (!display) {
+        playSoundSave = playSound;
+        playSound = false;
+      } else {
+        playSound = playSoundSave;
+      }
       break;
     case 'q':
       displayFood = !displayFood;

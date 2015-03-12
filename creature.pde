@@ -53,9 +53,12 @@ class creature {
 
   // senses/communication
   Sensory_Systems senses;
-  boolean scent;       // used to determine if creature is capable of producing scent
-  float scentStrength; // how strong the creature's scent is
-  int scentColor;      // store an integer for different colors
+  boolean scent;     // used to determine if creature is capable of producing scent
+  int scentStrength; // how strong the creature's scent is
+  int scentType;     // store an integer for different colors
+  boolean CreatureScent = false;
+  boolean ReproScent = false;
+  boolean PainScent = false;
 
   // body
   Body body;
@@ -106,10 +109,9 @@ class creature {
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
 
-    scent = setScent(this);     // does creature produce scent
-    scentStrength = setScentStrength(this);        // how strong is the scent
-    scentColor = setScentColor(this); // what color is the scent
-
+    scent = setScent();                 // does creature produce scent
+    scentStrength = setScentStrength(); // how strong is the scent
+    scentType = setScentType();         // what color is the scent
   }
 
   // construct a new creature with the given genome and energy
@@ -117,11 +119,11 @@ class creature {
     num = creature_count++;
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
-    
+
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     current_actions = new float[brain.OUTPUTS];
-    
+
     numSegments = getNumSegments();
     computeArmor();
     float averageArmor = armor.sum() / numSegments;
@@ -148,9 +150,9 @@ class creature {
     body.setUserData(this);
     alive = true;
 
-    scent = setScent(this);                 // does creature produce scent
-    scentStrength = setScentStrength(this); // how strong is the scent
-    scentColor = setScentColor(this);       // what color is the scent
+    scent = setScent();                 // does creature produce scent
+    scentStrength = setScentStrength(); // how strong is the scent
+    scentType = setScentType();         // what color is the scent
   }
 
   // construct a new creature with the given genome, energy and position
@@ -161,7 +163,7 @@ class creature {
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     current_actions = new float[brain.OUTPUTS];
-    
+
 
     numSegments = getNumSegments();
     computeArmor();
@@ -184,43 +186,81 @@ class creature {
     body.setUserData(this);
     alive = true;
 
-    scent = setScent(this);                 // does creature produce scent
-    scentStrength = setScentStrength(this); // how strong is the scent
-    scentColor = setScentColor(this);       // what color is the scent
+    scent = setScent();                 // does creature produce scent
+    scentStrength = setScentStrength(); // how strong is the scent
+    scentType = setScentType();         // what color is the scent
   }
 
-  boolean getScent()        { return scent; }
-  float getScentStrength()  { return scentStrength; }
-  int getScentColor()       { return scentColor; }
+  boolean getScent()     { return scent; }
+  int getScentStrength() { return scentStrength; }
+  int getScentType()     { return scentType; }
 
-  int setScentColor( creature c ) {
-    FloatList l;
-    float s;
-    int val;
-    l = c.genome.list(scentTrait);
-    s = l.get(5); // the 5th gene determines scent color for now
-    // map function goes here
-    if( s >= 0 ) {
-      return 1;
-    } else {
-      return 2;
+  int setScentType() {
+    if (scent) {
+       return 1;
+    }
+    return 0;
+  }
+
+  void TurnOnReproScent() {
+    if (!scent) {
+      return;
+    }
+    if (genome.sumX(scentTrait) >= 0) {
+      ReproScent = true;
+      CreatureScent = false;
+      PainScent = false;
+    }
+  }
+
+  void TurnOffReproScent() {
+    ReproScent = false;
+    if (scent) {
+      CreatureScent = true;
+    }
+  }
+
+  void TurnOnPainScent() {
+    if (!scent) {
+      return;
+    }
+    if (genome.sumY(scentTrait) >= 0) {
+      ReproScent = false;
+      CreatureScent = false;
+      PainScent = true;
+    }
+  }
+
+  void TurnOffPainScent() {
+    PainScent = false;
+    if (scent) {
+      CreatureScent = true;
     }
   }
 
   // set scentStrength
-  float setScentStrength( creature c ) {
-    float s;
-    s = c.genome.avg(scentTrait);
+  int setScentStrength() {
+    int s;
+    float tmp;
+    tmp = genome.avg(scentTrait);
+    if (tmp < -1 )
+      s = 0;
+    else if (tmp >= -1 && tmp < 0 )
+      s = 1;
+    else if (tmp >= 0 && tmp < 1 )
+      s = 2;
+    else
+      s = 3;
     // mapping function goes here
     return s;
   }
 
   // function setScent will calculate the creatures scent value
-  boolean setScent( creature c ) {
+  boolean setScent() {
     float s;
-    s = c.genome.sum(scentTrait);
+    s = genome.sum(scentTrait);
     // need to add a mapping function here
-    if( s >= 0 ) {
+    if (s >= 0) {
       return true;
     } else {
       return false;
@@ -454,6 +494,9 @@ class creature {
     int l = 50; // distance of the sensor from the body (should be evolved)
     int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
     float scentAheadL,scentAheadR;
+    float cscentAheadL,cscentAheadR;
+    float rscentAheadL,rscentAheadR;
+    float pscentAheadL,pscentAheadR;
     double sensorX,sensorY;
     int liquidFLAG = 0;
 
@@ -464,15 +507,18 @@ class creature {
     // length 50 pixels, these should be evolved)
     sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
     sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
+
     foodAheadL = environ.checkForFood(sensorX, sensorY);         // Check if there's food 'under' the left sensor
     creatureAheadL = environ.checkForCreature(sensorX, sensorY); // Check if there's a creature 'under' the left sensor
     rockAheadL = environ.checkForRock(sensorX, sensorY);         // Check if there's a rock 'under' the left sensor
     scentAheadL = environ.getScent(sensorX, sensorY);            // Get the amount of scent at the left sensor
+    cscentAheadL = environ.getCScent( sensorX, sensorY);
+    rscentAheadL = environ.getRScent( sensorX, sensorY);
+    pscentAheadL = environ.getPScent( sensorX, sensorY);
+
     // This is not torque specific code, but it is placed here to
     // avoid redundantly defining the sensors
-
-    // this checks if the creature is in water
-    if(environ.checkForLiquid(sensorX, sensorY) == 1){
+    if(environ.checkForLiquid(sensorX, sensorY) == 1) {
       liquidFLAG = 1;
     }
 
@@ -486,8 +532,13 @@ class creature {
     creatureAheadR = environ.checkForCreature(sensorX, sensorY);
     rockAheadR = environ.checkForRock(sensorX, sensorY);
     scentAheadR = environ.getScent(sensorX, sensorY);
-    // This is not torque specific code, but it is placed here to avoid redundantly defining the sensors
-    if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1){   // this checks if the creature is in water
+    cscentAheadR = environ.getCScent(sensorX, sensorY);
+    rscentAheadR = environ.getRScent(sensorX, sensorY);
+    pscentAheadR = environ.getPScent(sensorX, sensorY);
+
+    // This is not torque specific code, but it is placed here to
+    // avoid redundantly defining the sensors
+    if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1) {
       time_in_water++;
       liquidFLAG = 0;
     }
@@ -591,6 +642,12 @@ class creature {
       body.setTransform(box2d.coordPixelsToWorld(pos2), a);
     }
 
+    // If a creature runs our of locomotion energy it starts to lose health
+    // It might make more sense to just be based on health energy, but creatures start with zero health energy and health energy doesn't always decrease
+    if(energy_locomotion <= 0){
+      health = health -1;
+    }
+
     // if out of health have the creature "die". Stops participating
     // in the world, still exists for reproducton
     if (health <= 0) {
@@ -629,7 +686,7 @@ class creature {
     // Spends energy devoted to health regen to increase the
     // creature's health over time
     if (energy_health > 0 && health < maxHealth) {
-      health = health + health_regen; 
+      health = health + health_regen;
       energy_health = energy_health - regen_energy_cost;
     }
   }
