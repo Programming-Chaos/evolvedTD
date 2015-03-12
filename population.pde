@@ -147,7 +147,6 @@ class population {
   void next_generation() {
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
-
     for (creature c : swarm) {
       c.calcFitness();
       // Keep the survivors
@@ -162,13 +161,14 @@ class population {
       }
     }
     // Place gametes in order of time.
+    print("Gamete Size: " + gametes.size() + "\n");
     OrderGametes(gametes);
-
+    
     int childrenBred = 0;
     int childrenNew = 0;
     while (generation.size() < POP_SIZE) {
       // add random creatures if no gametes
-      if (gametes.size() == 0) {
+      if (gametes.size() < 2) {
         childrenNew++;
         generation.add(new creature(new Genome(), 20000));
         continue;
