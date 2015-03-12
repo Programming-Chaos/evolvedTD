@@ -277,7 +277,7 @@ class creature {
     max_energy_reproduction = body.getMass() * energy_scale * abs(genome.sum(maxReproductiveEnergy))/max_sum; 
     max_energy_locomotion = body.getMass() * energy_scale * abs(genome.sum(maxLocomotionEnergy))/max_sum;
     max_energy_health =  body.getMass() * energy_scale * abs(genome.sum(maxHealthEnergy))/max_sum;
-    energy_reproduction = 0;  
+    energy_reproduction = 0;
     energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
     metabolism = new metabolic_network(genome);
@@ -479,7 +479,9 @@ class creature {
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
-    int ret = round(genome.avg(expressedSegments) + 8);
+    println("one");
+    int ret = 8;//round(genome.avg(expressedSegments) + 8);
+    println("two");
     if (ret < 2)
       return 2;
     if (ret > MAX_SEGMENTS)

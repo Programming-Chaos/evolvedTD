@@ -225,11 +225,11 @@ class Genome {
     }
 
     float sum(Trait trait) {
-      return list(trait).sum();
+      return 0;//list(trait).sum();
     }
 
     float avg(Trait trait) {
-      return sum(trait) / trait.genes;
+      return 0;//sum(trait) / trait.genes;
     }
 
     void mutate() {
