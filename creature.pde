@@ -74,9 +74,9 @@ class creature {
   
   class Segment {
     int index;
-    double armor;
-    double density;
-    double restitution;
+    float armor;
+    float density;
+    float restitution;
     Vec2 frontPoint;
     Vec2 backPoint;
   
@@ -102,7 +102,7 @@ class creature {
         return 10 * (1 / (1 + abs(d)));
       // otherwise, the value is positive and density grows as 10 plus the square
       // root of the evolved value
-      return 10 + sqrt(genome.sum(densityTrait)); // limit 0 to infinity
+      return 10 + sqrt(d); // limit 0 to infinity
     }
     
     private float getRestitution() {
@@ -115,14 +115,14 @@ class creature {
       float endpoint = genome.sum(segmentTraits.get(index).endPoint);
       int lengthbase = 20;
       float l;
-      if (segment < 0) {
-        l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
+      if (endpoint < 0) {
+        l = 1 + (lengthbase-1) * (1.0/(1+abs(endpoint)));
       }
       else {
-        l = lengthbase + (2*lengthbase*(segment/(1+segment)));;
+        l = lengthbase + (2*lengthbase*(endpoint/(1+endpoint)));;
       }
-      p.x = (float)(l * Math.sin((i)*PI/(numSegments)) );
-      p.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
+      p.x = (float)(l * Math.sin((index)*PI/(numSegments)) );
+      p.y = (float)(l * Math.cos((index)*PI/(numSegments)) );
       return p;
     }
     
@@ -133,14 +133,14 @@ class creature {
       else endpoint = genome.sum(segmentTraits.get(index+1).endPoint);
       int lengthbase = 20;
       float l;
-      if (segment < 0) {
-        l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
+      if (endpoint < 0) {
+        l = 1 + (lengthbase-1) * (1.0/(1+abs(endpoint)));
       }
       else {
-        l = lengthbase + (2*lengthbase*(segment/(1+segment)));;
+        l = lengthbase + (2*lengthbase*(endpoint/(1+endpoint)));;
       }
-      p.x = (float)(l * Math.sin((i)*PI/(numSegments)) );
-      p.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
+      p.x = (float)(l * Math.sin((index)*PI/(numSegments)) );
+      p.y = (float)(l * Math.cos((index)*PI/(numSegments)) );
       return p;
     }
   }
@@ -193,7 +193,7 @@ class creature {
         return 10 * (1 / (1 + abs(d)));
       // otherwise, the value is positive and density grows as 10 plus the square
       // root of the evolved value
-      return 10 + sqrt(genome.sum(densityTrait)); // limit 0 to infinity
+      return 10 + sqrt(d); // limit 0 to infinity
     }
     
     private float getRestitution() {
@@ -215,15 +215,15 @@ class creature {
     }
     
     private Vec2 getOriginPoint() {
-      
+      return new Vec2();
     }
     
     private Vec2 getFrontPoint() {
-      
+      return new Vec2();
     }
     
     private Vec2 getBackPoint() {
-      
+      return new Vec2();
     }
   }
 
@@ -271,7 +271,6 @@ class creature {
  
  void construct(float e) { // this function contains all the overlap of the constructors
     numSegments = getNumSegments();
-    computeArmor();
     //density = (getDensity() * (armor.sum() / numSegments));
     float energy_scale = 500; // scales the max energy pool size
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
@@ -476,14 +475,6 @@ class creature {
   private float getForce() {
     // -infinity to infinity linear
     return (500 + 10 * genome.sum(forwardForce));
-  }
-
-  // How bouncy a creature is, one of the basic box2D body parameters,
-  // no idea how it evolves or if it has any value to the creatures
-  private float getRestitution() {
-    // TODO: refactor for restitution per segment
-    float r = genome.sum(restitutionTrait);
-    return 0.5 + (0.5 * (r / (1 + abs(r))));
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
@@ -703,10 +694,14 @@ class creature {
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
+    Object o;
+    //Fixture f = body.getFixtureList();
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      fill(getColor(f.getUserData.index)); // Get the creature's color
-      if (f.getUserData.armor > 1) strokeWeight((((f.getUserData.armor)-1)*2)+1);
-      else strokeWeight(f.getUserData.armor);
+      //o = f.getUserData();
+      //println(o.toString());
+      fill(getColor(0));//f.getUserData().index)); // Get the creature's color
+      //if (f.getUserData().armor > 1) strokeWeight((((f.getUserData().armor)-1)*2)+1);
+      //else strokeWeight(f.getUserData().armor);
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {

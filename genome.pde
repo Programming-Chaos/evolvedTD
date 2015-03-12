@@ -96,7 +96,6 @@ class SegmentTraits {
   Trait appendageSize;
 
   SegmentTraits() {
-    index = i;
     endPoint = new Trait(10);
     armor = new Trait(10);
     density = new Trait(10);
@@ -124,7 +123,7 @@ class AppendageTrait {
 }
 
 // "Static" initialization of trait lists
-  {
+  /*{
     // initialize the metabolic weights
     for (int i = 0; i < metabolic_network.num_weights; i++) {
       metabolicTraits.add(new Trait(10));
@@ -137,19 +136,19 @@ class AppendageTrait {
 
     // initialize the segments and their traits
     for (int i = 0; i < MAX_SEGMENTS; i++) {
-      segmentTraits.add(new SegmentTraits(i));
+      segmentTraits.add(new SegmentTraits());
     }
 
     // initialize the appendages and their traits
     for (int i = 0; i < MAX_APPENDAGES; i++) {
-      appendageTraits.add(new AppendageTrait(i));
+      appendageTraits.add(new AppendageTrait());
     }
 
     // initialize the color network weights
     for (int i = 0; i < color_network.num_weights; i++) {
       colorTraits.add(new Trait(10));
     }
-  }
+  }*/
 
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
