@@ -43,13 +43,13 @@ Trait scentTrait = new Trait(10);
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
-ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>();
+ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMENTS);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 
 // maximum number of apendages that can be evolved
 static final int MAX_APPENDAGES = MAX_SEGMENTS;
-ArrayList<AppendageTrait> appendageTraits = new ArrayList<AppendageTrait>();
+ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
 
 // sensory thresholds
 Trait painTrait = new Trait(10);
@@ -104,7 +104,7 @@ class SegmentTraits {
   }
 }
 
-class AppendageTrait {
+class AppendageTraits {
   Trait armor;
   Trait density;
   Trait restitution;
@@ -112,7 +112,7 @@ class AppendageTrait {
   Trait grassForce;
   Trait mountainForce;
 
-  AppendageTrait() {
+  AppendageTraits() {
     armor = new Trait(10);
     density = new Trait(10);
     restitution = new Trait(10);
@@ -123,7 +123,7 @@ class AppendageTrait {
 }
 
 // "Static" initialization of trait lists
-  /*{
+  {
     // initialize the metabolic weights
     for (int i = 0; i < metabolic_network.num_weights; i++) {
       metabolicTraits.add(new Trait(10));
@@ -141,14 +141,14 @@ class AppendageTrait {
 
     // initialize the appendages and their traits
     for (int i = 0; i < MAX_APPENDAGES; i++) {
-      appendageTraits.add(new AppendageTrait());
+      appendageTraits.add(new AppendageTraits());
     }
 
     // initialize the color network weights
     for (int i = 0; i < color_network.num_weights; i++) {
       colorTraits.add(new Trait(10));
     }
-  }*/
+  }
 
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
@@ -225,11 +225,11 @@ class Genome {
     }
 
     float sum(Trait trait) {
-      return 0;//list(trait).sum();
+      return list(trait).sum();
     }
 
     float avg(Trait trait) {
-      return 0;//sum(trait) / trait.genes;
+      return sum(trait) / trait.genes;
     }
 
     void mutate() {
