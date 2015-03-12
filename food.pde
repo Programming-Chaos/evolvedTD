@@ -2,11 +2,21 @@ class food {
   Body the_food;
   int radius;
   boolean remove = false;
+  /*Taste will be 5 types of taste. - sweet, sour, salty, bitter, umami*/
+  int []taste;
+  
+  int[] getTaste() { return taste; };
   
   food(int x, int y) {
     radius = 3;
     makebody(x, y);
     the_food.setUserData(this);
+    taste = new int[5];
+    taste[0] = 100;
+    taste[1] = 0;
+    taste[2] = 0;
+    taste[3] = 0;
+    taste[4] = 50;
   }
   
   food() {
@@ -14,12 +24,24 @@ class food {
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
     the_food.setUserData(this);
+    taste = new int[5];
+    taste[0] = 100;
+    taste[1] = 0;
+    taste[2] = 0;
+    taste[3] = 0;
+    taste[4] = 50;
   }
   
   food(float x, float y) {
     radius = 3;
     makebody((int)x, (int)y);
     the_food.setUserData(this);
+    taste = new int[5];
+    taste[0] = 100;
+    taste[1] = 0;
+    taste[2] = 0;
+    taste[3] = 0;
+    taste[4] = 50;
   }
   
   // This function removes the particle from the box2d world
