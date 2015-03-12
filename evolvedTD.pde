@@ -23,9 +23,11 @@ int timepergeneration = 1500;
 int generation = 0;
 
 boolean paused = false;        // is it paused
+boolean playSound = true;      // play game sounds
+boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
-boolean displayScent = true;   // not displaying scent speeds things up a lot
+boolean displayScent = false;  // not displaying scent speeds things up a lot
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -38,6 +40,7 @@ environment environ;           // the environment object
 
 Minim minim;
 AudioPlayer gunshot;
+//AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
@@ -49,16 +52,17 @@ void setup() {
   the_player = new player();
   the_tower = new tower();
   the_player.addtower(the_tower);
-  
+
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/Cannon.mp3");
+  //thunder = minim.loadFile("assets/thunder.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
   frameRate(200);                // sets the framerate, in many cases the actual framerate will be lower due to the number of objects moving nad interacting
   cameraX = 0;
   cameraY = 0;
-  cameraZ = 300;
+  cameraZ = 2150;
   the_pop = new population();
 
   place_food();                  // calls the place food function below
@@ -77,7 +81,7 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-  
+
 
   if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -111,7 +115,7 @@ void draw() {
       r.display();
     }
   }
-  
+
   the_player.update();
   if (display) {
     the_player.display(); // display the interface for the player
@@ -185,8 +189,18 @@ void keyPressed() { // if a key is pressed this function is called
     case 'p':  // toggle paused state
       paused = !paused;
       break;
+    case 'm':
+      playSound = !playSound;
+      break;
     case 'v':
       display = !display;
+      // mute on hide
+      if (!display) {
+        playSoundSave = playSound;
+        playSound = false;
+      } else {
+        playSound = playSoundSave;
+      }
       break;
     case 'q':
       displayFood = !displayFood;
@@ -258,7 +272,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-    
+
     p2.setRemove(true);
   }
 
@@ -274,7 +288,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
     p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-    
+
     p2.setRemove(true);
   }
 
