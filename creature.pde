@@ -619,6 +619,7 @@ class creature {
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
+    
     if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
