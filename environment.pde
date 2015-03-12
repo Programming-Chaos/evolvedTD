@@ -153,7 +153,7 @@ class environment{
     environHeight = worldHeight / cellHeight;   
     environAltitude = (int)random(255);
     temp = (int)random(-40, 50); // celcius
-    println(temp);
+    //println(temp);
     rockFrequency = 0;
     
     gravityMap = new gravityVector[environHeight][environWidth];
@@ -366,7 +366,7 @@ class environment{
         // change values here and reconstruct color 
       }
     }
-    println("red: " + r + " blue: " + b + " green: " + g);
+    //println("red: " + r + " blue: " + b + " green: " + g);
   }
   
   void place_creature(creature cd, float x, float y) {
