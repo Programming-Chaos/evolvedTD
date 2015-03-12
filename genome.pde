@@ -43,14 +43,13 @@ Trait scentTrait = new Trait(10);
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
-ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMENTS + 1);
+ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMENTS);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 
 // maximum number of apendages that can be evolved
 static final int MAX_APPENDAGES = 40;
-ArrayList<AppendageTraits> appendageTraits
-  = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
+ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
 
 // sensory thresholds
 Trait painTrait = new Trait(10);
