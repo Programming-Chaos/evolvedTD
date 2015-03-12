@@ -277,7 +277,9 @@ class creature {
   // the creatures body
   private Vec2 getPoint(int i) {
     Vec2 a = new Vec2();
-    float segment = genome.sum(segmentTraits.get(i).endPoint);
+    float segment;
+    if (i == (numSegments-1)) segment = genome.sum(trailingEndpoint);
+    else segment = genome.sum(segmentTraits.get(i).endPoint);
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -296,7 +298,9 @@ class creature {
   private Vec2 getFlippedPoint(int i) {
     // TODO: reduce code duplication
     Vec2 a = new Vec2();
-    float segment = genome.sum(segmentTraits.get(i).endPoint);
+    float segment;
+    if (i == (numSegments-1)) segment = genome.sum(trailingEndpoint);
+    else segment = genome.sum(segmentTraits.get(i).endPoint);
     int lengthbase = 20;
     float l;
     if (segment < 0) {
@@ -670,10 +674,6 @@ class creature {
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
-  }
-
-  class segIndex {  // This class is a helper. One of these is attached to every segment of every creature
-    int segmentIndex;  // This class's only variable is an index corresponding to of the creature's segments this is, so its armor can be referenced later
   }
 
   // This function makes a Box2D body for the creature and adds it to the box2d world

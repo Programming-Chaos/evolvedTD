@@ -48,7 +48,7 @@ ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMEN
 Trait expressedSegments = new Trait(10);
 
 // maximum number of apendages that can be evolved
-static final int MAX_APPENDAGES = 40;
+static final int MAX_APPENDAGES = MAX_SEGMENTS;
 ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
 
 // sensory thresholds
@@ -66,6 +66,8 @@ Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 Trait alphaTrait = new Trait(10);
+
+Trait trailingEndpoint = new Trait(10);
 
 // TODO: remove these traits when segment refactor is complete
 Trait densityTrait = new Trait(10);
@@ -136,7 +138,7 @@ class AppendageTraits {
     }
 
     // initialize the segments and their traits
-    for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
+    for (int i = 0; i < MAX_SEGMENTS; i++) {
       segmentTraits.add(new SegmentTraits());
     }
 
