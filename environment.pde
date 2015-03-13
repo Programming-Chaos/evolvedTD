@@ -381,7 +381,7 @@ class environment{
   }
 
   void update_scent() {
-    if (paused)
+    if (state != State.RUNNING)
       return;
     int range = 1, tempx, tempy;
     float count;
@@ -422,7 +422,7 @@ class environment{
   }
 
   void update_creature_scent() {
-    if (paused)
+    if (state != State.RUNNING)
       return;
     int range = 1, tempx, tempy;
     float count = 0;
