@@ -369,8 +369,8 @@ void endContact(Contact cp) {
 void place_food() { // done once at the beginning of the game
   foods = new ArrayList<food>();
   for (int i = 0; i < 50; i++) {
-    food f = new food((int)random(-0.4 * worldWidth, 0.4 * worldWidth),
-                      (int)random(-0.4 * worldHeight, 0.4 * worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
+                      (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
@@ -388,7 +388,7 @@ void nextgeneration() {
 
 void add_food() { // done after each wave/generation
   for (int i = 0; i < 10; i++) { // why add exactly 10 food each time?
-    food f = new food((int)random(-0.4*worldWidth,0.4*worldWidth), (int)random(-0.4*worldHeight,0.4*worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }

@@ -2,9 +2,6 @@ class tower {
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
-  float resources;        // amount of resources the tower has
-  float maxResources;     // max resources the tower can store, may not use, if used should be upgradable
-  float resourceGain;     // gain per timestep
   int activeweapon;     // value determines which weapon is active
   ArrayList<projectile> projectiles;  // list of active projectiles
   float angle;    // angle of tower's main, auto-fir weapon
@@ -22,7 +19,6 @@ class tower {
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
-    resourceGain = 0.1;  // changes with upgrades
     projectiles = new ArrayList<projectile>();
     angle = 0;
     gunbase = loadImage("assets/Tower_base_02.png");
@@ -35,7 +31,6 @@ class tower {
     update_projectiles();
     if(!paused){
       energy += energyGain;  // gain energy
-      resources += resourceGain;  // gain resources
       if (autofire) {
         Vec2 target;
         autofirecounter++;
@@ -111,7 +106,8 @@ class tower {
     noStroke();
     fill(0, 0, 255);
     rect(0, -30, 0.1*energy, 6);
-    // display resources
+    // display resources, now in player
+    /*
     pushMatrix();
     hint(DISABLE_DEPTH_TEST);
       translate(cameraX, cameraY,cameraZ-400);  // centered and below the camera
@@ -120,7 +116,7 @@ class tower {
       text("Resources: "+(int)resources,0.2*width,-0.25*height); 
     hint(ENABLE_DEPTH_TEST); 
     popMatrix();
-
+    */
   }
   
   void next_generation() { // update the tower

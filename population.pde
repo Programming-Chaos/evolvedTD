@@ -4,7 +4,7 @@
 
 class population {
   ArrayList<creature> swarm;
-  static final int POP_SIZE = 20;
+  static final int POP_SIZE = 35;
 
   float baseGameteChance = 0.4; // Base gamete success rate
   int baseGameteRadius = 6; // Base gamete mating range
