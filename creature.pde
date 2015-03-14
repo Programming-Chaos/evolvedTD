@@ -636,14 +636,6 @@ class creature {
     }
   }
 
-  void calcBehavior(){
-    for(int i = 0; i<brain.OUTPUTS; i++){
-      for(int j = 0; j<brain.INPUTS; j++){
-        current_actions[i] += (senses.brain_array[j]*brain.weights[i][j]);
-      }
-    }
-  }
-
   // The update function is called every timestep
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
