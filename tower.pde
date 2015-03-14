@@ -167,9 +167,10 @@ class tower {
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
-    gunshot.rewind();
-    gunshot.play();
-    
+    if (playSound) {
+      gunshot.rewind();
+      gunshot.play();
+    }
   }
   
   void drop_rock() {

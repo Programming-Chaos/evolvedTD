@@ -23,10 +23,7 @@ Trait gameteTime = new Trait(10);
 Trait gameteChance = new Trait(10);
 Trait gameteEnergy = new Trait(10);
 
-// Weights for the brain's artificial neural network
-static final int BRAIN_INPUTS = 10;
-static final int BRAIN_OUTPUTS = 100;
-ArrayList<Trait> brainTraits = new ArrayList<Trait>(BRAIN_INPUTS);
+ArrayList<Trait> brainTraits = new ArrayList<Trait>(Brain.WEIGHTS);
 
 // Speciation
 Trait compatibility = new Trait(10);
@@ -61,6 +58,8 @@ Trait sidePressureTrait = new Trait(10);
 Trait tasteTrait = new Trait(10);
 Trait speedTrait = new Trait(10);
 Trait angularMomentumTrait = new Trait(10);
+Trait massTrait = new Trait(10);
+Trait energyTrait = new Trait(10);
 
 ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
 // TODO: will these traits be gone with the use of a color network?
@@ -129,8 +128,8 @@ class AppendageTraits {
     }
 
     // initialize the brain weights
-    for (int i = 0; i < BRAIN_INPUTS; i++) {
-      brainTraits.add(new Trait(BRAIN_OUTPUTS));
+    for (int i = 0; i < Brain.WEIGHTS; i++) {
+      brainTraits.add(new Trait(10));
     }
 
     // initialize the segments and their traits
