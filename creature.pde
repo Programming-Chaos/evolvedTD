@@ -69,8 +69,8 @@ class creature {
   color_network coloration;
 
   // Reproduction variables
-  int baseGameteCost = 100;  // Gametes base energy cost
-  int baseGameteTime = 200;  // Gametes base create time in screen updates.
+  int baseGameteCost = 10;  // Gametes base energy cost
+  int baseGameteTime = 20;  // Gametes base create time in screen updates.
   int baseGameteEnergy = 500;// Gametes base extra energy
   int gameteTimeLapse = 0;   // Keeps track of time since last gamete
 
@@ -132,8 +132,8 @@ class creature {
     // Currently creatures are 'born' around a circle a fixed distance
     // from the tower. Birth locations should probably be evolved as
     // part of the reproductive strategy and/or behavior
-    Vec2 pos = new Vec2(0.45 * worldWidth * sin(angle),
-                        0.45 * worldWidth * cos(angle));
+    Vec2 pos = new Vec2(0.45* random(0.95,1.04) * worldWidth * sin(angle),
+                        0.45 * random(0.95,1.04) * worldWidth * cos(angle));
     makeBody(pos);
     float energy_scale = 500;
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));

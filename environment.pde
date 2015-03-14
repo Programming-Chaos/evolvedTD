@@ -151,7 +151,7 @@ class environment{
     environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
     temp = (int)random(-40, 50); // celcius
-    println(temp);
+
     rockFrequency = 0;
 
     gravityMap = new gravityVector[environHeight][environWidth];

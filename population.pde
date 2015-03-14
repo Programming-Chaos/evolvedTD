@@ -147,21 +147,24 @@ class population {
   void next_generation() {
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
+    println(generation);
+    
     for (creature c : swarm) {
-      c.calcFitness();
+     // c.calcFitness();
       // Keep the survivors
+      /*
       if (c.alive) {
         c.round_counter++;
         generation.add(c);
       }
-
+*/
       // Add all of a creatures gametes to the gamete pool
       for(Gamete g : c.gameteStack) {
         gametes.add(g);
       }
     }
     // Place gametes in order of time.
-    print("Gamete Size: " + gametes.size() + "\n");
+    //print("Gamete Size: " + gametes.size() + "\n");
     OrderGametes(gametes);
     
     int childrenBred = 0;
@@ -171,6 +174,7 @@ class population {
       if (gametes.size() < 2) {
         childrenNew++;
         generation.add(new creature(new Genome(), 20000));
+     
         continue;
       }
 
@@ -204,10 +208,12 @@ class population {
         
         childrenBred++;
         generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                    10000 + g1.energy + g2.energy, pos));
+                                    10000 + g1.energy + g2.energy));
       }
     }
     //println("made " + childrenBred + " and needed " + childrenNew + " more");
+    swarm.clear();
     swarm = generation;
+    
   }
 }

@@ -156,7 +156,7 @@ class tower {
   /* Firing, dropping rocks, etc. uses up some of the tower's energy */
   
   void fire_projectile() {
-    if (energy < 1) {
+    if (energy < 10) {
       return;
     }
     projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
@@ -168,6 +168,24 @@ class tower {
       gunshot.play();
     }
   }
+  
+  void wave_fire(){
+    if(energy < 5){
+      return;
+    }
+    for(float a = 0; a < 2*PI ; a += ((2*PI)/20)){
+      projectile p = new projectile(5*cos(a), 5*sin(a), a, 20); // 20 is the current damage, should be a variable, upgradable
+      // postions of new projectives are not at 0,0 to avoid collisions.
+      projectiles.add(p);
+    }
+    energy-=5;
+    imagetimer = 0;
+    if (playSound) {
+      gunshot.rewind();
+      gunshot.play();
+    }
+  }
+    
   
   void drop_rock() {
     float x,y;

@@ -377,7 +377,6 @@ void place_food() { // done once at the beginning of the game
 
 void nextgeneration() {
   generation++;
-  println(generation);
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
   the_tower.next_generation(); // have the tower update itself, reset energy etc.
@@ -408,6 +407,7 @@ void mousePressed() { // called if the (left) mouse button is pressed
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
+  the_player.mouse_pressed();
 }
 
 void controls() {

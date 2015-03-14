@@ -34,4 +34,16 @@ class player {
     upper_right.update();  // update GUI panel
   }
   
+  void mouse_pressed(){
+    upper_right.mouse_pressed();  // check if the mouse was pressed in the upperright GUI panel
+  }
+  
+  void wave_fire(){
+    for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
+      tower t = towers.get(i);
+      t.wave_fire();
+    }
+  }
+ 
+  
 }
