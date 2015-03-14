@@ -44,12 +44,12 @@ ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 
-// maximum number of apendages that can be evolved
-static final int MAX_APPENDAGES = 40;
-ArrayList<AppendageTrait> appendages
-  = new ArrayList<AppendageTrait>(MAX_APPENDAGES);
-// encodes number of appendages actually expressed
-Trait expressedAppendages = new Trait(10);
+// maximum number of feelers that can be evolved
+static final int MAX_FEELERS = 40;
+ArrayList<FeelerTrait> feelers
+  = new ArrayList<FeelerTrait>(MAX_FEELERS);
+// encodes number of feelers actually expressed
+Trait expressedFeelers = new Trait(10);
 
 // sensory thresholds
 Trait painTrait = new Trait(10);
@@ -105,14 +105,14 @@ class Segment {
   }
 }
 
-class AppendageTrait {
+class FeelerTrait {
   Trait scent;
   Trait pressure;
   Trait taste;
   Trait angle;
   Trait length;
 
-  AppendageTrait() {
+  FeelerTrait() {
     scent    = new Trait(10);
     pressure = new Trait(10);
     taste    = new Trait(10);
@@ -138,9 +138,9 @@ class AppendageTrait {
       segments.add(new Segment());
     }
 
-    // initialize the appendages and their traits
-    for (int i = 0; i < (MAX_APPENDAGES); i++) {
-      appendages.add(new AppendageTrait());
+    // initialize the feelers and their traits
+    for (int i = 0; i < (MAX_FEELERS); i++) {
+      feelers.add(new FeelerTrait());
     }
 
     // initialize the color network weights
