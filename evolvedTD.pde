@@ -279,7 +279,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
 
   if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     // projectiles damage creatures
-    println("first object was projectile");
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
     if (f2.getUserData().getClass() == creature.Segment.class) {
