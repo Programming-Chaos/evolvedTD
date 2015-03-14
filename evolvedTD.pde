@@ -7,6 +7,7 @@ import ddf.minim.effects.*;
 
 import shiffman.box2d.*;
 import org.jbox2d.collision.shapes.*;
+import org.jbox2d.collision.AABB;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
@@ -23,6 +24,8 @@ int timepergeneration = 1500;
 int generation = 0;
 
 boolean paused = false;        // is it paused
+boolean playSound = true;      // play game sounds
+boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
@@ -119,12 +122,12 @@ void draw() {
     the_player.display(); // display the interface for the player
   }
 
-/*
-  the_tower.update();
-  if (display) {
+  /*
+    the_tower.update();
+    if (display) {
     the_tower.display(); // display the tower
-  }
-*/
+    }
+  */
 
   if (!paused) {
     the_pop.update(); // update the population, i.e. move the creatures
@@ -187,8 +190,18 @@ void keyPressed() { // if a key is pressed this function is called
     case 'p':  // toggle paused state
       paused = !paused;
       break;
+    case 'm':
+      playSound = !playSound;
+      break;
     case 'v':
       display = !display;
+      // mute on hide
+      if (!display) {
+        playSoundSave = playSound;
+        playSound = false;
+      } else {
+        playSound = playSoundSave;
+      }
       break;
     case 'q':
       displayFood = !displayFood;
@@ -230,7 +243,9 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     p1.addEnergy(20000); // getting food is valuable
+
     food p2 = (food)o2;
+    p1.senses.Set_Taste(p2);
     if (p2 != null) {
       p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
@@ -242,6 +257,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     p1.addEnergy(20000); // getting food is valuable
     food p2 = (food)o1;
+    p1.senses.Set_Taste(p2);
     if (p2 != null) {
       p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
@@ -279,13 +295,75 @@ void beginContact(Contact cp) { // called when two box2d objects collide
 
     p2.setRemove(true);
   }
+  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+    creature p1 = (creature)o1;
+    creature p2 = (creature)o2;
+    Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
+    Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
+    int collision_1 = int(nf(p1.num, 0) + nf(p2.num, 0));
+    int collision_2 = int(nf(p2.num, 0) + nf(p1.num, 0));
+    int ID;
 
-  // nothing happens if two creatures collide
-  // Nothing happens if rocks collide with creatures, food with rocks, etc.
+    if (collision_1 > collision_2) {
+      ID = collision_1;
+    } else {
+      ID = collision_2;
+    }
+
+    p1.senses.Add_Side_Pressure(ID, PI);
+    p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+  }
 }
 
-void endContact(Contact cp) { // a required function, but doesn't do anything
-  ;
+
+void endContact(Contact cp) {
+  if (paused) { // probably not necessary
+    return;
+  }
+  // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
+  Fixture f1 = cp.getFixtureA();
+  Fixture f2 = cp.getFixtureB();
+  // Get the bodies that the fixtures are attached to
+  Body b1 = f1.getBody();
+  Body b2 = f2.getBody();
+  // Get the objects that reference these bodies, i.e. the userData
+  Object o1 = b1.getUserData();
+  Object o2 = b2.getUserData();
+
+  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+    creature p1 = (creature)o1;
+    creature p2 = (creature)o2;
+    Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
+    Vec2 pos_2 = box2d.getBodyPixelCoord(b2);
+    int collision_1 = int(nf(p1.num, 0) + nf(p2.num, 0));
+    int collision_2 = int(nf(p2.num, 0) + nf(p1.num, 0));
+    int ID;
+    if (collision_1 > collision_2) {
+      ID = collision_1;
+    } else {
+      ID = collision_2;
+    }
+    p1.senses.Remove_Side_Pressure(ID);
+    p2.senses.Remove_Side_Pressure(ID);
+  }
+
+
+
+
+  if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
+    // creatures grab food
+    creature p1 = (creature)o1;
+    p1.senses.Remove_Taste();
+  }
+
+  // check the class of the objects and respond accordingly
+  if (o1.getClass() == food.class && o2.getClass() == creature.class) {
+    // creatures grab food
+    creature p1 = (creature)o2;
+    p1.senses.Remove_Taste();
+  }
+
+
 }
 
 void place_food() { // done once at the beginning of the game
