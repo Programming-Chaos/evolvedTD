@@ -56,8 +56,6 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
   int numSegments;
-  FloatList armor;
-  float density;
   color_network coloration;
   int health_regen = 1; // value to set how much health is regenerated each timestep when energy is spent to regen
   int regen_energy_cost = 5; // value to determine how much regenerating health costs
@@ -70,10 +68,10 @@ class creature {
   int baseGameteEnergy = 500;// Gametes base extra energy
   int gameteTimeLapse = 0;   // Keeps track of time since last gamete
 
-  ArrayList<Gamete> gameteStack = new ArrayList(); // Holds the gametes and their map positions.
+  ArrayList<Gamete> gameteStack = new ArrayList<Gamete>(); // Holds the gametes and their map positions.
   
-  ArrayList<Segment> segments = new ArrayList();
-  ArrayList<Appendage> appendages = new ArrayList();
+  ArrayList<Segment> segments = new ArrayList<Segment>(numSegments);
+  ArrayList<Appendage> appendages = new ArrayList<Appendage>(numSegments);
   
   class Segment {
     int index;
@@ -87,6 +85,7 @@ class creature {
       index = i;
       armor = getArmor();
       density = getDensity();
+      density *= armor;
       restitution = getRestitution();
       frontPoint = getFrontPoint();
       backPoint = getBackPoint();
@@ -115,7 +114,9 @@ class creature {
     
     private Vec2 getFrontPoint() {
       Vec2 p = new Vec2();
-      float endpoint = genome.sum(segmentTraits.get(index).endPoint);
+      float endpoint;
+      if (index == (numSegments-1)) endpoint = genome.sum(segmentTraits.get(index).appendageSize);
+      else endpoint = genome.sum(segmentTraits.get(index+1).endPoint);
       int lengthbase = 20;
       float l;
       if (endpoint < 0) {
@@ -124,16 +125,14 @@ class creature {
       else {
         l = lengthbase + (2*lengthbase*(endpoint/(1+endpoint)));;
       }
-      p.x = (float)(l * Math.sin((index)*PI/(numSegments)) );
-      p.y = (float)(l * Math.cos((index)*PI/(numSegments)) );
+      p.x = (float)(l * Math.sin((index+1)*PI/(numSegments)) );
+      p.y = (float)(l * Math.cos((index+1)*PI/(numSegments)) );
       return p;
     }
     
     private Vec2 getBackPoint() {
       Vec2 p = new Vec2();
-      float endpoint;
-      if (index == (MAX_SEGMENTS-1)) endpoint = genome.sum(trailingEndpoint);
-      else endpoint = genome.sum(segmentTraits.get(index+1).endPoint);
+      float endpoint = genome.sum(segmentTraits.get(index).endPoint);
       int lengthbase = 20;
       float l;
       if (endpoint < 0) {
@@ -159,6 +158,8 @@ class creature {
     float waterForce;
     float grassForce;
     float mountainForce;
+    float angle;
+    float spread;
     Vec2 originPoint;
     Vec2 frontPoint;
     Vec2 backPoint;
@@ -166,27 +167,30 @@ class creature {
     Appendage(int i) {
       index = i;
       size = getSize();
-      armor = getArmor();
-      density = getDensity();
-      getForces();
-      originPoint = getOriginPoint();
-      frontPoint = getFrontPoint();
-      backPoint = getBackPoint();
+      if (size>0) {
+        armor = getArmor();
+        density = getDensity();
+        density *= armor;
+        getForces();
+        angle = getAngle();
+        spread = getSpread();
+        originPoint = getOriginPoint();
+        frontPoint = getFrontPoint();
+        backPoint = getBackPoint();
+      }
     }
     
     private float getSize() {
-      float ret = genome.avg(segmentTraits.get(index).appendageSize);
+      float ret = genome.sum(segmentTraits.get(index).appendageSize);
       if (ret < 0) ret *= -1;
-      if (ret < 1) ret = 0;
+      if (ret < 0.3) ret = 0;
       return ret;
     }
     
-    private float getArmor() {
-      float a = (genome.avg(appendageTraits.get(index).armor));
-      if ((1+a) < 0.1)
-        return 0.1;
-      else
-        return (a+1);
+    private float getArmor() {;
+     float a = (genome.avg(appendageTraits.get(index).armor));
+     if ((1+a) < 0.1) return 0.1;
+     return (a+1);
     }
     
     private float getDensity() {
@@ -204,29 +208,35 @@ class creature {
       return 0.5 + (0.5 * (r / (1 + abs(r))));
     }
     
-    void getForces() { //mapping function is inverse quadratic and then values are made proportional to their total
+    void getForces() { //mapping function is inverse quadratic and then values are made proportional to their sum
       float water = (genome.avg(appendageTraits.get(index).waterForce));
-      waterForce = ((-1/(1+(water*water)))+1);
+      waterForce = 1;//((-1/(1.01+(water*water)))+1);
       float grass = (genome.avg(appendageTraits.get(index).grassForce));
-      grassForce = ((-1/(1+(grass*grass)))+1);
+      grassForce = 1;//((-1/(1.01+(grass*grass)))+1);
+      grassForce *= 4;
       float mountain = (genome.avg(appendageTraits.get(index).mountainForce));
-      grassForce = ((-1/(1+(grass*grass)))+1);
-      float divisor = waterForce+grassForce+mountainForce;
-      waterForce /= (divisor/3);//corresponds to the length of the opposite side of the appendage
-      grassForce /= (divisor/3);//corresponds to the length of the front side of the appendage
-      mountainForce /= (divisor/3);//corresponds to the length of the rear side of the appendage
+      mountainForce = 1;//((-1/(1.01+(mountain*mountain)))+1);
+      mountainForce *= 4;
     }
     
-    private Vec2 getOriginPoint() {
-      return new Vec2();
+    private float getAngle() {
+      return (((index+1)*(PI/numSegments))-(PI/2));//(float)(Math.atan((segments.get(index).backPoint.x-segments.get(index).frontPoint.x)/(segments.get(index).backPoint.y-segments.get(index).frontPoint.y)));
     }
+    
+    private float getSpread() {
+      return (float)((Math.acos(((mountainForce*mountainForce)+(grassForce*grassForce)-(waterForce*waterForce))/(2*mountainForce*grassForce)))/2);
+    }
+    
+    private Vec2 getOriginPoint() { // point of origin of the appendages is the front point of the associated segment
+      return new Vec2(segments.get(index).frontPoint.x, segments.get(index).frontPoint.y);//segments.get(index).backPoint;//new Vec2((segments.get(index).frontPoint.x+((segments.get(index).backPoint.x-segments.get(index).frontPoint.x)/2)), (segments.get(index).frontPoint.y+((segments.get(index).backPoint.y-segments.get(index).frontPoint.y)/2)));
+     }
     
     private Vec2 getFrontPoint() {
-      return new Vec2();
+      return new Vec2(((float)(grassForce*(Math.sin(spread+angle+(PI/2))))*5)+originPoint.x, ((float)(grassForce*(Math.cos(spread+angle+(PI/2))))*5)+originPoint.y);
     }
     
     private Vec2 getBackPoint() {
-      return new Vec2();
+      return new Vec2(((float)(mountainForce*(Math.sin((-1*spread)+angle+(PI/2))))*5)+originPoint.x, ((float)(mountainForce*(Math.cos((-1*spread)+angle+(PI/2))))*5)+originPoint.y);
     }
   }
 
@@ -259,6 +269,9 @@ class creature {
   
   void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
     numSegments = getNumSegments();
+    for (int i = 0; i < numSegments; i++) segments.add(new Segment(i));
+    for (int i = 0; i < (numSegments-1); i++) appendages.add(new Appendage(i));
+    
     makeBody(pos);   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
     
@@ -427,50 +440,13 @@ class creature {
     return color(r, g, b, a);
   }
 
-  // Gets the end point of the ith segment/rib/spine used to create
-  // the creatures body
-  private Vec2 getPoint(int i) {
-    Vec2 a = new Vec2();
-    float segment = genome.sum(segmentTraits.get(i).endPoint);
-    int lengthbase = 20;
-    float l;
-    if (segment < 0) {
-      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
-    }
-    else {
-      l = lengthbase + (2*lengthbase*(segment/(1+segment)));;
-    }
-    a.x = (float)(l * Math.sin((i)*PI/(numSegments)) );
-    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
-    return a;
-  }
-
-  // Gets the end point of the ith segment/rib/spine on the other side
-  // of the creatures body
-  private Vec2 getFlippedPoint(int i) {
-    // TODO: reduce code duplication
-    Vec2 a = new Vec2();
-    float segment = genome.sum(segmentTraits.get(i).endPoint);
-    int lengthbase = 20;
-    float l;
-    if (segment < 0) {
-      l = 1 + (lengthbase-1) * (1.0/(1+abs(segment)));
-    }
-    else {
-      l = lengthbase + (2*lengthbase*(segment/(1+segment)));
-    }
-    a.x = (float)(-1 * l * Math.sin((i)*PI/(numSegments)) );
-    a.y = (float)(l * Math.cos((i)*PI/(numSegments)) );
-    return a;
-  }
-
   // Calculate and return the width of the creature
   private float getWidth() {
     // TODO: Move this to creature
     float maxX = 0;
     Vec2 temp;
     for (int i = 0; i < numSegments; i++) {
-      temp = getPoint(i);
+      temp = segments.get(i).frontPoint;
       if (temp.x > maxX) {
         maxX = temp.x;
       }
@@ -484,7 +460,7 @@ class creature {
     float minY = 0;
     Vec2 temp;
     for (int i = 0; i < numSegments; i++) {
-      temp = getPoint(i);
+      temp = segments.get(i).frontPoint;
       if (temp.y > maxY) {
         maxY = temp.y;
       }
@@ -508,9 +484,7 @@ class creature {
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
-    println("one");
-    int ret = 8;//round(genome.avg(expressedSegments) + 8);
-    println("two");
+    int ret = round(genome.avg(expressedSegments) + STARTING_NUMSEGMENTS);
     if (ret < 2)
       return 2;
     if (ret > MAX_SEGMENTS)
@@ -734,14 +708,17 @@ class creature {
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
-    Object o;
-    //Fixture f = body.getFixtureList();
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
-      //o = f.getUserData();
-      //println(o.toString());
-      fill(getColor(0));//f.getUserData().index)); // Get the creature's color
-      //if (f.getUserData().armor > 1) strokeWeight((((f.getUserData().armor)-1)*2)+1);
-      //else strokeWeight(f.getUserData().armor);
+      if (f.getUserData().getClass() == Segment.class) {
+        fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
+        if ((((Segment)f.getUserData()).armor) > 1)  strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else strokeWeight(((Segment)f.getUserData()).armor);
+      }
+      if (f.getUserData().getClass() == Appendage.class) {
+        fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
+        if ((((Appendage)f.getUserData()).armor) > 1)  strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else strokeWeight(((Appendage)f.getUserData()).armor);
+      }
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       for (int i = 0; i < 3; i++) {
@@ -750,10 +727,10 @@ class creature {
       }
       endShape(CLOSE);
     }
-    strokeWeight(1);  //reset line width to default
+    strokeWeight(1);
     // Add some eyespots
     fill(0);
-    Vec2 eye = getPoint(6);
+    Vec2 eye = segments.get(round(numSegments*.74)).frontPoint;;
     ellipse(eye.x, eye.y, 5, 5);
     ellipse(-1 * eye.x, eye.y, 5, 5);
     fill(255);
@@ -820,8 +797,8 @@ class creature {
       // First vertex is at the center of the creature
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));
       // Second and third vertices are evolved, so get from the genome
-      Vec2 front = new Vec2(segments.get(i).frontPoint);
-      Vec2 back = new Vec2(segments.get(i).backPoint);
+      Vec2 front = segments.get(i).frontPoint;
+      Vec2 back = segments.get(i).backPoint;
       vertices3[1] = box2d.vectorPixelsToWorld(front);
       vertices3[2] = box2d.vectorPixelsToWorld(back);
 
@@ -846,6 +823,33 @@ class creature {
       sd.set(vertices3, vertices3.length);
       fd.shape = sd;
       body.createFixture(fd);  // Create the actual fixture, which adds it to the body
+      
+      if (i == (numSegments-1))break;
+      if (appendages.get(i).size > 0) {
+        Vec2 orig = appendages.get(i).originPoint;
+        vertices3[0] = box2d.vectorPixelsToWorld(orig);
+        front = appendages.get(i).frontPoint;
+        back = appendages.get(i).backPoint;
+        vertices3[1] = box2d.vectorPixelsToWorld(front);
+        vertices3[2] = box2d.vectorPixelsToWorld(back);
+        sd.set(vertices3, vertices3.length);
+        fd.shape = sd;
+        fd.density = appendages.get(i).density;
+        fd.restitution = appendages.get(i).restitution;
+        fd.userData = appendages.get(i);
+        body.createFixture(fd);  // Create the actual fixture, which adds it to the body
+        
+        // now tweak and repeat for the symmetrically opposite fixture
+        orig.x *= -1;
+        vertices3[0] = box2d.vectorPixelsToWorld(orig);
+        front.x *= -1;
+        back.x *= -1;
+        vertices3[1] = box2d.vectorPixelsToWorld(front);
+        vertices3[2] = box2d.vectorPixelsToWorld(back);
+        sd.set(vertices3, vertices3.length);
+        fd.shape = sd;
+        body.createFixture(fd);  // Create the actual fixture, which adds it to the body
+      }
     }
   }
 }

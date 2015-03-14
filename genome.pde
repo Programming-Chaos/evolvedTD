@@ -5,6 +5,8 @@ static final float MUTATION_RATE = 0.20;
 static final float INITIAL_DEVIATION = 0.05;
 // multiplier for number of genes given to each trait
 static final float GENE_MULTIPLIER = 4.0/3.0;
+// initial number of segments (should be between 2 and 20)
+static final int STARTING_NUMSEGMENTS = 8;
 
 // additional control trait to estimate genetic evolution
 Trait control = new Trait(10);
@@ -66,10 +68,6 @@ Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 Trait alphaTrait = new Trait(10);
-
-Trait trailingEndpoint = new Trait(10);
-
-// TODO: remove these traits when segment refactor is complete
 
 private int nGenes = 0;
 
