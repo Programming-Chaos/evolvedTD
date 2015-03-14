@@ -1,9 +1,4 @@
-import shiffman.box2d.*;
-import org.jbox2d.collision.shapes.*;
-import org.jbox2d.collision.AABB;
-import org.jbox2d.common.*;
-import org.jbox2d.dynamics.*;
-import org.jbox2d.dynamics.contacts.*;
+static int creature_count = 0;
 
 class Gamete {
   int xPos, yPos;
@@ -27,41 +22,50 @@ class Gamete {
 }
 
 class creature {
-  // All creatures have a Box2D body, a genome, and some other qualities:
-  // fitness, health, a max health, angle they are facing, etc.
-  Body body;
-
-  Genome genome;         // encodes the creature's genetic information
-
-  // communication traits
-  boolean scent;         // used to determine if creature is capable of producing scent
-  int scentStrength;   // how strong the creature's scent is
-  int scentType;        // store an integer for different colors
+  // stats
+  int num;               // unique creature identifier
+  boolean alive;         // dead creatures remain in the swarm to have a breeding chance
+  float fitness;         // used for selection
+  float health;          // 0 health, creature dies
+  float maxHealth = 100; // TODO: should be evolved
+  int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
+  int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
+  
+  // timers
+  int timestep_counter;  // counter to track how many timesteps a creature has been alive
+  int time_in_water;     // tracks how much time the creature spends in water
+  int time_on_land;      // tracks how much time the creature spends on land
+  
+  // encodes the creature's genetic information
+  Genome genome;
+  Brain brain;
+  float current_actions[];
+  
+  // metabolism
+  float energy_reproduction;     // energy for gamete produciton
+  float energy_locomotion;       // energy for locomotion and similar activites
+  float energy_health;           // energy for regeneration
+  float max_energy_reproduction; // size of reproductive energy stores
+  float max_energy_locomotion;
+  float max_energy_health;
+  int regen_energy_cost = 5; // value to determine how much regenerating health costs
+  metabolic_network metabolism;
+  
+  // senses/communication
+  Sensory_Systems senses;
+  boolean scent;     // used to determine if creature is capable of producing scent
+  int scentStrength; // how strong the creature's scent is
+  int scentType;     // store an integer for different colors
   boolean CreatureScent = false;
   boolean ReproScent = false;
   boolean PainScent = false;
-
-  float energy_reproduction;  // energy for gamete produciton
-  float energy_locomotion;    // energy for locomotion and similar activites
-  float energy_health;        // energy for regeneration
-  float max_energy_reproduction;  // size of reproductive energy stores
-  float max_energy_locomotion;
-  float max_energy_health;
-  metabolic_network metabolism;
-  float fitness;         // used for selection
-  float health;          // 0 health, creature dies
-  float maxHealth = 100; // should be evolved
+  
+  // body
+  Body body;
   float angle;
-  boolean alive;         // dead creatures remain in the swarm to have a breeding chance
-  int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  int timestep_counter;  // counter to track how many timesteps a creature has been alive
   int numSegments;
   color_network coloration;
-  int health_regen = 1; // value to set how much health is regenerated each timestep when energy is spent to regen
-  int regen_energy_cost = 5; // value to determine how much regenerating health costs
-  int time_in_water;     // tracks how much time the creature spends in water
-  int time_on_land;      // tracks how much time the creature spends on land
-
+  
   // Reproduction variables
   int baseGameteCost = 100;  // Gametes base energy cost
   int baseGameteTime = 200;  // Gametes base create time in screen updates.
@@ -268,6 +272,11 @@ class creature {
   }
   
   void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
+    num = creature_count++;
+    senses = new Sensory_Systems(genome);
+    brain = new Brain(genome);
+    current_actions = new float[brain.OUTPUTS];
+    
     numSegments = getNumSegments();
     for (int i = 0; i < numSegments; i++) segments.add(new Segment(i));
     for (int i = 0; i < (numSegments-1); i++) appendages.add(new Appendage(i));
@@ -283,21 +292,21 @@ class creature {
     energy_reproduction = 0;                                // have to collect energy to reproduce
     energy_locomotion = min(e,max_energy_locomotion);       // start with energy for locomotion, the starting amount should come from the gamete and should be evolved
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
+    //println(max_energy_reproduction + " " + max_energy_locomotion + ":" +energy_locomotion + " "+ max_energy_health);  // for debugging
     metabolism = new metabolic_network(genome);
     coloration = new color_network(genome);
     health = maxHealth;                                     // probably should be evolved
     fitness = 0;
     alive = true;
     
-    scent = setScent(this);                 // does creature produce scent
-    scentStrength = setScentStrength(this); // how strong is the scent
-    scentType = setScentType(this);         // what color is the scent
+    scent = setScent();                 // does creature produce scent
+    scentStrength = setScentStrength(); // how strong is the scent
+    scentType = setScentType();         // what color is the scent
   }
 
-  boolean getScent()        { return scent; }
-
-  int getScentStrength()  { return scentStrength; }
-  int getScentType()       { return scentType; }
+  boolean getScent()     { return scent; }
+  int getScentStrength() { return scentStrength; }
+  int getScentType()     { return scentType; }
   
   int setScentType( creature c ) {
     if( c.scent == true ) {
@@ -601,6 +610,14 @@ class creature {
 
   float getFitness() {
     return fitness;
+  }
+ 
+  void calcBehavior(){
+    for(int i = 0; i<brain.OUTPUTS; i++){
+      for(int j = 0; j<brain.INPUTS; j++){
+        current_actions[i] += (senses.brain_array[j]*brain.weights[i][j]);
+      }
+    }
   }
 
   // The update function is called every timestep
