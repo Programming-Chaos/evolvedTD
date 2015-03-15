@@ -29,12 +29,12 @@ class tower {
   
   void update() {
     update_projectiles();
-    if(!paused){
+    if (state == State.RUNNING){
       energy += energyGain;  // gain energy
       if (autofire) {
         Vec2 target;
         autofirecounter++;
-        if (autofirecounter % 20 == 0 & !paused) { // only autofire every Nth time step
+        if (autofirecounter % 20 == 0) { // only autofire every 20th time step
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           target = the_pop.vec_to_random_creature(); // target a random creature
           angle = atan2(target.y,target.x);
