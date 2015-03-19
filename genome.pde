@@ -4,7 +4,7 @@ static final float MUTATION_RATE = 0.05;
 // standard deviation of initial gene values
 static final float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
-static final float GENE_MULTIPLIER = 4.0/3.0;
+static final float GENE_MULTIPLIER = 4.0 / 3.0;
 // initial number of segments (should be between 2 and 20)
 static final int STARTING_NUMSEGMENTS = 8;
 
@@ -15,7 +15,8 @@ Trait control = new Trait(10);
 Trait maxReproductiveEnergy = new Trait(10);
 Trait maxLocomotionEnergy = new Trait(10);
 Trait maxHealthEnergy = new Trait(10);
-ArrayList<Trait> metabolicTraits = new ArrayList<Trait>(metabolic_network.num_weights);
+ArrayList<Trait> metabolicTraits = new ArrayList<Trait>
+(metabolic_network.num_weights);
 
 // Reproduction
 Trait gameteCost = new Trait(10);
@@ -42,12 +43,14 @@ Trait scentTrait = new Trait(10);
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
-ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMENTS);
+ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>
+(MAX_SEGMENTS);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
 // maximum number of apendages that can be evolved
 static final int MAX_APPENDAGES = MAX_SEGMENTS;
-ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
+ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>
+(MAX_APPENDAGES);
 
 // maximum number of feelers that can be evolved
 static final int MAX_FEELERS = 40;
@@ -143,37 +146,37 @@ class FeelerTrait {
 }
 
 // "Static" initialization of trait lists
-  {
-    // initialize the metabolic weights
-    for (int i = 0; i < metabolic_network.num_weights; i++) {
-      metabolicTraits.add(new Trait(10));
-    }
-
-    // initialize the brain weights
-    for (int i = 0; i < Brain.WEIGHTS; i++) {
-      brainTraits.add(new Trait(10));
-    }
-
-    // initialize the segments and their traits
-    for (int i = 0; i < MAX_SEGMENTS; i++) {
-      segmentTraits.add(new SegmentTraits());
-    }
-
-    // initialize the appendages and their traits
-    for (int i = 0; i < MAX_APPENDAGES; i++) {
-      appendageTraits.add(new AppendageTraits());
-    }
-
-    // initialize the feelers and their traits
-    for (int i = 0; i < (MAX_FEELERS); i++) {
-      feelers.add(new FeelerTrait());
-    }
-
-    // initialize the color network weights
-    for (int i = 0; i < color_network.num_weights; i++) {
-      colorTraits.add(new Trait(10));
-    }
+{
+  // initialize the metabolic weights
+  for (int i = 0; i < metabolic_network.num_weights; i++) {
+    metabolicTraits.add(new Trait(10));
   }
+
+  // initialize the brain weights
+  for (int i = 0; i < Brain.WEIGHTS; i++) {
+    brainTraits.add(new Trait(10));
+  }
+
+  // initialize the segments and their traits
+  for (int i = 0; i < MAX_SEGMENTS; i++) {
+    segmentTraits.add(new SegmentTraits());
+  }
+
+  // initialize the appendages and their traits
+  for (int i = 0; i < MAX_APPENDAGES; i++) {
+    appendageTraits.add(new AppendageTraits());
+  }
+
+  // initialize the feelers and their traits
+  for (int i = 0; i < (MAX_FEELERS); i++) {
+    feelers.add(new FeelerTrait());
+  }
+
+  // initialize the color network weights
+  for (int i = 0; i < color_network.num_weights; i++) {
+    colorTraits.add(new Trait(10));
+  }
+}
 
 // Represents a creature's genomic data as an array of real values,
 // loosely modeling Additive Quantitative Genetics.
@@ -235,6 +238,7 @@ class Genome {
 
     Chromosome(int n) {
       genes = new FloatList(n);
+
       for (int i = 0; i < n; i++) {
         // give each gene a random value near zero
         genes.append(randomGaussian() * INITIAL_DEVIATION);
@@ -295,8 +299,10 @@ class Genome {
     gametes.add(y);
 
     // mutate
-    for (Chromosome chromosome : gametes)
+    for (Chromosome chromosome : gametes) {
       chromosome.mutate();
+    }
+
     return gametes;
   }
 }

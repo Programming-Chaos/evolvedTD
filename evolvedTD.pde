@@ -27,7 +27,8 @@ int generation = 0;
 
 boolean playSound = true;      // play game sounds
 boolean playSoundSave = true;  // restore sound setting on unhide
-boolean display = true;        // should the world be displayed - false speeds thing up considerably
+boolean display =
+  true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
 
@@ -48,7 +49,7 @@ int lasttime;                  // used to track the time between iterations to m
 
 void setup() {
   //size(850,850,P3D);  // default window size
-  size(800,800,P3D);             // window size, and makes it a 3D window
+  size(800, 800, P3D);           // window size, and makes it a 3D window
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   the_player = new player();
@@ -59,9 +60,11 @@ void setup() {
   gunshot = minim.loadFile("assets/Cannon.mp3");
   //thunder = minim.loadFile("assets/thunder.mp3");
 
-  box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
+  box2d.setGravity(0,
+                   0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
-  frameRate(200);                // sets the framerate, in many cases the actual framerate will be lower due to the number of objects moving nad interacting
+  frameRate(
+    200);                // sets the framerate, in many cases the actual framerate will be lower due to the number of objects moving nad interacting
   cameraX = 0;
   cameraY = 0;
   cameraZ = 2150;
@@ -69,11 +72,13 @@ void setup() {
 
   place_food();                  // calls the place food function below
   rocks = new ArrayList<rock>();
+
   for (int i = 0; i < 10; i++) { // creates 10 random rocks,
     rock r = new rock((int)random(-0.5 * worldWidth, 0.5 * worldWidth),
                       (int)random(-0.5 * worldHeight, 0.5 * worldHeight));
     rocks.add(r);
   }
+
   rectMode(CENTER);              // drawing mode fore rectangles,
 
   environ = new environment();   // must occur after creatures, etc. created
@@ -85,21 +90,28 @@ void draw() {
   lasttime = millis();
 
 
-  if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
+  if (state ==
+      State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
   }
+
   if (timesteps > timepergeneration) { // end of a wave/generation
     nextgeneration(); // call the function to set the next generation
     timesteps = 0;
   }
-  camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); // place the camera and point it in the right direction, happens repeatedly because the user can move the camera
+
+  camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1,
+         0); // place the camera and point it in the right direction, happens repeatedly because the user can move the camera
   background(100); // fill in the background
+
   if (display) {
     environ.display();
   }
 
-  for (int i = 0; i < foods.size(); i++) { // go through the list of food and if any was collided into by a creature, remove it.
+  for (int i = 0; i < foods.size();
+       i++) { // go through the list of food and if any was collided into by a creature, remove it.
     food f = foods.get(i);
+
     if (f != null) {
       if (f.update() == 1) {
         foods.remove(i); // if a food was eaten remove it from the list
@@ -108,17 +120,19 @@ void draw() {
   }
 
   if (display && displayFood) {
-    for (food f: foods) { // go through the array list of food and display them
+    for (food f : foods) { // go through the array list of food and display them
       f.display();
     }
   }
+
   if (display) {
-    for (rock r: rocks) { // go through the array list of rocks and display them
+    for (rock r : rocks) { // go through the array list of rocks and display them
       r.display();
     }
   }
 
   the_player.update();
+
   if (display) {
     the_player.display(); // display the interface for the player
   }
@@ -134,7 +148,8 @@ void draw() {
     the_pop.update(); // update the population, i.e. move the creatures
   }
 
-  if (the_pop.get_alive() == 0) { // if after updating the population is empty, go ahead and start the next generation
+  if (the_pop.get_alive() ==
+      0) { // if after updating the population is empty, go ahead and start the next generation
     nextgeneration(); // call the function to set the next generation
     timesteps = 0;
   }
@@ -147,6 +162,7 @@ void draw() {
   if (state == State.RUNNING) {
     box2d.step();
   }
+
   if (state == State.MENU) {
     display_controls();
   }
@@ -154,77 +170,101 @@ void draw() {
 
 void keyPressed() { // if a key is pressed this function is called
   int scale = 100;
+
   if (key == CODED) { // if its a coded key, e.g. and arrow key
-    switch(keyCode) {
+    switch (keyCode) {
     case UP:
-      cameraY-= (4 + int(cameraZ/scale));
+      cameraY -= (4 + int(cameraZ / scale));
       break;
+
     case DOWN:
-      cameraY+= (4 + int(cameraZ/scale));
+      cameraY += (4 + int(cameraZ / scale));
       break;
+
     case LEFT:
-      cameraX-= (4 + int(cameraZ/scale));
+      cameraX -= (4 + int(cameraZ / scale));
       break;
+
     case RIGHT:
-      cameraX+= (4 + int(cameraZ/scale));
+      cameraX += (4 + int(cameraZ / scale));
       break;
     }
   }
   else {
-    switch(key) { // else its a regular character
+    switch (key) { // else its a regular character
     case 'a':
       the_tower.toggleautofire();
       break;
+
     case 'z':
       cameraZ = 2150; // zoom all the way out
       break;
+
     case 'w':
       cameraZ -= (12 + int(cameraZ / scale)); // zoom in a little
       break;
+
     case 's':
       cameraZ += (12 + int(cameraZ / scale)); // zoom out a little
       break;
+
     case 'c':   // center the camera
       cameraX = 0;
       cameraY = 0;
       break;
+
     case 'p':  // toggle paused state
-      if (state == State.STAGED)
+      if (state == State.STAGED) {
         state = State.RUNNING;
-      else if (state != State.PAUSED)
+      }
+      else if (state != State.PAUSED) {
         state = State.PAUSED;
-      else
+      }
+      else {
         state = State.RUNNING;
+      }
+
       break;
+
     case 'm':
       playSound = !playSound;
       break;
+
     case 'v':
       display = !display;
+
       // mute on hide
       if (!display) {
         playSoundSave = playSound;
         playSound = false;
-      } else {
+      }
+      else {
         playSound = playSoundSave;
       }
+
       break;
+
     case 'q':
       displayFood = !displayFood;
       break;
+
     case 'n':
       displayScent = !displayScent;
       break;
+
     case '?':
       controls(); // call the instructions function
       break;
+
     case '1':
     case '2':
       the_tower.switchweapon(key);
       break;
+
     default:
 
     }
+
     if (cameraZ < 100) { // much closer than this and the screen goes blank
       cameraZ = 100;
     }
@@ -235,6 +275,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (state != State.RUNNING) { // probably not necessary?
     return;
   }
+
   // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
   Fixture f1 = cp.getFixtureA();
   Fixture f2 = cp.getFixtureB();
@@ -245,15 +286,19 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
 
-  if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
+  if (o1.getClass() == creature.class
+      && o2.getClass() ==
+      food.class) { // check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
     p1.addEnergy(20000); // getting food is valuable
 
     food p2 = (food)o2;
     p1.senses.Set_Taste(p2);
+
     if (p2 != null) {
-      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      p2.setRemove(
+        true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
   }
 
@@ -264,8 +309,10 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     p1.addEnergy(20000); // getting food is valuable
     food p2 = (food)o1;
     p1.senses.Set_Taste(p2);
+
     if (p2 != null) {
-      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      p2.setRemove(
+        true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
   }
 
@@ -274,28 +321,43 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // projectiles damage creatures
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
+
     if (f1.getUserData().getClass() == creature.Segment.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Segment)f1.getUserData()).armor)));
+      p1.changeHealth(round(-1 * (p2.get_damage() / ((creature.Segment)
+                                  f1.getUserData()).armor)));
     }
+
     if (f1.getUserData().getClass() == creature.Appendage.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f1.getUserData()).armor)));
+      p1.changeHealth(round(-1 * (p2.get_damage() / ((creature.Appendage)
+                                  f1.getUserData()).armor)));
     }
+
     p2.setRemove(true);
   }
 
-  if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+  if (o1.getClass() == projectile.class
+      && o2.getClass() ==
+      creature.class) { // check the class of the objects and respond accordingly
     // projectiles damage creatures
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
+
     if (f2.getUserData().getClass() == creature.Segment.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Segment)f2.getUserData()).armor)));
+      p1.changeHealth(round(-1 * (p2.get_damage() / ((creature.Segment)
+                                  f2.getUserData()).armor)));
     }
+
     if (f2.getUserData().getClass() == creature.Appendage.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f2.getUserData()).armor)));
+      p1.changeHealth(round(-1 * (p2.get_damage() / ((creature.Appendage)
+                                  f2.getUserData()).armor)));
     }
+
     p2.setRemove(true);
   }
-  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+
+  if (o1.getClass() == creature.class
+      && o2.getClass() ==
+      creature.class) { // check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
@@ -306,12 +368,14 @@ void beginContact(Contact cp) { // called when two box2d objects collide
 
     if (collision_1 > collision_2) {
       ID = collision_1;
-    } else {
+    }
+    else {
       ID = collision_2;
     }
 
     p1.senses.Add_Side_Pressure(ID, PI);
-    p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+    p2.senses.Add_Side_Pressure(ID,
+                                atan((pos_1.y - pos_2.y) / (pos_1.x - pos_2.x)));
   }
 }
 
@@ -320,6 +384,7 @@ void endContact(Contact cp) {
   if (state != State.RUNNING) { // probably not necessary?
     return;
   }
+
   // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
   Fixture f1 = cp.getFixtureA();
   Fixture f2 = cp.getFixtureB();
@@ -330,7 +395,9 @@ void endContact(Contact cp) {
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
 
-  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+  if (o1.getClass() == creature.class
+      && o2.getClass() ==
+      creature.class) { // check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);
@@ -338,11 +405,14 @@ void endContact(Contact cp) {
     int collision_1 = int(nf(p1.num, 0) + nf(p2.num, 0));
     int collision_2 = int(nf(p2.num, 0) + nf(p1.num, 0));
     int ID;
+
     if (collision_1 > collision_2) {
       ID = collision_1;
-    } else {
+    }
+    else {
       ID = collision_2;
     }
+
     p1.senses.Remove_Side_Pressure(ID);
     p2.senses.Remove_Side_Pressure(ID);
   }
@@ -350,7 +420,9 @@ void endContact(Contact cp) {
 
 
 
-  if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
+  if (o1.getClass() == creature.class
+      && o2.getClass() ==
+      food.class) { // check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
     p1.senses.Remove_Taste();
@@ -368,9 +440,11 @@ void endContact(Contact cp) {
 
 void place_food() { // done once at the beginning of the game
   foods = new ArrayList<food>();
+
   for (int i = 0; i < 50; i++) {
     food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
-                      (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
+                      (int)random(-0.2 * worldHeight,
+                                  0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
@@ -380,6 +454,7 @@ void nextgeneration() {
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
   the_tower.next_generation(); // have the tower update itself, reset energy etc.
+
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
   if (!the_tower.autofire) {
@@ -389,25 +464,30 @@ void nextgeneration() {
 
 void add_food() { // done after each wave/generation
   for (int i = 0; i < 10; i++) { // why add exactly 10 food each time?
-    food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
+                      (int)random(-0.2 * worldHeight,
+                                  0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
 
 void mousePressed() { // called if the (left) mouse button is pressed
-  float x,y;
+  float x, y;
   // first we have to try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
   // this calculation is not correct
-  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
+  x = cameraX + (cameraZ * sin(PI / 2.0) * 1.15) * ((mouseX - width * 0.5) /
+      (width * 0.5)) * 0.5; // not sure why 1.15
+  y = cameraY + (cameraZ * sin(PI / 2.0) * 1.15) * ((mouseY - width * 0.5) /
+      (width * 0.5)) * 0.5; // not sure why 1.15
 
-  if (state == State.RUNNING)
-    the_tower.fire(); // have the tower fire its active weapon if unpaused
+  if (state == State.RUNNING) {
+    the_tower.fire();  // have the tower fire its active weapon if unpaused
+  }
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
-  translate(x,y);
-  ellipse(0,0,30,30);
+  translate(x, y);
+  ellipse(0, 0, 30, 30);
   popMatrix();
   the_player.mouse_pressed();
 }
@@ -423,15 +503,15 @@ void controls() {
 }
 
 void display_controls() {
-  fill(200,200,200,200); // grey slightly transparent rectangle
+  fill(200, 200, 200, 200); // grey slightly transparent rectangle
   int leftalign = -90;
   int topalign = -80;
   pushMatrix();
   translate(cameraX, cameraY, cameraZ - 200);
-  rect(0,0,200,200);
+  rect(0, 0, 200, 200);
   fill(0);
   textSize(10);
-  text("Controls",leftalign,topalign);
+  text("Controls", leftalign, topalign);
   textSize(7);
   text("w/s - zoom in/out", leftalign, topalign + 10);
   text("Arrow keys - move camera", leftalign, topalign + 18);

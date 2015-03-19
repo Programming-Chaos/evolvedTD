@@ -5,7 +5,7 @@ class projectile {
   boolean remove = false;
   int damage; // how much damge the projectile does
   PImage bullet;    // declare image for gun
-  
+
   // constructor, creates a projectile
   projectile(float x, float y, float a, int d) {
     radius = (int)(2);
@@ -15,35 +15,36 @@ class projectile {
     the_projectile.setUserData(this);
     bullet = loadImage("assets/Bullet48x48a-01.png");
   }
-  
-  void update(){
+
+  void update() {
     Vec2 velocity;
     velocity = the_projectile.getLinearVelocity();
-    if(velocity.length()< 50){  // remove slow projectiles
+
+    if (velocity.length() < 50) { // remove slow projectiles
       remove = true;
     }
-  }   
-  
+  }
+
   // This function removes the particle from the box2d world
   void killBody() {
     if (the_projectile != null) {
       box2d.destroyBody(the_projectile);
     }
   }
-  
+
   Vec2 getPos() {
-    return(box2d.getBodyPixelCoord(the_projectile));
+    return (box2d.getBodyPixelCoord(the_projectile));
   }
-  
+
   int get_damage() {  // returns the amount of damage a projectile does
     return damage;
   }
-  
+
   void setRemove(boolean x) { // sets the projectile to be removed later
     remove = x;
   }
-  
-  Boolean getRemove(){
+
+  Boolean getRemove() {
     return remove;
   }
 
@@ -58,10 +59,10 @@ class projectile {
     fill(0, 0, 0);
     stroke(0);
     ellipse(0,0, radius*2, radius*2);
-*/    
+    */
     popMatrix();
   }
-  
+
   void makebody(float x, float y) {
     BodyDef bd = new BodyDef();
     bd.angle = angle;
@@ -69,17 +70,17 @@ class projectile {
     bd.type = BodyType.DYNAMIC;
     bd.bullet = true;
     bd.linearDamping = 0.1;
-    
+
     the_projectile = box2d.createBody(bd);
     // Define the shape -- a  (this is what we use for a rectangle)
     CircleShape sd = new CircleShape();
     sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
     FixtureDef fd = new FixtureDef();
     fd.filter.categoryBits = 3; // projectiles are in category 3
-    fd.filter.maskBits = 65533; // doesn't interact with food 
+    fd.filter.maskBits = 65533; // doesn't interact with food
     fd.shape = sd;
     fd.density = 40; // should be upgradable
     the_projectile.createFixture(fd);
-    the_projectile.setLinearVelocity(new Vec2(100*cos(angle), -100*sin(angle)));
+    the_projectile.setLinearVelocity(new Vec2(100 * cos(angle), -100 * sin(angle)));
   }
 }
