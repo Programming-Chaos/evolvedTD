@@ -5,6 +5,8 @@ static final float MUTATION_RATE = 0.05;
 static final float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
 static final float GENE_MULTIPLIER = 4.0/3.0;
+// initial number of segments (should be between 2 and 20)
+static final int STARTING_NUMSEGMENTS = 8;
 
 // additional control trait to estimate genetic evolution
 Trait control = new Trait(10);
@@ -40,9 +42,12 @@ Trait scentTrait = new Trait(10);
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
-ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
+ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMENTS);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
+// maximum number of apendages that can be evolved
+static final int MAX_APPENDAGES = MAX_SEGMENTS;
+ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
 
 // maximum number of feelers that can be evolved
 static final int MAX_FEELERS = 40;
@@ -69,10 +74,6 @@ Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 Trait alphaTrait = new Trait(10);
 
-// TODO: remove these traits when segment refactor is complete
-Trait densityTrait = new Trait(10);
-Trait restitutionTrait = new Trait(10);
-
 private int nGenes = 0;
 
 // Represents a trait with a number of genes/loci and its index in the genome
@@ -91,17 +92,37 @@ class Trait {
   }
 }
 
-class Segment {
+class SegmentTraits {
   Trait endPoint;
   Trait armor;
   Trait density;
   Trait restitution;
+  Trait appendageSize;
 
-  Segment() {
-    endPoint    = new Trait(10);
-    armor       = new Trait(10);
-    density     = new Trait(10);
+  SegmentTraits() {
+    endPoint = new Trait(10);
+    armor = new Trait(10);
+    density = new Trait(10);
     restitution = new Trait(10);
+    appendageSize = new Trait(10);
+  }
+}
+
+class AppendageTraits {
+  Trait armor;
+  Trait density;
+  Trait restitution;
+  Trait waterForce;
+  Trait grassForce;
+  Trait mountainForce;
+
+  AppendageTraits() {
+    armor = new Trait(10);
+    density = new Trait(10);
+    restitution = new Trait(10);
+    waterForce = new Trait(10);
+    grassForce = new Trait(10);
+    mountainForce = new Trait(10);
   }
 }
 
@@ -134,8 +155,13 @@ class FeelerTrait {
     }
 
     // initialize the segments and their traits
-    for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
-      segments.add(new Segment());
+    for (int i = 0; i < MAX_SEGMENTS; i++) {
+      segmentTraits.add(new SegmentTraits());
+    }
+
+    // initialize the appendages and their traits
+    for (int i = 0; i < MAX_APPENDAGES; i++) {
+      appendageTraits.add(new AppendageTraits());
     }
 
     // initialize the feelers and their traits

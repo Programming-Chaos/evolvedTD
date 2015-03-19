@@ -272,33 +272,27 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   // check the class of the objects and respond accordingly
   if (o1.getClass() == creature.class && o2.getClass() == projectile.class) {
     // projectiles damage creatures
-    Fixture f = b1.getFixtureList();
-    int c = 0;
-    while (f != f1) {
-      f = f.getNext();
-      c++;
-    }
-    c %= 8;
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-
+    if (f1.getUserData().getClass() == creature.Segment.class) {
+      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Segment)f1.getUserData()).armor)));
+    }
+    if (f1.getUserData().getClass() == creature.Appendage.class) {
+      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f1.getUserData()).armor)));
+    }
     p2.setRemove(true);
   }
 
   if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     // projectiles damage creatures
-    Fixture f = b1.getFixtureList();
-    int c = 0;
-    while (f != f1) {
-      f = f.getNext();
-      c++;
-    }
-    c %= 8;
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    p1.changeHealth((int)(-1*(p2.get_damage()/p1.armor.get(c))));
-
+    if (f2.getUserData().getClass() == creature.Segment.class) {
+      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Segment)f2.getUserData()).armor)));
+    }
+    if (f2.getUserData().getClass() == creature.Appendage.class) {
+      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f2.getUserData()).armor)));
+    }
     p2.setRemove(true);
   }
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
