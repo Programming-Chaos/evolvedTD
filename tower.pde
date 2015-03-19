@@ -2,9 +2,6 @@ class tower {
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
-  float resources;        // amount of resources the tower has
-  float maxResources;     // max resources the tower can store, may not use, if used should be upgradable
-  float resourceGain;     // gain per timestep
   int activeweapon;     // value determines which weapon is active
   ArrayList<projectile> projectiles;  // list of active projectiles
   float angle;    // angle of tower's main, auto-fir weapon
@@ -22,7 +19,6 @@ class tower {
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
-    resourceGain = 0.1;  // changes with upgrades
     projectiles = new ArrayList<projectile>();
     angle = 0;
     gunbase = loadImage("assets/Tower_base_02.png");
@@ -35,7 +31,6 @@ class tower {
     update_projectiles();
     if (state == State.RUNNING){
       energy += energyGain;  // gain energy
-      resources += resourceGain;  // gain resources
       if (autofire) {
         Vec2 target;
         autofirecounter++;
@@ -111,7 +106,8 @@ class tower {
     noStroke();
     fill(0, 0, 255);
     rect(0, -30, 0.1*energy, 6);
-    // display resources
+    // display resources, now in player
+    /*
     pushMatrix();
     hint(DISABLE_DEPTH_TEST);
       translate(cameraX, cameraY,cameraZ-400);  // centered and below the camera
@@ -120,7 +116,7 @@ class tower {
       text("Resources: "+(int)resources,0.2*width,-0.25*height); 
     hint(ENABLE_DEPTH_TEST); 
     popMatrix();
-
+    */
   }
   
   void next_generation() { // update the tower
@@ -160,7 +156,7 @@ class tower {
   /* Firing, dropping rocks, etc. uses up some of the tower's energy */
   
   void fire_projectile() {
-    if (energy < 1) {
+    if (energy < 10) {
       return;
     }
     projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
@@ -172,6 +168,24 @@ class tower {
       gunshot.play();
     }
   }
+  
+  void wave_fire(){
+    if(energy < 5){
+      return;
+    }
+    for(float a = 0; a < 2*PI ; a += ((2*PI)/20)){
+      projectile p = new projectile(5*cos(a), 5*sin(a), a, 20); // 20 is the current damage, should be a variable, upgradable
+      // postions of new projectives are not at 0,0 to avoid collisions.
+      projectiles.add(p);
+    }
+    energy-=5;
+    imagetimer = 0;
+    if (playSound) {
+      gunshot.rewind();
+      gunshot.play();
+    }
+  }
+    
   
   void drop_rock() {
     float x,y;

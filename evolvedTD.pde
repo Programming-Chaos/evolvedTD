@@ -375,15 +375,14 @@ void endContact(Contact cp) {
 void place_food() { // done once at the beginning of the game
   foods = new ArrayList<food>();
   for (int i = 0; i < 50; i++) {
-    food f = new food((int)random(-0.4 * worldWidth, 0.4 * worldWidth),
-                      (int)random(-0.4 * worldHeight, 0.4 * worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
+                      (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
 
 void nextgeneration() {
   generation++;
-  println(generation);
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
   the_tower.next_generation(); // have the tower update itself, reset energy etc.
@@ -396,7 +395,7 @@ void nextgeneration() {
 
 void add_food() { // done after each wave/generation
   for (int i = 0; i < 10; i++) { // why add exactly 10 food each time?
-    food f = new food((int)random(-0.4*worldWidth,0.4*worldWidth), (int)random(-0.4*worldHeight,0.4*worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
@@ -416,6 +415,7 @@ void mousePressed() { // called if the (left) mouse button is pressed
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
+  the_player.mouse_pressed();
 }
 
 void controls() {

@@ -4,7 +4,7 @@
 
 class population {
   ArrayList<creature> swarm;
-  static final int POP_SIZE = 20;
+  static final int POP_SIZE = 35;
 
   float baseGameteChance = 0.4; // Base gamete success rate
   int baseGameteRadius = 6; // Base gamete mating range
@@ -147,21 +147,14 @@ class population {
   void next_generation() {
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
+    
     for (creature c : swarm) {
-      c.calcFitness();
-      // Keep the survivors
-      if (c.alive) {
-        c.round_counter++;
-        generation.add(c);
-      }
-
       // Add all of a creatures gametes to the gamete pool
       for(Gamete g : c.gameteStack) {
         gametes.add(g);
       }
     }
     // Place gametes in order of time.
-    print("Gamete Size: " + gametes.size() + "\n");
     OrderGametes(gametes);
     
     int childrenBred = 0;
@@ -204,10 +197,12 @@ class population {
         
         childrenBred++;
         generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                    10000 + g1.energy + g2.energy, pos));
+                                    10000 + g1.energy + g2.energy));
       }
     }
     //println("made " + childrenBred + " and needed " + childrenNew + " more");
+    swarm.clear();
     swarm = generation;
+    
   }
 }
