@@ -159,45 +159,84 @@ class population {
     
     int childrenBred = 0;
     int childrenNew = 0;
+    int multiplier = 0;
+    int range;
+    
     while (generation.size() < POP_SIZE) {
+      range = multiplier++ * 5;
       // add random creatures if no gametes
       if (gametes.size() < 2) {
         childrenNew++;
         generation.add(new creature(new Genome(), 20000));
         continue;
       }
-
-      // Get the next gamete (priority time placement)
-      Gamete g1 = gametes.remove(0);
-      IntList proxGametes = new IntList();
-
-      // Get gametes in widening range search of our selected gamete
-      int multiplier = 0;
-      while (proxGametes.size() < 1) {
-        int range = multiplier++ * 5;
-        for (int i = 0; i < gametes.size(); i++) {
-          Gamete g2 = gametes.get(i);
+      
+      Gamete g1, g2;
+      // i is first gamete j is it's chosen mate
+      for (int i=0; i < gametes.size() - 1; i++) {
+        g1 = gametes.get(i);
+        for (int j = i+1; j < gametes.size(); j++) {
+          g2 = gametes.get(j);
           if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
               g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
-            // store index of nearby gamete
-            proxGametes.append(i);
+            // Remove gametes from list and mate
+            gametes.remove(i);
+            gametes.remove(j);
+            
+            int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
+            int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
+            // Check coordinates for other creatures spawned in this tile.
+            for (creature c : generation) {
+              Vec2 posCheck = box2d.getBodyPixelCoord(c.body);
+              // while creature already occupies tile
+              while ((px == posCheck.x / cellWidth) && (py == posCheck.y / cellHeight)){
+                // Move new creature in a random direction
+                switch ((int)random(8)) {
+                  case 0: //North
+                    py--;
+                    break;
+                  case 1: //NorthEast
+                    py--;
+                    px++;
+                    break;
+                  case 2: //East
+                    px++;
+                    break;
+                  case 3: //SouthEast
+                    py++;
+                    px++;
+                    break;
+                  case 4: //South
+                    py++;
+                    break;
+                  case 5: //SouthWest
+                    py++;
+                    px--;
+                    break;
+                  case 6: //West
+                    px--;
+                    break;
+                  case 7: //NorthWest
+                    py--;
+                    px++;
+                    break;
+                  default: break;
+                }
+                
+                // Make sure position is still in bounds
+                if (px >= worldWidth   / cellWidth)  px -= 5;
+                if (px <= 0)                         px += 5;
+                if (py >= worldHeight  / cellHeight) py -= 5;
+                if (py <= 0)                         py += 5;
+              }
+            }
+            Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
+      
+            childrenBred++;
+            generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+                                        10000 + g1.energy + g2.energy, pos));
           }
         }
-      }
-
-      if (proxGametes.size() > 0) {
-        // get first gamete layed in range
-        Gamete g2 = gametes.remove(proxGametes.get(0));
-        // get the point between the two gametes.
-        float angle = random(0, 2 * PI);
-        int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
-        int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
-        Vec2 pos = new Vec2(px * cellWidth * sin(angle),
-                            py * cellHeight * cos(angle)) ;
-        
-        childrenBred++;
-        generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                    10000 + g1.energy + g2.energy));
       }
     }
     //println("made " + childrenBred + " and needed " + childrenNew + " more");
