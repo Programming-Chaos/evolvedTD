@@ -6,7 +6,7 @@
    Additionally we implemented taste, pain, speed, mass, and energy detection
 */
 class Sensory_Systems {
-  float []brain_array = new float[1000];
+  float[] brain_array;
 
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
@@ -67,8 +67,8 @@ class Sensory_Systems {
   boolean energy = false;
   boolean canPain = false;
   
-  float [] apend_angles;
-  float [] apend_length;
+  float [] feeler_angles;
+  float [] feeler_length;
   float [] pressure_side_ids;
 
   boolean [] feeler_pressure;
@@ -76,7 +76,8 @@ class Sensory_Systems {
   boolean [] feeler_scent;
 
   Sensory_Systems(Genome g) {
-    brain_array = new float[1000];
+    brain_array = new float[Brain.INPUTS];
+    for (int c = 0; c < Brain.INPUTS; c++)brain_array[c] = 0;
     
     double can_feel_pain =  Utilities.Sigmoid(g.sum(painTrait), 5, 100);
 
@@ -113,8 +114,8 @@ class Sensory_Systems {
 
     num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 38));
 
-    apend_angles = new float[num_feelers];
-    apend_length = new float[num_feelers];
+    feeler_angles = new float[num_feelers];
+    feeler_length = new float[num_feelers];
     pressure_side_ids = new float[40];
 
     feeler_pressure = new boolean[num_feelers];
@@ -132,8 +133,8 @@ class Sensory_Systems {
   void Set_Feeler(Genome g) {
     for (int i = 0; i < num_feelers; i++) {
 
-      apend_angles[i]= abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, 2*PI));
-      apend_length[i] = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 100));
+      feeler_angles[i]= abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, 2*PI));
+      feeler_length[i] = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 100));
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).pressure), 5, 1) > 0) {
         feeler_pressure[i] = true;
@@ -158,7 +159,7 @@ class Sensory_Systems {
   /*Goes through each feelers and updates the senses it can interpret*/
   void Update_Senses(float x, float y, float angle) {
     for (int i = 0; i < num_feelers;  i++) {
-      Update_Sense(x, y, angle, apend_angles[i], apend_length[i], i);
+      Update_Sense(x, y, angle, feeler_angles[i], feeler_length[i], i);
     }
   }
 
@@ -236,7 +237,7 @@ class Sensory_Systems {
   for each feeler the creature has*/
   void Draw_Sense(float x, float y, float angle) {
     for (int i = 0; i < num_feelers;  i++) {
-      Draw_Feeler(x, y, angle, apend_angles[i], apend_length[i]);
+      Draw_Feeler(x, y, angle, feeler_angles[i], feeler_length[i]);
     }
   }
 
