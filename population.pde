@@ -175,10 +175,10 @@ class population {
       int size = gametes.size();
  println ("size = " + gametes.size());
       // i is first gamete j is it's chosen mate
-      for (int i=0; i < size - 1 && generation.size() < POP_SIZE; i++) {
+      for (int i=0; i < size - 1; i++) {
         g1 = gametes.get(i);
  println ("i = " + i);
-        for (int j = i+1; j < size && generation.size() < POP_SIZE; j++) {
+        for (int j = i+1; j < size; j++) {
           g2 = gametes.get(j);
  println ("j = " + j);
           if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
