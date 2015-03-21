@@ -30,7 +30,7 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  float baseMaxMovementSpeed = 600; //maximum speed without factoring in width and appendages
+  float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
   
   // timers
@@ -193,7 +193,7 @@ class creature {
       float ret = genome.sum(segmentTraits.get(index).appendageSize);
       if (ret < 0) ret *= -1;
       if (ret < 0.3) ret = 0;
-      return 0.3;//ret;
+      return ret;
     }
     
     private float getArmor() {;
@@ -219,13 +219,13 @@ class creature {
     
     void getForces() { //mapping function is inverse quadratic and then values are made proportional to their sum
       float water = (genome.avg(appendageTraits.get(index).waterForce));
-      waterForce = 1;//((-1/(1.01+(water*water)))+1);
-      waterForce *= 6;
+      waterForce = ((-1/(1.01+(water*water)))+1);
+      //waterForce *= 6;
       float grass = (genome.avg(appendageTraits.get(index).grassForce));
-      grassForce = 1;//((-1/(1.01+(grass*grass)))+1);
+      grassForce = ((-1/(1.01+(grass*grass)))+1);
       //grassForce *= 4;
       float mountain = (genome.avg(appendageTraits.get(index).mountainForce));
-      mountainForce = 1;//((-1/(1.01+(mountain*mountain)))+1);
+      mountainForce = ((-1/(1.01+(mountain*mountain)))+1);
       //mountainForce *= 4;
       float divisor = waterForce+grassForce+mountainForce;
       waterForcePercent = waterForce/divisor;
@@ -497,7 +497,7 @@ class creature {
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
-    int ret = round(genome.avg(expressedSegments) + STARTING_NUMSEGMENTS);
+    int ret = round(10*genome.avg(expressedSegments) + STARTING_NUMSEGMENTS);
     if (ret < 2)
       return 2;
     if (ret > MAX_SEGMENTS)
@@ -662,9 +662,9 @@ class creature {
     // force is a percentage of max movement speed from 10% to 100%, averaging 80%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
-    //f = Utilities.MovementForceSigmoid(current_actions[1]);
-    //if (current_actions[1] < 50) f *= -1;
-    f = 0.8;
+    f = Utilities.MovementForceSigmoid(current_actions[1]);
+    if (current_actions[1] < 50) f *= -1;
+    //f = 0.8;
     f *= maxMovementSpeed;
     
     int switchnum;
