@@ -173,17 +173,22 @@ class population {
       
       Gamete g1, g2;
       int size = gametes.size();
+ println ("size = " + gametes.size());
       // i is first gamete j is it's chosen mate
-      for (int i=0; i < size - 1; i++) {
+      for (int i=0; i < size - 1 && generation.size() < POP_SIZE; i++) {
         g1 = gametes.get(i);
-        for (int j = i+1; j < size; j++) {
+ println ("i = " + i);
+        for (int j = i+1; j < size && generation.size() < POP_SIZE; j++) {
           g2 = gametes.get(j);
+ println ("j = " + j);
           if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
               g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
             // Remove gametes from list and mate
-            gametes.remove(i); i--;
+ println ("*** MATCH ***");
             gametes.remove(j); j--;
+            gametes.remove(i); i--;
             size = gametes.size();
+ println ("size = " + gametes.size());
             
             int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
             int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
@@ -240,7 +245,7 @@ class population {
       
             childrenBred++;
             generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                        10000 + g1.energy + g2.energy));
+                                        10000 + g1.energy + g2.energy, pos));
             break;
           }
         }
