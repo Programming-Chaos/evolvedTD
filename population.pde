@@ -163,7 +163,10 @@ class population {
     int range;
     
     while (generation.size() < POP_SIZE) {
+      // increase search range with each pass thru.
       range = multiplier++ * 5;
+      //TODO: decrease success chance when range is increased.
+      
       // add random creatures if no gametes
       if (gametes.size() < 2) {
         childrenNew++;
@@ -195,8 +198,11 @@ class population {
               Vec2 posCheck = box2d.getBodyPixelCoord(generation.get(c).body);
               int xCheck = (int)(posCheck.x / cellWidth);
               int yCheck = (int)(posCheck.y / cellHeight);
-              // while creature already occupies tile
-              while ((px <= xCheck + 3) && (px >= xCheck - 3) && (py <= yCheck + 3) && (py >= yCheck - 3)){
+              
+              // while creature already occupies tile 
+              // (3 is the safety range to prevent stacking)
+              while ((px <= xCheck + 3) && (px >= xCheck - 3) && 
+                     (py <= yCheck + 3) && (py >= yCheck - 3)) {
                 // Reset c.  Need to make it thru entire list without flagging this.
                 c = -1; //c++ == 0
                 // Move new creature in a random direction
