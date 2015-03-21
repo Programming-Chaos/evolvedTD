@@ -17,13 +17,14 @@ int cameraX, cameraY, cameraZ; // location of the camera
 int worldWidth = 2500;         // size in pixels of the world
 int worldHeight = 2500;
 
-int state = 1;                 // 1 - running; 2 - paused between generations; 3 - controls
-int oldstate = 1;              // used to store the previous state to return to after displaying controls
+// see
+State state = State.RUNNING;
+State stateSaved = state;
+
 int timesteps = 0;
 int timepergeneration = 1500;
 int generation = 0;
 
-boolean paused = false;        // is it paused
 boolean playSound = true;      // play game sounds
 boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
@@ -84,7 +85,7 @@ void draw() {
   lasttime = millis();
 
 
-  if (!paused && state == 1) { // if running, increment the number of timesteps, at some max the wave/generation ends
+  if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
   }
   if (timesteps > timepergeneration) { // end of a wave/generation
@@ -129,7 +130,7 @@ void draw() {
     }
   */
 
-  if (!paused) {
+  if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures
   }
 
@@ -142,11 +143,11 @@ void draw() {
     the_pop.display(); // redisplay the creatures
   }
 
-  // If not paused and state is running then step through time!
-  if (!paused && state == 1) {
+  // If state is running then step through time!
+  if (state == State.RUNNING) {
     box2d.step();
   }
-  if (state == 3) {
+  if (state == State.MENU) {
     display_controls();
   }
 }  // end of draw loop
@@ -188,7 +189,12 @@ void keyPressed() { // if a key is pressed this function is called
       cameraY = 0;
       break;
     case 'p':  // toggle paused state
-      paused = !paused;
+      if (state == State.STAGED)
+        state = State.RUNNING;
+      else if (state != State.PAUSED)
+        state = State.PAUSED;
+      else
+        state = State.RUNNING;
       break;
     case 'm':
       playSound = !playSound;
@@ -226,7 +232,7 @@ void keyPressed() { // if a key is pressed this function is called
 }
 
 void beginContact(Contact cp) { // called when two box2d objects collide
-  if (paused) { // probably not necessary
+  if (state != State.RUNNING) { // probably not necessary?
     return;
   }
   // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
@@ -311,7 +317,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
 
 
 void endContact(Contact cp) {
-  if (paused) { // probably not necessary
+  if (state != State.RUNNING) { // probably not necessary?
     return;
   }
   // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
@@ -363,26 +369,27 @@ void endContact(Contact cp) {
 void place_food() { // done once at the beginning of the game
   foods = new ArrayList<food>();
   for (int i = 0; i < 50; i++) {
-    food f = new food((int)random(-0.4 * worldWidth, 0.4 * worldWidth),
-                      (int)random(-0.4 * worldHeight, 0.4 * worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
+                      (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
 
 void nextgeneration() {
   generation++;
-  println(generation);
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
   the_tower.next_generation(); // have the tower update itself, reset energy etc.
-  if (!the_tower.autofire) { // if in autofire mode don't both pausing - useful for evolving in the background
-    paused = true; // pause the game
+  // if in autofire mode don't both pausing - useful for evolving in
+  // the background
+  if (!the_tower.autofire) {
+    state = State.STAGED; // pause the game
   }
 }
 
 void add_food() { // done after each wave/generation
   for (int i = 0; i < 10; i++) { // why add exactly 10 food each time?
-    food f = new food((int)random(-0.4*worldWidth,0.4*worldWidth), (int)random(-0.4*worldHeight,0.4*worldHeight)); // places food randomly near the tower
+    food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
 }
@@ -394,7 +401,7 @@ void mousePressed() { // called if the (left) mouse button is pressed
   x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
   y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 
-  if (!paused)
+  if (state == State.RUNNING)
     the_tower.fire(); // have the tower fire its active weapon if unpaused
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
@@ -402,17 +409,16 @@ void mousePressed() { // called if the (left) mouse button is pressed
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
+  the_player.mouse_pressed();
 }
 
 void controls() {
-  if (state != 3) {
-    paused = true;
-    oldstate = state; // so the program can go back to it
-    state = 3;
+  if (state != State.MENU) {
+    stateSaved = state;
+    state = State.MENU;
   }
   else {
-    paused = false;
-    state = oldstate;
+    state = stateSaved;
   }
 }
 

@@ -69,8 +69,8 @@ class creature {
   color_network coloration;
   
   // Reproduction variables
-  int baseGameteCost = 100;  // Gametes base energy cost
-  int baseGameteTime = 200;  // Gametes base create time in screen updates.
+  int baseGameteCost = 10;  // Gametes base energy cost
+  int baseGameteTime = 20;  // Gametes base create time in screen updates.
   int baseGameteEnergy = 500;// Gametes base extra energy
   int gameteTimeLapse = 0;   // Keeps track of time since last gamete
 
