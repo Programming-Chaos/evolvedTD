@@ -172,24 +172,30 @@ class population {
       }
       
       Gamete g1, g2;
+      int size = gametes.size();
       // i is first gamete j is it's chosen mate
-      for (int i=0; i < gametes.size() - 1; i++) {
+      for (int i=0; i < size - 1; i++) {
         g1 = gametes.get(i);
-        for (int j = i+1; j < gametes.size(); j++) {
+        for (int j = i+1; j < size; j++) {
           g2 = gametes.get(j);
           if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
               g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
             // Remove gametes from list and mate
-            gametes.remove(i);
-            gametes.remove(j);
+            gametes.remove(i); i--;
+            gametes.remove(j); j--;
+            size = gametes.size();
             
             int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
             int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
             // Check coordinates for other creatures spawned in this tile.
-            for (creature c : generation) {
-              Vec2 posCheck = box2d.getBodyPixelCoord(c.body);
+            for (int c=0; c < generation.size(); c++) {
+              Vec2 posCheck = box2d.getBodyPixelCoord(generation.get(c).body);
+              int xCheck = (int)(posCheck.x / cellWidth);
+              int yCheck = (int)(posCheck.y / cellHeight);
               // while creature already occupies tile
-              while ((px == posCheck.x / cellWidth) && (py == posCheck.y / cellHeight)){
+              while ((px <= xCheck + 3) && (px >= xCheck - 3) && (py <= yCheck + 3) && (py >= yCheck - 3)){
+                // Reset c.  Need to make it thru entire list without flagging this.
+                c = -1; //c++ == 0
                 // Move new creature in a random direction
                 switch ((int)random(8)) {
                   case 0: //North
@@ -224,17 +230,18 @@ class population {
                 }
                 
                 // Make sure position is still in bounds
-                if (px >= worldWidth   / cellWidth)  px -= 5;
-                if (px <= 0)                         px += 5;
-                if (py >= worldHeight  / cellHeight) py -= 5;
-                if (py <= 0)                         py += 5;
+                if (px >= worldWidth   / cellWidth)  px = worldWidth / cellWidth - 5;
+                if (px <= 0)                         px = 5;
+                if (py >= worldHeight  / cellHeight) py = worldHeight / cellHeight - 5;
+                if (py <= 0)                         py = 5;
               }
             }
             Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
       
             childrenBred++;
             generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                        10000 + g1.energy + g2.energy, pos));
+                                        10000 + g1.energy + g2.energy));
+            break;
           }
         }
       }
