@@ -617,6 +617,7 @@ class creature {
 
   // Calculates a creature's fitness, which determines its probability of reproducing
   void calcFitness() {
+    // TODO: Use fitness
     fitness = 0;
     // for now only locomotion energy is counted because that's what's used
     fitness += energy_locomotion; // More energy = more fitness
@@ -633,10 +634,6 @@ class creature {
     senses.Set_Current_Pain(-h);
   }
 
-  float getFitness() {
-    return fitness;
-  }
- 
   void calcBehavior(){
     for(int i = 0; i<brain.OUTPUTS; i++){
       for(int j = 0; j<brain.INPUTS; j++){
