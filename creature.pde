@@ -615,20 +615,6 @@ class creature {
     return torque;
   }
 
-  // Calculates a creature's fitness, which determines its probability of reproducing
-  void calcFitness() {
-    // TODO: Use fitness
-    fitness = 0;
-    // for now only locomotion energy is counted because that's what's used
-    fitness += energy_locomotion; // More energy = more fitness
-    fitness += health;            // More health = more fitness
-    if (alive) {                  // Staying alive = more fitness
-      fitness *= 2;
-    }
-    // Note that unrealistically dead creatures can reproduce, which
-    // is necessary in cases where a player kills a whole wave
-  }
-
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
