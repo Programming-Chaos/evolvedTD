@@ -76,10 +76,10 @@ class creature {
   color_network coloration;
   
   // Reproduction variables
-  int baseGameteCost = 10;  // Gametes base energy cost
-  int baseGameteTime = 20;  // Gametes base create time in screen updates.
-  int baseGameteEnergy = 500;// Gametes base extra energy
-  int gameteTimeLapse = 0;   // Keeps track of time since last gamete
+  int baseGameteCost = 10;    // Gametes base energy cost
+  int baseGameteTime = 100;   // Gametes base create time in screen updates.
+  int baseGameteEnergy = 500; // Gametes base extra energy
+  int gameteTimeLapse = 0;    // Keeps track of time since last gamete
 
   ArrayList<Gamete> gameteStack = new ArrayList<Gamete>(); // Holds the gametes and their map positions.
   
@@ -632,10 +632,10 @@ class creature {
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
   void update() {
-    Vec2 pos2 = box2d.getBodyPixelCoord(body);
     if (!alive) { // dead creatures don't update
       return;
     }
+    Vec2 pos2 = box2d.getBodyPixelCoord(body);
     timestep_counter++;
     float a = body.getAngle();
     float m = body.getMass();
@@ -694,11 +694,12 @@ class creature {
     }
 
 
+    // Gamete production
     // if creature has enough energy and enough time has passed,
     // lay a gamete at current position on the map.
-    if (gameteTimeLapse > baseGameteTime * (1 + genome.avg(gameteTime))
-        && energy_reproduction > (baseGameteCost * (1 + genome.avg(gameteCost))
-                                  + baseGameteEnergy * (1 + genome.avg(gameteEnergy)))) {
+    if (gameteTimeLapse > baseGameteTime + genome.avg(gameteTime)
+        && energy_reproduction > (baseGameteCost + genome.avg(gameteCost)
+                                  + baseGameteEnergy + genome.avg(gameteEnergy))) {
 
       // Get the tile position of the creature
       int xPos = (int) (box2d.getBodyPixelCoord(body).x / cellWidth);
