@@ -1,6 +1,7 @@
 /* This class holds a population of creatures in an arraylist called swarm.
  * Each generation/wave the whole population attacks.
  */
+import java.util.Collections;
 
 class population {
   ArrayList<creature> swarm;
@@ -129,20 +130,6 @@ class population {
     return int(fitness/1000);
   }
 
-  // orders gametes by spawn time
-  void OrderGametes(ArrayList<Gamete> gList) {
-    for (int i=0; i < gList.size()-1; i++) {
-      Gamete g1, g2;
-      g1 = gList.get(i);
-      g2 = gList.get(i+1);
-      if (g1.getTime() > g2.getTime()) { // swap
-        gList.set(i+1, g1);
-        gList.set(i, g2);
-        i = 0; // start back at the beginning.
-      }
-    }
-  }
-
   // creates the next generation
   void next_generation() {
     ArrayList<Gamete> gametes = new ArrayList();
@@ -155,7 +142,7 @@ class population {
       }
     }
     // Place gametes in order of time.
-    OrderGametes(gametes);
+    Collections.sort(gametes, new GameteComparator());
     
     int childrenBred = 0;
     int childrenNew = 0;

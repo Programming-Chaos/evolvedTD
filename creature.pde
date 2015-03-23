@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 static int creature_count = 0;
 
 class Gamete {
@@ -19,6 +21,13 @@ class Gamete {
   int getTime()                   { return time; }
   int getEnergy()                 { return energy; }
   Genome.Chromosome getGamete()   { return gamete; }
+}
+
+class GameteComparator implements Comparator<Gamete> {
+    public int compare(Gamete x, Gamete y) {
+      // return the Java comparison of two integers
+      return Integer.valueOf(x.getTime()).compareTo(Integer.valueOf(y.getTime()));
+    }
 }
 
 class creature {
