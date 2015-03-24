@@ -1,10 +1,12 @@
 // standard deviation of mutation added to each gene in meiosis
-static final float MUTATION_DEVIATION = 0.3;
-static final float MUTATION_RATE = 0.20;
+static final float MUTATION_DEVIATION = 0.03;
+static final float MUTATION_RATE = 0.05;
 // standard deviation of initial gene values
-static final float INITIAL_DEVIATION = 0.05;
+static final float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
 static final float GENE_MULTIPLIER = 4.0/3.0;
+// initial number of segments (should be between 2 and 20)
+static final int STARTING_NUMSEGMENTS = 8;
 
 // additional control trait to estimate genetic evolution
 Trait control = new Trait(10);
@@ -21,17 +23,13 @@ Trait gameteTime = new Trait(10);
 Trait gameteChance = new Trait(10);
 Trait gameteEnergy = new Trait(10);
 
-// Weights for the brain's artificial neural network
-static final int BRAIN_INPUTS = 10;
-static final int BRAIN_OUTPUTS = 100;
-ArrayList<Trait> brainTraits = new ArrayList<Trait>(BRAIN_INPUTS);
+ArrayList<Trait> brainTraits = new ArrayList<Trait>(Brain.WEIGHTS);
 
 // Speciation
 Trait compatibility = new Trait(10);
 Trait reproductionEnergy = new Trait(10);
 
 // Environment interaction
-Trait forwardForce = new Trait(10);
 Trait turningForce = new Trait(10);
 Trait foodTrait = new Trait(10);
 Trait creatureTrait = new Trait(10);
@@ -43,16 +41,19 @@ Trait scentTrait = new Trait(10);
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
-ArrayList<Segment> segments = new ArrayList<Segment>(MAX_SEGMENTS + 1);
+ArrayList<SegmentTraits> segmentTraits = new ArrayList<SegmentTraits>(MAX_SEGMENTS);
 // encodes number of segments actually expressed
 Trait expressedSegments = new Trait(10);
-
 // maximum number of apendages that can be evolved
-static final int MAX_APPENDAGES = 40;
-ArrayList<AppendageTrait> appendages
-  = new ArrayList<AppendageTrait>(MAX_APPENDAGES);
-// encodes number of appendages actually expressed
-Trait expressedAppendages = new Trait(10);
+static final int MAX_APPENDAGES = MAX_SEGMENTS;
+ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_APPENDAGES);
+
+// maximum number of feelers that can be evolved
+static final int MAX_FEELERS = 40;
+ArrayList<FeelerTrait> feelers
+  = new ArrayList<FeelerTrait>(MAX_FEELERS);
+// encodes number of feelers actually expressed
+Trait expressedFeelers = new Trait(10);
 
 // sensory thresholds
 Trait painTrait = new Trait(10);
@@ -62,6 +63,8 @@ Trait sidePressureTrait = new Trait(10);
 Trait tasteTrait = new Trait(10);
 Trait speedTrait = new Trait(10);
 Trait angularMomentumTrait = new Trait(10);
+Trait massTrait = new Trait(10);
+Trait energyTrait = new Trait(10);
 
 ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
 // TODO: will these traits be gone with the use of a color network?
@@ -69,10 +72,6 @@ Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
 Trait alphaTrait = new Trait(10);
-
-// TODO: remove these traits when segment refactor is complete
-Trait densityTrait = new Trait(10);
-Trait restitutionTrait = new Trait(10);
 
 private int nGenes = 0;
 
@@ -92,28 +91,48 @@ class Trait {
   }
 }
 
-class Segment {
+class SegmentTraits {
   Trait endPoint;
   Trait armor;
   Trait density;
   Trait restitution;
+  Trait appendageSize;
 
-  Segment() {
-    endPoint    = new Trait(10);
-    armor       = new Trait(10);
-    density     = new Trait(10);
+  SegmentTraits() {
+    endPoint = new Trait(10);
+    armor = new Trait(10);
+    density = new Trait(10);
     restitution = new Trait(10);
+    appendageSize = new Trait(10);
   }
 }
 
-class AppendageTrait {
+class AppendageTraits {
+  Trait armor;
+  Trait density;
+  Trait restitution;
+  Trait waterForce;
+  Trait grassForce;
+  Trait mountainForce;
+
+  AppendageTraits() {
+    armor = new Trait(10);
+    density = new Trait(10);
+    restitution = new Trait(10);
+    waterForce = new Trait(10);
+    grassForce = new Trait(10);
+    mountainForce = new Trait(10);
+  }
+}
+
+class FeelerTrait {
   Trait scent;
   Trait pressure;
   Trait taste;
   Trait angle;
   Trait length;
 
-  AppendageTrait() {
+  FeelerTrait() {
     scent    = new Trait(10);
     pressure = new Trait(10);
     taste    = new Trait(10);
@@ -130,18 +149,23 @@ class AppendageTrait {
     }
 
     // initialize the brain weights
-    for (int i = 0; i < BRAIN_INPUTS; i++) {
-      brainTraits.add(new Trait(BRAIN_OUTPUTS));
+    for (int i = 0; i < Brain.WEIGHTS; i++) {
+      brainTraits.add(new Trait(10));
     }
 
     // initialize the segments and their traits
-    for (int i = 0; i < (MAX_SEGMENTS + 1); i++) {
-      segments.add(new Segment());
+    for (int i = 0; i < MAX_SEGMENTS; i++) {
+      segmentTraits.add(new SegmentTraits());
     }
 
     // initialize the appendages and their traits
-    for (int i = 0; i < (MAX_APPENDAGES); i++) {
-      appendages.add(new AppendageTrait());
+    for (int i = 0; i < MAX_APPENDAGES; i++) {
+      appendageTraits.add(new AppendageTraits());
+    }
+
+    // initialize the feelers and their traits
+    for (int i = 0; i < (MAX_FEELERS); i++) {
+      feelers.add(new FeelerTrait());
     }
 
     // initialize the color network weights
@@ -216,8 +240,8 @@ class Genome {
       }
     }
 
-    Chromosome(Chromosome chromosome) {
-      genes = chromosome.genes.copy();
+    Chromosome() {
+     genes = new FloatList();
     }
 
     FloatList list(Trait trait) {
@@ -246,8 +270,8 @@ class Genome {
     ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
 
     // recombine
-    Chromosome x = new Chromosome(nGenes);
-    Chromosome y = new Chromosome(nGenes);
+    Chromosome x = new Chromosome();
+    Chromosome y = new Chromosome();
 
     int start = int(random(nGenes));
     int num = int(random(nGenes - start));

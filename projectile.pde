@@ -7,7 +7,7 @@ class projectile {
   PImage bullet;    // declare image for gun
   
   // constructor, creates a projectile
-  projectile(int x, int y, float a, int d) {
+  projectile(float x, float y, float a, int d) {
     radius = (int)(2);
     angle = a;
     damage = d;
@@ -62,7 +62,7 @@ class projectile {
     popMatrix();
   }
   
-  void makebody(int x, int y) {
+  void makebody(float x, float y) {
     BodyDef bd = new BodyDef();
     bd.angle = angle;
     bd.position.set(box2d.coordPixelsToWorld(new Vec2(x, y)));
