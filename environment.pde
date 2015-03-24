@@ -774,7 +774,7 @@ class environment {
     int chance = int(waterReserve / 100);
     int rand = int(random(0,100));
     tempWaitOff = minute();
-    if(tempWaitOff >= waitRainOff+1 && rand <= chance)
+    if(tempWaitOff >= waitRainOff+3 && rand <= chance)
       isRaining = true;
     if(isRaining == true)
       waitRainOn = minute();
@@ -785,7 +785,7 @@ class environment {
     int chance = int(waterReserve / 100);
     int rand = int(random(0,100));
     tempWaitOn = minute();
-    if(tempWaitOn >= waitRainOn+1 && (chance - rand) <= 0)
+    if(tempWaitOn >= waitRainOn+3 && (chance - rand) <= 0)
       isRaining = false;
     chanceOfLightning();
     if(isRaining == false)
@@ -794,7 +794,7 @@ class environment {
 
   // Randomly decides if lightning should strike
   void chanceOfLightning() {
-    int chance = int(random(1,30));
+    int chance = int(random(1,800));
     if (chance == 1) {
       lightning();
     }
@@ -804,19 +804,20 @@ class environment {
   void rainfall() {
     float x, y;
     fill(0, 0, 255, 50);
-    rect((-worldWidth), (-worldHeight), (worldWidth*2), (worldHeight*2));
-    for(int i = 0; i < 600; i++) {
-      x = random(-worldWidth, worldWidth);
-      y = random(-worldHeight, worldHeight);
-      stroke(0, 0, 200, 95);
+    noStroke();
+    rect(-worldWidth/2,-worldHeight/2,worldWidth, worldHeight);
+    for(int i = 0; i < 350; i++) {
+      x = random(-worldWidth/2, worldWidth/2);
+      y = random(-worldHeight/2, worldHeight/2);
+      stroke(0, 0, 200, 75);
       line(x, y, x, y+30);
     }
   }
 
   // Draws lightning and kills a creature if it is on the tile
   void lightning() {
-    int randX = int(random(-worldWidth, worldWidth));
-    int randY = int(random(-worldHeight, worldHeight));
+    int randX = int(random(-worldWidth/2, worldWidth/2));
+    int randY = int(random(-worldHeight/2, worldHeight/2));
 
     int xOffset = randX;
     int yOffset = -worldHeight;
