@@ -13,6 +13,7 @@ class tower {
   boolean showgun = true; // show base gun image
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
+  int soundtimer;
   
   // constructor function, initializes the tower
   tower() {
@@ -25,6 +26,7 @@ class tower {
     gun = loadImage("assets/RailGun-01.png");
     gunalt = loadImage("assets/RailGun-a-01.png");
     imagetimer = 0;
+    soundtimer = 0;
   }
   
   void update() {
@@ -163,9 +165,19 @@ class tower {
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
-    if (playSound) {
-      gunshot.rewind();
-      gunshot.play();
+    soundtimer++;
+    if (soundtimer%3==0){
+      soundtimer = 0;
+      if (playSound) {
+        gunshot.rewind();
+        gunshot.play();
+      }
+    }
+    else{
+      if (playSound) {
+        gunshotalt.rewind();
+        gunshotalt.play();
+      }
     }
   }
   
