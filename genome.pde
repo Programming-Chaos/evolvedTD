@@ -241,11 +241,7 @@ class Genome {
     }
 
     Chromosome() {
-     genes = new FloatList(); 
-    }
-    
-    Chromosome(Chromosome chromosome) {
-      genes = chromosome.genes.copy();
+     genes = new FloatList();
     }
 
     FloatList list(Trait trait) {

@@ -632,7 +632,7 @@ class environment {
     }
     return 0;
   }
-  
+
   int checkForMountain(double x1, double y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
