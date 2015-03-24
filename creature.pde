@@ -30,6 +30,8 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
+  float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
+  float maxMovementSpeed;
   
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -119,7 +121,7 @@ class creature {
     private Vec2 getFrontPoint() {
       Vec2 p = new Vec2();
       float endpoint;
-      if (index == (numSegments-1)) endpoint = genome.sum(segmentTraits.get(index).appendageSize);
+      if (index == (numSegments-1)) endpoint = genome.sum(segmentTraits.get(index).appendageSize); // frontmost point is undefined and therefore we use the unused appendageSize trait
       else endpoint = genome.sum(segmentTraits.get(index+1).endPoint);
       int lengthbase = 20;
       float l;
@@ -162,6 +164,9 @@ class creature {
     float waterForce;
     float grassForce;
     float mountainForce;
+    float waterForcePercent;
+    float grassForcePercent;
+    float mountainForcePercent;
     float angle;
     float spread;
     Vec2 originPoint;
@@ -214,13 +219,18 @@ class creature {
     
     void getForces() { //mapping function is inverse quadratic and then values are made proportional to their sum
       float water = (genome.avg(appendageTraits.get(index).waterForce));
-      waterForce = 1;//((-1/(1.01+(water*water)))+1);
+      waterForce = ((-1/(1.01+(water*water)))+1);
+      //waterForce *= 6;
       float grass = (genome.avg(appendageTraits.get(index).grassForce));
-      grassForce = 1;//((-1/(1.01+(grass*grass)))+1);
-      grassForce *= 4;
+      grassForce = ((-1/(1.01+(grass*grass)))+1);
+      //grassForce *= 4;
       float mountain = (genome.avg(appendageTraits.get(index).mountainForce));
-      mountainForce = 1;//((-1/(1.01+(mountain*mountain)))+1);
-      mountainForce *= 4;
+      mountainForce = ((-1/(1.01+(mountain*mountain)))+1);
+      //mountainForce *= 4;
+      float divisor = waterForce+grassForce+mountainForce;
+      waterForcePercent = waterForce/divisor;
+      grassForcePercent = grassForce/divisor;
+      mountainForcePercent = mountainForce/divisor;
     }
     
     private float getAngle() {
@@ -228,19 +238,19 @@ class creature {
     }
     
     private float getSpread() {
-      return (float)((Math.acos(((mountainForce*mountainForce)+(grassForce*grassForce)-(waterForce*waterForce))/(2*mountainForce*grassForce)))/2);
+      return (PI/6);//(float)((Math.acos(((mountainForce*mountainForce)+(grassForce*grassForce)-(waterForce*waterForce))/(2*mountainForce*grassForce)))/2);
     }
     
     private Vec2 getOriginPoint() { // point of origin of the appendages is the front point of the associated segment
-      return new Vec2(segments.get(index).frontPoint.x, segments.get(index).frontPoint.y);//segments.get(index).backPoint;//new Vec2((segments.get(index).frontPoint.x+((segments.get(index).backPoint.x-segments.get(index).frontPoint.x)/2)), (segments.get(index).frontPoint.y+((segments.get(index).backPoint.y-segments.get(index).frontPoint.y)/2)));
-     }
+      return new Vec2(segments.get(index).frontPoint.x, segments.get(index).frontPoint.y);
+    }
     
     private Vec2 getFrontPoint() {
-      return new Vec2(((float)(grassForce*(Math.sin(spread+angle+(PI/2))))*5)+originPoint.x, ((float)(grassForce*(Math.cos(spread+angle+(PI/2))))*5)+originPoint.y);
+      return new Vec2(((float)(/*grassForce*/1*(Math.sin(spread+angle+(PI/2))))*10*size)+originPoint.x, ((float)(/*grassForce*/1*(Math.cos(spread+angle+(PI/2))))*10*size)+originPoint.y);
     }
     
     private Vec2 getBackPoint() {
-      return new Vec2(((float)(mountainForce*(Math.sin((-1*spread)+angle+(PI/2))))*5)+originPoint.x, ((float)(mountainForce*(Math.cos((-1*spread)+angle+(PI/2))))*5)+originPoint.y);
+      return new Vec2(((float)(/*mountainForce*/1*(Math.sin((-1*spread)+angle+(PI/2))))*10*size)+originPoint.x, ((float)(/*mountainForce*/1*(Math.cos((-1*spread)+angle+(PI/2))))*10*size)+originPoint.y);
     }
   }
 
@@ -300,6 +310,9 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    
+    maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
+    for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
     
     scent = setScent();                 // does creature produce scent
     scentStrength = setScentStrength(); // how strong is the scent
@@ -454,30 +467,26 @@ class creature {
   // Calculate and return the width of the creature
   private float getWidth() {
     // TODO: Move this to creature
-    float maxX = 0;
-    Vec2 temp;
-    for (int i = 0; i < numSegments; i++) {
-      temp = segments.get(i).frontPoint;
-      if (temp.x > maxX) {
-        maxX = temp.x;
-      }
+    float minX = 0;
+    float temp;
+    for (int i = 0; i < numSegments-1; i++) {
+      temp = segments.get(i).frontPoint.x;
+      if (temp < minX) minX = temp;
     }
-    return 2*maxX;
+    return (-2*minX);
   }
 
   // Calculate and return the length of the creature
   private float getLength() {
     float maxY = 0;
     float minY = 0;
-    Vec2 temp;
+    float temp = segments.get(0).backPoint.y;
+    if (temp > maxY) maxY = temp;
+    if (temp < minY) minY = temp;
     for (int i = 0; i < numSegments; i++) {
-      temp = segments.get(i).frontPoint;
-      if (temp.y > maxY) {
-        maxY = temp.y;
-      }
-      if (temp.y < minY) {
-        minY = temp.y;
-      }
+      temp = segments.get(i).frontPoint.y;
+      if (temp > maxY) maxY = temp;
+      if (temp < minY) minY = temp;
     }
     return (maxY - minY);
   }
@@ -486,16 +495,9 @@ class creature {
     return body.getMass();
   }
 
-  // Forward force to accelerate the creature, evolved, but
-  // (currently) doesn't change anytime durning a wave
-  private float getForce() {
-    // -infinity to infinity linear
-    return (500 + 10 * genome.sum(forwardForce));
-  }
-
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
-    int ret = round(genome.avg(expressedSegments) + STARTING_NUMSEGMENTS);
+    int ret = round(genome.sum(expressedSegments) + STARTING_NUMSEGMENTS);
     if (ret < 2)
       return 2;
     if (ret > MAX_SEGMENTS)
@@ -527,86 +529,7 @@ class creature {
   private double getBehavior(Trait trait) {
     return getTurningForce() * genome.sum(trait); // there's a turning force
   }
-
-  // This function calculates the torques the creature produces to turn, as a
-  // function of what it senses in the environment
-  double calcTorque() {
-    Vec2 pos2 = box2d.getBodyPixelCoord(body);  // get the creature's position
-    int l = 50; // distance of the sensor from the body (should be evolved)
-    int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
-    float scentAheadL,scentAheadR;
-    float cscentAheadL,cscentAheadR;
-    float rscentAheadL,rscentAheadR;
-    float pscentAheadL,pscentAheadR;
-    double sensorX,sensorY;
-    int liquidFLAG = 0;
-
-    // left sensor check
-
-    // Begin by calculating the x,y position of the left sensor
-    // (Currently the angle of the sensors is fixed, angle PI*0.40,
-    // length 50 pixels, these should be evolved)
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
-    sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
-
-    foodAheadL = environ.checkForFood(sensorX, sensorY);         // Check if there's food 'under' the left sensor
-    creatureAheadL = environ.checkForCreature(sensorX, sensorY); // Check if there's a creature 'under' the left sensor
-    rockAheadL = environ.checkForRock(sensorX, sensorY);         // Check if there's a rock 'under' the left sensor
-    scentAheadL = environ.getScent(sensorX, sensorY);            // Get the amount of scent at the left sensor
-    cscentAheadL = environ.getCScent( sensorX, sensorY);
-    rscentAheadL = environ.getRScent( sensorX, sensorY);
-    pscentAheadL = environ.getPScent( sensorX, sensorY);
-
-    // This is not torque specific code, but it is placed here to
-    // avoid redundantly defining the sensors
-    if(environ.checkForLiquid(sensorX, sensorY) == 1) {
-      liquidFLAG = 1;
-    }
-
-    // right sensor check
-
-    // Begin by calculating the x,y position of the right sensor
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60));
-    sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.60));
-    // Then do all of the right sensor checks
-    foodAheadR = environ.checkForFood(sensorX, sensorY);
-    creatureAheadR = environ.checkForCreature(sensorX, sensorY);
-    rockAheadR = environ.checkForRock(sensorX, sensorY);
-    scentAheadR = environ.getScent(sensorX, sensorY);
-    cscentAheadR = environ.getCScent(sensorX, sensorY);
-    rscentAheadR = environ.getRScent(sensorX, sensorY);
-    pscentAheadR = environ.getPScent(sensorX, sensorY);
-
-    // This is not torque specific code, but it is placed here to
-    // avoid redundantly defining the sensors
-    if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1) {
-      time_in_water++;
-      liquidFLAG = 0;
-    }
-
-    // Set the torque to zero, then add in the effect of the sensors
-    double torque = 0;
-    // If there's food ahead on the left, turn by the evolved torque
-    torque += foodAheadL * getBehavior(foodTrait);
-    // If there's food ahead on the right, turn by the evolved torque
-    // but in the opposite direction
-    torque += foodAheadR * -1 * getBehavior(foodTrait);
-    // Similar turns for creatures and rocks
-    torque += creatureAheadL * getBehavior(creatureTrait);
-    torque += creatureAheadR * -1 * getBehavior(creatureTrait);
-    torque += rockAheadL * getBehavior(rockTrait);
-    torque += rockAheadR * -1 * getBehavior(rockTrait);
-    // Take the square root of the amout of scent detected on the left
-    // (right), factor in the evolved response to smelling food, and
-    // add that to the torque Take the squareroot of the scent to
-    // reduce over correction
-    torque += sqrt(scentAheadL) * getBehavior(scentTrait);
-    torque += sqrt(scentAheadR) * -1 * getBehavior(scentTrait);
-    //println(torque);
-    return torque;
-  }
-
-  // Calculates a creature's fitness, which determines its probability of reproducing
+  
   void calcFitness() {
     fitness = 0;
     // for now only locomotion energy is counted because that's what's used
@@ -630,6 +553,7 @@ class creature {
  
   void calcBehavior(){
     for(int i = 0; i<brain.OUTPUTS; i++){
+      current_actions[i] = 0;
       for(int j = 0; j<brain.INPUTS; j++){
         current_actions[i] += (senses.brain_array[j]*brain.weights[i][j]);
       }
@@ -640,10 +564,10 @@ class creature {
   // It updates the creature's postion, including applying turning torques,
   // and checks if the creature has died.
   void update() {
-    Vec2 pos2 = box2d.getBodyPixelCoord(body);
     if (!alive) { // dead creatures don't update
       return;
     }
+    Vec2 pos2 = box2d.getBodyPixelCoord(body);
     timestep_counter++;
     float a = body.getAngle();
     float m = body.getMass();
@@ -655,14 +579,57 @@ class creature {
 
     calcBehavior();
     torque = current_actions[0]*0.01;
-    f = 1+current_actions[1];
+    
+    // force is a percentage of max movement speed from 10% to 100%, averaging 80%
+    // depending on the output of the neural network in current_actions[1], the movement force may be backwards
+    // as of now the creatures never completely stop moving
+    f = Utilities.MovementForceSigmoid(current_actions[1]);
+    if (current_actions[1] < -50) f *= -1;
+    //f = 0.8;
+    f *= maxMovementSpeed;
+    
+    int switchnum;
+    if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
+      time_in_water++;
+      switchnum = 0;
+    }
+    else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
+    else switchnum = 2;
+    //println("Creature (" + pos2.x + ", " + pos2.y + ")");
+    //println("Base move speed: " + f);
+    float base = f;
+    
+    // appendages will change the force depending on the environment
+    for (Appendage app : appendages) {
+      if (app.size > 0) { // if the appendage exists
+        switch (switchnum) {
+        case 0: // if the creature's center is in water
+          f -= (base*app.grassForcePercent)/numSegments;
+          f += (2*base*app.waterForcePercent)/numSegments;
+          f -= (base*app.mountainForcePercent)/numSegments;
+          break;
+        case 1: // if the creature's center is on a mountain
+          f -= (base*app.grassForcePercent)/numSegments;
+          f -= (base*app.waterForcePercent)/numSegments;
+          f += (2*base*app.mountainForcePercent)/numSegments;
+          break;
+        case 2: // if the creature's center is on grass
+          f += (2*base*app.grassForcePercent)/numSegments;
+          f -= (base*app.waterForcePercent)/numSegments;
+          f -= (base*app.mountainForcePercent)/numSegments;
+          break;
+        }
+      }
+    }
+    
+    //println("Environmental speed: " + f);
 
     body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
     
     if (energy_locomotion > 0) { // If there's energy left apply force
-      body.applyForce(new Vec2(f * cos(a - 4.7), f * sin(a - 4.7)), body.getWorldCenter());
+      body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
       energy_locomotion = (energy_locomotion - abs((float)(torque * 0.05)));
     }
@@ -774,7 +741,7 @@ class creature {
     strokeWeight(1);
     // Add some eyespots
     fill(0);
-    Vec2 eye = segments.get(round(numSegments*.74)).frontPoint;;
+    Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     ellipse(eye.x, eye.y, 5, 5);
     ellipse(-1 * eye.x, eye.y, 5, 5);
     fill(255);

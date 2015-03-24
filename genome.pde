@@ -30,7 +30,6 @@ Trait compatibility = new Trait(10);
 Trait reproductionEnergy = new Trait(10);
 
 // Environment interaction
-Trait forwardForce = new Trait(10);
 Trait turningForce = new Trait(10);
 Trait foodTrait = new Trait(10);
 Trait creatureTrait = new Trait(10);
