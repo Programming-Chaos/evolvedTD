@@ -14,6 +14,8 @@ class tower {
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
   int soundtimer;
+  int radius = 80;
+  Body tower_body;
   
   // constructor function, initializes the tower
   tower() {
@@ -27,6 +29,24 @@ class tower {
     gunalt = loadImage("assets/RailGun-a-01.png");
     imagetimer = 0;
     soundtimer = 0;
+    
+    BodyDef bd = new BodyDef();
+    bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17)));
+    bd.type = BodyType.STATIC;
+    bd.linearDamping = 0.9;
+    
+    tower_body = box2d.createBody(bd);
+    // Define the shape -- a  (this is what we use for a rectangle)
+    CircleShape sd = new CircleShape();
+    sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
+    FixtureDef fd = new FixtureDef();
+    fd.filter.categoryBits = 2; // food is in filter category 2
+    fd.filter.maskBits = 65531; // doesn't interact with projectiles 
+    fd.shape = sd;
+    fd.density = 100;
+    tower_body.createFixture(fd);
+    
+    tower_body.setUserData(this);
   }
   
   void update() {
@@ -89,12 +109,13 @@ class tower {
       showgunalt = true;
       showgun = false;
     }
-      pushMatrix();
-      float c = angle;
-      rotate(c + HALF_PI);
-      if(showgun)image(gun,-128,-128);
-      if(showgunalt)image(gunalt,-128,-128);
-      popMatrix();
+    
+    pushMatrix();
+    float c = angle;
+    rotate(c + HALF_PI);
+    if(showgun)image(gun,-128,-128);
+    if(showgunalt)image(gunalt,-128,-128);
+    popMatrix();
     
     for (projectile p: projectiles) { // display the active projectiles
       p.display();
