@@ -18,6 +18,10 @@ int timeStepTemp = timesteps;
 int waterReserveMax = 10000; // the world is only allowed to contain a certain amount of water
 int waterReserve = int(random(1, 10000)); // start of game water reserve amount
 
+static final int GRASS = 0;
+static final int WATER = 1;
+static final int MOUNTAIN = 2;
+
 int initializeRain() { return int(random(1,3)); }
 
 class tile {
@@ -37,7 +41,7 @@ class tile {
   float reproScent;
   float painScent;
 
-  boolean isLiquid;
+  int biome;
   boolean hasFood;
   boolean hasRock;
   boolean hasScent;
@@ -63,7 +67,7 @@ class tile {
     scent = 0;
     creatureScent = 0;
     creatureScentColor = 0;
-    isLiquid = false;
+    biome = GRASS;
     hasFood = false;
     hasRock = false;
     hasTower = false;
@@ -81,7 +85,6 @@ class tile {
   int getWeather()         { return weathering; }
   int getViscosity()       { return viscosity; }
   float getScent()         { return scent; }
-  boolean isLiquid()       { return isLiquid; }
   boolean hasFood()        { return hasFood; }
   boolean hasRock()        { return hasRock; }
   boolean hasTower()       { return hasTower; }
@@ -99,7 +102,6 @@ class tile {
   void setWeather(int w)         { weathering = w; }
   void setViscosity(int v)       { viscosity = v; }
   void setScent(float s)         { scent = s; }
-  void isLiquid(boolean l)       { isLiquid = l; }
   void hasFood(boolean f)        { hasFood = f; }
   void hasRock(boolean r)        { hasRock = r; }
   void hasTower(boolean t)       { hasTower = t; }
@@ -134,7 +136,7 @@ class gravityVector {
   }
 }
 
-class environment{
+class environment {
   int environWidth;
   int environHeight;
   int environAltitude;
@@ -274,7 +276,7 @@ class environment{
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
         if(tileMap[i][j].getAlt() <= alt) {
-          tileMap[i][j].isLiquid(true);
+          tileMap[i][j].biome = WATER;
           tileMap[i][j].setViscosity(255);
           tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
           tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
@@ -293,7 +295,7 @@ class environment{
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
         if(tileMap[i][j].getAlt() >= alt) {
-          tileMap[i][j].isLiquid(false);
+          tileMap[i][j].biome = MOUNTAIN;
           tileMap[i][j].setViscosity(0);
           tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
           tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
@@ -318,7 +320,7 @@ class environment{
       }
     }
   }
-
+/* this function is unused
   void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
     int totalSize = 0;
     int x = 0;
@@ -344,7 +346,7 @@ class environment{
           if(xOffset < environWidth && yOffset < environHeight
              && xOffset > 0 && yOffset > 0) {
             if((a * a) + (b * b) <= (r * r) ){
-              tileMap[xOffset][yOffset].isLiquid(true);
+              tileMap[xOffset][yOffset].biome = WATER;
               tileMap[xOffset][yOffset].setViscosity(255);
             }
           }
@@ -352,7 +354,7 @@ class environment{
       }
     }
   }
-
+*/
   void tempInfluence() {
     int r = 0;
     int b = 0;
@@ -499,8 +501,8 @@ class environment{
       p = r.getPos();
       x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
       y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
-      x = (x+environWidth)%environWidth; // in case creature was temporarily bumped out of bounds
-      y = (y+environHeight)%environHeight;
+      if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+      if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
       tileMap[x][y].hasRock(true);
     }
 
@@ -509,8 +511,8 @@ class environment{
       if (fd != null && p != null) {
         x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
         y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
-        x = (x+environWidth)%environWidth; // in case ccreature was temporarily bumped out of bounds
-        y = (y+environHeight)%environHeight;
+        if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+        if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
         tileMap[x][y].setTaste(fd.getTaste());
         tileMap[x][y].hasFood(true);
       }
@@ -523,8 +525,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     if (tileMap[x][y].hasFood()) {
       return 1;
@@ -536,8 +538,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getViscosity();
 
@@ -548,8 +550,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getScent();
   }
@@ -558,8 +560,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getCreatureScent();
   }
@@ -568,8 +570,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getReproScent();
   }
@@ -578,8 +580,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     tileMap[x][y].DEBUG_sensing(true); // so sensed squares can be drawn for debugging purposes
     return tileMap[x][y].getPainScent();
   }
@@ -588,8 +590,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     if (tileMap[x][y].hasCreature() == null) {
       return 0;
     }
@@ -600,8 +602,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     if (tileMap[x][y].hasRock()) {
       return 1;
     }
@@ -612,8 +614,8 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
     return tileMap[x][y].getTaste();
   }
 
@@ -623,9 +625,21 @@ class environment{
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    y = (y+environHeight)%environHeight;
-    if (tileMap[x][y].isLiquid()) {
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
+    if (tileMap[x][y].biome == WATER) {
+      return 1;
+    }
+    return 0;
+  }
+
+  int checkForMountain(double x1, double y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
+    if (tileMap[x][y].biome == MOUNTAIN) {
       return 1;
     }
     return 0;
