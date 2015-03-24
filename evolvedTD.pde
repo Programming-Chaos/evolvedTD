@@ -79,6 +79,10 @@ void setup() {
 
   environ = new environment();   // must occur after creatures, etc. created
   lasttime = 0;
+
+  // Run unit tests
+  Genome testGenome = new Genome();
+  testGenome.testChromosome();
 }
 
 void draw() {
