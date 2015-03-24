@@ -13,6 +13,7 @@ class tower {
   boolean showgun = true; // show base gun image
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
+  int soundtimer;
   int radius = 80;
   Body tower_body;
   
@@ -27,6 +28,7 @@ class tower {
     gun = loadImage("assets/RailGun-01.png");
     gunalt = loadImage("assets/RailGun-a-01.png");
     imagetimer = 0;
+    soundtimer = 0;
     
     BodyDef bd = new BodyDef();
     bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17)));
@@ -184,9 +186,19 @@ class tower {
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
-    if (playSound) {
-      gunshot.rewind();
-      gunshot.play();
+    soundtimer++;
+    if (soundtimer%3==0){
+      soundtimer = 0;
+      if (playSound) {
+        gunshot.rewind();
+        gunshot.play();
+      }
+    }
+    else{
+      if (playSound) {
+        gunshotalt.rewind();
+        gunshotalt.play();
+      }
     }
   }
   

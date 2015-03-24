@@ -41,7 +41,7 @@ Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
 Minim minim;
-AudioPlayer gunshot;
+AudioPlayer gunshot, gunshotalt;
 //AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
@@ -56,7 +56,8 @@ void setup() {
   the_player.addtower(the_tower);
 
   minim = new Minim(this);
-  gunshot = minim.loadFile("assets/Cannon.mp3");
+  gunshot = minim.loadFile("assets/railgunfire01long.mp3");
+  gunshotalt = minim.loadFile("assets/railgunfire01slow_01.mp3");
   //thunder = minim.loadFile("assets/thunder.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
