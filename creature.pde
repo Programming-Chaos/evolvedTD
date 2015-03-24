@@ -497,7 +497,7 @@ class creature {
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
-    int ret = round(10*genome.avg(expressedSegments) + STARTING_NUMSEGMENTS);
+    int ret = round(genome.sum(expressedSegments) + STARTING_NUMSEGMENTS);
     if (ret < 2)
       return 2;
     if (ret > MAX_SEGMENTS)
@@ -529,86 +529,7 @@ class creature {
   private double getBehavior(Trait trait) {
     return getTurningForce() * genome.sum(trait); // there's a turning force
   }
-/* deprecated function
-  // This function calculates the torques the creature produces to turn, as a
-  // function of what it senses in the environment
-  double calcTorque() {
-    Vec2 pos2 = box2d.getBodyPixelCoord(body);  // get the creature's position
-    int l = 50; // distance of the sensor from the body (should be evolved)
-    int foodAheadL,foodAheadR,creatureAheadL,creatureAheadR,rockAheadL,rockAheadR;
-    float scentAheadL,scentAheadR;
-    float cscentAheadL,cscentAheadR;
-    float rscentAheadL,rscentAheadR;
-    float pscentAheadL,pscentAheadR;
-    double sensorX,sensorY;
-    int liquidFLAG = 0;
-
-    // left sensor check
-
-    // Begin by calculating the x,y position of the left sensor
-    // (Currently the angle of the sensors is fixed, angle PI*0.40,
-    // length 50 pixels, these should be evolved)
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.40));
-    sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.40));
-
-    foodAheadL = environ.checkForFood(sensorX, sensorY);         // Check if there's food 'under' the left sensor
-    creatureAheadL = environ.checkForCreature(sensorX, sensorY); // Check if there's a creature 'under' the left sensor
-    rockAheadL = environ.checkForRock(sensorX, sensorY);         // Check if there's a rock 'under' the left sensor
-    scentAheadL = environ.getScent(sensorX, sensorY);            // Get the amount of scent at the left sensor
-    cscentAheadL = environ.getCScent( sensorX, sensorY);
-    rscentAheadL = environ.getRScent( sensorX, sensorY);
-    pscentAheadL = environ.getPScent( sensorX, sensorY);
-
-    // This is not torque specific code, but it is placed here to
-    // avoid redundantly defining the sensors
-    if(environ.checkForLiquid(sensorX, sensorY) == 1) {
-      liquidFLAG = 1;
-    }
-
-    // right sensor check
-
-    // Begin by calculating the x,y position of the right sensor
-    sensorX = pos2.x + l * cos(-1 * (body.getAngle() + PI * 0.60));
-    sensorY = pos2.y + l * sin(-1 * (body.getAngle() + PI * 0.60));
-    // Then do all of the right sensor checks
-    foodAheadR = environ.checkForFood(sensorX, sensorY);
-    creatureAheadR = environ.checkForCreature(sensorX, sensorY);
-    rockAheadR = environ.checkForRock(sensorX, sensorY);
-    scentAheadR = environ.getScent(sensorX, sensorY);
-    cscentAheadR = environ.getCScent(sensorX, sensorY);
-    rscentAheadR = environ.getRScent(sensorX, sensorY);
-    pscentAheadR = environ.getPScent(sensorX, sensorY);
-
-    // This is not torque specific code, but it is placed here to
-    // avoid redundantly defining the sensors
-    if(environ.checkForLiquid(sensorX, sensorY) == 1 && liquidFLAG == 1) {
-      time_in_water++;
-      liquidFLAG = 0;
-    }
-
-    // Set the torque to zero, then add in the effect of the sensors
-    double torque = 0;
-    // If there's food ahead on the left, turn by the evolved torque
-    torque += foodAheadL * getBehavior(foodTrait);
-    // If there's food ahead on the right, turn by the evolved torque
-    // but in the opposite direction
-    torque += foodAheadR * -1 * getBehavior(foodTrait);
-    // Similar turns for creatures and rocks
-    torque += creatureAheadL * getBehavior(creatureTrait);
-    torque += creatureAheadR * -1 * getBehavior(creatureTrait);
-    torque += rockAheadL * getBehavior(rockTrait);
-    torque += rockAheadR * -1 * getBehavior(rockTrait);
-    // Take the square root of the amout of scent detected on the left
-    // (right), factor in the evolved response to smelling food, and
-    // add that to the torque Take the squareroot of the scent to
-    // reduce over correction
-    torque += sqrt(scentAheadL) * getBehavior(scentTrait);
-    torque += sqrt(scentAheadR) * -1 * getBehavior(scentTrait);
-    //println(torque);
-    return torque;
-  }
-*/
-  // Calculates a creature's fitness, which determines its probability of reproducing
+  
   void calcFitness() {
     fitness = 0;
     // for now only locomotion energy is counted because that's what's used
@@ -663,7 +584,7 @@ class creature {
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
     f = Utilities.MovementForceSigmoid(current_actions[1]);
-    if (current_actions[1] < 50) f *= -1;
+    if (current_actions[1] < -50) f *= -1;
     //f = 0.8;
     f *= maxMovementSpeed;
     
