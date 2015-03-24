@@ -118,6 +118,7 @@ class tile {
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; }
 }
 
+// Unimplemented currently
 class gravityVector {
   float x;
   float y;
@@ -144,6 +145,11 @@ class environment {
   float liquidReservior; // Amount of water the environment is holding to expened into rain
   float temp; // celsius
   PGraphics image;
+  
+  // Coloring for the different terrain types. Currently being randomly assigned. 
+  color liquid;
+  color rock;
+  color land;
 
   gravityVector[][] gravityMap;
   tile[][] tileMap;
@@ -156,11 +162,17 @@ class environment {
     //println(temp);
     rockFrequency = 0;
 
+    // Establish colors for the environment
+    liquid = color((int)random(255), (int)random(255), (int)random(255)); 
+    rock = color((int)random(255), (int)random(255), (int)random(255)); 
+    land = color((int)random(255), (int)random(255), (int)random(255)); 
+
     gravityMap = new gravityVector[environHeight][environWidth];
     tileMap = new tile[environHeight][environWidth];
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
         tileMap[i][j] = new tile();
+        tileMap[i][j].colors = land;
         gravityMap[i][j] = new gravityVector();
       }
     }
@@ -278,8 +290,9 @@ class environment {
         if(tileMap[i][j].getAlt() <= alt) {
           tileMap[i][j].biome = WATER;
           tileMap[i][j].setViscosity(255);
-          tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
+          //tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
           tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
+          tileMap[i][j].colors = color(liquid, tileMap[i][j].opacity);
         }
       }
     }
@@ -297,8 +310,9 @@ class environment {
         if(tileMap[i][j].getAlt() >= alt) {
           tileMap[i][j].biome = MOUNTAIN;
           tileMap[i][j].setViscosity(0);
-          tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
+          //tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
           tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
+          tileMap[i][j].colors = color(rock, tileMap[i][j].opacity);
         }
       }
     }
@@ -320,41 +334,7 @@ class environment {
       }
     }
   }
-/* this function is unused
-  void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
-    int totalSize = 0;
-    int x = 0;
-    int y = 0;
-    for(int i = 0; i < numWaterBodies; i++) {
-      // water body origin
-      x = (int)random(environWidth);
-      y = (int)random(environHeight);
 
-      // noted extra chance of delta being 0
-      totalSize = initialSize + (int)(random(deltaSize) * random(-1, 1));
-
-      x = x + (totalSize / 2);
-      y = y + (totalSize / 2);
-
-
-      int a, b, r;
-      for(int xOffset = x - (totalSize / 2); xOffset < (x + (totalSize / 2)); xOffset++) {
-        for(int yOffset = y - (totalSize / 2); yOffset < (y + (totalSize / 2)); yOffset++) {
-          a = xOffset - x;
-          b = yOffset - y;
-          r = (totalSize / 2);
-          if(xOffset < environWidth && yOffset < environHeight
-             && xOffset > 0 && yOffset > 0) {
-            if((a * a) + (b * b) <= (r * r) ){
-              tileMap[xOffset][yOffset].biome = WATER;
-              tileMap[xOffset][yOffset].setViscosity(255);
-            }
-          }
-        }
-      }
-    }
-  }
-*/
   void tempInfluence() {
     int r = 0;
     int b = 0;
