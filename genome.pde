@@ -240,6 +240,10 @@ class Genome {
       }
     }
 
+    Chromosome() {
+     genes = new FloatList(); 
+    }
+    
     Chromosome(Chromosome chromosome) {
       genes = chromosome.genes.copy();
     }
@@ -270,8 +274,8 @@ class Genome {
     ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
 
     // recombine
-    Chromosome x = new Chromosome(nGenes);
-    Chromosome y = new Chromosome(nGenes);
+    Chromosome x = new Chromosome();
+    Chromosome y = new Chromosome();
 
     int start = int(random(nGenes));
     int num = int(random(nGenes - start));
