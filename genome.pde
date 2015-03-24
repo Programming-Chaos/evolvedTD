@@ -30,7 +30,6 @@ Trait compatibility = new Trait(10);
 Trait reproductionEnergy = new Trait(10);
 
 // Environment interaction
-Trait forwardForce = new Trait(10);
 Trait turningForce = new Trait(10);
 Trait foodTrait = new Trait(10);
 Trait creatureTrait = new Trait(10);
@@ -241,8 +240,8 @@ class Genome {
       }
     }
 
-    Chromosome(Chromosome chromosome) {
-      genes = chromosome.genes.copy();
+    Chromosome() {
+     genes = new FloatList();
     }
 
     FloatList list(Trait trait) {
@@ -271,8 +270,8 @@ class Genome {
     ArrayList<Chromosome> gametes = new ArrayList<Chromosome>(2);
 
     // recombine
-    Chromosome x = new Chromosome(nGenes);
-    Chromosome y = new Chromosome(nGenes);
+    Chromosome x = new Chromosome();
+    Chromosome y = new Chromosome();
 
     int start = int(random(nGenes));
     int num = int(random(nGenes - start));
