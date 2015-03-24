@@ -169,9 +169,8 @@ class population {
       
       // add random creatures if no gametes
       if (gametes.size() < 2) {
-        childrenNew++;
-        generation.add(new creature(new Genome(), 20000));
-        continue;
+        println("ERROR: Not enough gametes");
+        break;
       }
       
       Gamete g1, g2;
