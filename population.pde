@@ -136,6 +136,10 @@ class population {
     ArrayList<creature> generation = new ArrayList<creature>();
     
     for (creature c : swarm) {
+      // Kill the bodies of any creatures that are still alive
+      if (c.alive)
+        c.killBody();
+
       // Add all of a creatures gametes to the gamete pool
       for(Gamete g : c.gameteStack) {
         gametes.add(g);
