@@ -298,4 +298,36 @@ class Genome {
       chromosome.mutate();
     return gametes;
   }
+
+  boolean testSuccess = true;
+
+  void testFailed(String s) {
+    println("FAIL: " + s);
+    testSuccess = false;
+  }
+
+  void testChromosome() {
+    // test constructors
+    Chromosome defaultChromosome = new Chromosome();
+
+    if (defaultChromosome.genes.size() != 0)
+      testFailed("default chromosome does not have 0 genes");
+
+    Chromosome nChromosome = new Chromosome(nGenes);
+    if (nChromosome.genes.size() != nGenes)
+      testFailed("n chromosome does not have nGenes genes");
+
+    // test list method
+    if (nChromosome.list(control).size() != 10)
+      testFailed("control trait in nChromosome does not have 10 genes");
+
+    // test sum and avg method
+    if (nChromosome.avg(control) != (nChromosome.sum(control) / control.genes))
+      testFailed("controlt trait in nChromosome avg does not equal sum/traits");
+
+    if (testSuccess)
+      println("Genome.Chromosome tests PASSED :)");
+    else
+      println("Genome.Chromosome tests FAILED :(");
+  }
 }
