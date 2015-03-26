@@ -119,6 +119,10 @@ void draw() {
     }
   }
 
+  if (display) {
+    the_pop.display(); // redisplay the creatures
+  }
+
   the_player.update();
   if (display) {
     the_player.display(); // display the interface for the player
@@ -138,10 +142,6 @@ void draw() {
   if (the_pop.get_alive() == 0) { // if after updating the population is empty, go ahead and start the next generation
     nextgeneration(); // call the function to set the next generation
     timesteps = 0;
-  }
-
-  if (display) {
-    the_pop.display(); // redisplay the creatures
   }
 
   // If state is running then step through time!
