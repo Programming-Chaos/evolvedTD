@@ -739,6 +739,7 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
+
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
@@ -784,7 +785,7 @@ class creature {
 
     senses.Draw_Sense(pos.x, pos.y, body.getAngle());
 
-    pushMatrix(); // Draws a "health" bar above the creature
+    /*pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
     stroke(0);
@@ -796,7 +797,7 @@ class creature {
     rect(0, -1 * offset, 0.1 * health, 3);
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
-    popMatrix();
+    popMatrix();*/
   }
 
   // This function makes a Box2D body for the creature and adds it to the box2d world

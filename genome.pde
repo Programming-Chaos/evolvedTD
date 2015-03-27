@@ -232,7 +232,8 @@ class Genome {
 
   class Chromosome {
     FloatList genes;
-
+    String inherit = "";
+    
     Chromosome(int n) {
       genes = new FloatList(n);
       for (int i = 0; i < n; i++) {
@@ -260,7 +261,11 @@ class Genome {
     float avg(Trait trait) {
       return sum(trait) / trait.genes;
     }
-
+    void Lineage(String s) {
+      xChromosome.inherit += s;
+      yChromosome.inherit += s;
+    }
+    
     void mutate() {
       for (int i = 0; i < genes.size(); i++) {
         // mutate only a select number of random genes
@@ -278,6 +283,9 @@ class Genome {
     Chromosome x = new Chromosome();
     Chromosome y = new Chromosome();
 
+    x.inherit = xChromosome.inherit;
+    y.inherit = yChromosome.inherit;
+    
     int start = int(random(nGenes));
     int num = int(random(nGenes - start));
 

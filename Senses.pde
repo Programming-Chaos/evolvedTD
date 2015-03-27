@@ -249,7 +249,6 @@ class Sensory_Systems {
     sensorX = round((sensorX) / 20) * 20;
     sensorY = round((sensorY) / 20) * 20;
     line(x, y, sensorX, sensorY);
-
   }
 
   /*This is the constructor for the pain*/
