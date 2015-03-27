@@ -13,6 +13,8 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
+Boolean TREE = false;
+
 int cameraX, cameraY, cameraZ; // location of the camera
 int worldWidth = 2500;         // size in pixels of the world
 int worldHeight = 2500;
@@ -46,27 +48,29 @@ AudioPlayer gunshot;
 
 int lasttime;                 // used to track the time between iterations to measure the true framerate
 void display_ceature_for_picture(creature c) {
-  int pre_camera_z = cameraZ;
-  float x, y, a;
-  cameraZ = 120;
-  
-  Vec2 pos2 = box2d.getBodyPixelCoord(c.body);
-  x = pos2.x;
-  y = pos2.y;
-  a = c.body.getAngle();
-  
-  pos2.x = 0;
-  pos2.y = 0;
-  c.body.setTransform(box2d.coordPixelsToWorld(pos2), PI/2);
-  camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); 
-  background(255);
-  c.display();
-  saveFrame("c" + str(c.num) + ".png");
-  pos2.x = x;
-  pos2.y = y;
-  c.body.setTransform(box2d.coordPixelsToWorld(pos2), a);
-  cameraZ = pre_camera_z;
-  camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); 
+  if (TREE) {
+    int pre_camera_z = cameraZ;
+    float x, y, a;
+    cameraZ = 120;
+    
+    Vec2 pos2 = box2d.getBodyPixelCoord(c.body);
+    x = pos2.x;
+    y = pos2.y;
+    a = c.body.getAngle();
+    
+    pos2.x = 0;
+    pos2.y = 0;
+    c.body.setTransform(box2d.coordPixelsToWorld(pos2), PI/2);
+    camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); 
+    background(255);
+    c.display();
+    saveFrame("c" + str(c.num) + ".png");
+    pos2.x = x;
+    pos2.y = y;
+    c.body.setTransform(box2d.coordPixelsToWorld(pos2), a);
+    cameraZ = pre_camera_z;
+    camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); 
+   }
 }
 void setup() {
   //size(850,850,P3D);  // default window size

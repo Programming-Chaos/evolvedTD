@@ -111,7 +111,7 @@ class Sensory_Systems {
 
     Set_Pain(pain, 0, abs((float)Utilities.Sigmoid(g.sum(painDampeningTrait), 5, 1)), abs((float)Utilities.Sigmoid(g.sum(painThresholdTrait), 5, 100))); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
 
-    num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 38));
+    num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 20))*2;
 
     apend_angles = new float[num_feelers];
     apend_length = new float[num_feelers];
@@ -130,27 +130,46 @@ class Sensory_Systems {
 
   /*Determines what feelers can do and the lengths and angles of each*/
   void Set_Feeler(Genome g) {
-    for (int i = 0; i < num_feelers; i++) {
-
-      apend_angles[i]= abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, 2*PI));
-      apend_length[i] = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 100));
+    for (int i = 0; i < num_feelers; i=i+2) {
+      float angle_1 = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, PI) - HALF_PI );
+      float angle_2;
+      
+      if (angle_1 < 0) {
+        angle_2 = PI + angle_1;
+      } else {
+        angle_2 = PI - angle_1;
+      }
+      println("angle 1: " + str(angle_1) + "\nangle 2: " + str(angle_2));
+      apend_angles[i] = angle_1;
+      apend_angles[i+1] = angle_2; 
+ 
+      float len = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 1000));
+      apend_length[i] = len;
+      apend_length[i+1] = len;
+      
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).pressure), 5, 1) > 0) {
         feeler_pressure[i] = true;
+        feeler_pressure[i+1] = true;
       } else {
-        feeler_pressure[i] = true;
+        feeler_pressure[i] = false;
+        feeler_pressure[i+1] = false;
       }
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).taste), 5, 1) > 0) {
         feeler_taste[i] = true;
+        feeler_taste[i+1] = true;
       } else {
         feeler_taste[i] = false;
+        feeler_taste[i+1] = false;
       }
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).scent), 5, 1) > 0) {
         feeler_scent[i] = true;
+        feeler_scent[i+1] = true;
       } else {
         feeler_scent[i] = false;
+        feeler_scent[i+1] = false;
       }
     }
   }

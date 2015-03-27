@@ -30,7 +30,6 @@ Trait compatibility = new Trait(10);
 Trait reproductionEnergy = new Trait(10);
 
 // Environment interaction
-Trait forwardForce = new Trait(10);
 Trait turningForce = new Trait(10);
 Trait foodTrait = new Trait(10);
 Trait creatureTrait = new Trait(10);
@@ -243,11 +242,7 @@ class Genome {
     }
 
     Chromosome() {
-     genes = new FloatList(); 
-    }
-    
-    Chromosome(Chromosome chromosome) {
-      genes = chromosome.genes.copy();
+     genes = new FloatList();
     }
 
     FloatList list(Trait trait) {
@@ -310,5 +305,37 @@ class Genome {
     for (Chromosome chromosome : gametes)
       chromosome.mutate();
     return gametes;
+  }
+
+  boolean testSuccess = true;
+
+  void testFailed(String s) {
+    println("FAIL: " + s);
+    testSuccess = false;
+  }
+
+  void testChromosome() {
+    // test constructors
+    Chromosome defaultChromosome = new Chromosome();
+
+    if (defaultChromosome.genes.size() != 0)
+      testFailed("default chromosome does not have 0 genes");
+
+    Chromosome nChromosome = new Chromosome(nGenes);
+    if (nChromosome.genes.size() != nGenes)
+      testFailed("n chromosome does not have nGenes genes");
+
+    // test list method
+    if (nChromosome.list(control).size() != 10)
+      testFailed("control trait in nChromosome does not have 10 genes");
+
+    // test sum and avg method
+    if (nChromosome.avg(control) != (nChromosome.sum(control) / control.genes))
+      testFailed("controlt trait in nChromosome avg does not equal sum/traits");
+
+    if (testSuccess)
+      println("Genome.Chromosome tests PASSED :)");
+    else
+      println("Genome.Chromosome tests FAILED :(");
   }
 }

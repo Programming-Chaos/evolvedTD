@@ -1,6 +1,7 @@
 /* This class holds a population of creatures in an arraylist called swarm.
  * Each generation/wave the whole population attacks.
  */
+import java.util.Collections;
 
 class population {
   ArrayList<creature> swarm;
@@ -133,75 +134,120 @@ class population {
     return int(fitness/1000);
   }
 
-  // orders gametes by spawn time
-  void OrderGametes(ArrayList<Gamete> gList) {
-    for (int i=0; i < gList.size()-1; i++) {
-      Gamete g1, g2;
-      g1 = gList.get(i);
-      g2 = gList.get(i+1);
-      if (g1.getTime() > g2.getTime()) { // swap
-        gList.set(i+1, g1);
-        gList.set(i, g2);
-        i = 0; // start back at the beginning.
-      }
-    }
-  }
-
   // creates the next generation
   void next_generation() {
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
     
     for (creature c : swarm) {
+      // Kill the bodies of any creatures that are still alive
+      if (c.alive)
+        c.killBody();
+
       // Add all of a creatures gametes to the gamete pool
       for(Gamete g : c.gameteStack) {
         gametes.add(g);
       }
     }
     // Place gametes in order of time.
-    OrderGametes(gametes);
+    Collections.sort(gametes, new GameteComparator());
     
     int childrenBred = 0;
     int childrenNew = 0;
+    int multiplier = 0;
+    int range;
+    
     while (generation.size() < POP_SIZE) {
+      // increase search range with each pass thru.
+      range = multiplier++ * 5;
+      //TODO: decrease success chance when range is increased.
+      
       // add random creatures if no gametes
       if (gametes.size() < 2) {
         childrenNew++;
         generation.add(new creature(new Genome(), 20000));
         continue;
       }
-
-      // Get the next gamete (priority time placement)
-      Gamete g1 = gametes.remove(0);
-      IntList proxGametes = new IntList();
-
-      // Get gametes in widening range search of our selected gamete
-      int multiplier = 0;
-      while (proxGametes.size() < 1) {
-        int range = multiplier++ * 5;
-        for (int i = 0; i < gametes.size(); i++) {
-          Gamete g2 = gametes.get(i);
+      
+      Gamete g1, g2;
+      int size = gametes.size();
+      // i is first gamete j is it's chosen mate
+      for (int i=0; i < size - 1; i++) {
+        g1 = gametes.get(i);
+        for (int j = i+1; j < size; j++) {
+          g2 = gametes.get(j);
+          
           if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
               g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
-            // store index of nearby gamete
-            proxGametes.append(i);
+            // Remove gametes from list and mate
+            gametes.remove(j); j--;
+            gametes.remove(i); i--;
+            size = gametes.size();
+            
+            // Gamete coordinates
+            int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
+            int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
+            
+            // Check coordinates for other creatures spawned in this tile.
+            for (int c=0; c < generation.size(); c++) {
+              Vec2 posCheck = box2d.getBodyPixelCoord(generation.get(c).body);
+              int xCheck = (int)(posCheck.x / cellWidth);
+              int yCheck = (int)(posCheck.y / cellHeight);
+              
+              // while creature already occupies tile 
+              // (3 is the safety range to prevent stacking)
+              while ((px <= xCheck + 3) && (px >= xCheck - 3) && 
+                     (py <= yCheck + 3) && (py >= yCheck - 3)) {
+                // Reset c.  Need to make it thru entire list without flagging this.
+                c = -1; //c++ == 0
+                // Move new creature in a random direction
+                switch ((int)random(8)) {
+                  case 0: //North
+                    py--;
+                    break;
+                  case 1: //NorthEast
+                    py--;
+                    px++;
+                    break;
+                  case 2: //East
+                    px++;
+                    break;
+                  case 3: //SouthEast
+                    py++;
+                    px++;
+                    break;
+                  case 4: //South
+                    py++;
+                    break;
+                  case 5: //SouthWest
+                    py++;
+                    px--;
+                    break;
+                  case 6: //West
+                    px--;
+                    break;
+                  case 7: //NorthWest
+                    py--;
+                    px++;
+                    break;
+                  default: break;
+                }
+                
+                // Make sure position is still in bounds
+                if (px >= worldWidth   / cellWidth)  px = worldWidth / cellWidth - 5;
+                if (px <= 0)                         px = 5;
+                if (py >= worldHeight  / cellHeight) py = worldHeight / cellHeight - 5;
+                if (py <= 0)                         py = 5;
+              }
+            }
+            Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
+      
+            childrenBred++;
+            generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+                                        10000 + g1.energy + g2.energy, pos));
+            break;
           }
         }
-      }
-
-      if (proxGametes.size() > 0) {
-        // get first gamete layed in range
-        Gamete g2 = gametes.remove(proxGametes.get(0));
-        // get the point between the two gametes.
-        float angle = random(0, 2 * PI);
-        int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
-        int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
-        Vec2 pos = new Vec2(px * cellWidth * sin(angle),
-                            py * cellHeight * cos(angle)) ;
-        
-        childrenBred++;
-        generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                    10000 + g1.energy + g2.energy));
       }
     }
     //println("made " + childrenBred + " and needed " + childrenNew + " more");
