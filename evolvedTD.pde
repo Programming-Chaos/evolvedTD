@@ -13,6 +13,8 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
+Boolean TREE = true;
+
 int cameraX, cameraY, cameraZ; // location of the camera
 int worldWidth = 2500;         // size in pixels of the world
 int worldHeight = 2500;
@@ -41,11 +43,35 @@ Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
 Minim minim;
-AudioPlayer gunshot, gunshotalt;
+AudioPlayer gunshot;
 //AudioPlayer thunder;
 
-int lasttime;                  // used to track the time between iterations to measure the true framerate
-
+int lasttime;                 // used to track the time between iterations to measure the true framerate
+void display_ceature_for_picture(creature c) {
+  if (TREE) {
+    int pre_camera_z = cameraZ;
+    float x, y, a;
+    cameraZ = 120;
+    
+    Vec2 pos2 = box2d.getBodyPixelCoord(c.body);
+    x = pos2.x;
+    y = pos2.y;
+    a = c.body.getAngle();
+    
+    pos2.x = 0;
+    pos2.y = 0;
+    c.body.setTransform(box2d.coordPixelsToWorld(pos2), PI/2);
+    camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); 
+    background(255);
+    c.display();
+    saveFrame("c" + str(c.num) + ".png");
+    pos2.x = x;
+    pos2.y = y;
+    c.body.setTransform(box2d.coordPixelsToWorld(pos2), a);
+    cameraZ = pre_camera_z;
+    camera(cameraX, cameraY, cameraZ, cameraX, cameraY, 0, 0, 1, 0); 
+   }
+}
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
@@ -56,8 +82,7 @@ void setup() {
   the_player.addtower(the_tower);
 
   minim = new Minim(this);
-  gunshot = minim.loadFile("assets/railgunfire01long.mp3");
-  gunshotalt = minim.loadFile("assets/railgunfire01slow_01.mp3");
+  gunshot = minim.loadFile("assets/Cannon.mp3");
   //thunder = minim.loadFile("assets/thunder.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
@@ -67,7 +92,6 @@ void setup() {
   cameraY = 0;
   cameraZ = 2150;
   the_pop = new population();
-
   place_food();                  // calls the place food function below
   rocks = new ArrayList<rock>();
   for (int i = 0; i < 10; i++) { // creates 10 random rocks,
@@ -80,12 +104,10 @@ void setup() {
   environ = new environment();   // must occur after creatures, etc. created
   lasttime = 0;
 
-  // Run unit tests
-  Genome testGenome = new Genome();
-  testGenome.testChromosome();
 }
-
+int last_generation = -1;
 void draw() {
+  
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
 
@@ -155,6 +177,17 @@ void draw() {
   if (state == State.MENU) {
     display_controls();
   }
+  if (last_generation != generation) {
+    saveFrame(str(generation) + ".png");
+    println("#G\t" + str(generation));
+    last_generation = generation;
+    for (creature c: the_pop.swarm) {
+      Vec2 tmp = box2d.getBodyPixelCoord(c.body);
+     println("#" + str(c.num) + "\t" + str(tmp.x) + "\t" + str(tmp.y));
+     display_ceature_for_picture(c);
+    }
+  }
+  
 }  // end of draw loop
 
 void keyPressed() { // if a key is pressed this function is called
@@ -383,6 +416,22 @@ void place_food() { // done once at the beginning of the game
 void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
+  for (creature c : the_pop.swarm) {
+      if (c.genome.xChromosome.inherit == "") {
+        c.genome.xChromosome.inherit += str(c.num);
+      } else {
+        c.genome.xChromosome.inherit += "." + str(c.num);
+      }
+      if (c.genome.yChromosome.inherit == "") {
+        c.genome.yChromosome.inherit += str(c.num); 
+      } else {
+        c.genome.yChromosome.inherit += "." + str(c.num);
+      }
+ 
+      println(c.genome.xChromosome.inherit);
+      println(c.genome.yChromosome.inherit);
+  }
+  
   add_food(); // add some more food
   the_tower.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in

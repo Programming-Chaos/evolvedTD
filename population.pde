@@ -16,6 +16,10 @@ class population {
     for (int i = 0; i < POP_SIZE; i++) {
       a = random(0, 2*PI);
       creature c = new creature(0.45*worldWidth*sin(a),0.45*worldWidth*cos(a),a);
+      c.genome.xChromosome.inherit = str(c.num);
+      c.genome.yChromosome.inherit = str(c.num);
+      println(c.genome.xChromosome.inherit);
+      println(c.genome.yChromosome.inherit);
       swarm.add(c);
     }
   }

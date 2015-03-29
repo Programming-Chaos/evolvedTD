@@ -196,8 +196,8 @@ class tower {
     }
     else{
       if (playSound) {
-        gunshotalt.rewind();
-        gunshotalt.play();
+        //gunshotalt.rewind();
+        //gunshotalt.play();
       }
     }
   }

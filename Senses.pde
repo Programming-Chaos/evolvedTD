@@ -6,7 +6,7 @@
    Additionally we implemented taste, pain, speed, mass, and energy detection
 */
 class Sensory_Systems {
-  float[] brain_array; /* TODO: reconcile with brain.pde? */
+  float []brain_array = new float[1000];
 
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
@@ -67,23 +67,21 @@ class Sensory_Systems {
   boolean energy = false;
   boolean canPain = false;
   
-  float[] feeler_angles;
-  float[] feeler_length;
-  float[] pressure_side_ids;
+  float [] apend_angles;
+  float [] apend_length;
+  float [] pressure_side_ids;
 
-  boolean[] feeler_pressure;
-  boolean[] feeler_taste;
-  boolean[] feeler_scent;
+  boolean [] feeler_pressure;
+  boolean [] feeler_taste;
+  boolean [] feeler_scent;
 
   Sensory_Systems(Genome g) {
-    brain_array = new float[Brain.INPUTS];
-    for (int c = 0; c < Brain.INPUTS; c++)
-      brain_array[c] = 0;
+    brain_array = new float[1000];
     
     double can_feel_pain =  Utilities.Sigmoid(g.sum(painTrait), 5, 100);
 
     if (can_feel_pain > 0) {
-      canPain = true;
+      canPain = false;
     }
 
     double canMass = Utilities.Sigmoid(g.sum(massTrait), 5, 1);
@@ -108,15 +106,15 @@ class Sensory_Systems {
 
     double canEnergy = Utilities.Sigmoid(g.sum(energyTrait), 5, 1);
     if (canEnergy > 0) {
-      energy = true;
+      energy = false;
     }
 
     Set_Pain(pain, 0, abs((float)Utilities.Sigmoid(g.sum(painDampeningTrait), 5, 1)), abs((float)Utilities.Sigmoid(g.sum(painThresholdTrait), 5, 100))); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
 
-    num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 38));
+    num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 20))*2;
 
-    feeler_angles = new float[num_feelers];
-    feeler_length = new float[num_feelers];
+    apend_angles = new float[num_feelers];
+    apend_length = new float[num_feelers];
     pressure_side_ids = new float[40];
 
     feeler_pressure = new boolean[num_feelers];
@@ -126,29 +124,52 @@ class Sensory_Systems {
     Set_Feeler(g);
   }
 
-  /* Determines what feelers can do and the lengths and angles of each */
-  void Set_Feeler(Genome g) {
-    for (int i = 0; i < num_feelers; i++) {
+  /*For the brain*/
+  float [] Get_Brain_Array() { return brain_array; };
 
-      feeler_angles[i]= abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, 2*PI));
-      feeler_length[i] = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 100));
+
+  /*Determines what feelers can do and the lengths and angles of each*/
+  void Set_Feeler(Genome g) {
+    for (int i = 0; i < num_feelers; i=i+2) {
+      float angle_1 = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, PI) - HALF_PI );
+      float angle_2;
+      
+      if (angle_1 < 0) {
+        angle_2 = PI + angle_1;
+      } else {
+        angle_2 = PI - angle_1;
+      }
+  
+      apend_angles[i] = angle_1;
+      apend_angles[i+1] = angle_2; 
+ 
+      float len = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 1000));
+      apend_length[i] = len;
+      apend_length[i+1] = len;
+      
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).pressure), 5, 1) > 0) {
         feeler_pressure[i] = true;
+        feeler_pressure[i+1] = true;
       } else {
-        feeler_pressure[i] = true;
+        feeler_pressure[i] = false;
+        feeler_pressure[i+1] = false;
       }
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).taste), 5, 1) > 0) {
         feeler_taste[i] = true;
+        feeler_taste[i+1] = true;
       } else {
         feeler_taste[i] = false;
+        feeler_taste[i+1] = false;
       }
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).scent), 5, 1) > 0) {
         feeler_scent[i] = true;
+        feeler_scent[i+1] = true;
       } else {
         feeler_scent[i] = false;
+        feeler_scent[i+1] = false;
       }
     }
   }
@@ -156,12 +177,13 @@ class Sensory_Systems {
   /*Goes through each feelers and updates the senses it can interpret*/
   void Update_Senses(float x, float y, float angle) {
     for (int i = 0; i < num_feelers;  i++) {
-      Update_Sense(x, y, angle, feeler_angles[i], feeler_length[i], i);
+      Update_Sense(x, y, angle, apend_angles[i], apend_length[i], i);
     }
   }
 
   /*Update feeler senses*/
   void Update_Sense(float x, float y, float angle, float evolved_angle, float evolved_length, int i) {
+
     /*Calculate end location of feelers
      */
     float sensorX,sensorY;
@@ -184,47 +206,56 @@ class Sensory_Systems {
 
     /*If feeler can taste*/
     if (feeler_taste[i]) {
-      int[] tmp_taste = environ.checkForTaste(sensorX, sensorY);
+      int []tmp_taste = environ.checkForTaste(sensorX, sensorY);
       if (tmp_taste != null) {
-        for (int j = 0; j < 5; j++) {
-          brain_array[b_taste_feelers + i + j] = tmp_taste[j];
-        }
+        brain_array[b_taste_feelers+i] = tmp_taste[0];
+        brain_array[b_taste_feelers+i+1] = tmp_taste[1];
+        brain_array[b_taste_feelers+i+2] = tmp_taste[2];
+        brain_array[b_taste_feelers+i+3] = tmp_taste[3];
+        brain_array[b_taste_feelers+i+4] = tmp_taste[4];
       } else {
-        for (int j = 0; j < 5; j++) {
-          brain_array[b_taste_feelers + i + j] = 0;
-        }
+        brain_array[b_taste_feelers+i] = 0;
+        brain_array[b_taste_feelers+i+1] = 0;
+        brain_array[b_taste_feelers+i+2] = 0;
+        brain_array[b_taste_feelers+i+3] = 0;
+        brain_array[b_taste_feelers+i+4] = 0;        
       }
     }
     /*If feeler can pick up smell*/
     if (feeler_scent[i]) {
-      brain_array[b_scent_feelers + i] = environ.getScent(sensorX, sensorY);
+      brain_array[b_scent_feelers+i] = environ.getScent(sensorX, sensorY);
     }
+
   }
 
  /*Sets taste once creature comes in contact with food*/
   void Set_Taste(food f) {
     if (taste) {
-      int[] tmp_taste = f.getTaste();
-      for (int i = 0; i < 5; i++) {
-        brain_array[b_taste + i] = tmp_taste[i];
-      }
+      int []tmp_taste = f.getTaste();
+      brain_array[b_taste] = tmp_taste[0];
+      brain_array[b_taste+1] = tmp_taste[1];
+      brain_array[b_taste+2] = tmp_taste[2];
+      brain_array[b_taste+3] = tmp_taste[3];
+      brain_array[b_taste+4] = tmp_taste[4];
     }
   }
-
   /*Removes taste from eating*/
   void Remove_Taste() {
     if (taste) {
-      for (int i = 0; i < 5; i++) {
-        brain_array[b_taste + i] = 0;
-      }
+      brain_array[b_taste] = 0;
+      brain_array[b_taste+1] = 0;
+      brain_array[b_taste+2] = 0;
+      brain_array[b_taste+3] = 0;
+      brain_array[b_taste+4] = 0;
     }
+
   }
 
   /*This functions calls Draw_Feeler
   for each feeler the creature has*/
   void Draw_Sense(float x, float y, float angle) {
     for (int i = 0; i < num_feelers;  i++) {
-      Draw_Feeler(x, y, angle, feeler_angles[i], feeler_length[i]);
+      Draw_Feeler(x, y, angle, apend_angles[i], apend_length[i]);
     }
   }
 
@@ -304,8 +335,10 @@ class Sensory_Systems {
       i++;
     }
 
+
     pressure_side_ids[i] = ID;
     brain_array[b_pressure_side + i] = angle;
+
   }
 
   void Remove_Side_Pressure(int ID) {
