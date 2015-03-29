@@ -81,7 +81,7 @@ class Sensory_Systems {
     double can_feel_pain =  Utilities.Sigmoid(g.sum(painTrait), 5, 100);
 
     if (can_feel_pain > 0) {
-      canPain = true;
+      canPain = false;
     }
 
     double canMass = Utilities.Sigmoid(g.sum(massTrait), 5, 1);
@@ -106,7 +106,7 @@ class Sensory_Systems {
 
     double canEnergy = Utilities.Sigmoid(g.sum(energyTrait), 5, 1);
     if (canEnergy > 0) {
-      energy = true;
+      energy = false;
     }
 
     Set_Pain(pain, 0, abs((float)Utilities.Sigmoid(g.sum(painDampeningTrait), 5, 1)), abs((float)Utilities.Sigmoid(g.sum(painThresholdTrait), 5, 100))); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
@@ -139,7 +139,7 @@ class Sensory_Systems {
       } else {
         angle_2 = PI - angle_1;
       }
-      println("angle 1: " + str(angle_1) + "\nangle 2: " + str(angle_2));
+  
       apend_angles[i] = angle_1;
       apend_angles[i+1] = angle_2; 
  

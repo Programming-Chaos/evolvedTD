@@ -1,3 +1,6 @@
+
+import java.util.Comparator;
+
 static int creature_count = 0;
 
 class Gamete {
@@ -19,6 +22,14 @@ class Gamete {
   int getTime()                   { return time; }
   int getEnergy()                 { return energy; }
   Genome.Chromosome getGamete()   { return gamete; }
+}
+
+
+class GameteComparator implements Comparator<Gamete> {
+  public int compare(Gamete x, Gamete y) {
+    // return the Java comparison of two integers
+    return Integer.valueOf(x.getTime()).compareTo(Integer.valueOf(y.getTime()));
+  }
 }
 
 class creature {
@@ -489,8 +500,9 @@ class creature {
   // Forward force to accelerate the creature, evolved, but
   // (currently) doesn't change anytime durning a wave
   private float getForce() {
+    return 0;
     // -infinity to infinity linear
-    return (500 + 10 * genome.sum(forwardForce));
+    //return (500 + 10 * genome.sum(forwardForce));
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
@@ -654,7 +666,7 @@ class creature {
     senses.Update_Senses(pos2.x, pos2.y, a);
 
     calcBehavior();
-    torque = current_actions[0]*0.01;
+    torque = current_actions[0]*0.1;
     f = 1+current_actions[1];
 
     body.applyTorque((float)torque);
@@ -752,7 +764,7 @@ class creature {
     pushMatrix();  // Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    stroke(0);   // Draw polygons with edges
+    //stroke(0);   // Draw polygons with edges
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
@@ -792,7 +804,7 @@ class creature {
     // get the largest dimension of the creature
     int offset = (int)max(getWidth(), getLength());
     rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it
-    noStroke();
+    //noStroke();
     fill(0, 0, 255);
     rect(0, -1 * offset, 0.1 * health, 3);
     //Text to display the round counter of each creature for debug purposes

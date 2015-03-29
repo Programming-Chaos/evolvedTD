@@ -13,7 +13,7 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
-Boolean TREE = false;
+Boolean TREE = true;
 
 int cameraX, cameraY, cameraZ; // location of the camera
 int worldWidth = 2500;         // size in pixels of the world
