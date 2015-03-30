@@ -111,8 +111,6 @@ class tile {
   void setReproScent(float s) { reproScent = s;}
   void setPainScent(float s) { painScent = s;}
 
-
-
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
   void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; }
@@ -162,23 +160,9 @@ class environment {
     //println(temp);
     rockFrequency = 0;
 
-    // Establish colors for the environment
-    liquid = color((int)random(255), (int)random(255), (int)random(255)); 
-    rock = color((int)random(255), (int)random(255), (int)random(255)); 
-    land = color((int)random(225), (int)random(225), (int)random(255)); 
-    int r = (land >> 16) & 255;
-    int b = (land >> 8) & 255;
-    int g = (land) & 255;
-        
-    gravityMap = new gravityVector[environHeight][environWidth];
-    tileMap = new tile[environHeight][environWidth];
-    for (int i = 0; i < environHeight; i++) {
-      for (int j = 0; j < environWidth; j++) {
-        tileMap[i][j] = new tile();
-        tileMap[i][j].colors = color(r + random(20), b + random(20), g + random(30));
-        gravityMap[i][j] = new gravityVector();
-      }
-    }
+    isRaining = false;
+    // Establish world type
+    decideWorldType();
 
     generateAltitudeMap();
     //generateWaterALT((float)random(0, 70) / 100.0f);
@@ -188,6 +172,7 @@ class environment {
     tempInfluence();
     makeImage();
 
+    /*
     int chance = initializeRain();
     if(chance == 1) {
       isRaining = false;
@@ -196,6 +181,8 @@ class environment {
       isRaining = true;
       waitRainOn = minute();
     }
+    */
+    
     // makeImageFood();
     // updateEnviron();
   }
@@ -668,11 +655,16 @@ class environment {
     }
     //display_water();
 
-
     // checks to see if it can rain or not
+    if(isRaining == true) {
+      rainfall();
+    }
+    
+    /*
     if(timesteps == 0)
       timeStepTemp = 0;
     updateWaterReserve();
+        
     if(!isRaining)
       chanceOfRain();
 
@@ -680,6 +672,8 @@ class environment {
       rainfall();
       whileRaining();
     }
+    */
+    
     timeStepTemp = timesteps;
   }
 
@@ -759,6 +753,7 @@ class environment {
   /**** WEATHER ****/
 
   // updates the amount of water in the water reserve
+  /*
   void updateWaterReserve() {
     if(isRaining) {
       if(waterReserve <= 0) {}
@@ -794,10 +789,11 @@ class environment {
     if(isRaining == false)
       waitRainOff = minute();
   }
+  */
 
   // Randomly decides if lightning should strike
   void chanceOfLightning() {
-    int chance = int(random(1,30));
+    int chance = int(random(1,700));
     if (chance == 1) {
       lightning();
     }
@@ -807,23 +803,27 @@ class environment {
   void rainfall() {
     float x, y;
     fill(0, 0, 255, 50);
-    rect((-worldWidth), (-worldHeight), (worldWidth*2), (worldHeight*2));
+    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
     for(int i = 0; i < 600; i++) {
       x = random(-worldWidth, worldWidth);
       y = random(-worldHeight, worldHeight);
       stroke(0, 0, 200, 95);
       line(x, y, x, y+30);
     }
+    chanceOfLightning();
   }
 
   // Draws lightning and kills a creature if it is on the tile
   void lightning() {
-    int randX = int(random(-worldWidth, worldWidth));
-    int randY = int(random(-worldHeight, worldHeight));
+    int randX = int(random((-worldWidth / 2), worldWidth / 2));
+    int randY = int(random((-worldHeight / 2), worldHeight / 2));
 
     int xOffset = randX;
     int yOffset = -worldHeight;
     int yFinal = randY;
+
+    fill(225, 225, 225, 125);
+    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
 
     noFill();
     strokeWeight(5);
@@ -855,5 +855,61 @@ class environment {
     //thunder.rewind();
     //thunder.play();
   }
+  
+  void decideWorldType() {
+    int decision = int(random(1, 5));
+    int r = 0, b = 0, g = 0, randOffset = 0;
+    switch(decision) {
+      case 1:
+        // temperate
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
+        break;
+      
+      case 2:
+        // dry - desert, minimal water
+        liquid = color(0, 0, 225);
+        rock = color(204, 102, 0);
+        land = color(240, 231, 100);
+        break;
+        
+      case 3:
+        // rainy - lots of water, always raining
+        isRaining = true;
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
+        break;
+        
+      case 4:
+        // cold - snowy
+        liquid = color(153, 204, 255);
+        rock = color(150, 150, 150);
+        land = color(245, 245, 245); 
+        break;
+        
+      case 5:
+        // radiation - ??
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
+        break;
+    }
+    
+    r = (land >> 16) & 255;
+    b = (land >> 8) & 255;
+    g = (land) & 255;
+    gravityMap = new gravityVector[environHeight][environWidth];
+    tileMap = new tile[environHeight][environWidth];
+    for (int i = 0; i < environHeight; i++) {
+      for (int j = 0; j < environWidth; j++) {
+        tileMap[i][j] = new tile();
+        randOffset = int(random(0, 20));
+        tileMap[i][j].colors = color(r + randOffset, b + randOffset, g + randOffset);
+        gravityMap[i][j] = new gravityVector();
+      }
+    }
+  }   
 }
 
