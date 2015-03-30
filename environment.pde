@@ -156,18 +156,13 @@ class environment {
     environWidth = worldWidth / cellWidth;
     environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
-    temp = (int)random(-40, 50); // celcius
-    //println(temp);
+    // temp = (int)random(-40, 50); // celcius
     rockFrequency = 0;
 
     isRaining = false;
     // Establish world type
     decideWorldType();
-
-    generateAltitudeMap();
     //generateWaterALT((float)random(0, 70) / 100.0f);
-    generateWaterALT(0.35f); // Just works out better this way
-    generateRockyALT(0.60f);
     spawnRocks();
     tempInfluence();
     makeImage();
@@ -858,42 +853,59 @@ class environment {
   
   void decideWorldType() {
     int decision = int(random(1, 5));
-    int r = 0, b = 0, g = 0, randOffset = 0;
+    //int decision = 2;
+    int r = 0, b = 0, g = 0, randOffset = 0, temp = 0;
+    float waterALT = 0.0, rockALT = 0.0;
     switch(decision) {
       case 1:
         // temperate
+        temp = int(random(20, 40));
         liquid = color(0, 0, 225);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
+        waterALT = 0.35f;
+        rockALT = 0.60f;
         break;
       
       case 2:
         // dry - desert, minimal water
-        liquid = color(0, 0, 225);
+        temp = int(random(40, 60));
+        liquid = color(30, 220, 200);
         rock = color(204, 102, 0);
         land = color(240, 231, 100);
+        waterALT = 0.20f;
+        rockALT = 0.60f;
         break;
         
       case 3:
         // rainy - lots of water, always raining
+        temp = int(random(20, 40));
         isRaining = true;
         liquid = color(0, 0, 225);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
+        waterALT = 0.45f;
+        rockALT = 0.60f;
         break;
         
       case 4:
         // cold - snowy
+        temp = int(random(-20, 0));
         liquid = color(153, 204, 255);
         rock = color(150, 150, 150);
         land = color(245, 245, 245); 
+        waterALT = 0.35f;
+        rockALT = 0.60f;
         break;
         
       case 5:
         // radiation - ??
+        temp = int(random(20, 40));
         liquid = color(0, 0, 225);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
+        waterALT = 0.35f;
+        rockALT = 0.60f;
         break;
     }
     
@@ -910,6 +922,9 @@ class environment {
         gravityMap[i][j] = new gravityVector();
       }
     }
+    generateAltitudeMap();
+    generateWaterALT(waterALT); // Just works out better this way
+    generateRockyALT(rockALT);
   }   
 }
 
