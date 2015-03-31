@@ -24,6 +24,12 @@ static final int MOUNTAIN = 2;
 
 int initializeRain() { return int(random(1,3)); }
 
+// Variables for Data Collection
+float rStrikes = 0;
+float rKills = 0;
+float tStrikes = 0;
+float tKills = 0;
+
 class tile {
   float altitude;
   int coloring;      // 0 to 255 value that describes tile visually
@@ -817,6 +823,9 @@ class environment {
     int chance = int(random(1,30));
     if (chance == 1) {
       lightning();
+      
+      // data collection
+      rStrikes++;
     }
   }
 
@@ -867,6 +876,9 @@ class environment {
     if(tileMap[tileX][tileY].hasCreature() != null) {
       creature c = tileMap[tileX][tileY].hasCreature();
       c.changeHealth(-1000);
+      
+      // data collection
+      rKills++;
     }
     strokeWeight(1);
     //thunder.rewind();

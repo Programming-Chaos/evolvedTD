@@ -359,6 +359,47 @@ class population {
     c_avgsRow.setFloat("   Avg Acceleration   ", acclAvg/count);
     c_avgsRow.setFloat("   Avg Max HP   ", hpAvg/count);
     
+  //TODO: Create loop thru for all towers
+      // Update the player stats data
+      TableRow pstatsRow = p_stats.addRow();
+      pstatsRow.setInt("   Gen   "                         , generation);
+      //pstatsRow.setInt("   Tower ID   "                    , );
+      //pstatsRow.setInt("   Round # of Shots   "            , );
+      //pstatsRow.setInt("   Total # of Shots   "            , );
+      //pstatsRow.setInt("   Round Successful Hits   "       , );
+      //pstatsRow.setInt("   Total Successful Hits   "       , );
+      //pstatsRow.setInt("   Round Rock Hits   "             , );
+      //pstatsRow.setInt("   Total Rock Hits   "             , );
+      //pstatsRow.setFloat("   Round Accuracy   "            , );
+      //pstatsRow.setFloat("   Overall Accuracy   "          , );
+      //pstatsRow.setFloat("   Round Avg RoF   "             , );
+      //pstatsRow.setFloat("   Overall Avg RoF   "           , );
+      //pstatsRow.setInt("   Round # of Kills   "            , );
+      //pstatsRow.setInt("   Total # of Kills   "            , );
+      //pstatsRow.setFloat("   Round Avg Shots per Kill   "  , );
+      //pstatsRow.setFloat("   Overall Avg Shots per Kill   ", );
+      
+    // Update the environment data
+    fConsumed += (fStart - foods.size());
+    tStrikes += rStrikes;
+    tKills += rKills;
+    TableRow envRow = env.addRow();
+    envRow.setInt("   Gen   "                       , generation);
+    envRow.setInt("   Food at Start   "             , fStart);
+    envRow.setInt("   Food at End   "               , foods.size());
+    envRow.setInt("   Food Consumed   "             , fStart - foods.size());
+    envRow.setInt("   Total Food   "                , fTotal);
+    envRow.setInt("   Total Consumed   "            , fConsumed);
+    envRow.setInt("   Round Lightning Strikes   "   , (int)rStrikes);
+    envRow.setInt("   Round Lightning Kills   "     , (int)rKills);
+    envRow.setFloat("   Round Lightning Accuracy   ",  rKills / rStrikes);
+    envRow.setInt("   Total Lightning Strikes   "   , (int)tStrikes);
+    envRow.setInt("   Total Lightning Kills   "     , (int)tKills);
+    envRow.setFloat("   Overall Lightning Accuracy   ", tKills / tStrikes);
+    //reset environment round variables.
+    rStrikes = 0;
+    rKills = 0;
+    
     writeTables(); 
   }
 }

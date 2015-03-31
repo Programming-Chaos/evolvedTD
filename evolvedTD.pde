@@ -46,7 +46,7 @@ AudioPlayer gunshot, gunshotalt;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
-// Tables for data retrieval
+// Tables for data collection
 Table c_traits;
 Table c_avgs;
 Table reproduction;
@@ -56,6 +56,11 @@ Table lifetime;
 Table p_impact;
 Table p_stats;
 Table env;
+
+// Variables for data collection
+int fStart;
+int fTotal = 0;
+int fConsumed = 0;
 
 void setup() {
   //size(850,850,P3D);  // default window size
@@ -392,6 +397,10 @@ void place_food() { // done once at the beginning of the game
                       (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
+  
+  // data collection
+  fStart = foods.size();
+  fTotal += 50;
 }
 
 void nextgeneration() {
@@ -411,6 +420,10 @@ void add_food() { // done after each wave/generation
     food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
+  
+  // data collection  
+  fStart = foods.size();
+  fTotal += 10;
 }
 
 void mousePressed() { // called if the (left) mouse button is pressed
