@@ -133,7 +133,9 @@ class population {
   // creates the next generation
   void next_generation() {
     // at end of wave, update data collection
-    updateData();
+    if (swarm.size() > 0) {
+      updateData();
+    }
     
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
@@ -279,12 +281,38 @@ class population {
       //c_traitsRow.setFloat("   Acceleration   ", );
       c_traitsRow.setFloat("   Max HP   ", c.maxHealth); 
       
+      // Update creature trait averages data
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
       denseAvg += c.getDensity();
       armorAvg += c.getArmor();
       velAvg   += c.maxMovementSpeed;
       hpAvg    += c.maxHealth;
+      
+      // Update creature reproduction data
+      TableRow repRow = reproduction.addRow();
+      repRow.setInt("   Gen   ", generation);
+      repRow.setInt("   Creature ID   ", c.num);
+      repRow.setInt("   Spawn X   ", (int)c.sPos.x / cellWidth);
+      repRow.setInt("   Spawn Y   ", (int)c.sPos.y / cellHeight);
+      repRow.setInt("   # of Gametes   ", c.gameteStack.size());
+      repRow.setFloat("   Gamete Cost   ", c.baseGameteCost + c.genome.avg(gameteCost));
+      repRow.setFloat("   Gamete Time   ", c.baseGameteTime + c.genome.avg(gameteTime));
+      
+      // Update the creature senses data
+      TableRow senseRow = sensing.addRow();
+      senseRow.setInt("   Gen   ", generation);
+      senseRow.setInt("   Creature ID   ", c.num);
+      //senseRow.setInt("   Creature Scent   ", );
+      //senseRow.setInt("   Creature Taste   ", );
+      
+      // Update the creature metabolism data
+      TableRow metabRow = metabolism.addRow();
+      metabRow.setInt("   Gen   ", generation);
+      metabRow.setInt("   Creature ID   ", c.num);
+      metabRow.setFloat("   Total Energy Space   ", c.total_energy_space);
+      //metabRow.setFloat("   Total Energy Consumed   ", );
+      metabRow.setFloat("   Locomotion Space   ", c.max_energy_locomotion);
       
       count ++;
     }

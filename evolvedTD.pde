@@ -506,7 +506,7 @@ void initTables() {
   reproduction.addColumn("   Spawn Y   ");
   reproduction.addColumn("   # of Gametes   ");
   reproduction.addColumn("   Gamete Cost   ");
-  reproduction.addColumn("   Spawn Time   ");
+  reproduction.addColumn("   Gamete Time   ");
   
   //sensing traits
   sensing = new Table();

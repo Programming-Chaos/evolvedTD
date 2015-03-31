@@ -78,6 +78,7 @@ class creature {
   color_network coloration;
 
   // Reproduction variables
+  Vec2 sPos; // Starting position of creature
   int baseGameteCost = 10;    // Gametes base energy cost
   int baseGameteTime = 100;   // Gametes base create time in screen updates.
   int baseGameteEnergy = 500; // Gametes base extra energy
@@ -87,6 +88,15 @@ class creature {
 
   ArrayList<Segment> segments = new ArrayList<Segment>(numSegments);
   ArrayList<Appendage> appendages = new ArrayList<Appendage>(numSegments);
+  
+  // Data Collection variables
+  float total_energy_space;
+  float total_energy_consumed = 0;
+  float locomotion_used = 0;
+  float reproduction_used = 0;
+  float reproduction_passed = 0;
+  float health_used = 0;
+  
 
   class Segment {
     int index;
@@ -297,6 +307,11 @@ class creature {
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     current_actions = new float[brain.OUTPUTS];
+    
+    // used for data collection
+    sPos = pos.clone();
+    total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
+    
 
     numSegments = getNumSegments();
     for (int i = 0; i < numSegments; i++) segments.add(new Segment(i));
