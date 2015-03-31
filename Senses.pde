@@ -8,8 +8,8 @@
 
 
 class Sensory_Systems {
-  float[] brain_array; /* TODO: reconcile with brain.pde? */
-  PImage mustache = loadImage("assets/mustache.png");
+  float[] brain_array; /* TODO: reconcile with brain.pde? */wwsxxww
+  
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
 
@@ -224,7 +224,6 @@ class Sensory_Systems {
     }
     /*If feeler can pick up smell*/
     if (feeler_scent[i]) {
-      println("Here\n");
       brain_array[b_scent_feelers + i] = environ.getScent(sensorX, sensorY);
     }
 
@@ -233,6 +232,7 @@ class Sensory_Systems {
   void Draw_Eyes(Vec2 eye, creature c) {
     int compress;
     
+    /*Compression when the creatures lose energy in locomotion*/
     if (random(1) < .05) {
        compress = 1;
     } else {
@@ -245,7 +245,7 @@ class Sensory_Systems {
     ellipse(-1 * eye.x, eye.y, num_feelers+5, compress);
     
     fill(255);
-    image(mustache, eye.x, eye.y);
+ 
     if (compress < 3) {
       ellipse(eye.x, eye.y - 1, 2, 2);
       ellipse(-1 * eye.x, eye.y - 1, 2, 2);
@@ -330,8 +330,8 @@ class Sensory_Systems {
     }
     if (energy) {
       brain_array[b_energy_reproduction] = c.energy_reproduction / c.max_energy_reproduction;
-      brain_array[b_energy_move] = c.energy_locomotion / c.max_energy_reproduction;
-      brain_array[b_energy_health] = c.energy_health / c.max_energy_reproduction;
+      brain_array[b_energy_move] = c.energy_locomotion / c.max_energy_locomotion;
+      brain_array[b_energy_health] = c.energy_health / c.max_energy_health;
     }
 
     if (angular) {
