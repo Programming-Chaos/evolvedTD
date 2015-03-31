@@ -545,7 +545,7 @@ void initTables() {
   p_impact.addColumn("   Creature ID   ");
   p_impact.addColumn("   Died/Survived   ");
   p_impact.addColumn("   Times Hit by Tower   ");
-  p_impact.addColumn("   HP removed by Tower   ");
+  p_impact.addColumn("   HP Removed by Tower   ");
   p_impact.addColumn("   Final HP   ");
   
   //player stats

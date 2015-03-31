@@ -96,6 +96,8 @@ class creature {
   float reproduction_used = 0;
   float reproduction_passed = 0;
   float health_used = 0;
+  int   hits_by_tower = 0;
+  int   hp_removed_by_tower = 0;
   
 
   class Segment {
@@ -584,6 +586,10 @@ class creature {
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
+    
+    // data collection
+    hits_by_tower++;
+    hp_removed_by_tower += h;
   }
 
   void calcBehavior(){

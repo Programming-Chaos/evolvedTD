@@ -330,6 +330,17 @@ class population {
       //ticksRow.setInt("   Ticks on Rock   " , );
       ticksRow.setInt("   Total Lifetime   ", c.timestep_counter);
       
+      // Update the player impact data
+      String status;
+      if(c.alive) status = "Survived";  else status = "Died";
+      TableRow impactRow = p_impact.addRow();
+      impactRow.setInt("   Gen   "                  , generation);
+      impactRow.setInt("   Creature ID   "          , c.num);
+      impactRow.setString("   Died/Survived   "     , status);
+      impactRow.setInt("   Times Hit by Tower   "   , c.hits_by_tower);
+      impactRow.setFloat("   HP Removed by Tower   ", c.hp_removed_by_tower);
+      impactRow.setFloat("   Final HP   "           , c.health);
+      
       count ++;
     }
     
