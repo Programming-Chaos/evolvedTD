@@ -156,10 +156,15 @@ class environment {
   float temp; // celsius
   PGraphics image;
   
-  // Coloring for the different terrain types. Currently being randomly assigned. 
+  // Coloring for the different terrain types.
   color liquid;
   color rock;
   color land;
+  
+  // offsets designed to make terrain look more dynamic
+  int landOffset = 0;
+  int waterOffset = 0;
+  int rockOffset = 0;
 
   gravityVector[][] gravityMap;
   tile[][] tileMap;
@@ -780,10 +785,10 @@ class environment {
     float x, y;
     fill(0, 0, 255, 50);
     rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
-    for(int i = 0; i < 600; i++) {
+    for(int i = 0; i < 800; i++) {
       x = random(-worldWidth, worldWidth);
       y = random(-worldHeight, worldHeight);
-      stroke(0, 0, 200, 95);
+      stroke(0, 0, 200, 120);
       line(x, y, x, y+30);
     }
     chanceOfLightning();
@@ -832,15 +837,21 @@ class environment {
     //thunder.play();
   }
   
+  // decides on the world type by choosing random number between 1 and 4
   void decideWorldType() {
+<<<<<<< Updated upstream
     int decision = int(random(1, 5));
     //decision = 2;
     int r = 0, b = 0, g = 0, randOffset = 0, temp = 0;
+=======
+    int decision = int(random(1, 4.999999));
+    int r = 0, b = 0, g = 0, temp = 0;
+>>>>>>> Stashed changes
     float waterALT = 0.0, rockALT = 0.0;
     switch(decision) {
       case 1:
         // temperate
-        temp = int(random(20, 40));
+        temp = int(random(20, 25));
         liquid = color(0, 0, 225);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
@@ -850,7 +861,7 @@ class environment {
       
       case 2:
         // dry - desert, minimal water
-        temp = int(random(40, 60));
+        temp = int(random(40, 45));
         liquid = color(30, 220, 200);
         rock = color(204, 102, 0);
         land = color(240, 231, 100);
@@ -860,18 +871,18 @@ class environment {
         
       case 3:
         // rainy - lots of water, always raining
-        temp = int(random(20, 40));
         isRaining = true;
-        liquid = color(0, 0, 225);
+        temp = int(random(15, 20));
+        liquid = color(5, 25, 50);
         rock = color(150, 150, 150);
-        land = color(0, 150, 0);
+        land = color(8, 90, 8);
         waterALT = 0.45f;
-        rockALT = 0.60f;
+        rockALT = 0.70f;
         break;
         
       case 4:
         // cold - snowy
-        temp = int(random(-20, 0));
+        temp = int(random(-5, 0));
         liquid = color(153, 204, 255);
         rock = color(150, 150, 150);
         land = color(245, 245, 245); 
@@ -879,7 +890,8 @@ class environment {
         rockALT = 0.60f;
         break;
         
-      /*case 5:
+      /*
+      case 5:
         // radiation - ??
         temp = int(random(20, 40));
         liquid = color(0, 0, 225);
@@ -887,7 +899,8 @@ class environment {
         land = color(0, 150, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
-        break;*/
+        break;
+      */
     }
     
     r = (land >> 16) & 255;
@@ -898,8 +911,8 @@ class environment {
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
         tileMap[i][j] = new tile();
-        randOffset = int(random(0, 20));
-        tileMap[i][j].colors = color(r + randOffset, b + randOffset, g + randOffset);
+        landOffset = int(random(1, 10));
+        tileMap[i][j].colors = color(r + landOffset, b + landOffset, g + landOffset);
         gravityMap[i][j] = new gravityVector();
       }
     }
