@@ -78,6 +78,7 @@ class creature {
   color_network coloration;
 
   // Reproduction variables
+  Vec2 sPos; // Starting position of creature
   int baseGameteCost = 10;    // Gametes base energy cost
   int baseGameteTime = 100;   // Gametes base create time in screen updates.
   int baseGameteEnergy = 500; // Gametes base extra energy
@@ -87,6 +88,17 @@ class creature {
 
   ArrayList<Segment> segments = new ArrayList<Segment>(numSegments);
   ArrayList<Appendage> appendages = new ArrayList<Appendage>(numSegments);
+  
+  // Data Collection variables
+  float total_energy_space;
+  float total_energy_consumed = 0;
+  float locomotion_used = 0;
+  float reproduction_used = 0;
+  float reproduction_passed = 0;
+  float health_used = 0;
+  int   hits_by_tower = 0;
+  int   hp_removed_by_tower = 0;
+  
 
   class Segment {
     int index;
@@ -297,6 +309,11 @@ class creature {
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     current_actions = new float[brain.OUTPUTS];
+    
+    // used for data collection
+    sPos = pos.clone();
+    total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
+    
 
     numSegments = getNumSegments();
     for (int i = 0; i < numSegments; i++) segments.add(new Segment(i));
@@ -433,6 +450,9 @@ class creature {
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
     energy_health = min(energy_health, max_energy_health);
+    
+    // data collection
+    total_energy_consumed += x;
   }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
@@ -506,6 +526,30 @@ class creature {
   float getMass() {
     return body.getMass();
   }
+  
+  float getArmor() {  // gets the sum of armor on all segments and appendages
+    float value = 0;
+    for (Segment s : segments) {
+      value += s.armor;
+    }
+    for (Appendage a : appendages) {
+      value += a.armor;
+    }
+    
+    return value;
+  }
+  
+  float getDensity() { // gets the sum of density on all segments and appendages
+    float value = 0;
+    for (Segment s : segments) {
+      value += s.density;
+    }
+    for (Appendage a : appendages) {
+      value += a.density; 
+    }
+    
+    return value;
+  }
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
@@ -545,6 +589,10 @@ class creature {
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
+    
+    // data collection
+    hits_by_tower++;
+    hp_removed_by_tower += h;
   }
 
   void calcBehavior(){
@@ -628,6 +676,9 @@ class creature {
       body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
       energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
+      
+      // data collection
+      locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
     }
 
     // Creatures that run off one side of the world wrap to the other side.
@@ -684,6 +735,8 @@ class creature {
 
       // remove energy from creature
       energy_reproduction -= (baseGameteCost * (1+genome.avg(gameteCost)) + baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      reproduction_used += (baseGameteCost * (1+genome.avg(gameteCost)));
+      reproduction_passed += (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
 
       gameteTimeLapse = 0;
     }
@@ -695,6 +748,9 @@ class creature {
     if (energy_health > 0 && health < maxHealth) {
       health = health + health_regen;
       energy_health = energy_health - regen_energy_cost;
+      
+      // data collection
+      health_used += regen_energy_cost;
     }
   }
 
