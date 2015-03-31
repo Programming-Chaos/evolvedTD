@@ -46,6 +46,22 @@ AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
+// Tables for data collection
+Table c_traits;
+Table c_avgs;
+Table reproduction;
+Table sensing;
+Table metabolism;
+Table lifetime;
+Table p_impact;
+Table p_stats;
+Table env;
+
+// Variables for data collection
+int fStart;
+int fTotal = 0;
+int fConsumed = 0;
+
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
@@ -83,6 +99,9 @@ void setup() {
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
+  
+  // Init data tables
+  initTables();
 }
 
 void draw() {
@@ -378,6 +397,10 @@ void place_food() { // done once at the beginning of the game
                       (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
+  
+  // data collection
+  fStart = foods.size();
+  fTotal += 50;
 }
 
 void nextgeneration() {
@@ -397,6 +420,10 @@ void add_food() { // done after each wave/generation
     food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
+  
+  // data collection  
+  fStart = foods.size();
+  fTotal += 10;
 }
 
 void mousePressed() { // called if the (left) mouse button is pressed
@@ -450,4 +477,134 @@ void display_controls() {
   text("? - show/hide controls", leftalign, topalign + 82);
   text("a - toggle autofire", leftalign, topalign + 90);
   popMatrix();
+}
+
+void initTables() {
+  //creature traits
+  c_traits = new Table();
+  c_traits.addColumn("   Gen   ");
+  c_traits.addColumn("   Creature ID   ");
+  c_traits.addColumn("   Mass   ");
+  c_traits.addColumn("   Width   ");
+  c_traits.addColumn("   Density   ");
+  c_traits.addColumn("   Armor   ");
+  c_traits.addColumn("   Wing #   ");
+  c_traits.addColumn("   Wing Size   ");
+  c_traits.addColumn("   Antennae #   ");
+  c_traits.addColumn("   Color   ");
+  c_traits.addColumn("   Velocity   ");
+  c_traits.addColumn("   Acceleration   ");
+  c_traits.addColumn("   Max HP   ");
+  
+  //creature averages
+  c_avgs = new Table();
+  c_avgs.addColumn("   Gen   ");
+  c_avgs.addColumn("   Avg Mass   ");
+  c_avgs.addColumn("   Avg Width   ");
+  c_avgs.addColumn("   Avg Density   ");
+  c_avgs.addColumn("   Avg Armor   ");
+  c_avgs.addColumn("   Avg Wing #   ");
+  c_avgs.addColumn("   Avg Wing Size   ");
+  c_avgs.addColumn("   Avg Antennae #   ");
+  c_avgs.addColumn("   Avg Color   ");
+  c_avgs.addColumn("   Avg Velocity   ");
+  c_avgs.addColumn("   Avg Acceleration   ");
+  c_avgs.addColumn("   Avg Max HP   ");
+  
+  //reproduction traits
+  reproduction = new Table();
+  reproduction.addColumn("   Gen   ");
+  reproduction.addColumn("   Creature ID   ");
+  reproduction.addColumn("   Spawn X   ");
+  reproduction.addColumn("   Spawn Y   ");
+  reproduction.addColumn("   # of Gametes   ");
+  reproduction.addColumn("   Gamete Cost   ");
+  reproduction.addColumn("   Gamete Time   ");
+  
+  //sensing traits
+  sensing = new Table();
+  sensing.addColumn("   Gen   ");
+  sensing.addColumn("   Creature ID   ");
+  sensing.addColumn("   Creature Scent   ");
+  sensing.addColumn("   Creature Taste   ");
+  
+  //metabolism traits
+  metabolism = new Table();
+  metabolism.addColumn("   Gen   ");
+  metabolism.addColumn("   Creature ID   ");
+  metabolism.addColumn("   Total Energy Space   ");
+  metabolism.addColumn("   Total Energy Consumed   ");
+  metabolism.addColumn("   Locomotion Space   ");
+  metabolism.addColumn("   Locomotion Used   ");
+  metabolism.addColumn("   Reproduction Space   ");
+  metabolism.addColumn("   Reproduction Used   ");
+  metabolism.addColumn("   Reproduction Passed   ");
+  metabolism.addColumn("   Health Space   ");
+  metabolism.addColumn("   Health Used   ");
+  metabolism.addColumn("   Total Energy Used   ");
+  
+  //lifetime ticks
+  lifetime = new Table();
+  lifetime.addColumn("   Gen   ");
+  lifetime.addColumn("   Creature ID   ");
+  lifetime.addColumn("   Ticks on Algae   ");
+  lifetime.addColumn("   Ticks on Water   ");
+  lifetime.addColumn("   Ticks on Rock   ");
+  lifetime.addColumn("   Total Lifetime   ");
+  
+  //player impact
+  p_impact = new Table();
+  p_impact.addColumn("   Gen   ");
+  p_impact.addColumn("   Creature ID   ");
+  p_impact.addColumn("   Died/Survived   ");
+  p_impact.addColumn("   Times Hit by Tower   ");
+  p_impact.addColumn("   HP Removed by Tower   ");
+  p_impact.addColumn("   Final HP   ");
+  
+  //player stats
+  p_stats = new Table();
+  p_stats.addColumn("   Gen   ");
+  p_stats.addColumn("   Tower ID   ");
+  p_stats.addColumn("   Round # of Shots   ");
+  p_stats.addColumn("   Total # of Shots   ");
+  p_stats.addColumn("   Round Successful Hits   ");
+  p_stats.addColumn("   Total Successful Hits   ");
+  p_stats.addColumn("   Round Rock Hits   ");
+  p_stats.addColumn("   Total Rock Hits   ");
+  p_stats.addColumn("   Round Accuracy   ");
+  p_stats.addColumn("   Overall Accuracy   ");
+  p_stats.addColumn("   Round Avg RoF   ");
+  p_stats.addColumn("   Overall Avg RoF   ");
+  p_stats.addColumn("   Round # of Kills   ");
+  p_stats.addColumn("   Total # of Kills   ");
+  p_stats.addColumn("   Round Avg Shots per Kill   ");
+  p_stats.addColumn("   Overall Avg Shots per Kill   ");
+  
+  //environment stats
+  env = new Table();
+  env.addColumn("   Gen   ");
+  env.addColumn("   Food at Start   ");
+  env.addColumn("   Food at End   ");
+  env.addColumn("   Food Consumed   ");
+  env.addColumn("   Total Food   ");
+  env.addColumn("   Total Consumed   ");
+  env.addColumn("   Round Lightning Strikes   ");
+  env.addColumn("   Round Lightning Kills   ");
+  env.addColumn("   Round Lightning Accuracy   ");
+  env.addColumn("   Total Lightning Strikes   ");
+  env.addColumn("   Total Lightning Kills   ");
+  env.addColumn("   Overall Lightning Accuracy   ");
+}
+
+//Test for writing data to excel file
+void writeTables() {
+  saveTable(c_traits, "data/c_traits.csv");
+  saveTable(c_avgs, "data/c_avgs.csv");
+  saveTable(reproduction, "data/reproduction.csv");
+  saveTable(sensing, "data/sensing.csv");
+  saveTable(metabolism, "data/metabolism.csv");
+  saveTable(lifetime, "data/lifetime.csv");
+  saveTable(p_impact, "data/p_impact.csv");
+  saveTable(p_stats, "data/p_stats.csv");
+  saveTable(env, "data/env.csv");
 }
