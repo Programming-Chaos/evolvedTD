@@ -156,30 +156,12 @@ class environment {
     environWidth = worldWidth / cellWidth;
     environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
-    // temp = (int)random(-40, 50); // celcius
-    rockFrequency = 0;
-
     isRaining = false;
     // Establish world type
     decideWorldType();
-    //generateWaterALT((float)random(0, 70) / 100.0f);
-    spawnRocks();
-    tempInfluence();
-    makeImage();
 
-    /*
-    int chance = initializeRain();
-    if(chance == 1) {
-      isRaining = false;
-      waitRainOff = minute();
-    } else {
-      isRaining = true;
-      waitRainOn = minute();
-    }
-    */
-    
-    // makeImageFood();
-    // updateEnviron();
+    spawnRocks();
+    makeImage();
   }
 
 
@@ -305,6 +287,7 @@ class environment {
 
   // Spawn rocks with respect to rocky terrian (color); spawn more on rock terrain
   void spawnRocks() {
+    rockFrequency = 0;
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
         if(tileMap[i][j].getViscosity() == 0) {
@@ -318,24 +301,6 @@ class environment {
         }
       }
     }
-  }
-
-  void tempInfluence() {
-    int r = 0;
-    int b = 0;
-    int g = 0;
-    color c;
-    for(int i = 0; i < environHeight; i++) {
-      for(int j = 0; j < environWidth; j++) {
-        c = tileMap[i][j].colors;
-        r = (c >> 16) & 255;
-        b = (c >> 8) & 255;
-        g = (c) & 255;
-        //tileMap[i][j].colors = new color(r, b, g, 1);
-        // change values here and reconstruct color
-      }
-    }
-    //println("red: " + r + " blue: " + b + " green: " + g);
   }
 
   void place_creature(creature cd, float x, float y) {
