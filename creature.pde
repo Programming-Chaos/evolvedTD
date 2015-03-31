@@ -571,7 +571,7 @@ class creature {
     senses.Update_Senses(pos2.x, pos2.y, a);
 
     calcBehavior();
-    torque = current_actions[0]*0.01;
+    torque = current_actions[0];
 
     // force is a percentage of max movement speed from 10% to 100%, averaging 80%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
@@ -624,7 +624,7 @@ class creature {
     if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
-      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.05)));
+      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
     }
 
     // Creatures that run off one side of the world wrap to the other side.

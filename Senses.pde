@@ -8,7 +8,7 @@
 
 
 class Sensory_Systems {
-  float[] brain_array; /* TODO: reconcile with brain.pde? */wwsxxww
+  float[] brain_array; /* TODO: reconcile with brain.pde? */
   
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
