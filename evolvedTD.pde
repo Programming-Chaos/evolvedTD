@@ -227,6 +227,10 @@ void keyPressed() { // if a key is pressed this function is called
     case '2':
       the_tower.switchweapon(key);
       break;
+    case '3':
+    case '4':
+      the_tower.switchtargetMode(key);
+      break;
     default:
 
     }

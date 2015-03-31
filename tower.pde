@@ -15,6 +15,7 @@ class tower {
   int imagetimer; // timer for alternating gun images
   int soundtimer;
   int radius = 80;
+  int targetMode = 1;
   Body tower_body;
   
   // constructor function, initializes the tower
@@ -57,8 +58,13 @@ class tower {
         Vec2 target;
         autofirecounter++;
         if (autofirecounter % 20 == 0) { // only autofire every 20th time step
-        //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
-          target = the_pop.vec_to_random_creature(); // target a random creature
+          target = the_pop.vec_to_random_creature(); // target a random creature 
+          if (targetMode == 2){
+            target = the_pop.closest(new Vec2(0,0)); // target the closest creature
+          }
+          if (targetMode == 3){
+            target = the_pop.highestAlpha(); 
+          }
           angle = atan2(target.y,target.x);
           fire();
           autofirecounter = 0;  // reset the counter
@@ -173,6 +179,15 @@ class tower {
     case 2:
       drop_rock();
       break;        
+    }
+  }
+  
+  void switchtargetMode(char k) {
+    if (k == '3'){
+      targetMode = 2;
+    }
+    if (k == '4'){
+      targetMode = 3;
     }
   }
   
