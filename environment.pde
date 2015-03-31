@@ -839,14 +839,8 @@ class environment {
   
   // decides on the world type by choosing random number between 1 and 4
   void decideWorldType() {
-<<<<<<< Updated upstream
-    int decision = int(random(1, 5));
-    //decision = 2;
-    int r = 0, b = 0, g = 0, randOffset = 0, temp = 0;
-=======
     int decision = int(random(1, 4.999999));
     int r = 0, b = 0, g = 0, temp = 0;
->>>>>>> Stashed changes
     float waterALT = 0.0, rockALT = 0.0;
     switch(decision) {
       case 1:
@@ -923,7 +917,7 @@ class environment {
   }   
   
   boolean randBool() {
-    return random(1) < 0.5;
+  return random(1) < 0.5;
   }
 
   void spawnVegetation(int worldType, float waterALT, float rockALT) {
