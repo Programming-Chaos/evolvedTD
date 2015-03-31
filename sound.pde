@@ -12,7 +12,9 @@ public class Sounds extends Thread {
    } 
 }
 
-void PlaySounds( AudioPlayer a ) {
+void PlaySounds( String s ) {
+  AudioPlayer a;
+  a = minim.loadFile(s);
    Sounds f = new Sounds(a);
    f.start(); 
 }
