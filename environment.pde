@@ -135,6 +135,18 @@ class gravityVector {
   }
 }
 
+class Vegetation {
+  PImage img;
+  int x;
+  int y;
+  
+  void Vegetation() {
+    img = null;
+    x = 0;
+    y = 0;
+  }
+}
+
 class environment {
   int environWidth;
   int environHeight;
@@ -151,6 +163,7 @@ class environment {
 
   gravityVector[][] gravityMap;
   tile[][] tileMap;
+  ArrayList<Vegetation> vegetation;
 
   environment() {
     environWidth = worldWidth / cellWidth;
@@ -635,6 +648,9 @@ class environment {
     */
     
     timeStepTemp = timesteps;
+    for(Vegetation i : vegetation) {
+      image(i.img, i.x, i.y);
+    }
   }
 
   void display_scent() {
@@ -863,7 +879,7 @@ class environment {
         rockALT = 0.60f;
         break;
         
-      case 5:
+      /*case 5:
         // radiation - ??
         temp = int(random(20, 40));
         liquid = color(0, 0, 225);
@@ -871,7 +887,7 @@ class environment {
         land = color(0, 150, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
-        break;
+        break;*/
     }
     
     r = (land >> 16) & 255;
@@ -890,6 +906,40 @@ class environment {
     generateAltitudeMap();
     generateWaterALT(waterALT); // Just works out better this way
     generateRockyALT(rockALT);
+    spawnVegetation(decision, waterALT, rockALT);
   }   
+
+  void spawnVegetation(int worldType, float waterALT, float rockALT) {
+    vegetation = new ArrayList<Vegetation>();
+    int vegFreq = 0;
+    Vegetation veg;
+    PImage tree;
+    PImage vegies; 
+    switch(worldType) {
+      default:
+        int t = (int)random(0,2);
+        int v = (int)random(0,3);
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].getViscosity() >= 10 && tileMap[i][j].getViscosity() <= 200) {
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(100);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/warm" + t + ".png");
+                veg = new Vegetation();
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+                vegetation.add(veg);
+              }
+            }
+          }
+        }
+    }
+  }
+
 }
+
+
 
