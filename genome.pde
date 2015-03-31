@@ -23,6 +23,11 @@ Trait gameteTime = new Trait(10);
 Trait gameteChance = new Trait(10);
 Trait gameteEnergy = new Trait(10);
 
+Trait ReyeColor = new Trait(10);
+Trait GeyeColor = new Trait(10);
+Trait BeyeColor = new Trait(10);
+
+
 ArrayList<Trait> brainTraits = new ArrayList<Trait>(Brain.WEIGHTS);
 
 // Speciation

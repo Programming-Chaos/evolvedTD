@@ -709,10 +709,12 @@ class creature {
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-    pushMatrix();  // Stores the current drawing reference frame
+       
+      pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
+    
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
@@ -724,27 +726,28 @@ class creature {
         if ((((Appendage)f.getUserData()).armor) > 1)  strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         else strokeWeight(((Appendage)f.getUserData()).armor);
       }
+
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
+      strokeWeight(.1);
       for (int i = 0; i < 3; i++) {
         Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
     }
-    strokeWeight(1);
+    
+    //strokeWeight(1);
     // Add some eyespots
-    fill(0);
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
-    ellipse(eye.x, eye.y, 5, 5);
-    ellipse(-1 * eye.x, eye.y, 5, 5);
-    fill(255);
-    ellipse(eye.x, eye.y - 1, 2, 2);
-    ellipse(-1 * eye.x, eye.y - 1, 2, 2);
+    senses.Draw_Eyes(eye, this);
     popMatrix();
-
+    
+    pushMatrix();
+    noStroke();
     senses.Draw_Sense(pos.x, pos.y, body.getAngle());
-
+    popMatrix();
+    
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();

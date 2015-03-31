@@ -5,9 +5,11 @@
 
    Additionally we implemented taste, pain, speed, mass, and energy detection
 */
+
+
 class Sensory_Systems {
   float[] brain_array; /* TODO: reconcile with brain.pde? */
-
+  PImage mustache = loadImage("assets/mustache.png");
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
 
@@ -74,9 +76,14 @@ class Sensory_Systems {
   boolean[] feeler_pressure;
   boolean[] feeler_taste;
   boolean[] feeler_scent;
-
+ 
+  color color_of_eyes;
+  
   Sensory_Systems(Genome g) {
     brain_array = new float[Brain.INPUTS];
+    
+    color_of_eyes = color(abs((float)Utilities.Sigmoid(g.sum(ReyeColor), 5, 255)), abs((float)Utilities.Sigmoid(g.sum(BeyeColor), 5, 255)), abs((float)Utilities.Sigmoid(g.sum(GeyeColor), 5, 255)));
+    
     for (int c = 0; c < Brain.INPUTS; c++)
       brain_array[c] = 0;
     
@@ -113,7 +120,7 @@ class Sensory_Systems {
 
     Set_Pain(pain, 0, abs((float)Utilities.Sigmoid(g.sum(painDampeningTrait), 5, 1)), abs((float)Utilities.Sigmoid(g.sum(painThresholdTrait), 5, 100))); /*Has pain, pain amount currentlyu, pain_dampening, pain_threshold*/
 
-    num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 38));
+    num_feelers = (int)abs((float)Utilities.Sigmoid(g.sum(expressedFeelers), 1, 20))*2;
 
     feeler_angles = new float[num_feelers];
     feeler_length = new float[num_feelers];
@@ -128,27 +135,46 @@ class Sensory_Systems {
 
   /* Determines what feelers can do and the lengths and angles of each */
   void Set_Feeler(Genome g) {
-    for (int i = 0; i < num_feelers; i++) {
-
-      feeler_angles[i]= abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, 2*PI));
-      feeler_length[i] = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 100));
+       for (int i = 0; i < num_feelers; i=i+2) {
+      float angle_1 = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).angle), 3, PI) - HALF_PI );
+      float angle_2;
+      
+      if (angle_1 < 0) {
+        angle_2 = PI + angle_1;
+      } else {
+        angle_2 = PI - angle_1;
+      }
+  
+      feeler_angles[i] = angle_1;
+      feeler_angles[i+1] = angle_2; 
+ 
+      float len = abs((float)Utilities.Sigmoid(g.sum(feelers.get(i).length), 5, 500));
+      feeler_length[i] = len;
+      feeler_length[i+1] = len;
+      
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).pressure), 5, 1) > 0) {
         feeler_pressure[i] = true;
+        feeler_pressure[i+1] = true;
       } else {
-        feeler_pressure[i] = true;
+        feeler_pressure[i] = false;
+        feeler_pressure[i+1] = false;
       }
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).taste), 5, 1) > 0) {
         feeler_taste[i] = true;
+        feeler_taste[i+1] = true;
       } else {
         feeler_taste[i] = false;
+        feeler_taste[i+1] = false;
       }
 
       if (Utilities.Sigmoid(g.sum(feelers.get(i).scent), 5, 1) > 0) {
         feeler_scent[i] = true;
+        feeler_scent[i+1] = true;
       } else {
         feeler_scent[i] = false;
+        feeler_scent[i+1] = false;
       }
     }
   }
@@ -172,6 +198,7 @@ class Sensory_Systems {
     sensorY = round((sensorY) / 20) * 20;
 
     /*If feeler can feel pressure*/
+
     if (feeler_pressure[i]) {
       if (environ.checkForRock(sensorX, sensorY) == 1) {
         brain_array[b_pressure_feeler + i] = ROCK_PRESSURE;
@@ -197,10 +224,36 @@ class Sensory_Systems {
     }
     /*If feeler can pick up smell*/
     if (feeler_scent[i]) {
+      println("Here\n");
       brain_array[b_scent_feelers + i] = environ.getScent(sensorX, sensorY);
     }
-  }
 
+}
+  
+  void Draw_Eyes(Vec2 eye, creature c) {
+    int compress;
+    
+    if (random(1) < .05) {
+       compress = 1;
+    } else {
+      compress = ((int)((num_feelers)*(c.energy_locomotion / c.max_energy_locomotion)))+3;
+    }
+    
+    fill(color_of_eyes);
+    
+    ellipse(eye.x, eye.y, num_feelers+5, compress);
+    ellipse(-1 * eye.x, eye.y, num_feelers+5, compress);
+    
+    fill(255);
+    image(mustache, eye.x, eye.y);
+    if (compress < 3) {
+      ellipse(eye.x, eye.y - 1, 2, 2);
+      ellipse(-1 * eye.x, eye.y - 1, 2, 2);
+    } else {
+      ellipse(eye.x, eye.y - 1, 2, 2);
+      ellipse(-1 * eye.x, eye.y - 1, 2, 2);  
+    }
+  }
  /*Sets taste once creature comes in contact with food*/
   void Set_Taste(food f) {
     if (taste) {
