@@ -68,9 +68,9 @@ class population {
     for (creature c: swarm) { 
       if (c.alive) {
         temp = c.getPos();
-        tempa = -1000000000;
+        tempa = 1000000000;
         float tempb = c.genome.sum(alphaTrait);
-        if (tempb > tempa ){
+        if (tempb < tempa ){
            tempa = tempb;
            v = c.getPos();     
         }
