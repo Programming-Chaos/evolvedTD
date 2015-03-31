@@ -183,10 +183,29 @@ class environment {
     isRaining = false;
     // Establish world type
     decideWorldType();
-
+    
     spawnRocks();
+    altitudeShift();
     makeImage();
   }
+  
+  void altitudeShift() {
+    for(int i = 0; i < environWidth; i++) {
+      for(int j = 0; j < environHeight; j++) {
+        tile t = tileMap[i][j];
+        float alt = t.altitude;
+        color c = t.colors;
+        int r = (c >> 16) & 255;
+        int g = (c >> 8) & 255;
+        int b = (c) & 255; 
+        float p = 150 * alt; 
+        if(true) {
+          t.colors = color((int) r - p, (int) g - p, (int) b - p);
+        }
+        tileMap[i][j] = t; 
+      }
+    }
+  }  
 
 
   // Generates altitude for each tile using the built in perlin noise generator "noise()".
@@ -854,6 +873,7 @@ class environment {
     int decision = int(random(1, 4.999999));
     int r = 0, b = 0, g = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;
+    decision = 2;
     switch(decision) {
       case 1:
         // temperate
