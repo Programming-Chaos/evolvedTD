@@ -834,7 +834,7 @@ class environment {
   
   void decideWorldType() {
     int decision = int(random(1, 5));
-    //int decision = 2;
+    //decision = 2;
     int r = 0, b = 0, g = 0, randOffset = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;
     switch(decision) {
@@ -908,6 +908,10 @@ class environment {
     generateRockyALT(rockALT);
     spawnVegetation(decision, waterALT, rockALT);
   }   
+  
+  boolean randBool() {
+    return random(1) < 0.5;
+  }
 
   void spawnVegetation(int worldType, float waterALT, float rockALT) {
     vegetation = new ArrayList<Vegetation>();
@@ -917,22 +921,28 @@ class environment {
     PImage tree;
     PImage vegies; 
     switch(worldType) {
-      default:
+      default: break;
+      case 1:
         for(int i = 0; i < environWidth; i++) {
           for(int j = 0; j < environHeight; j++) {
-            if(tileMap[i][j].getViscosity() >= 10 && tileMap[i][j].getViscosity() <= 200) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
               int x = (i * cellWidth) - (worldWidth / 2);
               int y = (j * cellHeight) - (worldHeight / 2);
               int f = (int)random(100);
               int t = (int)random(0,2);
               int v = (int)random(0,3);
+              
               if(f <= vegFreq) {
-                tree = loadImage("assets/environment/trees/warm" + t + ".png");
+                if(randBool()) {
+                  tree = loadImage("assets/environment/trees/purple" + t + ".png");
+                } else {
+                  tree = loadImage("assets/environment/trees/warm" + t + ".png");
+                }
                 vegies = loadImage("assets/environment/vegitation/warm" + v + ".png");
                 veg = new Vegetation();
                 veg1 = new Vegetation();
                 
-                
+                tree.resize(tree.width / 2, tree.height / 2);
                 veg.img = tree;
                 veg.x = x;
                 veg.y = y; 
@@ -941,16 +951,110 @@ class environment {
                 veg1.x = x;
                 veg1.y = y;
                 
-                vegetation.add(veg1);
+                if(randBool()) {
+                  vegetation.add(veg1);
+                } else {
+                  vegetation.add(veg);
+                }
+              }
+            }
+          }
+        }
+        break;
+        
+      case 2:
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(1000);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/desert" + t + ".png");
+                vegies = loadImage("assets/environment/vegitation/desert" + v + ".png");
+                veg = new Vegetation();
+                veg1 = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+                
+                veg1.img = vegies;
+                veg1.x = x;
+                veg1.y = y;
+                
+                if(randBool()) {
+                  vegetation.add(veg1);
+                } else {
+                  vegetation.add(veg);
+                }
+              }
+            }
+          }
+        }
+        break;
+        
+      case 3: 
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(300);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/swamp" + t + ".png");
+                vegies = loadImage("assets/environment/vegitation/swamp" + v + ".png");
+                veg = new Vegetation();
+                veg1 = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+                
+                veg1.img = vegies;
+                veg1.x = x;
+                veg1.y = y;
+                
+                if(randBool()) {
+                  vegetation.add(veg1);
+                } else {
+                  vegetation.add(veg);
+                }
+              }
+            }
+          }
+        }
+        break;
+      case 4:
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(400);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/dead" + t + ".png");
+                veg = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+               
                 vegetation.add(veg);
               }
             }
           }
         }
-      //case 2:
-      //case 3:
-      //case 4:
-      //default:
+        break;
     }
   }
 
