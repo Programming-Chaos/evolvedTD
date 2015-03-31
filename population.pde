@@ -267,19 +267,19 @@ class population {
     for(creature c : swarm) {
       // Update creature traits data
       TableRow c_traitsRow = c_traits.addRow();
-      c_traitsRow.setInt("   Gen   ", generation);
+      c_traitsRow.setInt("   Gen   "        , generation);
       c_traitsRow.setInt("   Creature ID   ", c.num);
-      c_traitsRow.setFloat("   Mass   ", c.getMass());
-      c_traitsRow.setFloat("   Width   ", c.getWidth());
-      c_traitsRow.setFloat("   Density   ", c.getDensity());
-      c_traitsRow.setFloat("   Armor   ", c.getArmor());
+      c_traitsRow.setFloat("   Mass   "     , c.getMass());
+      c_traitsRow.setFloat("   Width   "    , c.getWidth());
+      c_traitsRow.setFloat("   Density   "  , c.getDensity());
+      c_traitsRow.setFloat("   Armor   "    , c.getArmor());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
       //c_traitsRow.setFloat("   Color   ", );
-      c_traitsRow.setFloat("   Velocity   ", c.maxMovementSpeed);
+      c_traitsRow.setFloat("   Velocity   " , c.maxMovementSpeed);
       //c_traitsRow.setFloat("   Acceleration   ", );
-      c_traitsRow.setFloat("   Max HP   ", c.maxHealth); 
+      c_traitsRow.setFloat("   Max HP   "   , c.maxHealth); 
       
       // Update creature trait averages data
       massAvg  += c.getMass();
@@ -291,35 +291,44 @@ class population {
       
       // Update creature reproduction data
       TableRow repRow = reproduction.addRow();
-      repRow.setInt("   Gen   ", generation);
-      repRow.setInt("   Creature ID   ", c.num);
-      repRow.setInt("   Spawn X   ", (int)c.sPos.x / cellWidth);
-      repRow.setInt("   Spawn Y   ", (int)c.sPos.y / cellHeight);
-      repRow.setInt("   # of Gametes   ", c.gameteStack.size());
+      repRow.setInt("   Gen   "          , generation);
+      repRow.setInt("   Creature ID   "  , c.num);
+      repRow.setInt("   Spawn X   "      , (int)c.sPos.x / cellWidth);
+      repRow.setInt("   Spawn Y   "      , (int)c.sPos.y / cellHeight);
+      repRow.setInt("   # of Gametes   " , c.gameteStack.size());
       repRow.setFloat("   Gamete Cost   ", c.baseGameteCost + c.genome.avg(gameteCost));
       repRow.setFloat("   Gamete Time   ", c.baseGameteTime + c.genome.avg(gameteTime));
       
       // Update the creature senses data
       TableRow senseRow = sensing.addRow();
-      senseRow.setInt("   Gen   ", generation);
-      senseRow.setInt("   Creature ID   ", c.num);
-      //senseRow.setInt("   Creature Scent   ", );
+      senseRow.setInt("   Gen   "           , generation);
+      senseRow.setInt("   Creature ID   "   , c.num);
+      senseRow.setInt("   Creature Scent   ", c.getScentType());
       //senseRow.setInt("   Creature Taste   ", );
       
       // Update the creature metabolism data
       TableRow metabRow = metabolism.addRow();
-      metabRow.setInt("   Gen   ", generation);
-      metabRow.setInt("   Creature ID   ", c.num);
-      metabRow.setFloat("   Total Energy Space   ", c.total_energy_space);
+      metabRow.setInt("   Gen   "                    , generation);
+      metabRow.setInt("   Creature ID   "            , c.num);
+      metabRow.setFloat("   Total Energy Space   "   , c.total_energy_space);
       metabRow.setFloat("   Total Energy Consumed   ", c.total_energy_consumed);
-      metabRow.setFloat("   Locomotion Space   ", c.max_energy_locomotion);
-      metabRow.setFloat("   Locomotion Used   ", c.locomotion_used);
-      metabRow.setFloat("   Reproduction Space   ", c.max_energy_reproduction);
-      metabRow.setFloat("   Reproduction Used   ", c.reproduction_used);
-      metabRow.setFloat("   Reproduction Passed   ", c.reproduction_passed);
-      metabRow.setFloat("   Health Space   ", c.max_energy_health);
-      metabRow.setFloat("   Health Used   ", c.health_used);
-      metabRow.setFloat("   Total Energy Used   ", c.locomotion_used + c.reproduction_used + c. health_used);
+      metabRow.setFloat("   Locomotion Space   "     , c.max_energy_locomotion);
+      metabRow.setFloat("   Locomotion Used   "      , c.locomotion_used);
+      metabRow.setFloat("   Reproduction Space   "   , c.max_energy_reproduction);
+      metabRow.setFloat("   Reproduction Used   "    , c.reproduction_used);
+      metabRow.setFloat("   Reproduction Passed   "  , c.reproduction_passed);
+      metabRow.setFloat("   Health Space   "         , c.max_energy_health);
+      metabRow.setFloat("   Health Used   "          , c.health_used);
+      metabRow.setFloat("   Total Energy Used   "    , c.locomotion_used + c.reproduction_used + c. health_used);
+      
+      // Update the creature lifetime ticks data
+      TableRow ticksRow = lifetime.addRow();
+      ticksRow.setInt("   Gen   "           , generation);
+      ticksRow.setInt("   Creature ID   "   , c.num);
+      ticksRow.setInt("   Ticks on Algae   ", c.time_on_land);
+      ticksRow.setInt("   Ticks on Water   ", c.time_in_water);
+      //ticksRow.setInt("   Ticks on Rock   " , );
+      ticksRow.setInt("   Total Lifetime   ", c.timestep_counter);
       
       count ++;
     }
