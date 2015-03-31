@@ -470,7 +470,10 @@ class creature {
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
     a = a*(1 + (int)outputs[3]);
-    return color(r, g, b, a);
+    
+    /*I turned off alpha value here so I could not draw segmentations on creatures
+    The creatures weren't easily visible with a low alpha*/
+    return color(r, g, b, 255);
   }
 
   // Calculate and return the width of the creature
@@ -729,7 +732,8 @@ class creature {
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
-      strokeWeight(.1);
+      //strokeWeight(.1);
+      noStroke();
       for (int i = 0; i < 3; i++) {
         Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
