@@ -869,6 +869,7 @@ class environment {
       c.changeHealth(-1000);
     }
     strokeWeight(1);
+    if( random(-4, 1) < 0 ) PlaySounds( thunder);
     //thunder.rewind();
     //thunder.play();
   }
