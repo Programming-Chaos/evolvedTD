@@ -311,8 +311,15 @@ class population {
       metabRow.setInt("   Gen   ", generation);
       metabRow.setInt("   Creature ID   ", c.num);
       metabRow.setFloat("   Total Energy Space   ", c.total_energy_space);
-      //metabRow.setFloat("   Total Energy Consumed   ", );
+      metabRow.setFloat("   Total Energy Consumed   ", c.total_energy_consumed);
       metabRow.setFloat("   Locomotion Space   ", c.max_energy_locomotion);
+      metabRow.setFloat("   Locomotion Used   ", c.locomotion_used);
+      metabRow.setFloat("   Reproduction Space   ", c.max_energy_reproduction);
+      metabRow.setFloat("   Reproduction Used   ", c.reproduction_used);
+      metabRow.setFloat("   Reproduction Passed   ", c.reproduction_passed);
+      metabRow.setFloat("   Health Space   ", c.max_energy_health);
+      metabRow.setFloat("   Health Used   ", c.health_used);
+      metabRow.setFloat("   Total Energy Used   ", c.locomotion_used + c.reproduction_used + c. health_used);
       
       count ++;
     }

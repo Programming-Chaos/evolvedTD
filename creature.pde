@@ -448,6 +448,9 @@ class creature {
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
     energy_health = min(energy_health, max_energy_health);
+    
+    // data collection
+    total_energy_consumed += x;
   }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
@@ -664,6 +667,9 @@ class creature {
       body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
       energy_locomotion = (energy_locomotion - abs((float)(torque * 0.05)));
+      
+      // data collection
+      locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.05)));
     }
 
     // Creatures that run off one side of the world wrap to the other side.
@@ -720,6 +726,8 @@ class creature {
 
       // remove energy from creature
       energy_reproduction -= (baseGameteCost * (1+genome.avg(gameteCost)) + baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      reproduction_used += (baseGameteCost * (1+genome.avg(gameteCost)));
+      reproduction_passed += (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
 
       gameteTimeLapse = 0;
     }
@@ -731,6 +739,9 @@ class creature {
     if (energy_health > 0 && health < maxHealth) {
       health = health + health_regen;
       energy_health = energy_health - regen_energy_cost;
+      
+      // data collection
+      health_used += regen_energy_cost;
     }
   }
 
