@@ -913,29 +913,44 @@ class environment {
     vegetation = new ArrayList<Vegetation>();
     int vegFreq = 0;
     Vegetation veg;
+    Vegetation veg1;
     PImage tree;
     PImage vegies; 
     switch(worldType) {
       default:
-        int t = (int)random(0,2);
-        int v = (int)random(0,3);
         for(int i = 0; i < environWidth; i++) {
           for(int j = 0; j < environHeight; j++) {
             if(tileMap[i][j].getViscosity() >= 10 && tileMap[i][j].getViscosity() <= 200) {
               int x = (i * cellWidth) - (worldWidth / 2);
               int y = (j * cellHeight) - (worldHeight / 2);
               int f = (int)random(100);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
               if(f <= vegFreq) {
                 tree = loadImage("assets/environment/trees/warm" + t + ".png");
+                vegies = loadImage("assets/environment/vegitation/warm" + v + ".png");
                 veg = new Vegetation();
+                veg1 = new Vegetation();
+                
+                
                 veg.img = tree;
                 veg.x = x;
                 veg.y = y; 
+                
+                veg1.img = vegies;
+                veg1.x = x;
+                veg1.y = y;
+                
+                vegetation.add(veg1);
                 vegetation.add(veg);
               }
             }
           }
         }
+      //case 2:
+      //case 3:
+      //case 4:
+      //default:
     }
   }
 
