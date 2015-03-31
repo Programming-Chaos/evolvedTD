@@ -132,6 +132,9 @@ class population {
 
   // creates the next generation
   void next_generation() {
+    // at end of wave, update data collection
+    updateData();
+    
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
     
@@ -249,5 +252,58 @@ class population {
     swarm.clear();
     swarm = generation;
     
+  }
+  
+  void updateData() {
+    
+    //average variables
+    float massAvg = 0, widthAvg = 0, denseAvg = 0, armorAvg = 0, 
+          wingAvg = 0, wingSizeAvg = 0, antennaeAvg = 0, colorAvg = 0, 
+          velAvg = 0, acclAvg = 0, hpAvg = 0;
+    int count = 0;
+    
+    for(creature c : swarm) {
+      // Update creature traits data
+      TableRow c_traitsRow = c_traits.addRow();
+      c_traitsRow.setInt("   Gen   ", generation);
+      c_traitsRow.setInt("   Creature ID   ", c.num);
+      c_traitsRow.setFloat("   Mass   ", c.getMass());
+      c_traitsRow.setFloat("   Width   ", c.getWidth());
+      c_traitsRow.setFloat("   Density   ", c.getDensity());
+      c_traitsRow.setFloat("   Armor   ", c.getArmor());
+      //c_traitsRow.setFloat("   Wing #   ", );
+      //c_traitsRow.setFloat("   Wing Size   ", );
+      //c_traitsRow.setFloat("   Antennae #   ", );
+      //c_traitsRow.setFloat("   Color   ", );
+      c_traitsRow.setFloat("   Velocity   ", c.maxMovementSpeed);
+      //c_traitsRow.setFloat("   Acceleration   ", );
+      c_traitsRow.setFloat("   Max HP   ", c.maxHealth); 
+      
+      massAvg  += c.getMass();
+      widthAvg += c.getWidth();
+      denseAvg += c.getDensity();
+      armorAvg += c.getArmor();
+      velAvg   += c.maxMovementSpeed;
+      hpAvg    += c.maxHealth;
+      
+      count ++;
+    }
+    
+    // Update creature trait averages data
+    TableRow c_avgsRow = c_avgs.addRow();
+    c_avgsRow.setInt("   Gen   ", generation);
+    c_avgsRow.setFloat("   Avg Mass   ", massAvg/count);
+    c_avgsRow.setFloat("   Avg Width   ", widthAvg/count);
+    c_avgsRow.setFloat("   Avg Density   ", denseAvg/count);
+    c_avgsRow.setFloat("   Avg Armor   ", armorAvg/count);
+    c_avgsRow.setFloat("   Avg Wing #   ", wingAvg/count);
+    c_avgsRow.setFloat("   Avg Wing Size   ", wingSizeAvg/count);
+    c_avgsRow.setFloat("   Avg Antennae #   ", antennaeAvg/count);
+    c_avgsRow.setFloat("   Avg Color   ", colorAvg/count);
+    c_avgsRow.setFloat("   Avg Velocity   ", velAvg/count);
+    c_avgsRow.setFloat("   Avg Acceleration   ", acclAvg/count);
+    c_avgsRow.setFloat("   Avg Max HP   ", hpAvg/count);
+    
+    writeTables(); 
   }
 }

@@ -503,6 +503,30 @@ class creature {
   float getMass() {
     return body.getMass();
   }
+  
+  float getArmor() {  // gets the sum of armor on all segments and appendages
+    float value = 0;
+    for (Segment s : segments) {
+      value += s.armor;
+    }
+    for (Appendage a : appendages) {
+      value += a.armor;
+    }
+    
+    return value;
+  }
+  
+  float getDensity() { // gets the sum of density on all segments and appendages
+    float value = 0;
+    for (Segment s : segments) {
+      value += s.density;
+    }
+    for (Appendage a : appendages) {
+      value += a.density; 
+    }
+    
+    return value;
+  }
 
   // can be from 2 to Genome.MAX_SEGMENTS
   int getNumSegments() {
