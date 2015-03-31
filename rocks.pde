@@ -8,17 +8,20 @@ class rock {
   Body the_rock;  // box2d body
   int radius;     // radius of the rock
   boolean remove = false;  // used to remember to remove it from the list of rocks
+  PImage rockImg = null;// = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png"); 
   
   rock(int x, int y) {  // Construct a rock at the given location
     radius = (int)(10);
     makebody(x, y);
     the_rock.setUserData(this);
+    rockImg = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png");
   }
   
   rock(int x, int y, int r) {  // Construct a rock at the given location
     radius = r;
     makebody(x, y);
     the_rock.setUserData(this);
+    rockImg = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png");
   }
   
   rock() {  // Construct a rock at a random location
@@ -26,6 +29,8 @@ class rock {
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
     the_rock.setUserData(this);
+    int rockType = (int)random(0,3); 
+    rockImg = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png");
   }
   
   // This function removes the particle from the box2d world
@@ -53,10 +58,13 @@ class rock {
     Vec2 pos = box2d.getBodyPixelCoord(the_rock);
     pushMatrix();
     translate(pos.x, pos.y);
-    fill(200, 200, 200);
-    stroke(0);
-    ellipse(0, 0, radius*2, radius*2);  
+    //fill(200, 200, 200);
+    //stroke(0);
+    //ellipse(0, 0, radius*2, radius*2);  
     popMatrix();
+    if(rockImg != null) {
+      image(rockImg, pos.x, pos.y, rockImg.width * 10, rockImg.height * 10);
+    }
   }
   
   void makebody(int x, int y) {
