@@ -14,14 +14,14 @@ class rock {
     radius = (int)(10);
     makebody(x, y);
     the_rock.setUserData(this);
-    rockImg = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png");
+    rockImg = loadImage("assets/environment/rocks/rock" + (int)random(0,3) + ".png");
   }
   
   rock(int x, int y, int r) {  // Construct a rock at the given location
     radius = r;
     makebody(x, y);
     the_rock.setUserData(this);
-    rockImg = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png");
+    rockImg = loadImage("assets/environment/rocks/rock" + (int)random(0,3) + ".png");
   }
   
   rock() {  // Construct a rock at a random location
@@ -30,7 +30,7 @@ class rock {
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
     the_rock.setUserData(this);
     int rockType = (int)random(0,3); 
-    rockImg = loadImage("/assets/environment/rocks/rock" + (int)random(0,3) + ".png");
+    rockImg = loadImage("assets/environment/rocks/rock" + (int)random(0,3) + ".png");
   }
   
   // This function removes the particle from the box2d world
@@ -63,7 +63,7 @@ class rock {
     //ellipse(0, 0, radius*2, radius*2);  
     popMatrix();
     if(rockImg != null) {
-      image(rockImg, pos.x, pos.y, rockImg.width * 10, rockImg.height * 10);
+      image(rockImg, pos.x - rockImg.width / 8, pos.y - rockImg.width / 8, rockImg.width / 4, rockImg.height / 4);
     }
   }
   
