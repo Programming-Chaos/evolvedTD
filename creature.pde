@@ -610,6 +610,26 @@ class creature {
     if (!alive) { // dead creatures don't update
       return;
     }
+
+    if (selected && timesteps % 20 == 0) {
+      println("----------------------------");
+      println("Stats for creature #" + num);
+      println("----------------------------");
+      println("Health: " + health + " / " + maxHealth + " +" + health_regen);
+      println("Fitness: " + fitness);
+      println("Max speed: " + maxMovementSpeed);
+      println("Time in water: " + time_in_water);
+      println("Time on land: " + time_on_land);
+      if (scent)
+        println("Can smell");
+      else
+        println("Cannot smell");
+      println("Scent strength: " + scentStrength);
+      println("Reproduction energy: " + energy_reproduction);
+      println("Locomotion energy: " + energy_locomotion);
+      println("Health energy: " + energy_health);
+    }
+
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     timestep_counter++;
     float a = body.getAngle();
@@ -910,3 +930,4 @@ class creature {
     }
   }
 }
+
