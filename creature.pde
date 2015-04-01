@@ -41,6 +41,7 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
+  boolean selected;
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -336,6 +337,7 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    selected = false;
 
     maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
     for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
