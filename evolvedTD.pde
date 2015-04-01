@@ -442,23 +442,17 @@ void mousePressed() { // called if the (left) mouse button is pressed
     the_tower.fire(); // have the tower fire its active weapon if unpaused
 
   if (mouseButton == RIGHT) {
-    // select creature
     int radius = 20;
-    creature selection = null;
-
     // find a creature
     for (creature c : the_pop.swarm) {
       Vec2 location = c.getPos();
       if (x < location.x + radius && x > location.x - radius
           && y < location.y + radius && y > location.y - radius) {
-        selection = c;
-        break;
+        c.selected = true;
       }
-    }
-
-    // toggle found creature
-    if (selection != null) {
-      selection.selected = !selection.selected;
+      else {
+        c.selected = false;
+      }
     }
   }
 
