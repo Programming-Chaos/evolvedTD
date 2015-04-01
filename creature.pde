@@ -770,17 +770,26 @@ class creature {
     pushMatrix();  // Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    stroke(0);   // Draw polygons with edges
+
+    if (selected) // purple
+      stroke(76, 0, 153);
+    else          // black
+      stroke(0);
+
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
-        if ((((Segment)f.getUserData()).armor) > 1)  strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else strokeWeight(((Segment)f.getUserData()).armor);
+        if ((((Segment)f.getUserData()).armor) > 1)
+          strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else
+          strokeWeight(((Segment)f.getUserData()).armor);
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-        if ((((Appendage)f.getUserData()).armor) > 1)  strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else strokeWeight(((Appendage)f.getUserData()).armor);
+        if ((((Appendage)f.getUserData()).armor) > 1)
+          strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else
+          strokeWeight(((Appendage)f.getUserData()).armor);
       }
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
