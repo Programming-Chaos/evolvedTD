@@ -441,6 +441,7 @@ void mousePressed() { // called if the (left) mouse button is pressed
   if (mouseButton == LEFT && state == State.RUNNING)
     the_tower.fire(); // have the tower fire its active weapon if unpaused
 
+  // select a creature
   if (mouseButton == RIGHT) {
     int radius = 20;
     // find a creature
@@ -449,6 +450,8 @@ void mousePressed() { // called if the (left) mouse button is pressed
       if (x < location.x + radius && x > location.x - radius
           && y < location.y + radius && y > location.y - radius) {
         c.selected = true;
+        // zoom in on click
+        cameraZ = 400;
       }
       else {
         c.selected = false;

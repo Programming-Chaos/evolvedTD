@@ -783,6 +783,12 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
 
+    // make camera follow creature
+    if (selected) {
+      cameraX = int(pos.x);
+      cameraY = int(pos.y);
+    }
+
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
