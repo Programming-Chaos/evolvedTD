@@ -6,8 +6,12 @@ class panel{
   float panel_width;
   boolean extended;
   int paneltype;      // 1 for upper right, 2 for bottom
+  boolean hasclicked1; // these are temporary resolutions for my fixed position turrets
+  boolean hasclicked2; // prevents turrets from overlapping each other
   PImage gbase;
   PImage g;
+  PImage fbase;
+  PImage f;
   
   panel(int pw, int ph, int type){
     panel_width = pw;// 100;
@@ -16,7 +20,8 @@ class panel{
     panel_y = panel_height;
     paneltype = type;
     extended = false;
-    gbase = loadImage("assets/Tower_base_02.png");
+    hasclicked1 = false;
+    hasclicked2 = false;
   }
 //  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 //  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
@@ -42,14 +47,21 @@ class panel{
           break;
         case 2:
           g = loadImage("assets/RailGun-01.png");
+          gbase = loadImage("assets/Tower_base_02.png");
+          f = loadImage("assets/FlameThrower01-01.png");
+          fbase = loadImage("assets/Turbase03256.png");
           //translate(cameraX, cameraY+195+panel_y,cameraZ-400);  // centered and below the camera
           translate(-1250, 1250+panel_y, 0);
           fill(255,255,255,150);
           rect(1250,-125,panel_width,panel_height);
           fill(0,150,0,200);
-          rect(0, 0, 500, 500);
+          rect(128, -125, 250, 256);
+          fill(255,0,0,200);
+          rect(384,-125,250,256);
           image(gbase, 0, -256);
           image(g, 0, -256);
+          image(fbase, 256, -256);
+          image(f, 256, -256);
           break;
       }
     hint(ENABLE_DEPTH_TEST); 
@@ -94,7 +106,18 @@ class panel{
     }
     
     if((mouseY > height - (panel_height/3))  && mouseX < panel_width/32){
-      the_player.wave_fire();
+      if (!hasclicked1){
+        tower t = new tower(-500, 0, 'r');
+        the_player.addtower(t);
+        hasclicked1 = true;
+      }
+    }
+    if((mouseY > height - (panel_height/3))  && mouseX > panel_width/32 && mouseX < 2*panel_width/32){
+      if (!hasclicked2){
+        tower t = new tower(500, 0, 'f');
+        the_player.addtower(t);
+        hasclicked2 = true;
+      }
     }
     
   }

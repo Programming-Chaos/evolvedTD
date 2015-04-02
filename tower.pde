@@ -3,6 +3,8 @@ class tower {
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
   int activeweapon;     // value determines which weapon is active
+  int xpos;
+  int ypos;
   ArrayList<projectile> projectiles;  // list of active projectiles
   float angle;    // angle of tower's main, auto-fir weapon
   boolean autofire = true;
@@ -16,17 +18,33 @@ class tower {
   int soundtimer;
   
   // constructor function, initializes the tower
-  tower() {
+  tower(int x, int y, char c) {
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
     projectiles = new ArrayList<projectile>();
     angle = 0;
-    gunbase = loadImage("assets/Tower_base_02.png");
-    gun = loadImage("assets/RailGun-01.png");
-    gunalt = loadImage("assets/RailGun-a-01.png");
+    xpos = x;
+    ypos = y;
     imagetimer = 0;
     soundtimer = 0;
+    loadimages(c);
+  }
+  
+  
+  void loadimages(char c){
+    switch (c){
+      case 'r':
+        gunbase = loadImage("assets/Tower_base_02.png");
+        gun = loadImage("assets/RailGun-01.png");
+        gunalt = loadImage("assets/RailGun-a-01.png");
+        break;
+      case 'f':
+        gunbase = loadImage("assets/Turbase03256.png");
+        gun = loadImage("assets/FlameThrower01-01.png");
+        gunalt = loadImage("assets/FlameThrower02-01.png");
+        break;
+    }
   }
   
   void update() {
@@ -77,7 +95,7 @@ class tower {
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
     */
-    image(gunbase,-128,-128);
+    image(gunbase, xpos-128, ypos-128);
     showgunalt = false;
     showgun = true;
     imagetimer++;
@@ -91,6 +109,7 @@ class tower {
     }
       pushMatrix();
       float c = angle;
+      translate(xpos, ypos, 0);
       rotate(c + HALF_PI);
       if(showgun)image(gun,-128,-128);
       if(showgunalt)image(gunalt,-128,-128);
@@ -161,7 +180,7 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
+    projectile p = new projectile(xpos, ypos, angle, 20); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
@@ -186,7 +205,7 @@ class tower {
       return;
     }
     for(float a = 0; a < 2*PI ; a += ((2*PI)/20)){
-      projectile p = new projectile(5*cos(a), 5*sin(a), a, 20); // 20 is the current damage, should be a variable, upgradable
+      projectile p = new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, 20); // 20 is the current damage, should be a variable, upgradable
       // postions of new projectives are not at 0,0 to avoid collisions.
       projectiles.add(p);
     }
