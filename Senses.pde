@@ -82,7 +82,9 @@ class Sensory_Systems {
   Sensory_Systems(Genome g) {
     brain_array = new float[Brain.INPUTS];
     
-    color_of_eyes = color(abs((float)Utilities.Sigmoid(g.sum(RedeyeColor), 5, 255)), abs((float)Utilities.Sigmoid(g.sum(BlueeyeColor), 5, 255)), abs((float)Utilities.Sigmoid(g.sum(GreeneyeColor), 5, 255)));
+    color_of_eyes = color(abs((float)Utilities.Sigmoid(g.sum(redEyeColor), 5, 255)), 
+          abs((float)Utilities.Sigmoid(g.sum(blueEyeColor), 5, 255)), 
+          abs((float)Utilities.Sigmoid(g.sum(greenEyeColor), 5, 255)));
     
     for (int c = 0; c < Brain.INPUTS; c++)
       brain_array[c] = 0;

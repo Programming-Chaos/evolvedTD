@@ -38,9 +38,9 @@ Trait rockTrait = new Trait(10);
 // Body
 Trait scentTrait = new Trait(10);
 
-Trait RedeyeColor = new Trait(10);
-Trait GreeneyeColor = new Trait(10);
-Trait BlueeyeColor = new Trait(10);
+Trait redEyeColor = new Trait(10);
+Trait greenEyeColor = new Trait(10);
+Trait blueEyeColor = new Trait(10);
 
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
@@ -204,6 +204,7 @@ class Genome {
   }
 
   //Creates inheritance value
+  //. between each creature uniqie id between .
   void Inheritance(int num) {
     if (xChromosome.inherit != "") {
       xChromosome.inherit += "." + str(num);
@@ -216,7 +217,6 @@ class Genome {
     } else {
       yChromosome.inherit = str(num);
     }
-      
   }
   // Returns a list of genes from the Y chromosome
   FloatList listY(Trait trait) {
@@ -294,6 +294,7 @@ class Genome {
     // recombine
     Chromosome x = new Chromosome();
     Chromosome y = new Chromosome();
+    //shares info of inheritance
     x.inherit = xChromosome.inherit;
     y.inherit = yChromosome.inherit;
     
