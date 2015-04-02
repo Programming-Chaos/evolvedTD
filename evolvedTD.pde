@@ -14,8 +14,9 @@ import org.jbox2d.dynamics.contacts.*;
 
 
 int cameraX, cameraY, cameraZ; // location of the camera
-int worldWidth = 2500;         // size in pixels of the world
-int worldHeight = 2500;
+static int worldWidth = 2500;  // world size
+static int worldHeight = 2500;
+static int zoomOffset = 2160;  // (cameraZ - zoomOffset) is zoomed out
 
 // see
 State state = State.RUNNING;
@@ -464,7 +465,9 @@ void mousePressed() { // called if the (left) mouse button is pressed
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
+
   the_player.mouse_pressed();
+
 }
 
 void controls() {
