@@ -42,6 +42,7 @@ class creature {
   float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
   boolean selected;
+  StatsPanel stats;
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -338,6 +339,7 @@ class creature {
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
     selected = false;
+    stats = new StatsPanel();
 
     maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
     for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
@@ -611,25 +613,6 @@ class creature {
       return;
     }
 
-    if (selected && timesteps % 20 == 0) {
-      println("----------------------------");
-      println("Stats for creature #" + num);
-      println("----------------------------");
-      println("Health: " + health + " / " + maxHealth + " +" + health_regen);
-      println("Fitness: " + fitness);
-      println("Max speed: " + maxMovementSpeed);
-      println("Time in water: " + time_in_water);
-      println("Time on land: " + time_on_land);
-      if (scent)
-        println("Can smell");
-      else
-        println("Cannot smell");
-      println("Scent strength: " + scentStrength);
-      println("Reproduction energy: " + energy_reproduction);
-      println("Locomotion energy: " + energy_locomotion);
-      println("Health energy: " + energy_health);
-    }
-
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     timestep_counter++;
     float a = body.getAngle();
@@ -783,8 +766,9 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
 
-    // make camera follow creature
     if (selected) {
+      stats.display();
+      // make camera follow creature
       cameraX = int(pos.x);
       cameraY = int(pos.y);
     }
@@ -933,6 +917,40 @@ class creature {
         fd.shape = sd;
         body.createFixture(fd);  // Create the actual fixture, which adds it to the body
       }
+    }
+  }
+
+  class StatsPanel {
+    // TODO: replace with pending GUI helper class
+    float w = 140;
+    float h = 90;
+
+    void display() {
+      pushMatrix();
+      hint(DISABLE_DEPTH_TEST);
+      // I don't know why these numbers scale it seemingly well enough
+      translate(cameraX + 180, cameraY + 160, cameraZ - 400);
+      fill(255, 255, 255, 150);
+      rect(0, 0, w, h);
+      fill(0, 0, 0, 200);
+      textSize(8);
+
+      float leftalign = -w/2 + 4;
+      float topalign = -h/2;
+      text("Creature: " + num, leftalign, topalign + 10);
+      text("Health: " + health + " / " + maxHealth + " +" + health_regen, leftalign, topalign + 18);
+      text("Fitness: " + fitness, leftalign, topalign + 26);
+      text("Max speed: " + int(maxMovementSpeed), leftalign, topalign + 34);
+      text("Time in water: " + time_in_water, leftalign, topalign + 42);
+      text("Time on land: " + time_on_land, leftalign, topalign + 50);
+      text("Scent strength: " + scentStrength, leftalign, topalign + 58);
+      text("Reproduction energy: " + int(energy_reproduction), leftalign, topalign + 66);
+      text("Locomotion energy: " + int(energy_locomotion), leftalign, topalign + 74);
+      text("Health energy: " + int(energy_health), leftalign, topalign + 82);
+
+      fill(255,0,0,200);
+      hint(ENABLE_DEPTH_TEST);
+      popMatrix();
     }
   }
 }
