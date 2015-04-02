@@ -119,7 +119,7 @@ class tile {
 
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
-  void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; }
+  void DEBUG_sensing(boolean s)  { DEBUG_sensing = false; }
 }
 
 // Unimplemented currently

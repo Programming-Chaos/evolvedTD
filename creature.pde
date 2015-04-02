@@ -306,10 +306,12 @@ class creature {
     construct(e, pos);
   }
 
-  void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
+  void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors  
     num = creature_count++;
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
+    genome.Inheritance(num);
+ 
     current_actions = new float[brain.OUTPUTS];
     
     // used for data collection
@@ -494,7 +496,10 @@ class creature {
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
     a = a*(1 + (int)outputs[3]);
-    return color(r, g, b, a);
+    
+    /*I turned off alpha value here so I could not draw segmentations on creatures
+    The creatures weren't easily visible with a low alpha*/
+    return color(r, g, b, 255);
   }
 
   // Calculate and return the width of the creature
@@ -624,7 +629,7 @@ class creature {
     senses.Update_Senses(pos2.x, pos2.y, a);
 
     calcBehavior();
-    torque = current_actions[0]*0.01;
+    torque = current_actions[0];
 
     // force is a percentage of max movement speed from 10% to 100%, averaging 80%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
@@ -677,10 +682,10 @@ class creature {
     if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
-      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.05)));
+      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
       
       // data collection
-      locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.05)));
+      locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
     }
 
     // Creatures that run off one side of the world wrap to the other side.
@@ -777,9 +782,12 @@ class creature {
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-    pushMatrix();  // Stores the current drawing reference frame
+       
+      pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
+    stroke(0);   // Draw polygons with edges
+    
 
     if (selected) // purple
       stroke(76, 0, 153);
@@ -801,27 +809,29 @@ class creature {
         else
           strokeWeight(((Appendage)f.getUserData()).armor);
       }
+
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
+      //strokeWeight(.1);
+      noStroke();
       for (int i = 0; i < 3; i++) {
         Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
     }
-    strokeWeight(1);
+    
+    //strokeWeight(1);
     // Add some eyespots
-    fill(0);
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
-    ellipse(eye.x, eye.y, 5, 5);
-    ellipse(-1 * eye.x, eye.y, 5, 5);
-    fill(255);
-    ellipse(eye.x, eye.y - 1, 2, 2);
-    ellipse(-1 * eye.x, eye.y - 1, 2, 2);
+    senses.Draw_Eyes(eye, this);
     popMatrix();
-
+    
+    pushMatrix();
+    noStroke();
     senses.Draw_Sense(pos.x, pos.y, body.getAngle());
-
+    popMatrix();
+    
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();

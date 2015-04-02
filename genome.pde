@@ -38,6 +38,10 @@ Trait rockTrait = new Trait(10);
 // Body
 Trait scentTrait = new Trait(10);
 
+Trait redEyeColor = new Trait(10);
+Trait greenEyeColor = new Trait(10);
+Trait blueEyeColor = new Trait(10);
+
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
 // need an extra point for the leading and trailing edge (spine)
@@ -193,16 +197,33 @@ class Genome {
     yChromosome = y;
   }
 
+  
   // Returns a list of genes from the X chromosome
   FloatList listX(Trait trait) {
     return xChromosome.list(trait);
   }
 
+  //Creates inheritance value
+  //. between each creature uniqie id between .
+  void inheritance(int num) {
+    if (xChromosome.inherit != "") {
+      xChromosome.inherit += "." + str(num);
+    } else {
+      xChromosome.inherit = str(num);
+    }
+    
+    if (yChromosome.inherit != "") {
+      yChromosome.inherit += "." + str(num);
+    } else {
+      yChromosome.inherit = str(num);
+    }
+  }
   // Returns a list of genes from the Y chromosome
   FloatList listY(Trait trait) {
     return yChromosome.list(trait);
   }
 
+  
   // Returns a combined list of genes from both chromosomes
   FloatList list(Trait trait) {
     FloatList l = listX(trait);
@@ -231,7 +252,8 @@ class Genome {
 
   class Chromosome {
     FloatList genes;
-
+    String inherit = "";
+    
     Chromosome(int n) {
       genes = new FloatList(n);
       for (int i = 0; i < n; i++) {
@@ -272,7 +294,10 @@ class Genome {
     // recombine
     Chromosome x = new Chromosome();
     Chromosome y = new Chromosome();
-
+    //shares info of inheritance
+    x.inherit = xChromosome.inherit;
+    y.inherit = yChromosome.inherit;
+    
     int start = int(random(nGenes));
     int num = int(random(nGenes - start));
 
