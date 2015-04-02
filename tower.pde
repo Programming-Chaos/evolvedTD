@@ -68,22 +68,32 @@ class tower {
           if (targetMode == 3){
             target = the_pop.highestAlpha(); 
           }  
-//          goal_angle = atan2(target.y,target.x);          
-//          if(angle_incr % angle != 0){
-//          angle_incr += radians(10);
-//          }
+          goal_angle = atan2(target.y,target.x);          
         if (autofirecounter % 20 == 0) { // only autofire every 20th time step
+          if(goal_angle - angle < 1){
           fire();
+          }
           autofirecounter = 0;  // reset the counter
           angle = goal_angle;
           goal_angle = atan2(target.y,target.x); 
         }
           
 //        }
-
-        if(angle != goal_angle){
-          angle += angle_incr;
+       if(targetMode != 1){
+        if(angle < goal_angle){
+          if(goal_angle - angle > 1){           
+            angle += angle_incr;  
+          }else{ 
+            angle += (goal_angle - angle);  // to not over correct
+          }
+        }else if(angle > goal_angle){         
+          if(goal_angle - angle > 1){
+            angle += (-1)*angle_incr;
+          }else{
+            angle += (-1)*(angle - goal_angle);
+          }
         }
+      }
       }
       else {  // user controlled, point at the mouse
         // calculate the location of the mouse pointer in the world
