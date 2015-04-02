@@ -298,6 +298,8 @@ class population {
       repRow.setInt("   # of Gametes   " , c.gameteStack.size());
       repRow.setFloat("   Gamete Cost   ", c.baseGameteCost + c.genome.avg(gameteCost));
       repRow.setFloat("   Gamete Time   ", c.baseGameteTime + c.genome.avg(gameteTime));
+      repRow.setString("   Inheritance Chromo 1   ", c.genome.xChromosome.inherit);   
+      repRow.setString("   Inheritance Chromo 2   ", c.genome.yChromosome.inherit);  
       
       // Update the creature senses data
       TableRow senseRow = sensing.addRow();
