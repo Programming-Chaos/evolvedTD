@@ -182,14 +182,14 @@ class environment {
     environAltitude = (int)random(255);
     isRaining = false;
     // Establish world type
-    decideWorldType();
+    int altShift = decideWorldType();
     
     spawnRocks();
-    altitudeShift();
+    altitudeShift(altShift);
     makeImage();
   }
   
-  void altitudeShift() {
+  void altitudeShift(int altShift) {
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
         tile t = tileMap[i][j];
@@ -198,7 +198,7 @@ class environment {
         int r = (c >> 16) & 255;
         int g = (c >> 8) & 255;
         int b = (c) & 255; 
-        float p = 150 * alt; 
+        float p = altShift * alt; 
         if(true) {
           t.colors = color((int) r - p, (int) g - p, (int) b - p);
         }
@@ -869,11 +869,11 @@ class environment {
   }
   
   // decides on the world type by choosing random number between 1 and 4
-  void decideWorldType() {
+  int decideWorldType() {
     int decision = int(random(1, 4.999999));
+    int altShift = 0;
     int r = 0, b = 0, g = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;
-    decision = 2;
     switch(decision) {
       case 1:
         // temperate
@@ -883,6 +883,7 @@ class environment {
         land = color(0, 150, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
+        altShift = 100;
         break;
       
       case 2:
@@ -893,6 +894,7 @@ class environment {
         land = color(240, 231, 100);
         waterALT = 0.20f;
         rockALT = 0.60f;
+        altShift = 100;
         break;
         
       case 3:
@@ -904,6 +906,7 @@ class environment {
         land = color(8, 90, 8);
         waterALT = 0.45f;
         rockALT = 0.70f;
+        altShift = 60;
         break;
         
       case 4:
@@ -914,6 +917,7 @@ class environment {
         land = color(245, 245, 245); 
         waterALT = 0.35f;
         rockALT = 0.60f;
+        altShift = 100;        
         break;
         
       /*
@@ -946,6 +950,7 @@ class environment {
     generateWaterALT(waterALT); // Just works out better this way
     generateRockyALT(rockALT);
     spawnVegetation(decision, waterALT, rockALT);
+    return altShift;
   }   
   
   boolean randBool() {
