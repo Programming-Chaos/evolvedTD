@@ -41,8 +41,6 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
-  boolean selected;
-  StatsPanel stats;
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -340,8 +338,6 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
-    selected = false;
-    stats = new StatsPanel();
 
     maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
     for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
@@ -771,13 +767,6 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
 
-    if (selected) {
-      stats.display();
-      // make camera follow creature
-      cameraX = int(pos.x);
-      cameraY = int(pos.y);
-    }
-
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
@@ -789,10 +778,7 @@ class creature {
     stroke(0);   // Draw polygons with edges
     
 
-    if (selected) // purple
-      stroke(76, 0, 153);
-    else          // black
-      stroke(0);
+    stroke(0);
 
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
@@ -927,41 +913,6 @@ class creature {
         fd.shape = sd;
         body.createFixture(fd);  // Create the actual fixture, which adds it to the body
       }
-    }
-  }
-
-  class StatsPanel {
-    float w = 500;
-    float h = 420;
-
-    void display() {
-      pushMatrix();
-      hint(DISABLE_DEPTH_TEST);
-      translate(cameraX + (worldWidth - w)/2, cameraY + worldHeight/2 - h, cameraZ - zoomOffset);
-
-      fill(255, 255, 255, 150);
-      rect(0, 0, w, h);
-      fill(0, 0, 0, 200);
-
-      float leftalign = -w/2 + 4;
-      float topalign = -h/2;
-      int fontSize = 40;
-      textSize(fontSize);
-
-      text("Creature: " + num, leftalign, topalign + 1 * fontSize);
-      text("Health: " + health + " / " + maxHealth + " +" + health_regen, leftalign, topalign + 2 * fontSize);
-      text("Fitness: " + fitness, leftalign, topalign + 3 * fontSize);
-      text("Max speed: " + int(maxMovementSpeed), leftalign, topalign + 4 * fontSize);
-      text("Time in water: " + time_in_water, leftalign, topalign + 5 * fontSize);
-      text("Time on land: " + time_on_land, leftalign, topalign + 6 * fontSize);
-      text("Scent strength: " + scentStrength, leftalign, topalign + 7 * fontSize);
-      text("Reproduction energy: " + int(energy_reproduction), leftalign, topalign + 8 * fontSize);
-      text("Locomotion energy: " + int(energy_locomotion), leftalign, topalign + 9 * fontSize);
-      text("Health energy: " + int(energy_health), leftalign, topalign + 10 * fontSize);
-
-      fill(255,0,0,200);
-      hint(ENABLE_DEPTH_TEST);
-      popMatrix();
     }
   }
 }
