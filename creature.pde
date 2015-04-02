@@ -310,7 +310,7 @@ class creature {
     num = creature_count++;
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
-    genome.Inheritance(num);
+    genome.inheritance(num);
  
     current_actions = new float[brain.OUTPUTS];
     
