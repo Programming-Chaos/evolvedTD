@@ -9,7 +9,7 @@ class player {
   player(){
     towers = new ArrayList<tower>();
     upper_right = new panel(100,100, 1);
-    bottom = new panel(400, 75, 2);
+    bottom = new panel(2500, 250, 2);
     resources = 0;
     resourceGain = 0.1;
   }
@@ -40,6 +40,7 @@ class player {
   
   void mouse_pressed(){
     upper_right.mouse_pressed();  // check if the mouse was pressed in the upperright GUI panel
+    bottom.mouse_pressed();
   }
   
   void wave_fire(){

@@ -42,15 +42,14 @@ class panel{
           break;
         case 2:
           g = loadImage("assets/RailGun-01.png");
-          translate(cameraX, cameraY+195+panel_y,cameraZ-400);  // centered and below the camera
+          //translate(cameraX, cameraY+195+panel_y,cameraZ-400);  // centered and below the camera
+          translate(-1250, 1250+panel_y, 0);
           fill(255,255,255,150);
-          rect(0,0,panel_width,panel_height); 
+          rect(1250,-125,panel_width,panel_height);
           fill(0,150,0,200);
-          // sample button
-          rect(-0.5*panel_width+panel_width/12,0, panel_width/6, panel_height);
-          pushMatrix();
-            
-          popMatrix();
+          rect(0, 0, 500, 500);
+          image(gbase, 0, -256);
+          image(g, 0, -256);
           break;
       }
     hint(ENABLE_DEPTH_TEST); 
@@ -68,10 +67,10 @@ class panel{
         }
         break;
       case 2:
-        if( (mouseY > height - (panel_height*2)) && (panel_y > 0)){
+        if( (mouseY > height - (panel_height/2)) && (panel_y > 0)){
          panel_y = panel_y - (panel_height*0.1); 
         }
-        if( (mouseY < height - (panel_height*2)) && panel_y < panel_height){
+        if( (mouseY < height - (panel_height/2)) && panel_y < panel_height){
           panel_y += (panel_height*0.1);
         }
         break;
@@ -92,6 +91,10 @@ class panel{
       if(mouseY > (panel_height*1.3) && mouseY < panel_height*1.9 ){
         the_player.wave_fire();
       }
+    }
+    
+    if((mouseY > height - (panel_height/3))  && mouseX < panel_width/32){
+      the_player.wave_fire();
     }
     
   }
