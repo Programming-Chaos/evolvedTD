@@ -450,13 +450,12 @@ void mousePressed() { // called if the (left) mouse button is pressed
       Vec2 location = c.getPos();
       if (x < location.x + radius && x > location.x - radius
           && y < location.y + radius && y > location.y - radius) {
-        c.selected = true;
+        the_player.selectedCreature = c;
         // zoom in on click
         cameraZ = 400;
+        break;
       }
-      else {
-        c.selected = false;
-      }
+      the_player.selectedCreature = null;
     }
   }
 
