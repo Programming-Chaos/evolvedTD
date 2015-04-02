@@ -931,32 +931,33 @@ class creature {
   }
 
   class StatsPanel {
-    // TODO: replace with pending GUI helper class
-    float w = 140;
-    float h = 90;
+    float w = 500;
+    float h = 420;
 
     void display() {
       pushMatrix();
       hint(DISABLE_DEPTH_TEST);
-      // I don't know why these numbers scale it seemingly well enough
-      translate(cameraX + 180, cameraY + 160, cameraZ - 400);
+      translate(cameraX + (worldWidth - w)/2, cameraY + worldHeight/2 - h, cameraZ - zoomOffset);
+
       fill(255, 255, 255, 150);
       rect(0, 0, w, h);
       fill(0, 0, 0, 200);
-      textSize(8);
 
       float leftalign = -w/2 + 4;
       float topalign = -h/2;
-      text("Creature: " + num, leftalign, topalign + 10);
-      text("Health: " + health + " / " + maxHealth + " +" + health_regen, leftalign, topalign + 18);
-      text("Fitness: " + fitness, leftalign, topalign + 26);
-      text("Max speed: " + int(maxMovementSpeed), leftalign, topalign + 34);
-      text("Time in water: " + time_in_water, leftalign, topalign + 42);
-      text("Time on land: " + time_on_land, leftalign, topalign + 50);
-      text("Scent strength: " + scentStrength, leftalign, topalign + 58);
-      text("Reproduction energy: " + int(energy_reproduction), leftalign, topalign + 66);
-      text("Locomotion energy: " + int(energy_locomotion), leftalign, topalign + 74);
-      text("Health energy: " + int(energy_health), leftalign, topalign + 82);
+      int fontSize = 40;
+      textSize(fontSize);
+
+      text("Creature: " + num, leftalign, topalign + 1 * fontSize);
+      text("Health: " + health + " / " + maxHealth + " +" + health_regen, leftalign, topalign + 2 * fontSize);
+      text("Fitness: " + fitness, leftalign, topalign + 3 * fontSize);
+      text("Max speed: " + int(maxMovementSpeed), leftalign, topalign + 4 * fontSize);
+      text("Time in water: " + time_in_water, leftalign, topalign + 5 * fontSize);
+      text("Time on land: " + time_on_land, leftalign, topalign + 6 * fontSize);
+      text("Scent strength: " + scentStrength, leftalign, topalign + 7 * fontSize);
+      text("Reproduction energy: " + int(energy_reproduction), leftalign, topalign + 8 * fontSize);
+      text("Locomotion energy: " + int(energy_locomotion), leftalign, topalign + 9 * fontSize);
+      text("Health energy: " + int(energy_health), leftalign, topalign + 10 * fontSize);
 
       fill(255,0,0,200);
       hint(ENABLE_DEPTH_TEST);
