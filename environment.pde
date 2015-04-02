@@ -50,12 +50,12 @@ class tile {
   int biome;
   boolean hasFood;
   boolean hasRock;
+  boolean hasTower;
   boolean hasScent;
   boolean hasCreatureScent;
   boolean hasReproScent;
   boolean hasPainScent;
 
-  boolean hasTower;
   int[] taste;
 
   creature hasCreature; // is there a creature present
@@ -562,6 +562,18 @@ class environment {
       return 1;
     }
     return 0;
+  }
+  
+  int checkForTower(double x1, double y1){
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
+    if (tileMap[x][y].hasTower()){
+      return 0;
+    }
+    return 1;
   }
 
   int []checkForTaste(double x1, double y1) {
