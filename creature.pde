@@ -41,6 +41,8 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
+  boolean selected;
+  StatsPanel stats;
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -336,6 +338,8 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    selected = false;
+    stats = new StatsPanel();
 
     maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
     for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
@@ -608,6 +612,7 @@ class creature {
     if (!alive) { // dead creatures don't update
       return;
     }
+
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     timestep_counter++;
     float a = body.getAngle();
@@ -761,6 +766,13 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
 
+    if (selected) {
+      stats.display();
+      // make camera follow creature
+      cameraX = int(pos.x);
+      cameraY = int(pos.y);
+    }
+
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
@@ -768,17 +780,26 @@ class creature {
     pushMatrix();  // Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    stroke(0);   // Draw polygons with edges
+
+    if (selected) // purple
+      stroke(76, 0, 153);
+    else          // black
+      stroke(0);
+
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
-        if ((((Segment)f.getUserData()).armor) > 1)  strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else strokeWeight(((Segment)f.getUserData()).armor);
+        if ((((Segment)f.getUserData()).armor) > 1)
+          strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else
+          strokeWeight(((Segment)f.getUserData()).armor);
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-        if ((((Appendage)f.getUserData()).armor) > 1)  strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else strokeWeight(((Appendage)f.getUserData()).armor);
+        if ((((Appendage)f.getUserData()).armor) > 1)
+          strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else
+          strokeWeight(((Appendage)f.getUserData()).armor);
       }
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
@@ -898,4 +919,39 @@ class creature {
       }
     }
   }
+
+  class StatsPanel {
+    // TODO: replace with pending GUI helper class
+    float w = 140;
+    float h = 90;
+
+    void display() {
+      pushMatrix();
+      hint(DISABLE_DEPTH_TEST);
+      // I don't know why these numbers scale it seemingly well enough
+      translate(cameraX + 180, cameraY + 160, cameraZ - 400);
+      fill(255, 255, 255, 150);
+      rect(0, 0, w, h);
+      fill(0, 0, 0, 200);
+      textSize(8);
+
+      float leftalign = -w/2 + 4;
+      float topalign = -h/2;
+      text("Creature: " + num, leftalign, topalign + 10);
+      text("Health: " + health + " / " + maxHealth + " +" + health_regen, leftalign, topalign + 18);
+      text("Fitness: " + fitness, leftalign, topalign + 26);
+      text("Max speed: " + int(maxMovementSpeed), leftalign, topalign + 34);
+      text("Time in water: " + time_in_water, leftalign, topalign + 42);
+      text("Time on land: " + time_on_land, leftalign, topalign + 50);
+      text("Scent strength: " + scentStrength, leftalign, topalign + 58);
+      text("Reproduction energy: " + int(energy_reproduction), leftalign, topalign + 66);
+      text("Locomotion energy: " + int(energy_locomotion), leftalign, topalign + 74);
+      text("Health energy: " + int(energy_health), leftalign, topalign + 82);
+
+      fill(255,0,0,200);
+      hint(ENABLE_DEPTH_TEST);
+      popMatrix();
+    }
+  }
 }
+
