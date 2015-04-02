@@ -31,12 +31,14 @@ boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
+boolean buttonpressed = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
+ArrayList<Panel> panels;
 
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
@@ -70,6 +72,7 @@ void setup() {
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   PFont font = createFont("Arial", 100);
   textFont(font);
+  panels = new ArrayList<Panel>();
   the_player = new player();
   the_tower = new tower();
   the_player.addtower(the_tower);
@@ -439,8 +442,14 @@ void mousePressed() { // called if the (left) mouse button is pressed
   x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
   y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 
-  if (mouseButton == LEFT && state == State.RUNNING)
-    the_tower.fire(); // have the tower fire its active weapon if unpaused
+  if (mouseButton == LEFT) {
+    the_player.mouse_pressed();
+    if (!buttonpressed) {
+      if (state == State.RUNNING)
+        the_tower.fire(); // have the tower fire its active weapon if unpaused
+    }
+    buttonpressed = false;
+  }
 
   // select a creature
   if (mouseButton == RIGHT) {
@@ -464,9 +473,6 @@ void mousePressed() { // called if the (left) mouse button is pressed
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
-
-  the_player.mouse_pressed();
-
 }
 
 void controls() {
