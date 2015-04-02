@@ -205,7 +205,7 @@ class Genome {
 
   //Creates inheritance value
   //. between each creature uniqie id between .
-  void Inheritance(int num) {
+  void inheritance(int num) {
     if (xChromosome.inherit != "") {
       xChromosome.inherit += "." + str(num);
     } else {
