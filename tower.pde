@@ -190,14 +190,17 @@ class tower {
     if (soundtimer%3==0){
       soundtimer = 0;
       if (playSound) {
-        gunshot.rewind();
-        gunshot.play();
+        PlaySounds( "assets/railgunfire01long.mp3" );
+        //        gunshot.rewind();
+        //        gunshot.play();
       }
     }
     else{
       if (playSound) {
-        gunshotalt.rewind();
-        gunshotalt.play();
+        PlaySounds( "assets/railgunfire01slow_01.mp3" );        
+        //        PlaySounds( gunshotalt );        
+        //        gunshotalt.rewind();
+        //        gunshotalt.play();
       }
     }
   }
@@ -214,8 +217,10 @@ class tower {
     energy-=5;
     imagetimer = 0;
     if (playSound) {
-      gunshot.rewind();
-      gunshot.play();
+      //      PlaySounds( gunshot );
+        PlaySounds( "assets/railgunfire01long.mp3" );      
+      //      gunshot.rewind();
+      //      gunshot.play();
     }
   }
     
