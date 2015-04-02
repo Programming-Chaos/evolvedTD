@@ -4,7 +4,9 @@ class tower {
   int maxEnergy = 1000; // max energy the tower can have
   int activeweapon;     // value determines which weapon is active
   ArrayList<projectile> projectiles;  // list of active projectiles
-  float angle;    // angle of tower's main, auto-fir weapon
+  float angle = 0;    // angle of tower's main, auto-fir weapon
+  float angle_incr = radians(10);
+  float goal_angle;
   boolean autofire = true;
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
   PImage gun;    // declare image for gun
@@ -57,17 +59,30 @@ class tower {
       if (autofire) {
         Vec2 target;
         autofirecounter++;
-        if (autofirecounter % 20 == 0) { // only autofire every 20th time step
+//        if(autofirecounter % 20 == 0){
           target = the_pop.vec_to_random_creature(); // target a random creature 
+//            target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           if (targetMode == 2){
             target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           }
           if (targetMode == 3){
             target = the_pop.highestAlpha(); 
-          }
-          angle = atan2(target.y,target.x);
+          }  
+//          goal_angle = atan2(target.y,target.x);          
+//          if(angle_incr % angle != 0){
+//          angle_incr += radians(10);
+//          }
+        if (autofirecounter % 20 == 0) { // only autofire every 20th time step
           fire();
           autofirecounter = 0;  // reset the counter
+          angle = goal_angle;
+          goal_angle = atan2(target.y,target.x); 
+        }
+          
+//        }
+
+        if(angle != goal_angle){
+          angle += angle_incr;
         }
       }
       else {  // user controlled, point at the mouse
@@ -197,7 +212,7 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
+    projectile p = new projectile(0, 0, goal_angle, 20); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
