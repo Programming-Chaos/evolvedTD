@@ -67,6 +67,8 @@ void setup() {
   size(800,800,P3D);             // window size, and makes it a 3D window
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
+  PFont font = createFont("Arial", 100);
+  textFont(font);
   the_player = new player();
   the_tower = new tower();
   the_player.addtower(the_tower);
