@@ -1,7 +1,8 @@
 class player {
   ArrayList<tower> towers;
-  PlayerPanel playerPanel;
-  StatsPanel statsPanel;
+  Panel playerPanel;
+  Panel statsPanel;
+  Panel newpanel;
   
   Panel testpanel;
   
@@ -11,32 +12,49 @@ class player {
   creature selectedCreature;
 
   player() {
+    towers = new ArrayList<tower>();
+    
     testpanel = new Panel(400,400,-1000,0,true);
-    //testpanel.enabled = false;
     testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40);
     testpanel.createButton(300,100,0,100,"Yay BUTTON",30,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
-    panels.add(testpanel);
-    towers = new ArrayList<tower>();
-    playerPanel = new PlayerPanel();
-    statsPanel = new StatsPanel();
+    testpanel.enabled = false;
+    
+    playerPanel = new Panel(500,420,980,-1020,true);
+    playerPanel.createTextBox(480,50,0,-180,new StringPass() { public String passed() { return ("Resources: " + (int)resources); } },40);
+    playerPanel.createTextBox(480,50,0,-100,new StringPass() { public String passed() { return ("Generation: " + generation); } },40);
+    playerPanel.createTextBox(480,50,0,-20,new StringPass() { public String passed() { return ("Time left: " + (timepergeneration - timesteps)); } },40);
+    playerPanel.createButton(350,100,0,110,"Wave Fire",50,new ButtonPress() { public void pressed() { wave_fire(); } });
+    
+    statsPanel = new Panel(500,520,980,1020-200,false);//-200 so it's not cut off the bottom of some peoples' screens
+    statsPanel.createTextBox(20,10+0*50,new StringPass() { public String passed() { return ("Creature: " + selectedCreature.num); } },40);
+    statsPanel.createTextBox(20,10+1*50,new StringPass() { public String passed() { return ("Health: " + selectedCreature.health + " / " + selectedCreature.maxHealth + " +" + selectedCreature.health_regen); } },40);
+    statsPanel.createTextBox(20,10+2*50,new StringPass() { public String passed() { return ("Fitness: " + selectedCreature.fitness); } },40);
+    statsPanel.createTextBox(20,10+3*50,new StringPass() { public String passed() { return ("Max speed: " + (int)selectedCreature.maxMovementSpeed); } },40);
+    statsPanel.createTextBox(20,10+4*50,new StringPass() { public String passed() { return ("Time in water: " + selectedCreature.time_in_water); } },40);
+    statsPanel.createTextBox(20,10+5*50,new StringPass() { public String passed() { return ("Time on land: " + selectedCreature.time_on_land); } },40);
+    statsPanel.createTextBox(20,10+6*50,new StringPass() { public String passed() { return ("Scent strength: " + selectedCreature.scentStrength); } },40);
+    statsPanel.createTextBox(20,10+7*50,new StringPass() { public String passed() { return ("Reproduction energy: " + (int)selectedCreature.energy_reproduction); } },40);
+    statsPanel.createTextBox(20,10+8*50,new StringPass() { public String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } },40);
+    statsPanel.createTextBox(20,10+9*50,new StringPass() { public String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } },40);
+    
     resources = 0;
     resourceGain = 0.1;
     selectedCreature = null;
   }
 
   void display() {
-    for (int i = towers.size() - 1; i >= 0; i--)  // walk through the towers
-      towers.get(i).display();  // display them all
-    for (int i = panels.size() - 1; i >= 0; i--)
-      panels.get(i).display();
-
-    playerPanel.display();
     if (selectedCreature != null) {
       Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
       cameraX = int(pos.x);
       cameraY = int(pos.y);
-      statsPanel.display();
+      statsPanel.enabled = true;
     }
+    else statsPanel.enabled = false;
+    
+    for (int i = towers.size() - 1; i >= 0; i--)  // walk through the towers
+      towers.get(i).display();  // display them all
+    for (int i = panels.size() - 1; i >= 0; i--)
+      panels.get(i).display();
   }
 
   void addtower(tower t) {
@@ -50,119 +68,18 @@ class player {
       towers.get(i).update();   // update them
     for (int i = panels.size() - 1; i >= 0; i--)
       panels.get(i).update();
-    playerPanel.update();
   }
 
   void mouse_pressed() {
     // check if the mouse was pressed in the player panel
     for (int i = panels.size() - 1; i >= 0; i--)
       panels.get(i).mouse_pressed();
-    playerPanel.mouse_pressed();
   }
 
   void wave_fire(){
     for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
       tower t = towers.get(i);
       t.wave_fire();
-    }
-  }
-
-  class PlayerPanel {
-    float w = 350;
-    float h = 200;
-    float x = w;
-    boolean displayed = false;
-
-    void display() {
-      pushMatrix();
-      hint(DISABLE_DEPTH_TEST);
-      translate(cameraX + (worldWidth - x)/2, cameraY + (h - worldHeight)/2, cameraZ - zoomOffset);
-
-      fill(255, 255, 255, 150);
-      rect(0, 0, w, h);
-      fill(0, 0, 0, 200);
-
-      float leftalign = -w/2 + 4;
-      float topalign = -h/2;
-      int fontSize = 40;
-      textSize(fontSize);
-
-      text("Resources: " + int(the_player.resources), leftalign, topalign + 1 * fontSize);
-      text("Generation: " + generation, leftalign, topalign + 2 * fontSize);
-      text("Time left: " + (timepergeneration - timesteps), leftalign, topalign + 3 * fontSize);
-
-      fill(255,0,0,200);
-
-      // wave fire button
-      rect(0, topalign + 4 * fontSize + 10, w - 40, fontSize + 10);
-      fill(0, 0, 0, 200);
-      text("Wave Fire", -w/4, topalign + 4 * fontSize + 20);
-
-      hint(ENABLE_DEPTH_TEST);
-      popMatrix();
-    }
-
-    void update() {
-      // if the upper right third
-      if (mouseX > 2 * width / 3 && mouseY < height / 3) {
-        // shift if not fully displayed
-        if (x < w) {
-          x += w * 0.1;
-        } else {
-          displayed = true;
-        }
-      } else if (x > -w){
-        x -= w * 0.1;
-        displayed = false;
-      }
-    }
-
-    void mouse_pressed() {
-      if (!displayed) { // only handle mouse presses in an extended panel
-        return;
-      }
-      if (mouseX > 5 * width / 6 && mouseY < height / 6) {
-        the_player.wave_fire();
-      }
-    }
-  }
-
-  class StatsPanel {
-    float w = 500;
-    float h = 420;
-
-    void display() {
-      if (selectedCreature == null)
-        return;
-      creature c = selectedCreature;
-
-      pushMatrix();
-      hint(DISABLE_DEPTH_TEST);
-      translate(cameraX + (worldWidth - w)/2, cameraY + worldHeight/2 - h, cameraZ - zoomOffset);
-
-      fill(255, 255, 255, 150);
-      rect(0, 0, w, h);
-      fill(0, 0, 0, 200);
-
-      float leftalign = -w/2 + 4;
-      float topalign = -h/2;
-      int fontSize = 40;
-      textSize(fontSize);
-
-      text("Creature: " + c.num, leftalign, topalign + 1 * fontSize);
-      text("Health: " + c.health + " / " + c.maxHealth + " +" + c.health_regen, leftalign, topalign + 2 * fontSize);
-      text("Fitness: " + c.fitness, leftalign, topalign + 3 * fontSize);
-      text("Max speed: " + int(c.maxMovementSpeed), leftalign, topalign + 4 * fontSize);
-      text("Time in water: " + c.time_in_water, leftalign, topalign + 5 * fontSize);
-      text("Time on land: " + c.time_on_land, leftalign, topalign + 6 * fontSize);
-      text("Scent strength: " + c.scentStrength, leftalign, topalign + 7 * fontSize);
-      text("Reproduction energy: " + int(c.energy_reproduction), leftalign, topalign + 8 * fontSize);
-      text("Locomotion energy: " + int(c.energy_locomotion), leftalign, topalign + 9 * fontSize);
-      text("Health energy: " + int(c.energy_health), leftalign, topalign + 10 * fontSize);
-
-      fill(255,0,0,200);
-      hint(ENABLE_DEPTH_TEST);
-      popMatrix();
     }
   }
 }
