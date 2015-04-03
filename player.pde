@@ -2,12 +2,20 @@ class player {
   ArrayList<tower> towers;
   PlayerPanel playerPanel;
   StatsPanel statsPanel;
+  
+  Panel testpanel;
+  
   float resources;        // amount of resources the tower has
   float maxResources;     // max resources the tower can store, may not use, if used should be upgradable
   float resourceGain;     // gain per timestep
   creature selectedCreature;
 
   player() {
+    testpanel = new Panel(400,400,-1000,0,true);
+    //testpanel.enabled = false;
+    testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40);
+    testpanel.createButton(300,100,0,100,"Yay BUTTON",30,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
+    panels.add(testpanel);
     towers = new ArrayList<tower>();
     playerPanel = new PlayerPanel();
     statsPanel = new StatsPanel();
@@ -17,10 +25,10 @@ class player {
   }
 
   void display() {
-    for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
-      tower t = towers.get(i);
-      t.display();  // display them all
-    }
+    for (int i = towers.size() - 1; i >= 0; i--)  // walk through the towers
+      towers.get(i).display();  // display them all
+    for (int i = panels.size() - 1; i >= 0; i--)
+      panels.get(i).display();
 
     playerPanel.display();
     if (selectedCreature != null) {
@@ -38,15 +46,17 @@ class player {
   void update() {
     resources += resourceGain;
     // walk through the towers
-    for (int i = towers.size() - 1; i >= 0; i--) {
-      tower t = towers.get(i);
-      t.update();   // update them
-    }
+    for (int i = towers.size() - 1; i >= 0; i--)
+      towers.get(i).update();   // update them
+    for (int i = panels.size() - 1; i >= 0; i--)
+      panels.get(i).update();
     playerPanel.update();
   }
 
   void mouse_pressed() {
     // check if the mouse was pressed in the player panel
+    for (int i = panels.size() - 1; i >= 0; i--)
+      panels.get(i).mouse_pressed();
     playerPanel.mouse_pressed();
   }
 
