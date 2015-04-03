@@ -1,7 +1,3 @@
-static int ZOOMED_HEIGHT = 2500;
-static int ZOOMED_WIDTH = 2500;
-static int ZOOMED_OFFSET = 2163;  // (translate(cameraX, cameraY, cameraZ - zoomOffset)
-
 interface ButtonPress {
   void pressed();
 }
@@ -37,10 +33,10 @@ class Button {
   }
   
   boolean isMouseOver() {
-    return (mouseX <= (((float)width/ZOOMED_WIDTH)*((parent.panel_x+(ZOOMED_WIDTH/2))+button_x+(button_width/2))) &&
-            mouseX >= (((float)width/ZOOMED_WIDTH)*((parent.panel_x+(ZOOMED_WIDTH/2))+button_x-(button_width/2))) &&
-            mouseY <= (((float)width/ZOOMED_WIDTH)*((parent.panel_y+(ZOOMED_HEIGHT/2))+button_y+(button_height/2))) &&
-            mouseY >= (((float)width/ZOOMED_WIDTH)*((parent.panel_y+(ZOOMED_HEIGHT/2))+button_y-(button_height/2))));
+    return (mouseX <= (((float)width/worldWidth)*((parent.panel_x+(worldWidth/2))+button_x+(button_width/2))) &&
+            mouseX >= (((float)width/worldWidth)*((parent.panel_x+(worldWidth/2))+button_x-(button_width/2))) &&
+            mouseY <= (((float)width/worldWidth)*((parent.panel_y+(worldHeight/2))+button_y+(button_height/2))) &&
+            mouseY >= (((float)width/worldWidth)*((parent.panel_y+(worldHeight/2))+button_y-(button_height/2))));
   }
   
   void buttonPressed() {
@@ -113,51 +109,51 @@ class Panel {
         else
           direction = 2;
       switch (direction) {
-        case 0:
-          offsetX = 0;
-          offsetY = ((-1*((panel_y+(ZOOMED_HEIGHT/2))+(panel_height/2)))+5);
-          current_offsetX = 0;
-          current_offsetY = offsetY;
-          break;
-        case 1:
-          offsetX = ((((ZOOMED_WIDTH/2)-panel_x)+(panel_width/2))-5);
-          offsetY = 0;
-          current_offsetX = offsetX;
-          current_offsetY = 0;
-          break;
-        case 2:
-          offsetX = 0;
-          offsetY = ((((ZOOMED_HEIGHT/2)-panel_y)+(panel_height/2))-5);
-          current_offsetX = 0;
-          current_offsetY = offsetY;
-          break;
-        case 3:
-          offsetX = ((-1*((panel_x+(ZOOMED_WIDTH/2))+(panel_width/2)))+5);
-          offsetY = 0;
-          current_offsetX = offsetX;
-          current_offsetY = 0;
-          break;
+      case 0:
+        offsetX = 0;
+        offsetY = ((-1*((panel_y+(worldHeight/2))+(panel_height/2)))+5);
+        current_offsetX = 0;
+        current_offsetY = offsetY;
+        break;
+      case 1:
+        offsetX = ((((worldWidth/2)-panel_x)+(panel_width/2))-5);
+        offsetY = 0;
+        current_offsetX = offsetX;
+        current_offsetY = 0;
+        break;
+      case 2:
+        offsetX = 0;
+        offsetY = ((((worldHeight/2)-panel_y)+(panel_height/2))-5);
+        current_offsetX = 0;
+        current_offsetY = offsetY;
+        break;
+      case 3:
+        offsetX = ((-1*((panel_x+(worldWidth/2))+(panel_width/2)))+5);
+        offsetY = 0;
+        current_offsetX = offsetX;
+        current_offsetY = 0;
+        break;
       }
     }
     else shown = true;
   }
   
-//  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-//  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
+  //  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
+  //  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 
   void display() {
     if (!enabled)return;
     if (shown) {
       pushMatrix();
       hint(DISABLE_DEPTH_TEST);
-        translate(cameraX+panel_x, cameraY+panel_y,cameraZ-ZOOMED_OFFSET);  // centered and below the camera+180+panel_x
-        fill(255,255,255,150);
-        rect(0,0,panel_width,panel_height);
-        for (Button b : buttons)
-          b.display();
-        for (TextBox t : textboxes)
-          t.display();
-        /*fill(0,0,0,255);
+      translate(cameraX+panel_x, cameraY+panel_y,cameraZ-zoomOffset);  // centered and below the camera+180+panel_x
+      fill(255,255,255,150);
+      rect(0,0,panel_width,panel_height);
+      for (Button b : buttons)
+        b.display();
+      for (TextBox t : textboxes)
+        t.display();
+      /*fill(0,0,0,255);
         textSize(8);
         text("Resources: " + (int)the_player.resources,-0.45*panel_width,-0.40*panel_height); 
         text("Generation: " + generation,-0.45*panel_width,-0.3*panel_height); 
@@ -173,9 +169,9 @@ class Panel {
     else if (hiddenpanel) {
       pushMatrix();
       hint(DISABLE_DEPTH_TEST);
-        translate(cameraX+panel_x+current_offsetX, cameraY+panel_y+current_offsetY,cameraZ-ZOOMED_OFFSET);
-        fill(255,255,255,150);
-        rect(0,0,panel_width,panel_height);
+      translate(cameraX+panel_x+current_offsetX, cameraY+panel_y+current_offsetY,cameraZ-zoomOffset);
+      fill(255,255,255,150);
+      rect(0,0,panel_width,panel_height);
       hint(ENABLE_DEPTH_TEST); 
       popMatrix();
     }
@@ -210,10 +206,10 @@ class Panel {
   }
   
   boolean isMouseNear() {
-    return ((mouseX <= (((float)width/ZOOMED_WIDTH)*((panel_x+(ZOOMED_WIDTH/2))+(panel_width/2)))) &&
-            (mouseX >= (((float)width/ZOOMED_WIDTH)*((panel_x+(ZOOMED_WIDTH/2))-(panel_width/2)))) &&
-            (mouseY <= (((float)width/ZOOMED_WIDTH)*((panel_y+(ZOOMED_HEIGHT/2))+(panel_height/2)))) &&
-            (mouseY >= (((float)width/ZOOMED_WIDTH)*((panel_y+(ZOOMED_HEIGHT/2))-(panel_height/2)))));
+    return ((mouseX <= (((float)width/worldWidth)*((panel_x+(worldWidth/2))+(panel_width/2)))) &&
+            (mouseX >= (((float)width/worldWidth)*((panel_x+(worldWidth/2))-(panel_width/2)))) &&
+            (mouseY <= (((float)width/worldWidth)*((panel_y+(worldHeight/2))+(panel_height/2)))) &&
+            (mouseY >= (((float)width/worldWidth)*((panel_y+(worldHeight/2))-(panel_height/2)))));
   }
   
   void mouse_pressed() {
