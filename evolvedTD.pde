@@ -16,7 +16,7 @@ import org.jbox2d.dynamics.contacts.*;
 int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
-static int zoomOffset = 2160;  // (cameraZ - zoomOffset) is zoomed out
+static int zoomOffset = 2163;  // (cameraZ - zoomOffset) is zoomed out
 
 // see
 State state = State.RUNNING;
