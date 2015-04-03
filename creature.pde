@@ -627,7 +627,13 @@ class creature {
     calcBehavior();
     torque = current_actions[0]*0.01;
 
-    f = current_actions[1] + 250; //adding 250 as a base force, can be refined later
+    // force is a percentage of max movement speed from 10% to 100%, averaging 80%
+    // depending on the output of the neural network in current_actions[1], the movement force may be backwards
+    // as of now the creatures never completely stop moving
+    f = Utilities.MovementForceSigmoid(current_actions[1]);
+    if (current_actions[1] < -50) f *= -1;
+    //f = 0.8;
+    f *= maxMovementSpeed;
 
     int switchnum;
     if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {

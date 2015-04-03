@@ -197,8 +197,8 @@ class Panel {
     panels.add(this);
   }
   
-//  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-//  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
+  //  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
+  //  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 
   void display() {
     if (!enabled)return;
@@ -212,16 +212,6 @@ class Panel {
           b.display();
         for (TextBox t : textboxes)
           t.display();
-        /*fill(0,0,0,255);
-        textSize(8);
-        text("Resources: " + (int)the_player.resources,-0.45*panel_width,-0.40*panel_height); 
-        text("Generation: " + generation,-0.45*panel_width,-0.3*panel_height); 
-        text("Time left: " + (timepergeneration-timesteps),-0.45*panel_width,-0.2*panel_height); 
-        fill(255,0,0,200);
-        // sample button
-        rect(0,0.4*panel_height, panel_width*0.9, panel_height*0.1);  
-        fill(0,0,0,200);
-        text("Wave Fire", -0.2*panel_width,0.43*panel_height);*/
       hint(ENABLE_DEPTH_TEST); 
       popMatrix();
     }
