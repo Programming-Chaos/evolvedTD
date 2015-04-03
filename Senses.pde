@@ -12,6 +12,7 @@ class Sensory_Systems {
   
   int ROCK_PRESSURE = 260;
   int CREATURE_PRESSURE = 270;
+  int TOWER_PRESSURE = 280; //<- added by thom5468 to complete assignment
 
   int b_pain = 0;
   int b_pain_angle = 1;
@@ -206,6 +207,8 @@ class Sensory_Systems {
         brain_array[b_pressure_feeler + i] = ROCK_PRESSURE;
       } else if (environ.checkForCreature(sensorX, sensorY) == 1) {
         brain_array[b_pressure_feeler + i] = CREATURE_PRESSURE;
+      } else if (environ.checkForTower(sensorX, sensorY) == 1){
+        brain_array[b_pressure_feeler +i] = TOWER_PRESSURE;
       } else {
         brain_array[b_pressure_feeler + i] = environ.checkForPressure(sensorX, sensorY);
       }
