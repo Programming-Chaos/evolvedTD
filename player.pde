@@ -12,9 +12,9 @@ class player {
 
   player() {
     testpanel = new Panel(400,400,-1000,0,true);
+    //testpanel.enabled = false;
     testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40);
     testpanel.createButton(300,100,0,100,"Yay BUTTON",30,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
-    testpanel.enabled = false;
     panels.add(testpanel);
     towers = new ArrayList<tower>();
     playerPanel = new PlayerPanel();

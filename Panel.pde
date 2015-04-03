@@ -99,7 +99,7 @@ class Panel {
     panel_x = px;
     panel_y = py;
     hiddenpanel = hp;
-    enabled = false;
+    enabled = true;
     if (hiddenpanel) {
       shown = false;
       if (panel_x > panel_y)
