@@ -14,8 +14,9 @@ import org.jbox2d.dynamics.contacts.*;
 
 
 int cameraX, cameraY, cameraZ; // location of the camera
-int worldWidth = 2500;         // size in pixels of the world
-int worldHeight = 2500;
+static int worldWidth = 2500;  // world size
+static int worldHeight = 2500;
+static int zoomOffset = 2160;  // (cameraZ - zoomOffset) is zoomed out
 
 // see
 State state = State.RUNNING;
@@ -30,19 +31,21 @@ boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
+boolean buttonpressed = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
+ArrayList<Panel> panels;
 
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
 Minim minim;
 AudioPlayer gunshot, gunshotalt;
-//AudioPlayer thunder;
+AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
@@ -67,6 +70,9 @@ void setup() {
   size(800,800,P3D);             // window size, and makes it a 3D window
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
+  PFont font = createFont("Arial", 100);
+  textFont(font);
+  panels = new ArrayList<Panel>();
   the_player = new player();
   the_tower = new tower();
   the_player.addtower(the_tower);
@@ -74,7 +80,7 @@ void setup() {
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/railgunfire01long.mp3");
   gunshotalt = minim.loadFile("assets/railgunfire01slow_01.mp3");
-  //thunder = minim.loadFile("assets/thunder.mp3");
+  thunder = minim.loadFile("assets/Thunder.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -428,20 +434,45 @@ void add_food() { // done after each wave/generation
 
 void mousePressed() { // called if the (left) mouse button is pressed
   float x,y;
-  // first we have to try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
-  // this calculation is not correct
+  // first we have to try to figure out, given the pixel coordinates
+  // of the mouse and the camera position, where in the virtual world
+  // the cursor is
+
+  // TODO "this calculation is not correct" ?
   x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
   y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
 
-  if (state == State.RUNNING)
-    the_tower.fire(); // have the tower fire its active weapon if unpaused
+  if (mouseButton == LEFT) {
+    the_player.mouse_pressed();
+    if (!buttonpressed) {
+      if (state == State.RUNNING)
+        the_tower.fire(); // have the tower fire its active weapon if unpaused
+    }
+    buttonpressed = false;
+  }
+
+  // select a creature
+  if (mouseButton == RIGHT) {
+    int radius = 20;
+    // find a creature
+    for (creature c : the_pop.swarm) {
+      Vec2 location = c.getPos();
+      if (x < location.x + radius && x > location.x - radius
+          && y < location.y + radius && y > location.y - radius) {
+        the_player.selectedCreature = c;
+        // zoom in on click
+        cameraZ = 400;
+        break;
+      }
+      the_player.selectedCreature = null;
+    }
+  }
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
   translate(x,y);
   ellipse(0,0,30,30);
   popMatrix();
-  the_player.mouse_pressed();
 }
 
 void controls() {
