@@ -627,12 +627,11 @@ class creature {
     calcBehavior();
     torque = current_actions[0]*0.01;
 
-    // force is a percentage of max movement speed from 10% to 100%, averaging 80%
+    // force is a percentage of max movement speed from 10% to 100%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
-    f = Utilities.MovementForceSigmoid(current_actions[1]);
-    if (current_actions[1] < -50) f *= -1;
-    //f = 0.8;
+    f = Utilities.MovementForceSigmoid(current_actions[1]); // force is scaled to a percent between 10% and 100% asymptotically approaching 100%
+    if (current_actions[1] < 0) f *= -1; // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
     f *= maxMovementSpeed;
 
     int switchnum;
@@ -640,10 +639,10 @@ class creature {
       time_in_water++;
       switchnum = 0;
     }
+    
     else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
     else switchnum = 2;
-    //println("Creature (" + pos2.x + ", " + pos2.y + ")");
-    //println("Base move speed: " + f);
+    
     float base = f;
 
     // appendages will change the force depending on the environment
