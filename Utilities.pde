@@ -16,7 +16,7 @@ public static class Utilities {
   }                                                                                //            ( (1 + e^(-lx))      )   This sigmoid is centered on 0, gives values in the range (-N,N)
   
   public static float MovementForceSigmoid(float x) {
-    return ((-1/((10/9)+(((x+50)/50)*(x/50))))+1);
+    return (x<0 ? ((1/((10/9)+(((x+50)/50)*((x+50)/50))))-1) : ((-1/((10/9)+(((x+50)/50)*((x+50)/50))))+1));
   }
 }
 

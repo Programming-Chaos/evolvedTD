@@ -631,7 +631,7 @@ class creature {
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
     f = Utilities.MovementForceSigmoid(current_actions[1]); // force is scaled to a percent between 10% and 100% asymptotically approaching 100%
-    if (current_actions[1] < 0) f *= -1; // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
+    // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
     f *= maxMovementSpeed;
 
     int switchnum;
