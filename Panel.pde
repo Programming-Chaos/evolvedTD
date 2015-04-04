@@ -146,7 +146,14 @@ class Panel {
   int direction;
   ArrayList<Button> buttons = new ArrayList<Button>();
   ArrayList<TextBox> textboxes = new ArrayList<TextBox>();
-  
+
+  // used by setupTextBox and pushTextBox
+  float textbox_x;
+  float textbox_y;
+  float textbox_height; // increment in height for each push
+  int textsize;
+  int textbox_i;
+
   Panel(float pw, float ph, float px, float py, boolean hp) {
     panel_width = pw;
     panel_height = ph;
@@ -276,7 +283,20 @@ class Panel {
     buttons.add(new Button(bw,bh,bx,by,bt,ts,r,g,b,this,BP));//bw,bh,bx,by,bt,this,BP));
     return (buttons.size() - 1); // return the index of this button for later reference
   }
-  
+
+  // sets values to be passed to next text boxes
+  void setupTextBox(float tcx, float tcy, float h, int ts) {
+    textbox_x = tcx;
+    textbox_y = tcy;
+    textbox_height = h;
+    textsize = ts;
+    textbox_i = -1; // so first push starts at 0
+  }
+
+  int pushTextBox(StringPass SP) {
+    return createTextBox(textbox_x,textbox_y+(++textbox_i*textbox_height),SP,textsize);
+  }
+
   int createTextBox(float tw, float th, float tx, float ty, String tt, int ts) {//used for hardcoded strings
     textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,CENTER,CENTER));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
