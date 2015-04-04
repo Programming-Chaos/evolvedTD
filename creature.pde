@@ -630,9 +630,8 @@ class creature {
     // force is a percentage of max movement speed from 10% to 100%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
-    f = Utilities.MovementForceSigmoid(current_actions[1]); // force is scaled to a percent between 10% and 100% asymptotically approaching 100%
+    f = (maxMovementSpeed * Utilities.MovementForceSigmoid(current_actions[1])); // force is scaled to a percent between 10% and 100% asymptotically approaching 100%
     // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
-    f *= maxMovementSpeed;
 
     int switchnum;
     if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
