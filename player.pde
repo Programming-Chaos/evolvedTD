@@ -16,7 +16,7 @@ class player {
     
     testpanel = new Panel(400,400,-1000,0,true);
     testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40);
-    testpanel.createButton(300,100,0,100,"Yay BUTTON",30,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
+    testpanel.createButton(300,100,0,100,"Yay BUTTON",30,0,0,0,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
     testpanel.enabled = false;
     
     playerPanel = new Panel(500,420,980,-1020,true);
@@ -25,8 +25,8 @@ class player {
     playerPanel.createTextBox(480,50,0,-20,new StringPass() { public String passed() { return ("Time left: " + (timepergeneration - timesteps)); } },40);
     playerPanel.createButton(350,100,0,110,"Wave Fire",50,new ButtonPress() { public void pressed() { wave_fire(); } });
     
-    statsPanel = new Panel(500,520,980,1020-200,false);//-200 so it's not cut off the bottom of some peoples' screens
-    statsPanel.setupTextBox(20,10,50,40);
+    statsPanel = new Panel(500,520,980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
+    statsPanel.setupTextBoxList(20,10,50,40);
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Creature: " + selectedCreature.num); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health: " + selectedCreature.health + " / " + selectedCreature.maxHealth + " +" + selectedCreature.health_regen); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Fitness: " + selectedCreature.fitness); } });
