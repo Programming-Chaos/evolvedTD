@@ -712,9 +712,29 @@ class creature {
     // in the world, still exists for reproducton
     if (health <= 0) {
       alive = false;
-      // if its no longer alive the body can be killed - otherwise it
+      // if its no longer alive creature spawns 2 gametes in a 
+      //radius of 5 tiles and the body can be killed - otherwise it
       // still "in" the world.  Have to make sure the body isn't
       // referenced elsewhere
+      
+      //spawn gametes
+      int dx = (int)random(-5, 6); //from -5 to 5 (6 is not included)
+      int dy = (int)random(-5, 6);
+      int energy = (int) (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      Vec2 pos = box2d.getBodyPixelCoord(body);
+      
+      int posX = (int)(pos.x / cellWidth);
+      int posY = (int)(pos.y / cellHeight);
+      
+      Gamete g1 = new Gamete(posX + dx, posY + dy, energy, 
+                             (Genome.Chromosome)genome.getGametes().get(0));
+      Gamete g2 = new Gamete(posX - dx, posY - dy, energy, 
+                             (Genome.Chromosome)genome.getGametes().get(0));
+                             
+      gameteStack.add(g1);
+      gameteStack.add(g2);
+      
+      //delete the body
       killBody();
     }
 
