@@ -36,7 +36,6 @@ class tower {
     bd.linearDamping = 0.9;
     
     tower_body = box2d.createBody(bd);
-    // Define the shape -- a  (this is what we use for a rectangle)
     CircleShape sd = new CircleShape();
     sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
     FixtureDef fd = new FixtureDef();
@@ -97,7 +96,7 @@ class tower {
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
     */
-    image(gunbase,-128,-128);
+    image(gunbase,-128,-128);//, radius*2, radius*2);
     showgunalt = false;
     showgun = true;
     imagetimer++;
@@ -113,8 +112,8 @@ class tower {
     pushMatrix();
     float c = angle;
     rotate(c + HALF_PI);
-    if(showgun)image(gun,-128,-128);
-    if(showgunalt)image(gunalt,-128,-128);
+    if(showgun)image(gun,-128,-128);//, radius*2, radius*2);
+    if(showgunalt)image(gunalt,-128,-128);//, radius*2, radius*2);
     popMatrix();
     
     for (projectile p: projectiles) { // display the active projectiles
@@ -129,6 +128,9 @@ class tower {
     noStroke();
     fill(0, 0, 255);
     rect(0, -30, 0.1*energy, 6);
+
+    fill(64, 64, 64, 128);
+    ellipse(0,0, radius*2, radius*2);
     // display resources, now in player
     /*
     pushMatrix();
