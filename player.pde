@@ -3,6 +3,7 @@ class player {
   Panel playerPanel;
   Panel statsPanel;
   Panel newpanel;
+  Panel upgradePanel;
   
   Panel testpanel;
   
@@ -37,6 +38,9 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Reproduction energy: " + (int)selectedCreature.energy_reproduction); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
+    
+    upgradePanel = new Panel(2000,1800,0,0,false, 255);
+    upgradePanel.createTextBox(2000,200,0,-800,"Upgrade your defenses",100);
     
     resources = 0;
     resourceGain = 0.1;

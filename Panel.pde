@@ -124,6 +124,7 @@ class Panel {
   float current_offsetX;
   float current_offsetY;
   int direction;
+  int opacity;
   ArrayList<Button> buttons = new ArrayList<Button>();
   ArrayList<TextBox> textboxes = new ArrayList<TextBox>();
 
@@ -140,6 +141,21 @@ class Panel {
     panel_x = px;
     panel_y = py;
     hiddenpanel = hp;
+    opacity = 150;
+    construct();
+  }
+
+  Panel(float pw, float ph, float px, float py, boolean hp, int o) {
+    panel_width = pw;
+    panel_height = ph;
+    panel_x = px;
+    panel_y = py;
+    hiddenpanel = hp;
+    opacity = o;
+    construct();
+  }
+  
+  void construct() {
     enabled = true;
     if (hiddenpanel) {
       shown = false;
@@ -193,7 +209,7 @@ class Panel {
       pushMatrix();
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x, cameraY+panel_y,cameraZ-zoomOffset);  // centered and below the camera+180+panel_x
-        fill(255,255,255,150);
+        fill(200,200,200,opacity);
         rect(0,0,panel_width,panel_height);
         for (Button b : buttons)
           b.display();
@@ -206,7 +222,7 @@ class Panel {
       pushMatrix();
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x+current_offsetX, cameraY+panel_y+current_offsetY,cameraZ-zoomOffset);
-        fill(255,255,255,150);
+        fill(200,200,200,opacity);
         rect(0,0,panel_width,panel_height);
       hint(ENABLE_DEPTH_TEST); 
       popMatrix();
