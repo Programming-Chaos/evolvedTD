@@ -54,8 +54,8 @@ class Button {
 }
 
 class TextBox {
-  float textbox_width = 0;
-  float textbox_height = 0;
+  float textbox_width;
+  float textbox_height;
   float textbox_x;
   float textbox_y;
   String textbox_text;
@@ -77,31 +77,11 @@ class TextBox {
     align_vert = av;
   }
   
-  TextBox(float tcx, float tcy, String tt, int ts, Panel pr, int ah, int av) {
-    textbox_x = (tcx-(pr.panel_width/2));
-    textbox_y = (tcy-(pr.panel_height/2));
-    textbox_text = tt;
-    textsize = ts;
-    parent = pr;
-    align_horiz = ah;
-    align_vert = av;
-  }
-  
   TextBox(float tw, float th, float tx, float ty, StringPass SPin, int ts, Panel pr, int ah, int av) {
     textbox_width = tw;
     textbox_height = th;
     textbox_x = tx;
     textbox_y = ty;
-    SP = SPin;
-    textsize = ts;
-    parent = pr;
-    align_horiz = ah;
-    align_vert = av;
-  }
-  
-  TextBox(float tcx, float tcy, StringPass SPin, int ts, Panel pr, int ah, int av) {
-    textbox_x = (tcx-(pr.panel_width/2));
-    textbox_y = (tcy-(pr.panel_height/2));
     SP = SPin;
     textsize = ts;
     parent = pr;
@@ -146,7 +126,14 @@ class Panel {
   int direction;
   ArrayList<Button> buttons = new ArrayList<Button>();
   ArrayList<TextBox> textboxes = new ArrayList<TextBox>();
-  
+
+  // used by setupTextBox and pushTextBox
+  float listed_textbox_x;
+  float listed_textbox_y;
+  float listed_textbox_height; // increment in height for each push
+  int listed_textbox_textsize;
+  int listed_textbox_i;
+
   Panel(float pw, float ph, float px, float py, boolean hp) {
     panel_width = pw;
     panel_height = ph;
@@ -268,52 +255,70 @@ class Panel {
   }
   
   int createButton(float bw, float bh, float bx, float by, String bt, int ts, ButtonPress BP) {
-    buttons.add(new Button(bw,bh,bx,by,bt,ts,0,0,128,this,BP));//bw,bh,bx,by,bt,this,BP));
+    buttons.add(new Button(bw,bh,bx,by,bt,ts,0,0,128,this,BP));//default color navy blue
     return (buttons.size() - 1); // return the index of this button for later reference
   }
   
   int createButton(float bw, float bh, float bx, float by, String bt, int ts, int r, int g, int b, ButtonPress BP) {
-    buttons.add(new Button(bw,bh,bx,by,bt,ts,r,g,b,this,BP));//bw,bh,bx,by,bt,this,BP));
+    buttons.add(new Button(bw,bh,bx,by,bt,ts,r,g,b,this,BP));
     return (buttons.size() - 1); // return the index of this button for later reference
   }
-  
-  int createTextBox(float tw, float th, float tx, float ty, String tt, int ts) {//used for hardcoded strings
+
+  // sets values to be passed to this panel's list of text boxes (every panel gets one) (or none)
+  void setupTextBoxList(float tx, float ty, float h, int ts) {
+    listed_textbox_x = tx;
+    listed_textbox_y = ty;
+    listed_textbox_height = h;
+    listed_textbox_textsize = ts;
+    listed_textbox_i = -1; // so first push starts at 0
+  }
+
+  int pushTextBox(String s) {
+    return createTextBox(listed_textbox_x,listed_textbox_y+(++listed_textbox_i*listed_textbox_height),s,listed_textbox_textsize);
+  }
+
+  int pushTextBox(StringPass SP) {
+    return createTextBox(listed_textbox_x,listed_textbox_y+(++listed_textbox_i*listed_textbox_height),SP,listed_textbox_textsize);
+  }
+
+  //This is a boxed-style textbox. The text will wrap within the dimensions tw and th (textbox width and textbox height)
+  int createTextBox(float tw, float th, float tx, float ty, String tt, int ts) {//tx and ty are the coordinates of the textbox's center (boxed-style)
     textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,CENTER,CENTER));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
-  }
-  
-  int createTextBox(float tcx, float tcy, String tt, int ts) {//used for hardcoded strings
-    textboxes.add(new TextBox(tcx,tcy,tt,ts,this,LEFT,TOP));//bw,bh,bx,by,bt,this,BP));
+  }//in boxed-style, the origin of the textbox's coordinates is the topleft of the panel
+  //This is a cornered-style textbox. The text will not wrap. It will just keep going off the page unless you put linebreaks.
+  int createTextBox(float tx, float ty, String tt, int ts) {//tx and ty are the coordinates of the topleft corner with the panel's topleft corner as the origin (cornered style)
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,LEFT,TOP));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
-  
+  //boxed style with executable string code
   int createTextBox(float tw, float th, float tx, float ty, StringPass SP, int ts) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
     textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,CENTER,CENTER));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
-  
-  int createTextBox(float tcx, float tcy, StringPass SP, int ts) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
-    textboxes.add(new TextBox(tcx,tcy,SP,ts,this,LEFT,TOP));//bw,bh,bx,by,bt,this,BP));
+  //cornered style with executable string code
+  int createTextBox(float tx, float ty, StringPass SP, int ts) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,LEFT,TOP));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
-  
+  //boxed style with a straight-up string and text alignment specifications
   int createTextBox(float tw, float th, float tx, float ty, String tt, int ts, int ah, int av) {//used for hardcoded strings
     textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,ah,av));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
-  
-  int createTextBox(float tcx, float tcy, String tt, int ts, int ah, int av) {//used for hardcoded strings
-    textboxes.add(new TextBox(tcx,tcy,tt,ts,this,ah,av));//bw,bh,bx,by,bt,this,BP));
+  //cornered style with a straight- up string and text alignment specifications
+  int createTextBox(float tx, float ty, String tt, int ts, int ah, int av) {//used for hardcoded strings
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,ah,av));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
-  
+  //boxed style with with executable string code and text alignment specifications
   int createTextBox(float tw, float th, float tx, float ty, StringPass SP, int ts, int ah, int av) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
     textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,ah,av));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
-  
-  int createTextBox(float tcx, float tcy, StringPass SP, int ts, int ah, int av) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
-    textboxes.add(new TextBox(tcx,tcy,SP,ts,this,ah,av));//bw,bh,bx,by,bt,this,BP));
+  //cornered style with executable string code and text alignment specifications
+  int createTextBox(float tx, float ty, StringPass SP, int ts, int ah, int av) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,ah,av));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
 }
