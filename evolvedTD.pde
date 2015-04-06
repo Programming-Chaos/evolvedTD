@@ -32,7 +32,7 @@ boolean display = true;        // should the world be displayed - false speeds t
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean buttonpressed = false;
-boolean autofire = false;
+boolean autofire = true;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
