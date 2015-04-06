@@ -10,25 +10,37 @@ class tower {
   PImage gun;    // declare image for gun
   PImage gunalt; // declare alternate image for animation
   PImage gunbase; // gun base
+  PImage flame; // flamethrower head
+  PImage flamealt; // flamethrower alternate
+  PImage flamebase; // flamethrower base
   boolean showgun = true; // show base gun image
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
   int soundtimer;
   float radius = 50; // 80 is the size we were using for a long time
+  int xpos; // x position of center of turret
+  int ypos; // y position of center of turret
   Body tower_body;
   
   // constructor function, initializes the tower
-  tower() {
+  tower(int x, int y) {
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
     projectiles = new ArrayList<projectile>();
     angle = 0;
+    imagetimer = 0;
+    soundtimer = 0;
+    
+    xpos = x;
+    ypos = y;
+    
     gunbase = loadImage("assets/Tower_base_02.png");
     gun = loadImage("assets/RailGun-01.png");
     gunalt = loadImage("assets/RailGun-a-01.png");
-    imagetimer = 0;
-    soundtimer = 0;
+    flame = loadImage("assets/FlameThrower01-01.png");
+    flamealt = loadImage("assets/FlameThrower02-01.png");
+    flamebase = loadImage("assets/Turbase03256.png");
     
     BodyDef bd = new BodyDef();
     bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17*(radius/80))));

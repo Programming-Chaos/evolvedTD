@@ -39,6 +39,9 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
     
+    towerPanel = new Panel(2500, 300, 0, 1100, true);
+    towerPanel.createButton(150, 150, 75, 1175, "Flamethrower", 30, 0, 150, 0, );
+    
     resources = 0;
     resourceGain = 0.1;
     selectedCreature = null;
