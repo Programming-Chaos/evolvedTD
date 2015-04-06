@@ -105,7 +105,8 @@ void setup() {
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
-  
+  testGenome.testMutation();
+
   // Init data tables
   initTables();
 }
