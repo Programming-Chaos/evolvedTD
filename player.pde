@@ -39,6 +39,10 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
     
+    towerPanel = new Panel(2500, 300, 0, 1100, true);
+    towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed(){tower t = new tower(500, 0, 'r'); the_player.addtower(t);}});
+    towerPanel.createButton(300, 300, -800, 0, "Flamethrower", 45, 200, 0, 0, new ButtonPress() {public void pressed(){tower t = new tower(-500, 0, 'f'); the_player.addtower(t);}});
+    
     resources = 0;
     resourceGain = 0.1;
     selectedCreature = null;
@@ -82,6 +86,12 @@ class player {
     for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
       tower t = towers.get(i);
       t.wave_fire();
+    }
+  }
+  void next_generation(){
+    for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
+      tower t = towers.get(i);
+      t.next_generation();
     }
   }
 }
