@@ -14,8 +14,9 @@ class tower {
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
   int soundtimer;
-  int damage = 10;
   float radius = 50; // 80 is the size we were using for a long time
+  int dmg; // damage value, changed by turret type
+  int firerate; // autofire rate, lower values fire faster
   Body tower_body;
   
   // constructor function, initializes the tower
@@ -56,7 +57,7 @@ class tower {
       if (autofire) {
         Vec2 target;
         autofirecounter++;
-        if (autofirecounter % 20 == 0) { // only autofire every 20th time step
+        if (autofirecounter == 20) { // only autofire every 20th time step
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           target = the_pop.vec_to_random_creature(); // target a random creature
           angle = atan2(target.y,target.x);
@@ -98,7 +99,6 @@ class tower {
     ellipse(0, 0, 10, 10); // just a circle for now
     */
     image(gunbase,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
-    println(radius*((float)128/80));
     showgunalt = false;
     showgun = true;
     imagetimer++;
@@ -162,7 +162,12 @@ class tower {
     projectiles.clear();
   }
 
-  void switchweapon(char k) {
+  void switchweapon1() {
+    activeweapon = 2;
+    }
+  }
+
+  void switchweapon2() {
     if (k == '1') {
       activeweapon = 1;
     }
@@ -192,12 +197,12 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(0, 0, angle, damage); // 20 is the current damage, should be a variable, upgradable
+    projectile p = new projectile(0, 0, angle, dmg);
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
     soundtimer++;
-    if (soundtimer%3==0){
+    if (soundtimer == 3){
       soundtimer = 0;
       if (playSound) {
         PlaySounds( "assets/railgunfire01long.mp3" );
@@ -220,7 +225,7 @@ class tower {
       return;
     }
     for(float a = 0; a < 2*PI ; a += ((2*PI)/20)){
-      projectile p = new projectile(5*cos(a), 5*sin(a), a, damage); // 20 is the current damage, should be a variable, upgradable
+      projectile p = new projectile(5*cos(a), 5*sin(a), a, dmg);
       // postions of new projectives are not at 0,0 to avoid collisions.
       projectiles.add(p);
     }

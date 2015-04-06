@@ -228,7 +228,7 @@ void keyPressed() { // if a key is pressed this function is called
       else
         state = State.RUNNING;
       break;
-    case 'o':  // enter staged state
+    case 'u':  // enter staged state
       state = State.STAGED;
       the_player.upgradePanel.enabled = true;
       break;
@@ -256,8 +256,7 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case '1':
     case '2':
-      the_tower.switchweapon(key);
-      break;
+      the_tower.activeweapon = (key-'0');
     default:
 
     }

@@ -47,7 +47,7 @@ class Button {
     else {
       fill(red,green,blue,150);
       stroke(0);
-      rect(button_x,button_y,button_width,button_height,5);
+      rect(button_x,button_y,button_width,button_height,20);
       textSize(textsize);
       textAlign(CENTER,CENTER);
       fill(((red < 64 && green < 64 && blue < 64) ? 255 : 0), 255);
@@ -254,28 +254,28 @@ class Panel {
   
   void update() {
     if (!enabled)return;
-    if (hiddenpanel) {
-      if (isMouseNear()) {
-        if (!shown) {
-          if (direction == 0 || direction == 2) {
-            current_offsetY -= (offsetY*0.1);
-            if(current_offsetY == 0)shown = true;
-          }
-          else {
-            current_offsetX -= (offsetX*0.1);
-            if(current_offsetX == 0)shown = true;
-          }
-        }
-      }
-      else if (current_offsetX != offsetX || current_offsetY != offsetY) {
+    if (state != State.RUNNING)return;
+    if (!hiddenpanel)return;
+    if (isMouseNear()) {
+      if (!shown) {
         if (direction == 0 || direction == 2) {
-          current_offsetY += (offsetY*0.1);
-          if (shown)shown = false;
+          current_offsetY -= (offsetY*0.1);
+          if(current_offsetY == 0)shown = true;
         }
         else {
-          current_offsetX += (offsetX*0.1);
-          if (shown)shown = false;
+          current_offsetX -= (offsetX*0.1);
+          if(current_offsetX == 0)shown = true;
         }
+      }
+    }
+    else if (current_offsetX != offsetX || current_offsetY != offsetY) {
+      if (direction == 0 || direction == 2) {
+        current_offsetY += (offsetY*0.1);
+        if (shown)shown = false;
+      }
+      else {
+        current_offsetX += (offsetX*0.1);
+        if (shown)shown = false;
       }
     }
   }
