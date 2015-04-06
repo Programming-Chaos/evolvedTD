@@ -74,7 +74,7 @@ void setup() {
   textFont(font);
   panels = new ArrayList<Panel>();
   the_player = new player();
-  the_tower = new tower(0, 0, 'r');
+  the_tower = new tower();
   the_player.addtower(the_tower);
 
   minim = new Minim(this);
@@ -413,7 +413,7 @@ void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
-  the_player.next_generation(); // have the tower update itself, reset energy etc.
+  the_tower.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
   if (!the_tower.autofire) {
