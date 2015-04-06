@@ -3,6 +3,7 @@ class player {
   Panel playerPanel;
   Panel statsPanel;
   Panel newpanel;
+  Panel towerPanel;
   
   Panel testpanel;
   
