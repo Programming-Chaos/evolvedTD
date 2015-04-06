@@ -10,9 +10,6 @@ class tower {
   PImage gun;    // declare image for gun
   PImage gunalt; // declare alternate image for animation
   PImage gunbase; // gun base
-  PImage flame; // flamethrower head
-  PImage flamealt; // flamethrower alternate
-  PImage flamebase; // flamethrower base
   boolean showgun = true; // show base gun image
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
@@ -20,10 +17,18 @@ class tower {
   float radius = 50; // 80 is the size we were using for a long time
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
+  int dmg; // damage value, changed by turret type
+  int firerate; // autofire rate, lower values fire faster
+  int ecost; // per fire energy cost
+  char type;
+  /* type is the turret type
+   * r: default rail gun
+   * f: flamethrower
+   */
   Body tower_body;
   
   // constructor function, initializes the tower
-  tower(int x, int y) {
+  tower(int x, int y, char t) {
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     activeweapon = 1;
@@ -34,13 +39,26 @@ class tower {
     
     xpos = x;
     ypos = y;
+    type = t;
     
-    gunbase = loadImage("assets/Tower_base_02.png");
-    gun = loadImage("assets/RailGun-01.png");
-    gunalt = loadImage("assets/RailGun-a-01.png");
-    flame = loadImage("assets/FlameThrower01-01.png");
-    flamealt = loadImage("assets/FlameThrower02-01.png");
-    flamebase = loadImage("assets/Turbase03256.png");
+    switch (type){
+      case 'r':
+        gunbase = loadImage("assets/Tower_base_02.png");
+        gun = loadImage("assets/RailGun-01.png");
+        gunalt = loadImage("assets/RailGun-a-01.png");
+        dmg = 20;
+        firerate = 25;
+        ecost = 10;
+      break;
+      case 'f':
+        gun = loadImage("assets/FlameThrower01-01.png");
+        gunalt = loadImage("assets/FlameThrower02-01.png");
+        gunbase = loadImage("assets/Turbase03256.png");
+        dmg = 200;
+        firerate = 75;
+        ecost = 50;
+      break;
+    }
     
     BodyDef bd = new BodyDef();
     bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17*(radius/80))));
@@ -67,7 +85,7 @@ class tower {
       if (autofire) {
         Vec2 target;
         autofirecounter++;
-        if (autofirecounter % 20 == 0) { // only autofire every 20th time step
+        if (autofirecounter % firerate == 0) { // only autofire every nth time step where n is the fire rate
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           target = the_pop.vec_to_random_creature(); // target a random creature
           angle = atan2(target.y,target.x);
@@ -108,12 +126,12 @@ class tower {
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
     */
-    image(gunbase,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     println(radius*((float)128/80));
     showgunalt = false;
     showgun = true;
     imagetimer++;
-    if (imagetimer > 2) {
+    if (imagetimer > 15) {
       showgunalt = false;
       showgun = true;
     }
@@ -124,6 +142,7 @@ class tower {
     
     pushMatrix();
     float c = angle;
+    translate(xpos, ypos, 0);
     rotate(c + HALF_PI);
     if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
@@ -137,10 +156,10 @@ class tower {
     noFill();
     stroke(0);
     rectMode(CENTER);
-    rect(0, -30, 0.1*maxEnergy, 6);
+    rect(xpos, ypos-30, 0.1*maxEnergy, 6);
     noStroke();
     fill(0, 0, 255);
-    rect(0, -30, 0.1*energy, 6);
+    rect(xpos, ypos-30, 0.1*energy, 6);
 
     // draw the outline of the tower's box2D body
     /*pushMatrix();
@@ -203,26 +222,30 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
+    projectile p = new projectile(xpos, ypos, angle, dmg, type); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
-    energy-=10;
+    energy-=ecost;
     imagetimer = 0;
     soundtimer++;
-    if (soundtimer%3==0){
-      soundtimer = 0;
-      if (playSound) {
-        PlaySounds( "assets/railgunfire01long.mp3" );
-        //        gunshot.rewind();
-        //        gunshot.play();
-      }
-    }
-    else{
-      if (playSound) {
-        PlaySounds( "assets/railgunfire01slow_01.mp3" );        
-        //        PlaySounds( gunshotalt );        
-        //        gunshotalt.rewind();
-        //        gunshotalt.play();
-      }
+    switch (type) {
+      case 'r':
+        if (soundtimer%3==0){
+          soundtimer = 0;
+          if (playSound) {
+            PlaySounds( "assets/railgunfire01long.mp3" );
+          }
+        }
+        else{
+          if (playSound) {
+            PlaySounds( "assets/railgunfire01slow_01.mp3" );        
+          }
+        }
+        break;
+      case 'f':
+        if (playSound){
+           PlaySounds( "assets/ricochet1.mp3"); 
+        }
+        break;
     }
   }
   
@@ -231,7 +254,7 @@ class tower {
       return;
     }
     for(float a = 0; a < 2*PI ; a += ((2*PI)/20)){
-      projectile p = new projectile(5*cos(a), 5*sin(a), a, 20); // 20 is the current damage, should be a variable, upgradable
+      projectile p = new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type); // 20 is the current damage, should be a variable, upgradable
       // postions of new projectives are not at 0,0 to avoid collisions.
       projectiles.add(p);
     }
