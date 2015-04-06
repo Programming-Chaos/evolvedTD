@@ -32,6 +32,7 @@ boolean display = true;        // should the world be displayed - false speeds t
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean buttonpressed = false;
+boolean autofire = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -48,6 +49,9 @@ AudioPlayer gunshot, gunshotalt;
 AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
+
+float mouse_x;
+float mouse_y;
 
 // Tables for data collection
 Table c_traits;
@@ -74,8 +78,7 @@ void setup() {
   textFont(font);
   panels = new ArrayList<Panel>();
   the_player = new player();
-  the_tower = new tower();
-  the_player.addtower(the_tower);
+  the_player.towers.add(new tower(0, 0, 'r'));
 
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/railgunfire01long.mp3");
@@ -113,7 +116,8 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-
+  mouse_x = ((mouseX-(width/2)) * ((float)worldWidth/width));
+  mouse_y = ((mouseY-(height/2)) * ((float)worldHeight/height));
 
   if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -203,7 +207,7 @@ void keyPressed() { // if a key is pressed this function is called
   else {
     switch(key) { // else its a regular character
     case 'a':
-      the_tower.toggleautofire();
+      autofire = !autofire;
       break;
     case 'z':
       cameraZ = 2150; // zoom all the way out
@@ -256,7 +260,8 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case '1':
     case '2':
-      the_tower.activeweapon = (key-'0');
+      the_player.towers.get(0).activeweapon = (key-'0');
+      break;
     default:
 
     }
@@ -418,10 +423,10 @@ void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
-  the_tower.next_generation(); // have the tower update itself, reset energy etc.
+  the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
-  if (!the_tower.autofire) {
+  if (!autofire) {
     state = State.STAGED; // pause the game
     the_player.upgradePanel.shown = true;
   }
@@ -438,21 +443,14 @@ void add_food() { // done after each wave/generation
   fTotal += 10;
 }
 
-void mousePressed() { // called if the (left) mouse button is pressed
-  float x,y;
-  // first we have to try to figure out, given the pixel coordinates
-  // of the mouse and the camera position, where in the virtual world
-  // the cursor is
-
-  // TODO "this calculation is not correct" ?
-  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-
+void mousePressed() { // called if either mouse button is pressed
+  // fire the weapons
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
     if (!buttonpressed) {
       if (state == State.RUNNING)
-        the_tower.fire(); // have the tower fire its active weapon if unpaused
+        for (tower t : the_player.towers)
+          t.fire(); // have the tower fire its active weapon if unpaused
     }
     buttonpressed = false;
   }
@@ -463,8 +461,8 @@ void mousePressed() { // called if the (left) mouse button is pressed
     // find a creature
     for (creature c : the_pop.swarm) {
       Vec2 location = c.getPos();
-      if (x < location.x + radius && x > location.x - radius
-          && y < location.y + radius && y > location.y - radius) {
+      if (mouse_x < location.x + radius && mouse_x > location.x - radius
+          && mouse_y < location.y + radius && mouse_y > location.y - radius) {
         the_player.selectedCreature = c;
         // zoom in on click
         cameraZ = 400;
@@ -476,7 +474,7 @@ void mousePressed() { // called if the (left) mouse button is pressed
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
-  translate(x,y);
+  translate(mouse_x,mouse_y);
   ellipse(0,0,30,30);
   popMatrix();
 }
