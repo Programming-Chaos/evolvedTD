@@ -1,6 +1,6 @@
 // standard deviation of mutation added to each gene in meiosis
 static float MUTATION_DEVIATION = 0.03;
-static float MUTATION_RATE = 0.20;
+static float MUTATION_RATE = 0.05;
 // standard deviation of initial gene values
 static float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
@@ -332,8 +332,8 @@ class Genome {
   }
 
   void testMutation() {
-    if (MUTATION_RATE != 0.20)
-      testFailed("mutation rate is no longer 20 percent");
+    if (MUTATION_RATE != 0.05)
+      testFailed("mutation rate is no longer 5 percent");
   }
 
   void testChromosome() {
