@@ -88,7 +88,7 @@ class tower {
         if (autofirecounter % firerate == 0) { // only autofire every nth time step where n is the fire rate
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           target = the_pop.vec_to_random_creature(); // target a random creature
-          angle = atan2(target.y,target.x);
+          angle = atan2(target.y-ypos,target.x-xpos);
           fire();
           autofirecounter = 0;  // reset the counter
         }
