@@ -41,6 +41,7 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
+  int hit_indicator=0; //to create animations on creature impacts
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -283,10 +284,12 @@ class creature {
     angle = a;
     genome = new Genome();
     construct((float)20000, new Vec2(x, y));
+    hit_indicator=0;
   }
 
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
+    hit_indicator=0; // starts a creature as not having been hit
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
     // Currently creatures are 'born' around a circle a fixed distance
@@ -591,6 +594,7 @@ class creature {
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
+    hit_indicator=5; //increase or decrease this number to lengthen/shorten the animation time on hit
     
     // data collection
     hits_by_tower++;
@@ -766,6 +770,10 @@ class creature {
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
     float a = body.getAngle();
+    if(hit_indicator>0){ //makes the animation show up when hit
+    fill (153,0,0);
+    ellipse (pos.x, pos.y, getWidth()+15, getWidth()+15); //this draws the animation when the creature gets hit. Animation is a circle right now
+    hit_indicator=hit_indicator-1;} //this counts down each timestep to make the animation dissapear
 
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
