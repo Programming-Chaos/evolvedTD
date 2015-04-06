@@ -4,6 +4,16 @@ class player {
   Panel statsPanel;
   Panel newpanel;
   Panel upgradePanel;
+  Panel guiPanel;
+  int bulletSpeedButtons[] = new int[5];
+  int bulletSpeedUpgrades = 0;
+  int bulletWeightButtons[] = new int[5];
+  int bulletWeightUpgrades = 0;
+  int fireRateButtons[] = new int[5];
+  int fireRateUpgrades = 0;
+  int money = 0;
+  int moneyGain = 1; // money per 40 ticks
+  int currentMoneyTick;
   
   Panel testpanel;
   
@@ -16,9 +26,9 @@ class player {
     towers = new ArrayList<tower>();
     
     testpanel = new Panel(400,400,-1000,0,true);
-    testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40);
+    testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40,true);
     testpanel.createButton(300,100,0,100,"Yay BUTTON",30,0,0,0,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
-    testpanel.enabled = false;
+    //testpanel.enabled = false;
     
     playerPanel = new Panel(500,420,980,-1020,true);
     playerPanel.createTextBox(480,50,0,-180,new StringPass() { public String passed() { return ("Resources: " + (int)resources); } },40);
@@ -40,7 +50,19 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
     
     upgradePanel = new Panel(2000,1800,0,0,false, 255);
-    upgradePanel.createTextBox(2000,200,0,-800,"Upgrade your defenses",100);
+    upgradePanel.enabled = false;
+    upgradePanel.createTextBox(2000,200,0,-800,"Upgrade your defenses",100, true);
+    for (int c = 0; c < 5; c++) {
+      bulletSpeedButtons[c] = upgradePanel.createButton(400, 200, -600, 900-((5-c)*200),"Bullet Speed +"+ (c+1), 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletSpeed(); } });
+      upgradePanel.buttons.get(bulletSpeedButtons[c]).grayed = true;
+      bulletWeightButtons[c] = upgradePanel.createButton(400, 200, 0, 900-((5-c)*200),"Bullet Power +"+ (c+1), 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletSpeed(); } });
+      upgradePanel.buttons.get(bulletWeightButtons[c]).grayed = true;
+      fireRateButtons[c] = upgradePanel.createButton(400, 200, 600, 900-((5-c)*200),"Rate of Fire +"+ (c+1), 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeFireRate(); } });
+      upgradePanel.buttons.get(fireRateButtons[c]).grayed = true;
+    }
+    
+    guiPanel = new Panel(2500,100,0,-1200,false,50);
+    guiPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money); } }, 50);
     
     resources = 0;
     resourceGain = 0.1;
@@ -67,7 +89,15 @@ class player {
   }
 
   void update() {
-    resources += resourceGain;
+    if (state == State.RUNNING) {
+      resources += resourceGain;
+      currentMoneyTick++;
+      if (currentMoneyTick == 40) {
+        currentMoneyTick = 0;
+        money += moneyGain;
+        println("Currency: " + money);
+      }
+    }
     // walk through the towers
     for (int i = towers.size() - 1; i >= 0; i--)
       towers.get(i).update();   // update them
@@ -86,5 +116,17 @@ class player {
       tower t = towers.get(i);
       t.wave_fire();
     }
+  }
+  
+  void upgradeBulletSpeed() {
+    
+  }
+  
+  void upgradeBulletWeight() {
+    
+  }
+  
+  void upgradeFireRate() {
+    
   }
 }

@@ -219,12 +219,18 @@ void keyPressed() { // if a key is pressed this function is called
       cameraY = 0;
       break;
     case 'p':  // toggle paused state
-      if (state == State.STAGED)
+      if (state == State.STAGED) {
         state = State.RUNNING;
+        the_player.upgradePanel.enabled = false;
+      }
       else if (state != State.PAUSED)
         state = State.PAUSED;
       else
         state = State.RUNNING;
+      break;
+    case 'o':  // enter staged state
+      state = State.STAGED;
+      the_player.upgradePanel.enabled = true;
       break;
     case 'm':
       playSound = !playSound;
@@ -418,6 +424,7 @@ void nextgeneration() {
   // the background
   if (!the_tower.autofire) {
     state = State.STAGED; // pause the game
+    the_player.upgradePanel.shown = true;
   }
 }
 

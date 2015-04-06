@@ -16,6 +16,7 @@ class Button {
   int red, green, blue;
   ButtonPress BP;
   Panel parent;
+  boolean grayed;
   
   Button(float bw, float bh, float bx, float by, String bt, int ts, int r, int g, int b, Panel pr, ButtonPress BPin) {
     button_width = bw;
@@ -29,15 +30,29 @@ class Button {
     blue = b;
     parent = pr;
     BP = BPin;
+    grayed = false;
   }
   
   void display() {
-    fill(red,green,blue,150);
-    rect(button_x,button_y,button_width,button_height);
-    textSize(textsize);
-    textAlign(CENTER,CENTER);
-    fill(255-red,255-green,255-blue,200);
-    text(button_text,button_x,button_y,button_width,button_height);
+    if (grayed) {
+      float avgcolor = ((red+green+blue)/3);
+      fill(avgcolor,150);
+      stroke(0);
+      rect(button_x,button_y,button_width,button_height,5);
+      textSize(textsize);
+      textAlign(CENTER,CENTER);
+      fill((avgcolor<64 ? 255 : 0),255);
+      text(button_text,button_x,button_y,button_width,button_height);
+    }
+    else {
+      fill(red,green,blue,150);
+      stroke(0);
+      rect(button_x,button_y,button_width,button_height,5);
+      textSize(textsize);
+      textAlign(CENTER,CENTER);
+      fill(((red < 64 && green < 64 && blue < 64) ? 255 : 0), 255);
+      text(button_text,button_x,button_y,button_width,button_height);
+    }
   }
   
   boolean isMouseOver() {
@@ -64,8 +79,10 @@ class TextBox {
   Panel parent;
   int align_horiz;
   int align_vert;
+  boolean bordered;
+  boolean grayed;
   
-  TextBox(float tw, float th, float tx, float ty, String tt, int ts, Panel pr, int ah, int av) {
+  TextBox(float tw, float th, float tx, float ty, String tt, int ts, Panel pr, int ah, int av, boolean b) {
     textbox_width = tw;
     textbox_height = th;
     textbox_x = tx;
@@ -75,9 +92,11 @@ class TextBox {
     parent = pr;
     align_horiz = ah;
     align_vert = av;
+    bordered = b;
+    grayed = false;
   }
   
-  TextBox(float tw, float th, float tx, float ty, StringPass SPin, int ts, Panel pr, int ah, int av) {
+  TextBox(float tw, float th, float tx, float ty, StringPass SPin, int ts, Panel pr, int ah, int av, boolean b) {
     textbox_width = tw;
     textbox_height = th;
     textbox_x = tx;
@@ -87,22 +106,26 @@ class TextBox {
     parent = pr;
     align_horiz = ah;
     align_vert = av;
+    bordered = b;
+    grayed = false;
   }
   
   void display() {
-    fill(0,0,0,200);
     textSize(textsize);
+    textAlign(align_horiz,align_vert);
+    if (bordered) {
+      stroke(0);
+      fill(255,255,255,0);
+      rect(textbox_x, textbox_y, textbox_width, textbox_height, 5);
+    }
+    fill(0,0,0,255);
     if (textbox_width == 0 && textbox_height == 0) {
-      textAlign(align_horiz,align_vert);
-      fill(0,0,0,200);
       if (SP == null) text(textbox_text,textbox_x,textbox_y);
       else {
         text(SP.passed(),textbox_x,textbox_y);
       }
     }
     else {
-      textAlign(align_horiz,align_vert);
-      fill(0,0,0,200);
       if (SP == null) text(textbox_text,textbox_x,textbox_y,textbox_width,textbox_height);
       else {
         text(SP.passed(),textbox_x,textbox_y,textbox_width,textbox_height);
@@ -210,7 +233,7 @@ class Panel {
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x, cameraY+panel_y,cameraZ-zoomOffset);  // centered and below the camera+180+panel_x
         fill(200,200,200,opacity);
-        rect(0,0,panel_width,panel_height);
+        rect(0,0,panel_width,panel_height, 10);
         for (Button b : buttons)
           b.display();
         for (TextBox t : textboxes)
@@ -223,7 +246,7 @@ class Panel {
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x+current_offsetX, cameraY+panel_y+current_offsetY,cameraZ-zoomOffset);
         fill(200,200,200,opacity);
-        rect(0,0,panel_width,panel_height);
+        rect(0,0,panel_width,panel_height, 10);
       hint(ENABLE_DEPTH_TEST); 
       popMatrix();
     }
@@ -267,7 +290,7 @@ class Panel {
   void mouse_pressed() {
     if (!enabled)return;
     for (Button b : buttons)
-      if (b.isMouseOver())b.buttonPressed();
+      if (b.isMouseOver() && !b.grayed)b.buttonPressed();
   }
   
   int createButton(float bw, float bh, float bx, float by, String bt, int ts, ButtonPress BP) {
@@ -299,42 +322,63 @@ class Panel {
 
   //This is a boxed-style textbox. The text will wrap within the dimensions tw and th (textbox width and textbox height)
   int createTextBox(float tw, float th, float tx, float ty, String tt, int ts) {//tx and ty are the coordinates of the textbox's center (boxed-style)
-    textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,CENTER,CENTER));//specifies a size for the text to wrap within
+    textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,CENTER,CENTER, false));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }//in boxed-style, the origin of the textbox's coordinates is the topleft of the panel
   //This is a cornered-style textbox. The text will not wrap. It will just keep going off the page unless you put linebreaks.
   int createTextBox(float tx, float ty, String tt, int ts) {//tx and ty are the coordinates of the topleft corner with the panel's topleft corner as the origin (cornered style)
-    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,LEFT,TOP));
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,LEFT,TOP, false));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
   //boxed style with executable string code
   int createTextBox(float tw, float th, float tx, float ty, StringPass SP, int ts) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
-    textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,CENTER,CENTER));//specifies a size for the text to wrap within
+    textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,CENTER,CENTER, false));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
   //cornered style with executable string code
   int createTextBox(float tx, float ty, StringPass SP, int ts) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
-    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,LEFT,TOP));
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,LEFT,TOP, false));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
   //boxed style with a straight-up string and text alignment specifications
   int createTextBox(float tw, float th, float tx, float ty, String tt, int ts, int ah, int av) {//used for hardcoded strings
-    textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,ah,av));//specifies a size for the text to wrap within
+    textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,ah,av, false));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
   //cornered style with a straight- up string and text alignment specifications
   int createTextBox(float tx, float ty, String tt, int ts, int ah, int av) {//used for hardcoded strings
-    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,ah,av));
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,ah,av, false));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
   //boxed style with with executable string code and text alignment specifications
   int createTextBox(float tw, float th, float tx, float ty, StringPass SP, int ts, int ah, int av) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
-    textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,ah,av));//specifies a size for the text to wrap within
+    textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,ah,av, false));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
   //cornered style with executable string code and text alignment specifications
   int createTextBox(float tx, float ty, StringPass SP, int ts, int ah, int av) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
-    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,ah,av));
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,ah,av, false));
+    return (textboxes.size() - 1); // return the index of this textbox for later reference
+  }
+
+  //This is a boxed-style textbox. The text will wrap within the dimensions tw and th (textbox width and textbox height)
+  int createTextBox(float tw, float th, float tx, float ty, String tt, int ts, boolean b) {//tx and ty are the coordinates of the textbox's center (boxed-style)
+    textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,CENTER,CENTER, b));//specifies a size for the text to wrap within
+    return (textboxes.size() - 1); // return the index of this textbox for later reference
+  }//in boxed-style, the origin of the textbox's coordinates is the topleft of the panel
+  //boxed style with executable string code
+  int createTextBox(float tw, float th, float tx, float ty, StringPass SP, int ts, boolean b) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
+    textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,CENTER,CENTER, b));//specifies a size for the text to wrap within
+    return (textboxes.size() - 1); // return the index of this textbox for later reference
+  }
+  //boxed style with a straight-up string and text alignment specifications
+  int createTextBox(float tw, float th, float tx, float ty, String tt, int ts, int ah, int av, boolean b) {//used for hardcoded strings
+    textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,ah,av, b));//specifies a size for the text to wrap within
+    return (textboxes.size() - 1); // return the index of this textbox for later reference
+  }
+  //boxed style with with executable string code and text alignment specifications
+  int createTextBox(float tw, float th, float tx, float ty, StringPass SP, int ts, int ah, int av, boolean b) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
+    textboxes.add(new TextBox(tw,th,tx,ty,SP,ts,this,ah,av, b));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
 }

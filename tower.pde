@@ -15,6 +15,7 @@ class tower {
   int imagetimer; // timer for alternating gun images
   int soundtimer;
   int radius = 80;
+  int damage = 10;
   Body tower_body;
   
   // constructor function, initializes the tower
@@ -182,7 +183,7 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(0, 0, angle, 20); // 20 is the current damage, should be a variable, upgradable
+    projectile p = new projectile(0, 0, angle, damage); // 20 is the current damage, should be a variable, upgradable
     projectiles.add(p);
     energy-=10;
     imagetimer = 0;
@@ -210,7 +211,7 @@ class tower {
       return;
     }
     for(float a = 0; a < 2*PI ; a += ((2*PI)/20)){
-      projectile p = new projectile(5*cos(a), 5*sin(a), a, 20); // 20 is the current damage, should be a variable, upgradable
+      projectile p = new projectile(5*cos(a), 5*sin(a), a, damage); // 20 is the current damage, should be a variable, upgradable
       // postions of new projectives are not at 0,0 to avoid collisions.
       projectiles.add(p);
     }
