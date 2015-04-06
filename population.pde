@@ -163,44 +163,68 @@ class population {
       range = multiplier++ * 5;
       //TODO: decrease success chance when range is increased.
       
-      // add random creatures if no gametes
+      // print error if not enough gametes
       if (gametes.size() < 2) {
         println("ERROR: Not enough gametes");
         break;
       }
       
       Gamete g1, g2;
+      int variance = 15;
       int size = gametes.size();
-      // i is first gamete j is it's chosen mate
-      for (int i=0; i < size - 1; i++) {
-        g1 = gametes.get(i);
-        for (int j = i+1; j < size; j++) {
-          g2 = gametes.get(j);
-          
-          if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
-              g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
-            // Remove gametes from list and mate
-            gametes.remove(j); j--;
-            gametes.remove(i); i--;
-            size = gametes.size();
-            
-            // Gamete coordinates
-            int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
-            int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
-            Vec2 pos = new Vec2(px, py);
-            
-            // Check coordinates for other creatures or rocks spawned in this tile.
-            while( checkForCreature(pos, generation) || checkForRock(pos, rocks)){};
-            
-            pos.x = pos.x * cellWidth;
-            pos.y = pos.y * cellHeight;
+      int rand;
       
-            childrenBred++;
-            generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                        10000 + g1.energy + g2.energy, pos));
+      // i is first gamete j is it's chosen mate
+      for (int i=0; i < variance; i++) {
+        rand = (int)random(size);
+        g1 = gametes.get(rand); // Randomly select a gamete
+        
+        ArrayList<Integer> inProximity = new ArrayList<Integer>();
+        
+        // copy array position of gametes in proximity
+        for (int j=0; j < size; j++) {
+          if (j == rand) {//if same gamete... skip
+            j++;
+          }
+          if (j >= size) {//if j is beyond the list of gametes, break
             break;
           }
+          
+          g2 = gametes.get(j);
+        
+          // Check if g2 is in range of g1
+          if (g2.xPos > g1.xPos - range && g2.xPos < g1.xPos + range && // within x range
+              g2.yPos > g1.yPos - range && g2.yPos < g1.yPos + range) { // within y range
+            inProximity.add(j);       
+          }
         }
+        
+        // if any match has been found:
+        if (inProximity.size() > 0) {
+          rand = (int)random(inProximity.size());
+          int listPos = inProximity.get(rand);
+          g2 = gametes.get(listPos); //get random mate within range
+          gametes.remove(g1); //remove first gamete
+          gametes.remove(g2); //remove second gamete
+          size = gametes.size(); //update list size variable
+          
+          // Gamete coordinates
+          int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
+          int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
+          Vec2 pos = new Vec2(px, py);
+          
+          // Check coordinates for other creatures or rocks spawned in this tile.
+          while( checkForCreature(pos, generation) || checkForRock(pos, rocks)){};
+          
+          pos.x = pos.x * cellWidth;
+          pos.y = pos.y * cellHeight;
+    
+          childrenBred++;
+          generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+                                      10000 + g1.energy + g2.energy, pos));
+          break;
+        }
+        
       }
     }
     //println("made " + childrenBred + " and needed " + childrenNew + " more");
