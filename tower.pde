@@ -14,8 +14,8 @@ class tower {
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
   int soundtimer;
-  int radius = 80;
   int damage = 10;
+  float radius = 50; // 80 is the size we were using for a long time
   Body tower_body;
   
   // constructor function, initializes the tower
@@ -32,12 +32,11 @@ class tower {
     soundtimer = 0;
     
     BodyDef bd = new BodyDef();
-    bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17)));
+    bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17*(radius/80))));
     bd.type = BodyType.STATIC;
     bd.linearDamping = 0.9;
     
     tower_body = box2d.createBody(bd);
-    // Define the shape -- a  (this is what we use for a rectangle)
     CircleShape sd = new CircleShape();
     sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
     FixtureDef fd = new FixtureDef();
@@ -98,7 +97,8 @@ class tower {
     //draw the tower
     ellipse(0, 0, 10, 10); // just a circle for now
     */
-    image(gunbase,-128,-128);
+    image(gunbase,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    println(radius*((float)128/80));
     showgunalt = false;
     showgun = true;
     imagetimer++;
@@ -114,8 +114,8 @@ class tower {
     pushMatrix();
     float c = angle;
     rotate(c + HALF_PI);
-    if(showgun)image(gun,-128,-128);
-    if(showgunalt)image(gunalt,-128,-128);
+    if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
     
     for (projectile p: projectiles) { // display the active projectiles
@@ -130,6 +130,15 @@ class tower {
     noStroke();
     fill(0, 0, 255);
     rect(0, -30, 0.1*energy, 6);
+
+    // draw the outline of the tower's box2D body
+    /*pushMatrix();
+    translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
+    fill(200, 200, 200, 0);
+    stroke(0);
+    ellipse(0, 0, radius*2, radius*2);  
+    popMatrix();*/
+    
     // display resources, now in player
     /*
     pushMatrix();
