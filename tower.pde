@@ -186,7 +186,7 @@ class tower {
   void fire() {
     switch(activeweapon) {
     case 1:
-      fire_projectile();
+      if (the_player.towers.get(0).activeweapon == 1)fire_projectile();
       break;
     case 2:
       drop_rock();

@@ -57,6 +57,7 @@ class player {
     upgradePanel = new Panel(2000,1800,0,0,false, 255);
     upgradePanel.enabled = false;
     upgradePanel.createTextBox(2000,200,0,-800,"Upgrade your defenses",100, true);
+    upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() { upgradePanel.enabled = false; state = State.RUNNING; } });
     for (int c = 0; c < 5; c++) {
       
       if (c>0) {

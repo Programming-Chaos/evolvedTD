@@ -233,8 +233,14 @@ void keyPressed() { // if a key is pressed this function is called
         state = State.RUNNING;
       break;
     case 'u':  // enter staged state
-      state = State.STAGED;
-      the_player.upgradePanel.enabled = true;
+      if (state == State.STAGED) {
+        the_player.upgradePanel.enabled = false;
+        state = State.RUNNING;
+      }
+      else {
+        state = State.STAGED;
+        the_player.upgradePanel.enabled = true;
+      }
       break;
     case 'm':
       playSound = !playSound;
