@@ -90,7 +90,7 @@ class tower {
         //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
           target = the_pop.vec_to_random_creature(); // target a random creature
           angle = atan2(target.y-ypos,target.x-xpos);
-          fire();
+          fire_projectile();
           autofirecounter = 0;  // reset the counter
         }
       }
@@ -186,7 +186,7 @@ class tower {
   void fire() {
     switch(activeweapon) {
     case 1:
-      if (the_player.towers.get(0).activeweapon == 1)fire_projectile();
+      if (the_player.towers.get(0).activeweapon == 1 && !autofire)fire_projectile();
       break;
     case 2:
       drop_rock();

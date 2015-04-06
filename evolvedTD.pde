@@ -181,9 +181,6 @@ void draw() {
   if (state == State.RUNNING) {
     box2d.step();
   }
-  if (state == State.MENU) {
-    display_controls();
-  }
 }  // end of draw loop
 
 void keyPressed() { // if a key is pressed this function is called
@@ -230,15 +227,9 @@ void keyPressed() { // if a key is pressed this function is called
       else
         state = State.RUNNING;
       break;
-    case 'u':  // enter staged state
-      if (state != State.UPGRADE) {
-        stateSaved = state;
-        state = State.UPGRADE;
-        the_player.upgradePanel.enabled = true;
-      } else {
-        state = stateSaved;
-        the_player.upgradePanel.enabled = false;
-      }
+    case 'u':  // toggle upgrade window
+      the_player.upgradePanel.enabled = !the_player.upgradePanel.enabled;
+      if (state == State.STAGED) state = State.RUNNING;
       break;
     case 'm':
       playSound = !playSound;
@@ -260,7 +251,7 @@ void keyPressed() { // if a key is pressed this function is called
       displayScent = !displayScent;
       break;
     case '?':
-      controls(); // call the instructions function
+      the_player.helpPanel.enabled = !the_player.helpPanel.enabled;
       break;
     case '1':
     case '2':
@@ -431,8 +422,9 @@ void nextgeneration() {
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
   if (!autofire) {
+    stateSaved = state;
     state = State.STAGED; // pause the game
-    the_player.upgradePanel.shown = true;
+    the_player.upgradePanel.enabled = true;
   }
 }
 
@@ -480,41 +472,6 @@ void mousePressed() { // called if either mouse button is pressed
   pushMatrix();
   translate(mouse_x,mouse_y);
   ellipse(0,0,30,30);
-  popMatrix();
-}
-
-void controls() {
-  if (state != State.MENU) {
-    stateSaved = state;
-    state = State.MENU;
-  }
-  else {
-    state = stateSaved;
-  }
-}
-
-void display_controls() {
-  fill(200,200,200,200); // grey slightly transparent rectangle
-  int leftalign = -90;
-  int topalign = -80;
-  pushMatrix();
-  translate(cameraX, cameraY, cameraZ - 200);
-  rect(0,0,200,200);
-  fill(0);
-  textSize(10);
-  text("Controls",leftalign,topalign);
-  textSize(7);
-  text("w/s - zoom in/out", leftalign, topalign + 10);
-  text("Arrow keys - move camera", leftalign, topalign + 18);
-  text("z - zoom out", leftalign, topalign + 26);
-  text("p - pause/unpause", leftalign, topalign + 34);
-  text("Mouse button - fire", leftalign, topalign + 42);
-  text("Number keys - switch weapons", leftalign, topalign + 50);
-  text("q - hide/unhide food", leftalign, topalign + 58);
-  text("n - hide/unhide scent", leftalign, topalign + 66);
-  text("v - hide/unhide screen", leftalign, topalign + 74);
-  text("? - show/hide controls", leftalign, topalign + 82);
-  text("a - toggle autofire", leftalign, topalign + 90);
   popMatrix();
 }
 

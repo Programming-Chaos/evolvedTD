@@ -39,6 +39,7 @@ class Button {
       fill(avgcolor,150);
       stroke(0);
       rect(button_x,button_y,button_width,button_height,5);
+      stroke(0,0);
       textSize(textsize);
       textAlign(CENTER,CENTER);
       fill((avgcolor<64 ? 255 : 0),255);
@@ -48,6 +49,7 @@ class Button {
       fill(red,green,blue,150);
       stroke(0);
       rect(button_x,button_y,button_width,button_height,20);
+      stroke(0,0);
       textSize(textsize);
       textAlign(CENTER,CENTER);
       fill(((red < 64 && green < 64 && blue < 64) ? 255 : 0), 255);
@@ -117,6 +119,7 @@ class TextBox {
       stroke(0);
       fill(255,255,255,0);
       rect(textbox_x, textbox_y, textbox_width, textbox_height, 5);
+      stroke(0,0);
     }
     fill(0,0,0,255);
     if (textbox_width == 0 && textbox_height == 0) {

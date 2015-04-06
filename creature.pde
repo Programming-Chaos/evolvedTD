@@ -762,6 +762,7 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
+    float sw = 1;
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
@@ -776,35 +777,41 @@ class creature {
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
-    
-
-    stroke(0);
 
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
         if ((((Segment)f.getUserData()).armor) > 1)
-          strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+          sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         else
-          strokeWeight(((Segment)f.getUserData()).armor);
+          sw = (((Segment)f.getUserData()).armor);
+        //strokeWeight(sw);
+        //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
+        //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
         if ((((Appendage)f.getUserData()).armor) > 1)
-          strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+          sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         else
-          strokeWeight(((Appendage)f.getUserData()).armor);
+          sw = (((Appendage)f.getUserData()).armor);
+        //strokeWeight(sw);
+        //line((int)(((Appendage)f.getUserData()).frontPoint.x),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x),(int)(((Appendage)f.getUserData()).backPoint.y));
+        //line((int)(((Appendage)f.getUserData()).frontPoint.x*-1),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x*-1),(int)(((Appendage)f.getUserData()).backPoint.y));
       }
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       //strokeWeight(.1);
       noStroke();
+      Vec2 v;
       for (int i = 0; i < 3; i++) {
-        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+        v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
+      stroke(0);
+      strokeWeight(1);
     }
     
     //strokeWeight(1);
