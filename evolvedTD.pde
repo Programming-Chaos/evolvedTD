@@ -223,23 +223,21 @@ void keyPressed() { // if a key is pressed this function is called
       cameraY = 0;
       break;
     case 'p':  // toggle paused state
-      if (state == State.STAGED) {
+      if (state == State.STAGED)
         state = State.RUNNING;
-        the_player.upgradePanel.enabled = false;
-      }
       else if (state != State.PAUSED)
         state = State.PAUSED;
       else
         state = State.RUNNING;
       break;
     case 'u':  // enter staged state
-      if (state == State.STAGED) {
-        the_player.upgradePanel.enabled = false;
-        state = State.RUNNING;
-      }
-      else {
-        state = State.STAGED;
+      if (state != State.UPGRADE) {
+        stateSaved = state;
+        state = State.UPGRADE;
         the_player.upgradePanel.enabled = true;
+      } else {
+        state = stateSaved;
+        the_player.upgradePanel.enabled = false;
       }
       break;
     case 'm':

@@ -4,4 +4,5 @@ public enum State {
   RUNNING, // in a wave
   STAGED,  // between waves
   MENU,    // user in menu
+  UPGRADE, // user in upgrade menu
 }
