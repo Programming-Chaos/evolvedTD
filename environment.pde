@@ -488,13 +488,13 @@ class environment {
         y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
         if (x >= environWidth || x < 0) {
         // x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-        fd.setRemove( true ); // remove food if off map
+        fd.remove = true; // remove food if off map
         continue;
         }
         if (y >= environHeight || y < 0) 
         {
         // y = (y+environWidth)%environHeight;
-        fd.setRemove( true ); // remove food if off map
+        fd.remove = true; // remove food if off map
         continue;
         }
         tileMap[x][y].setTaste(fd.getTaste());

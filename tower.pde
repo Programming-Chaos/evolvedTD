@@ -1,4 +1,5 @@
 class tower {
+  int ID;
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
@@ -21,12 +22,21 @@ class tower {
   int baseDamageRailgun = 20;
   int baseDamageFlamethrower = 200;
   int firerate; // autofire rate, lower values fire faster
-  int baseFirerateRailgun = 25;
-  int baseFirerateFlamethrower = 75;
+  int baseFirerate;
   int projectileSpeed;
   int baseProjectileSpeed = 100;
   int ecost; // per fire energy cost
+  int bulletSpeedUpgrades = 0;
+  int bulletDamageUpgrades = 0;
+  int fireRateUpgrades = 0;
+  int bulletSpeedButtons[] = new int[5];
+  int bulletDamageButtons[] = new int[5];
+  int fireRateButtons[] = new int[5];
+  boolean inTransit = true;
+  boolean wasInTransit = true;
+  boolean conflict = false;
   char type;
+  Panel upgradePanel;
   /* type is the turret type
    * r: default rail gun
    * f: flamethrower
@@ -34,62 +44,101 @@ class tower {
   Body tower_body;
 
   // constructor function, initializes the tower
-  tower(int x, int y, char t) {
+  tower(char t, int id) {
+    ID = id;
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
-    activeweapon = 1;
     projectiles = new ArrayList<projectile>();
     angle = 0;
     imagetimer = 0;
     soundtimer = 0;
-    projectileSpeed = baseProjectileSpeed*(the_player.bulletSpeedUpgrades+1);
+    projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
 
-    xpos = x;
-    ypos = y;
+    xpos = round(mouse_x);
+    ypos = round(mouse_y);
     type = t;
 
     switch (type){
       case 'r':
-        the_player.numrailguns++;
+        baseFirerate = 25;
         gunbase = loadImage("assets/Tower_base_02.png");
         gun = loadImage("assets/RailGun-01.png");
         gunalt = loadImage("assets/RailGun-a-01.png");
-        dmg = baseDamageRailgun*(the_player.bulletDamageUpgrades+1);
-        firerate = round((float)baseFirerateRailgun/(the_player.fireRateUpgrades+1));
+        dmg = baseDamageRailgun*(bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 10;
         break;
       case 'f':
-        the_player.numflamethrowers++;
+        baseFirerate = 75;
         gun = loadImage("assets/FlameThrower01-01.png");
         gunalt = loadImage("assets/FlameThrower02-01.png");
         gunbase = loadImage("assets/Turbase03256.png");
-        dmg = baseDamageFlamethrower*(the_player.bulletDamageUpgrades+1);
-        firerate = round((float)baseFirerateFlamethrower/(the_player.fireRateUpgrades+1));
+        dmg = baseDamageFlamethrower*(bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 50;
         break;
     }
-
-    BodyDef bd = new BodyDef();
-    bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17*(radius/80))));
-    bd.type = BodyType.STATIC;
-    bd.linearDamping = 0.9;
-
-    tower_body = box2d.createBody(bd);
-    CircleShape sd = new CircleShape();
-    sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
-    FixtureDef fd = new FixtureDef();
-    fd.filter.categoryBits = 2; // food is in filter category 2
-    fd.filter.maskBits = 65531; // doesn't interact with projectiles
-    fd.shape = sd;
-    fd.density = 100;
-    tower_body.createFixture(fd);
-
-    tower_body.setUserData(this);
+    upgradePanel = new Panel(2000,1800,0,0,false, 200);
+    upgradePanel.enabled = false;
+    upgradePanel.createTextBox(2000,200,0,-800,new StringPass() { public String passed() { return ("Upgrade your " + (the_player.selectedTower.type == 'r' ? "railgun" : "flamethrower") + " ID# " + the_player.selectedTower.ID); } },100, true);
+    upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
+      upgradePanel.enabled = false;
+      if(state == State.STAGED)state = State.RUNNING;
+    } });
+    for (int c = 0; c < 5; c++) {
+      
+      if (c>0) {
+        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
+        upgradePanel.buttons.get(bulletSpeedButtons[c]).grayed = true;
+        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        upgradePanel.buttons.get(bulletDamageButtons[c]).grayed = true;
+        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeFireRate(); } });
+        upgradePanel.buttons.get(fireRateButtons[c]).grayed = true;
+      }
+      else {
+        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
+        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeFireRate(); } });
+      }
+    }
+    the_player.upgradepanels.add(upgradePanel);
   }
 
   void update() {
     update_projectiles();
-    if (state == State.RUNNING){
+    if (!inTransit && wasInTransit) {
+      BodyDef bd = new BodyDef();
+      bd.position.set(box2d.coordPixelsToWorld(new Vec2(0+xpos, 17*(radius/80)+ypos)));
+      bd.type = BodyType.STATIC;
+      bd.linearDamping = 0.9;
+      tower_body = box2d.createBody(bd);
+      CircleShape sd = new CircleShape();
+      sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
+      FixtureDef fd = new FixtureDef();
+      fd.filter.categoryBits = 2; // food is in filter category 2
+      fd.filter.maskBits = 65531; // doesn't interact with projectiles
+      fd.shape = sd;
+      fd.density = 100;
+      tower_body.createFixture(fd);
+      tower_body.setUserData(this);
+      wasInTransit = false;
+    }
+    if (inTransit) {
+      if (!wasInTransit)
+        box2d.destroyBody(tower_body);
+      wasInTransit = true;
+      xpos = round(mouse_x);
+      ypos = round(mouse_y);
+      conflict = false;
+      for (tower t : the_player.towers) {
+        if (t != the_player.pickedup)
+          if (sqrt((t.xpos-xpos)*(t.xpos-xpos)+(t.ypos-ypos)*(t.ypos-ypos)) <= radius*2)
+            conflict = true;
+      }
+      if (xpos < ((-1*(worldWidth/2))+radius) || xpos > ((worldWidth/2)-radius) || ypos < ((-1*(worldHeight/2))+radius) || ypos > ((worldHeight/2)-radius))
+        conflict = true;
+    }
+    else if (state == State.RUNNING){
       energy += energyGain;  // gain energy
       if (autofire) {
         Vec2 target;
@@ -110,16 +159,9 @@ class tower {
           autofirecounter = 0;  // reset the counter
         }
       }
-      else { // user controlled: calculate the angle to the mouse pointer and point at the mouse
-        // calculate the location of the mouse pointer in the world
-        //float x, y;
-        //x = ((mouse_x/((float)zoomOffset/cameraZ))+cameraX-xpos);
-        //y = ((mouse_y/((float)zoomOffset/cameraZ))+cameraY-ypos);
-        //x = (cameraX+((mouseX-(width/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
-        //y = (cameraY+((mouseY-(height/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+      else // user controlled: calculate the angle to the mouse pointer and point at the mouse
         //calculate the angle to the mouse pointer
         angle = atan2(mouse_y-ypos,mouse_x-xpos);//(ypos*((float)worldWidth/width)), x-(xpos*((float)worldWidth/width)));
-      }
     }
   }
 
@@ -127,7 +169,7 @@ class tower {
     for (int i = projectiles.size() - 1; i >= 0; i--) {  // walk through particles to avoid missing one
       projectile p = projectiles.get(i);
       p.update();
-      if(p.getRemove()){
+      if(p.remove){
         p.killBody();  // remove the box2d body
         projectiles.remove(i);  // remove the projectile from the list
       }
@@ -156,9 +198,8 @@ class tower {
     }
 
     pushMatrix();
-    float c = angle;
     translate(xpos, ypos, 0);
-    rotate(c + HALF_PI);
+    rotate(angle + HALF_PI);
     if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
@@ -176,13 +217,39 @@ class tower {
     fill(0, 0, 255);
     rect(xpos, ypos-30, 0.1*energy, 6);
 
+    if (inTransit) {
     // draw the outline of the tower's box2D body
-    /*pushMatrix();
-    translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
-    fill(200, 200, 200, 0);
-    stroke(0);
-    ellipse(0, 0, radius*2, radius*2);
-    popMatrix();*/
+      pushMatrix();
+      translate(xpos,ypos);
+      fill(0, 0, 0, 0);
+      if (conflict)stroke(255,0,0);
+      else stroke(0,255,0);
+      ellipse(0, 0, radius*2, radius*2);
+      stroke(0);
+      popMatrix();
+    }
+    else if (the_player.placing) {
+      for (tower t : the_player.towers) {
+        if (t != the_player.pickedup) {
+          pushMatrix();
+          translate(box2d.getBodyPixelCoord(t.tower_body).x, box2d.getBodyPixelCoord(t.tower_body).y);
+          fill(0, 0, 0, 0);
+          stroke(0);
+          ellipse(0, 0, radius*2, radius*2);
+          stroke(0);
+          popMatrix();
+        }
+      }
+    }
+    else if (the_player.selectedTower != null && the_player.selectedTower.ID == ID) {
+      pushMatrix();
+      translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
+      fill(0, 0, 0, 0);
+      stroke(255,255,0);
+      ellipse(0, 0, radius*2, radius*2);
+      stroke(0);
+      popMatrix();
+    }
 
     // display resources, now in player
     /*
@@ -205,17 +272,6 @@ class tower {
       }
     }
     projectiles.clear();
-  }
-
-  void fire() {
-    switch(activeweapon) {
-    case 1:
-      if (the_player.towers.get(0).activeweapon == 1 && !autofire)fire_projectile();
-      break;
-    case 2:
-      drop_rock();
-      break;
-    }
   }
 
   void switchtargetMode(char k) {
@@ -266,17 +322,75 @@ class tower {
     }
   }
 
-
-  void drop_rock() {
-    float x,y;
-    // Try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
-    x = cameraX + (cameraZ*sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-    y = cameraY + (cameraZ*sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-    if (energy < 100) {
+  void upgradeBulletSpeed() {
+    if (bulletSpeedUpgrades > 4)return;
+    if (the_player.money < ((((byte)1)<<(bulletSpeedUpgrades*3))*100)) {
+      println("You do not have sufficient funds to purchase this upgrade...");
       return;
     }
-    energy -= 100;  // uses a lot of energy to drop a rock
-    rock r = new rock((int)x, (int)y);
-    rocks.add(r); // rocks is a global list
+    the_player.money -= ((((byte)1)<<(bulletSpeedUpgrades*3))*100);
+    upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades]).button_text = "Bullet Speed\nX"+ (bulletSpeedUpgrades+2) + "\nPurchased!";
+    upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
+    if (bulletSpeedUpgrades < 4) {
+      upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades+1]).grayed = false;
+      upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades+1]).button_text = "Bullet Speed\nX"+ (bulletSpeedUpgrades+3) + "\n" + (((byte)1)<<((bulletSpeedUpgrades+1)*3)) + "00$";
+    }
+    
+    bulletSpeedUpgrades++;
+    
+    projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
+  }
+  
+  void upgradeBulletDamage() {
+    if (bulletDamageUpgrades > 4)return;
+    if (the_player.money < ((((byte)1)<<(bulletDamageUpgrades*3))*100)) {
+      println("You do not have sufficient funds to purchase this upgrade...");
+      return;
+    }
+    the_player.money -= ((((byte)1)<<(bulletDamageUpgrades*3))*100);
+    upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
+    upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
+    if (bulletDamageUpgrades < 4) {
+      upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).grayed = false;
+      upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
+    }
+    
+    bulletDamageUpgrades++;
+    
+    switch (type) {
+      case 'r':
+        dmg = baseDamageRailgun*(bulletDamageUpgrades+1);
+        break;
+      case 'f':
+        dmg = baseDamageFlamethrower*(bulletDamageUpgrades+1);
+        break;
+      }
+  }
+  
+  void upgradeFireRate() {
+    if (fireRateUpgrades > 4)return;
+    if (the_player.money < ((((byte)1)<<(fireRateUpgrades*3))*100)) {
+      println("You do not have sufficient funds to purchase this upgrade...");
+      return;
+    }
+    the_player.money -= ((((byte)1)<<(fireRateUpgrades*3))*100);
+    upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades]).button_text = "Fire Rate\nX"+ (fireRateUpgrades+2) + "\nPurchased!";
+    upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
+    if (fireRateUpgrades < 4) {
+      upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades+1]).grayed = false;
+      upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades+1]).button_text = "Fire Rate\nX"+ (fireRateUpgrades+3) + "\n" + (((byte)1)<<((fireRateUpgrades+1)*3)) + "00$";
+    }
+    
+    fireRateUpgrades++;
+    
+    switch (type) {
+      case 'r':
+        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
+        break;
+      case 'f':
+        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
+        break;
+    }
+    autofirecounter = 0;
   }
 }

@@ -42,10 +42,6 @@ class rock {
     return(box2d.getBodyPixelCoord(the_rock));
   }
   
-  void setRemove(boolean x) {
-    remove = x;
-  }
-  
   int update() {
     if (remove) {
       killBody();

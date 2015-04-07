@@ -17,6 +17,7 @@ class Button {
   ButtonPress BP;
   Panel parent;
   boolean grayed;
+  boolean enabled;
   
   Button(float bw, float bh, float bx, float by, String bt, int ts, int r, int g, int b, Panel pr, ButtonPress BPin) {
     button_width = bw;
@@ -31,9 +32,11 @@ class Button {
     parent = pr;
     BP = BPin;
     grayed = false;
+    enabled = true;
   }
   
   void display() {
+    if (!enabled)return;
     if (grayed) {
       float avgcolor = ((red+green+blue)/3);
       fill(avgcolor,150);
@@ -65,6 +68,7 @@ class Button {
   }
   
   void buttonPressed() {
+    if (!enabled)return;
     buttonpressed = true;
     BP.pressed();
   }

@@ -40,6 +40,8 @@ class projectile {
   }
   
   void update(){
+    if (box2d.getBodyPixelCoord(the_projectile).x < (-1*(worldWidth/2)) || box2d.getBodyPixelCoord(the_projectile).x > (worldWidth/2))remove = true;
+    if (box2d.getBodyPixelCoord(the_projectile).y < (-1*(worldHeight/2)) || box2d.getBodyPixelCoord(the_projectile).y > (worldHeight/2))remove = true;
     Vec2 velocity;
     velocity = the_projectile.getLinearVelocity();
     if(velocity.length()< 50){  // remove slow projectiles
@@ -60,14 +62,6 @@ class projectile {
   
   int get_damage() {  // returns the amount of damage a projectile does
     return damage;
-  }
-  
-  void setRemove(boolean x) { // sets the projectile to be removed later
-    remove = x;
-  }
-  
-  Boolean getRemove(){
-    return remove;
   }
 
   void display() {
