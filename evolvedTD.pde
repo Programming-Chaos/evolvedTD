@@ -148,13 +148,11 @@ void draw() {
     rock r = rocks.get(i);
     Vec2 rockPos = r.getPos();
     if (r != null) {
-      if (rockPos.x > 1250 || rockPos.x < -1250){
+      if (rockPos.x > 1250 || rockPos.x < -1250 || 
+          rockPos.y > 1250 || rockPos.y < -1250) {
         r.killBody();
         rocks.remove(r); // if a rock was hit out of map on x dimension, remove it from the list
-      }
-      if (rockPos.y > 1250 || rockPos.y < -1250){
-        r.killBody();
-        rocks.remove(r); // if a rock was hit out of map on y dimension, remove it from the list
+        i--;
       }
     }
   }
