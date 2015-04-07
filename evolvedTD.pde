@@ -426,7 +426,7 @@ void nextgeneration() {
 }
 
 void add_food() { // done after each wave/generation
-  for (int i = 0; i < 35; i++) { // why add exactly 10 food each time?
+  for (int i = 0; i < 35; i++) { // why add exactly 35 food each time?
     food f = new food((int)random(-0.4*worldWidth,0.3*worldWidth), (int)random(-0.3*worldHeight,0.4*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
