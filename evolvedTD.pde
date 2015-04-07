@@ -17,6 +17,7 @@ int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
 static int zoomOffset = 2163;  // (translate(cameraX, cameraY, cameraZ - zoomOffset)
+float worldRatioX, worldRatioY;
 
 // see
 State state = State.RUNNING;
@@ -72,6 +73,8 @@ int fConsumed = 0;
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
+  worldRatioX = (float)worldWidth/width;
+  worldRatioY = (float)worldHeight/height;
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   PFont font = createFont("Arial", 100);
