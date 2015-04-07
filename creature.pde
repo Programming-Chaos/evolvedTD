@@ -727,7 +727,9 @@ class creature {
       int posY = (int)(pos.y / cellHeight);
       
       // Use one of each chromosome from getGametes.
-      ArrayList<Chromosome> newGametes = genome.getGametes();
+      ArrayList<Genome.Chromosome> newGametes = new ArrayList<Genome.Chromosome>(2);
+      newGametes = genome.getGametes();
+      
       Gamete g1 = new Gamete(posX + dx, posY + dy, energy, newGametes.get(0));
       Gamete g2 = new Gamete(posX - dx, posY - dy, energy, newGametes.get(1));
                              
