@@ -46,17 +46,17 @@ class player {
     for (int c = 0; c < 5; c++) {
       
       if (c>0) {
-        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\n+"+ (c+1) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletSpeed(); } });
+        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletSpeed(); } });
         upgradePanel.buttons.get(bulletSpeedButtons[c]).grayed = true;
-        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\n+"+ (c+1) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletDamage(); } });
+        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletDamage(); } });
         upgradePanel.buttons.get(bulletDamageButtons[c]).grayed = true;
-        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\n+"+ (c+1) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeFireRate(); } });
+        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeFireRate(); } });
         upgradePanel.buttons.get(fireRateButtons[c]).grayed = true;
       }
       else {
-        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\n+"+ (c+1) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletSpeed(); } });
-        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\n+"+ (c+1) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletDamage(); } });
-        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\n+"+ (c+1) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeFireRate(); } });
+        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletSpeed(); } });
+        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeBulletDamage(); } });
+        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { upgradeFireRate(); } });
       }
     }
 
@@ -169,13 +169,17 @@ class player {
       return;
     }
     money -= ((((byte)1)<<(bulletSpeedUpgrades*3))*100);
-    upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades]).button_text = "Bullet Speed\n+"+ (bulletSpeedUpgrades+1) + "\nPurchased!";
+    upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades]).button_text = "Bullet Speed\nX"+ (bulletSpeedUpgrades+2) + "\nPurchased!";
     upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (bulletSpeedUpgrades < 4) {
       upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades+1]).grayed = false;
-      upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades+1]).button_text = "Bullet Speed\n+"+ (bulletSpeedUpgrades+2) + "\n" + (((byte)1)<<((bulletSpeedUpgrades+1)*3)) + "00$";
+      upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades+1]).button_text = "Bullet Speed\nX"+ (bulletSpeedUpgrades+3) + "\n" + (((byte)1)<<((bulletSpeedUpgrades+1)*3)) + "00$";
     }
+    
     bulletSpeedUpgrades++;
+    
+    for (tower t : towers)
+      t.projectileSpeed = t.baseProjectileSpeed*(bulletSpeedUpgrades+1);
   }
   
   void upgradeBulletDamage() {
@@ -185,13 +189,25 @@ class player {
       return;
     }
     money -= ((((byte)1)<<(bulletDamageUpgrades*3))*100);
-    upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Bullet Damage\n+"+ (bulletDamageUpgrades+1) + "\nPurchased!";
+    upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
     upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (bulletDamageUpgrades < 4) {
       upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).grayed = false;
-      upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Bullet Damage\n+"+ (bulletDamageUpgrades+2) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
+      upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
     }
+    
     bulletDamageUpgrades++;
+    
+    for (tower t : towers) {
+      switch (t.type) {
+        case 'r':
+          t.dmg = t.baseDamageRailgun*(bulletDamageUpgrades+1);
+          break;
+        case 'f':
+          t.dmg = t.baseDamageFlamethrower*(bulletDamageUpgrades+1);
+          break;
+      }
+    }
   }
   
   void upgradeFireRate() {
@@ -201,12 +217,25 @@ class player {
       return;
     }
     money -= ((((byte)1)<<(fireRateUpgrades*3))*100);
-    upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades]).button_text = "Fire Rate\n+"+ (fireRateUpgrades+1) + "\nPurchased!";
+    upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades]).button_text = "Fire Rate\nX"+ (fireRateUpgrades+2) + "\nPurchased!";
     upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (fireRateUpgrades < 4) {
       upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades+1]).grayed = false;
-      upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades+1]).button_text = "Fire Rate\n+"+ (fireRateUpgrades+2) + "\n" + (((byte)1)<<((fireRateUpgrades+1)*3)) + "00$";
+      upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades+1]).button_text = "Fire Rate\nX"+ (fireRateUpgrades+3) + "\n" + (((byte)1)<<((fireRateUpgrades+1)*3)) + "00$";
     }
+    
     fireRateUpgrades++;
+    
+    for (tower t : towers) {
+      switch (t.type) {
+        case 'r':
+          t.firerate = round((float)t.baseFirerateRailgun/(fireRateUpgrades+1));
+          break;
+        case 'f':
+          t.firerate = round((float)t.baseFirerateFlamethrower/(fireRateUpgrades+1));
+          break;
+      }
+      t.autofirecounter = 0;
+    }
   }
 }

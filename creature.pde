@@ -722,7 +722,7 @@ class creature {
 
     // If a creature runs our of locomotion energy it starts to lose health
     // It might make more sense to just be based on health energy, but creatures start with zero health energy and health energy doesn't always decrease
-    if(energy_locomotion <= 0){
+    if(energy_locomotion <= 0) {
       health = health -1;
     }
 
@@ -730,9 +730,31 @@ class creature {
     // in the world, still exists for reproducton
     if (health <= 0) {
       alive = false;
-      // if its no longer alive the body can be killed - otherwise it
+      // if its no longer alive creature spawns 2 gametes in a 
+      //radius of 5 tiles and the body can be killed - otherwise it
       // still "in" the world.  Have to make sure the body isn't
       // referenced elsewhere
+      
+      //spawn gametes
+      int dx = (int)random(-5, 6); //from -5 to 5 (6 is not included)
+      int dy = (int)random(-5, 6);
+      int energy = (int) (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      Vec2 pos = box2d.getBodyPixelCoord(body);
+      
+      int posX = (int)(pos.x / cellWidth);
+      int posY = (int)(pos.y / cellHeight);
+      
+      // Use one of each chromosome from getGametes.
+      ArrayList<Genome.Chromosome> newGametes = new ArrayList<Genome.Chromosome>(2);
+      newGametes = genome.getGametes();
+      
+      Gamete g1 = new Gamete(posX + dx, posY + dy, energy, newGametes.get(0));
+      Gamete g2 = new Gamete(posX - dx, posY - dy, energy, newGametes.get(1));
+                             
+      gameteStack.add(g1);
+      gameteStack.add(g2);
+      
+      //delete the body
       killBody();
     }
 
@@ -780,7 +802,7 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
-    float sw = 1;
+    //float sw = 1;
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
@@ -795,28 +817,28 @@ class creature {
     rectMode(CENTER);
     ellipseMode(CENTER);
 
-      pushMatrix();// Stores the current drawing reference frame
+    pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    stroke(0);   // Draw polygons with edges
-
+    //stroke(0);   // Draw polygons with edges
+    
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
-        if ((((Segment)f.getUserData()).armor) > 1)
-          sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else
-          sw = (((Segment)f.getUserData()).armor);
+        //if ((((Segment)f.getUserData()).armor) > 1)
+        //  sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        //else
+        //  sw = (((Segment)f.getUserData()).armor);
         //strokeWeight(sw);
         //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
         //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-        if ((((Appendage)f.getUserData()).armor) > 1)
-          sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else
-          sw = (((Appendage)f.getUserData()).armor);
+        //if ((((Appendage)f.getUserData()).armor) > 1)
+        //  sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        //else
+        //  sw = (((Appendage)f.getUserData()).armor);
         //strokeWeight(sw);
         //line((int)(((Appendage)f.getUserData()).frontPoint.x),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x),(int)(((Appendage)f.getUserData()).backPoint.y));
         //line((int)(((Appendage)f.getUserData()).frontPoint.x*-1),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x*-1),(int)(((Appendage)f.getUserData()).backPoint.y));
@@ -840,11 +862,6 @@ class creature {
     senses.Draw_Eyes(eye, this);
     popMatrix();
 
-    pushMatrix();
-    noStroke();
-    senses.Draw_Sense(pos.x, pos.y, body.getAngle());
-    popMatrix();
-
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
@@ -855,6 +872,20 @@ class creature {
     noStroke();
     fill(0, 0, 255);
     rect(0, -1 * offset, 0.1 * health, 3);
+    //Text to display the round counter of each creature for debug purposes
+    //text((int)round_counter, 0.2*width,-0.25*height);
+    popMatrix();
+    
+    pushMatrix(); // Draws a "energy" bar above the creature
+    translate(pos.x, pos.y);
+    noFill();
+    stroke(1000);
+    // get the largest dimension of the creature
+    int offset2 = (int)max(getWidth(), getLength());
+    rect(0, -1.1 * offset2, 0.1 * (max_energy_reproduction+max_energy_health+max_energy_locomotion)*0.02, 5); // draw the energy bar that much above it
+    noStroke();
+    fill(255, 0, 0);
+    rect(0, -1.1 * offset2, 0.1 * (energy_reproduction+energy_health+energy_locomotion)*0.02, 5);
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
