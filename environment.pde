@@ -462,8 +462,6 @@ class environment {
 
     for (food fd: foods) {
       p = fd.getPos();
-      println( p.x );
-      println ( p.y );
       if (fd != null && p != null) {
         x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
         y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
