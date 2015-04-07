@@ -17,6 +17,7 @@ int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
 static int zoomOffset = 2163;  // (translate(cameraX, cameraY, cameraZ - zoomOffset)
+float worldRatioX, worldRatioY;
 
 // see
 State state = State.RUNNING;
@@ -72,13 +73,18 @@ int fConsumed = 0;
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
+  worldRatioX = (float)worldWidth/width;
+  worldRatioY = (float)worldHeight/height;
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   PFont font = createFont("Arial", 100);
   textFont(font);
   panels = new ArrayList<Panel>();
   the_player = new player();
-  the_player.towers.add(new tower(0, 0, 'r'));
+  the_player.towers.add(new tower('r'));
+  the_player.towers.get(0).xpos = 0;
+  the_player.towers.get(0).ypos = 0;
+  the_player.towers.get(0).inTransit = false;
 
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/railgunfire01long.mp3");
@@ -117,8 +123,10 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-  mouse_x = ((mouseX-(width/2)) * ((float)worldWidth/width));
-  mouse_y = ((mouseY-(height/2)) * ((float)worldHeight/height));
+  mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
+  mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
+  //these variables represent where the mouse is on the surface of the planet
+  //If you zoom in on the top left and move the mouse to the lower right the coordinates will be very negative
 
   if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -259,7 +267,7 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case '1':
     case '2':
-      the_player.towers.get(0).activeweapon = (key-'0');
+      the_player.activeweapon = (key-'0');
       break;
     case '3':
     case '4':
@@ -427,6 +435,7 @@ void nextgeneration() {
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
   the_player.next_generation(); // have the tower update itself, reset energy etc.
+  the_player.selectedCreature = null;
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
   if (!autofire) {
@@ -452,15 +461,36 @@ void mousePressed() { // called if either mouse button is pressed
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
     if (!buttonpressed) {
-      if (state == State.RUNNING)
-        for (tower t : the_player.towers)
-          t.fire(); // have the tower fire its active weapon if unpaused
+      if (state == State.RUNNING) { 
+        if (the_player.placing) {
+          if (!the_player.pickedup.conflict)
+          {
+            the_player.pickedup.inTransit = false;
+            the_player.pickedup = null;
+            the_player.placing = false;
+            the_player.towerPanel.buttons.get(2).enabled = false;
+            the_player.towerPanel.hiddenpanel = true;
+            the_player.towerPanel.shown = false;
+          }
+        }
+        else {
+          switch (the_player.activeweapon) {
+            case 1:
+              for (tower t : the_player.towers)
+                t.fire_projectile(); // have the tower fire its active weapon if unpaused
+              break;
+            case 2:
+              the_player.drop_rock();
+              break;
+          }
+        }
+      }
     }
     buttonpressed = false;
   }
 
-  // select a creature
-  if (mouseButton == RIGHT) {
+  // select a creature or tower
+  if (mouseButton == RIGHT && !the_player.placing) {
     int radius = 20;
     // find a creature
     for (creature c : the_pop.swarm) {
@@ -474,12 +504,33 @@ void mousePressed() { // called if either mouse button is pressed
       }
       the_player.selectedCreature = null;
     }
+    
+    if (the_player.selectedCreature == null) {
+      // find a tower
+      for (tower t : the_player.towers) {
+        if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
+            && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
+          t.inTransit = true;
+          t.xpos = round(mouse_x);
+          t.ypos = round(mouse_y);
+          the_player.pickedup = t;
+          the_player.placing = true;
+          the_player.towerPanel.buttons.get(2).enabled = true;
+          the_player.towerPanel.hiddenpanel = false;
+          the_player.towerPanel.shown = true;
+          break;
+        }
+      }
+    }
   }
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
-  translate(mouse_x,mouse_y);
-  ellipse(0,0,30,30);
+  hint(DISABLE_DEPTH_TEST);
+  translate(cameraX,cameraY,cameraZ-zoomOffset);
+  fill(255,0,255,255);
+  ellipse((((float)mouseX-(width/2))*worldRatioX),(((float)mouseY-(height/2))*worldRatioX),50,50);
+  hint(ENABLE_DEPTH_TEST);
   popMatrix();
 }
 

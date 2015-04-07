@@ -17,6 +17,7 @@ class Button {
   ButtonPress BP;
   Panel parent;
   boolean grayed;
+  boolean enabled;
   
   Button(float bw, float bh, float bx, float by, String bt, int ts, int r, int g, int b, Panel pr, ButtonPress BPin) {
     button_width = bw;
@@ -31,9 +32,11 @@ class Button {
     parent = pr;
     BP = BPin;
     grayed = false;
+    enabled = true;
   }
   
   void display() {
+    if (!enabled)return;
     if (grayed) {
       float avgcolor = ((red+green+blue)/3);
       fill(avgcolor,150);
@@ -58,13 +61,14 @@ class Button {
   }
   
   boolean isMouseOver() {
-    return (mouseX <= (((float)width/worldWidth)*((parent.panel_x+(worldWidth/2))+button_x+(button_width/2))) &&
-            mouseX >= (((float)width/worldWidth)*((parent.panel_x+(worldWidth/2))+button_x-(button_width/2))) &&
-            mouseY <= (((float)width/worldWidth)*((parent.panel_y+(worldHeight/2))+button_y+(button_height/2))) &&
-            mouseY >= (((float)width/worldWidth)*((parent.panel_y+(worldHeight/2))+button_y-(button_height/2))));
+    return (mouseX <= (((parent.panel_x+(worldWidth/2))+button_x+(button_width/2))/worldRatioX) &&
+            mouseX >= (((parent.panel_x+(worldWidth/2))+button_x-(button_width/2))/worldRatioX) &&
+            mouseY <= (((parent.panel_y+(worldHeight/2))+button_y+(button_height/2))/worldRatioY) &&
+            mouseY >= (((parent.panel_y+(worldHeight/2))+button_y-(button_height/2))/worldRatioY));
   }
   
   void buttonPressed() {
+    if (!enabled)return;
     buttonpressed = true;
     BP.pressed();
   }
@@ -95,7 +99,6 @@ class TextBox {
     align_horiz = ah;
     align_vert = av;
     bordered = b;
-    grayed = false;
   }
   
   TextBox(float tw, float th, float tx, float ty, StringPass SPin, int ts, Panel pr, int ah, int av, boolean b) {
@@ -109,7 +112,6 @@ class TextBox {
     align_horiz = ah;
     align_vert = av;
     bordered = b;
-    grayed = false;
   }
   
   void display() {
@@ -119,7 +121,7 @@ class TextBox {
       stroke(0);
       fill(255,255,255,0);
       rect(textbox_x, textbox_y, textbox_width, textbox_height, 5);
-      stroke(0,0);
+      noStroke();
     }
     fill(0,0,0,255);
     if (textbox_width == 0 && textbox_height == 0) {
@@ -236,6 +238,7 @@ class Panel {
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x, cameraY+panel_y,cameraZ-zoomOffset);  // centered and below the camera+180+panel_x
         fill(200,200,200,opacity);
+        noStroke();
         rect(0,0,panel_width,panel_height, 10);
         for (Button b : buttons)
           b.display();
@@ -249,6 +252,7 @@ class Panel {
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x+current_offsetX, cameraY+panel_y+current_offsetY,cameraZ-zoomOffset);
         fill(200,200,200,opacity);
+        noStroke();
         rect(0,0,panel_width,panel_height, 10);
       hint(ENABLE_DEPTH_TEST); 
       popMatrix();
@@ -284,10 +288,10 @@ class Panel {
   }
   
   boolean isMouseNear() {
-    return ((mouseX <= (((float)width/worldWidth)*((panel_x+(worldWidth/2))+(panel_width/2)))) &&
-            (mouseX >= (((float)width/worldWidth)*((panel_x+(worldWidth/2))-(panel_width/2)))) &&
-            (mouseY <= (((float)width/worldWidth)*((panel_y+(worldHeight/2))+(panel_height/2)))) &&
-            (mouseY >= (((float)width/worldWidth)*((panel_y+(worldHeight/2))-(panel_height/2)))));
+    return ((mouseX <= (((panel_x+(worldWidth/2))+(panel_width/2))/worldRatioX)) &&
+            (mouseX >= (((panel_x+(worldWidth/2))-(panel_width/2))/worldRatioX)) &&
+            (mouseY <= (((panel_y+(worldHeight/2))+(panel_height/2))/worldRatioY)) &&
+            (mouseY >= (((panel_y+(worldHeight/2))-(panel_height/2))/worldRatioY)));
   }
   
   void mouse_pressed() {

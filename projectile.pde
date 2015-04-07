@@ -10,16 +10,18 @@ class projectile {
   PImage bulletalt3;
   char type;
   int imagetimer = 0;
+  int speed;
   /* type is the projectile type
    * r: rail gun bullet
    * f: flamethrower "bullet"
    */
   
   // constructor, creates a projectile
-  projectile(float x, float y, float a, int d, char t) {
+  projectile(float x, float y, float a, int d, char t, int s) {
     radius = (int)(2);
     angle = a;
     damage = d;
+    speed = s;
     makebody(x, y);
     the_projectile.setUserData(this);
     type = t;
@@ -119,6 +121,6 @@ class projectile {
     fd.shape = sd;
     fd.density = 40; // should be upgradable
     the_projectile.createFixture(fd);
-    the_projectile.setLinearVelocity(new Vec2(100*cos(angle), -100*sin(angle)));
+    the_projectile.setLinearVelocity(new Vec2(speed*cos(angle), -1*speed*sin(angle)));
   }
 }
