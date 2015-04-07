@@ -147,6 +147,20 @@ void draw() {
       f.display();
     }
   }
+  
+  for (int i = 0; i < rocks.size(); i++) { // go through the list of rocks and if any was pushed outside map, remove it.
+    rock r = rocks.get(i);
+    Vec2 rockPos = r.getPos();
+    if (r != null) {
+      if (rockPos.x > 1250 || rockPos.x < -1250 || 
+          rockPos.y > 1250 || rockPos.y < -1250) {
+        r.killBody();
+        rocks.remove(r); // if a rock was hit out of map on x dimension, remove it from the list
+        i--;
+      }
+    }
+  }
+  
   if (display) {
     for (rock r: rocks) { // go through the array list of rocks and display them
       r.display();
