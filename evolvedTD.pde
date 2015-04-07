@@ -17,6 +17,7 @@ int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
 static int zoomOffset = 2163;  // (translate(cameraX, cameraY, cameraZ - zoomOffset)
+float worldRatioX, worldRatioY;
 
 // see
 State state = State.RUNNING;
@@ -72,6 +73,8 @@ int fConsumed = 0;
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
+  worldRatioX = (float)worldWidth/width;
+  worldRatioY = (float)worldHeight/height;
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
   PFont font = createFont("Arial", 100);
@@ -117,8 +120,10 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-  mouse_x = ((((mouseX-(width/2))*((float)worldWidth/width))/((float)zoomOffset/cameraZ))+cameraX);
-  mouse_y = ((((mouseY-(height/2))*((float)worldHeight/height))/((float)zoomOffset/cameraZ))+cameraY);
+  mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
+  mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
+  //these variables represent where the mouse is on the surface of the planet
+  //If you zoom in on the top left and move the mouse to the lower right the coordinates will be very negative
 
   if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -492,9 +497,11 @@ void mousePressed() { // called if either mouse button is pressed
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
-  //translate(400,400);//mouse_x,mouse_y);
-  fill(0,0,255,150);
-  ellipse((((float)mouseX-(width/2))*((float)worldWidth/width)),(((float)mouseY-(height/2))*((float)worldHeight/height)),30,30);
+  hint(DISABLE_DEPTH_TEST);
+  translate(cameraX,cameraY,cameraZ-zoomOffset);
+  fill(255,0,255,255);
+  ellipse((((float)mouseX-(width/2))*worldRatioX),(((float)mouseY-(height/2))*worldRatioX),50,50);
+  hint(ENABLE_DEPTH_TEST);
   popMatrix();
 }
 
