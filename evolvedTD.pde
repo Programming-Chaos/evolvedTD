@@ -108,7 +108,8 @@ void setup() {
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
-  
+  testGenome.testMutation();
+
   // Init data tables
   initTables();
 }
@@ -207,7 +208,10 @@ void keyPressed() { // if a key is pressed this function is called
       autofire = !autofire;
       break;
     case 'z':
-      cameraZ = 2150; // zoom all the way out
+      // center camera and zoom all the way out
+      cameraX = 0;
+      cameraY = 0;
+      cameraZ = zoomOffset;
       break;
     case 'w':
       cameraZ -= (12 + int(cameraZ / scale)); // zoom in a little
