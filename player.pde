@@ -40,7 +40,6 @@ class player {
     playerPanel.createButton(350,100,0,110,"Wave Fire",50,new ButtonPress() { public void pressed() { wave_fire(); } });
 
     statsPanel = new Panel(500,520,980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
-    statsPanel.enabled = false;
     statsPanel.setupTextBoxList(20,10,50,40);
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Creature: " + selectedCreature.num); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health: " + selectedCreature.health + " / " + selectedCreature.maxHealth + " +" + selectedCreature.health_regen); } });
@@ -96,16 +95,17 @@ class player {
 
   void display() {
     if (selectedCreature != null) {
-      Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
-      cameraX = int(pos.x);
-      cameraY = int(pos.y);
+      // only follow if alive
+      if (selectedCreature.alive) {
+        Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
+        cameraX = int(pos.x);
+        cameraY = int(pos.y);
+      }
       statsPanel.enabled = true;
+    } else {
+      statsPanel.enabled = false;
     }
-    else statsPanel.enabled = false;
-    
-    if (selectedTower != null) towerstatsPanel.enabled = true;
-    else towerstatsPanel.enabled = false;
-    
+
     for (tower t : towers)  // walk through the towers
       t.display();  // display them all
     for (Panel p : panels)
@@ -121,12 +121,11 @@ class player {
         money += moneyGain;
       }
     }
-    rectMode(CENTER);
     // walk through the towers
-    for (tower t : towers)
-      t.update();   // update them
-    for (Panel p : panels)
-      p.update();
+    for (int i = towers.size() - 1; i >= 0; i--)
+      towers.get(i).update();   // update them
+    for (int i = panels.size() - 1; i >= 0; i--)
+      panels.get(i).update();
   }
 
   void mouse_pressed() {
@@ -137,9 +136,11 @@ class player {
   }
 
   void wave_fire(){
-    for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
-      tower t = towers.get(i);
-      t.wave_fire();
+    if (state == State.RUNNING) {
+      for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
+        tower t = towers.get(i);
+        t.wave_fire();
+      }
     }
   }
 

@@ -3,6 +3,7 @@ class tower {
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
+  int activeweapon;     // value determines which weapon is active
   ArrayList<projectile> projectiles;  // list of active projectiles
   float angle;    // angle of tower's main, auto-fir weapon
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
@@ -198,7 +199,7 @@ class tower {
 
     pushMatrix();
     translate(xpos, ypos, 0);
-    rotate(angle+(PI/2));
+    rotate(angle + HALF_PI);
     if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
@@ -210,10 +211,11 @@ class tower {
     // draw tower energy bar
     noFill();
     stroke(0);
-    rect(xpos, ypos-30, 0.1*maxEnergy, 12);
+    rectMode(CENTER);
+    rect(xpos, ypos-30, 0.1*maxEnergy, 6);
     noStroke();
     fill(0, 0, 255);
-    rect(xpos, ypos-30, 0.1*energy, 12);
+    rect(xpos, ypos-30, 0.1*energy, 6);
 
     if (inTransit) {
     // draw the outline of the tower's box2D body
@@ -308,7 +310,6 @@ class tower {
 
   void wave_fire() {
     if (energy < 5) return;
-    if (inTransit) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
       projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
     energy -= 5;

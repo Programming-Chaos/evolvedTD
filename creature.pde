@@ -730,9 +730,31 @@ class creature {
     // in the world, still exists for reproducton
     if (health <= 0) {
       alive = false;
-      // if its no longer alive the body can be killed - otherwise it
+      // if its no longer alive creature spawns 2 gametes in a 
+      //radius of 5 tiles and the body can be killed - otherwise it
       // still "in" the world.  Have to make sure the body isn't
       // referenced elsewhere
+      
+      //spawn gametes
+      int dx = (int)random(-5, 6); //from -5 to 5 (6 is not included)
+      int dy = (int)random(-5, 6);
+      int energy = (int) (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      Vec2 pos = box2d.getBodyPixelCoord(body);
+      
+      int posX = (int)(pos.x / cellWidth);
+      int posY = (int)(pos.y / cellHeight);
+      
+      // Use one of each chromosome from getGametes.
+      ArrayList<Genome.Chromosome> newGametes = new ArrayList<Genome.Chromosome>(2);
+      newGametes = genome.getGametes();
+      
+      Gamete g1 = new Gamete(posX + dx, posY + dy, energy, newGametes.get(0));
+      Gamete g2 = new Gamete(posX - dx, posY - dy, energy, newGametes.get(1));
+                             
+      gameteStack.add(g1);
+      gameteStack.add(g2);
+      
+      //delete the body
       killBody();
     }
 
@@ -850,6 +872,20 @@ class creature {
     noStroke();
     fill(0, 0, 255);
     rect(0, -1 * offset, 0.1 * health, 3);
+    //Text to display the round counter of each creature for debug purposes
+    //text((int)round_counter, 0.2*width,-0.25*height);
+    popMatrix();
+    
+    pushMatrix(); // Draws a "energy" bar above the creature
+    translate(pos.x, pos.y);
+    noFill();
+    stroke(1000);
+    // get the largest dimension of the creature
+    int offset2 = (int)max(getWidth(), getLength());
+    rect(0, -1.1 * offset2, 0.1 * (max_energy_reproduction+max_energy_health+max_energy_locomotion)*0.02, 5); // draw the energy bar that much above it
+    noStroke();
+    fill(255, 0, 0);
+    rect(0, -1.1 * offset2, 0.1 * (energy_reproduction+energy_health+energy_locomotion)*0.02, 5);
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();

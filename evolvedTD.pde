@@ -155,6 +155,20 @@ void draw() {
       f.display();
     }
   }
+  
+  for (int i = 0; i < rocks.size(); i++) { // go through the list of rocks and if any was pushed outside map, remove it.
+    rock r = rocks.get(i);
+    Vec2 rockPos = r.getPos();
+    if (r != null) {
+      if (rockPos.x > 1250 || rockPos.x < -1250 || 
+          rockPos.y > 1250 || rockPos.y < -1250) {
+        r.killBody();
+        rocks.remove(r); // if a rock was hit out of map on x dimension, remove it from the list
+        i--;
+      }
+    }
+  }
+  
   if (display) {
     for (rock r: rocks) { // go through the array list of rocks and display them
       r.display();
@@ -232,9 +246,8 @@ void keyPressed() { // if a key is pressed this function is called
       cameraY = 0;
       break;
     case 'p':  // toggle paused state
-      if (state == State.STAGED) {
+      if (state == State.STAGED)
         state = State.RUNNING;
-      }
       else if (state != State.PAUSED)
         state = State.PAUSED;
       else
@@ -284,7 +297,7 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case '1':
     case '2':
-      the_player.activeweapon = (key-'0');
+      the_player.towers.get(0).activeweapon = (key-'0');
       break;
     case '3':
     case '4':
@@ -452,7 +465,6 @@ void nextgeneration() {
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
   the_player.next_generation(); // have the tower update itself, reset energy etc.
-  the_player.selectedCreature = null;
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
   if (!autofire) {
