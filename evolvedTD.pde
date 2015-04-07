@@ -261,6 +261,10 @@ void keyPressed() { // if a key is pressed this function is called
     case '2':
       the_player.towers.get(0).activeweapon = (key-'0');
       break;
+    case '3':
+    case '4':
+      the_player.towers.get(0).switchtargetMode(key);
+      break;
     default:
 
     }
