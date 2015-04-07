@@ -462,11 +462,20 @@ class environment {
 
     for (food fd: foods) {
       p = fd.getPos();
+      println( p.x );
+      println ( p.y );
       if (fd != null && p != null) {
         x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
         y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
-        if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-        if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
+        if (x >= environWidth || x < 0) {
+        // x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+        fd.setRemove( true ); // remove food if off map
+        }
+        if (y >= environHeight || y < 0) 
+        {
+        // y = (y+environWidth)%environHeight;
+        fd.setRemove( true ); // remove food if off map
+        }
         tileMap[x][y].setTaste(fd.getTaste());
         tileMap[x][y].hasFood(true);
       }
