@@ -2,7 +2,6 @@ class tower {
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
-  int activeweapon;     // value determines which weapon is active
   ArrayList<projectile> projectiles;  // list of active projectiles
   float angle;    // angle of tower's main, auto-fir weapon
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
@@ -18,8 +17,16 @@ class tower {
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
   int dmg; // damage value, changed by turret type
+  int baseDamageRailgun = 20;
+  int baseDamageFlamethrower = 200;
   int firerate; // autofire rate, lower values fire faster
+  int baseFirerateRailgun = 25;
+  int baseFirerateFlamethrower = 75;
+  int projectileSpeed;
+  int baseProjectileSpeed = 100;
   int ecost; // per fire energy cost
+  boolean inTransit = true;
+  boolean conflict = false;
   char type;
   /* type is the turret type
    * r: default rail gun
@@ -28,17 +35,17 @@ class tower {
   Body tower_body;
 
   // constructor function, initializes the tower
-  tower(int x, int y, char t) {
+  tower(char t) {
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
-    activeweapon = 1;
     projectiles = new ArrayList<projectile>();
     angle = 0;
     imagetimer = 0;
     soundtimer = 0;
+    projectileSpeed = baseProjectileSpeed*(the_player.bulletSpeedUpgrades+1);
 
-    xpos = x;
-    ypos = y;
+    xpos = round(mouse_x);
+    ypos = round(mouse_y);
     type = t;
 
     switch (type){
@@ -47,8 +54,8 @@ class tower {
         gunbase = loadImage("assets/Tower_base_02.png");
         gun = loadImage("assets/RailGun-01.png");
         gunalt = loadImage("assets/RailGun-a-01.png");
-        dmg = 20;
-        firerate = 25;
+        dmg = baseDamageRailgun*(the_player.bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerateRailgun/(the_player.fireRateUpgrades+1));
         ecost = 10;
         break;
       case 'f':
@@ -56,8 +63,8 @@ class tower {
         gun = loadImage("assets/FlameThrower01-01.png");
         gunalt = loadImage("assets/FlameThrower02-01.png");
         gunbase = loadImage("assets/Turbase03256.png");
-        dmg = 200;
-        firerate = 75;
+        dmg = baseDamageFlamethrower*(the_player.bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerateFlamethrower/(the_player.fireRateUpgrades+1));
         ecost = 50;
         break;
     }
@@ -82,7 +89,19 @@ class tower {
 
   void update() {
     update_projectiles();
-    if (state == State.RUNNING){
+    if (inTransit) {
+      xpos = round(mouse_x);
+      ypos = round(mouse_y);
+      conflict = false;
+      for (tower t : the_player.towers) {
+        if (t != the_player.pickedup)
+          if (sqrt((t.xpos-xpos)*(t.xpos-xpos)+(t.ypos-ypos)*(t.ypos-ypos)) <= radius*2)
+            conflict = true;
+      }
+      if (xpos < ((-1*(worldWidth/2))+radius) || xpos > ((worldWidth/2)-radius) || ypos < ((-1*(worldHeight/2))+radius) || ypos > ((worldHeight/2)-radius))
+        conflict = true;
+    }
+    else if (state == State.RUNNING){
       energy += energyGain;  // gain energy
       if (autofire) {
         Vec2 target;
@@ -103,8 +122,16 @@ class tower {
           autofirecounter = 0;  // reset the counter
         }
       }
-      else // user controlled: calculate the angle to the mouse pointer and point at the mouse
-        angle = atan2(mouse_y-ypos, mouse_x-xpos);
+      else { // user controlled: calculate the angle to the mouse pointer and point at the mouse
+        // calculate the location of the mouse pointer in the world
+        //float x, y;
+        //x = ((mouse_x/((float)zoomOffset/cameraZ))+cameraX-xpos);
+        //y = ((mouse_y/((float)zoomOffset/cameraZ))+cameraY-ypos);
+        //x = (cameraX+((mouseX-(width/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+        //y = (cameraY+((mouseY-(height/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+        //calculate the angle to the mouse pointer
+        angle = atan2(mouse_y-ypos,mouse_x-xpos);//(ypos*((float)worldWidth/width)), x-(xpos*((float)worldWidth/width)));
+      }
     }
   }
 
@@ -141,9 +168,8 @@ class tower {
     }
 
     pushMatrix();
-    float c = angle;
     translate(xpos, ypos, 0);
-    rotate(c + HALF_PI);
+    rotate(angle+(PI/2));
     if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
@@ -155,19 +181,35 @@ class tower {
     // draw tower energy bar
     noFill();
     stroke(0);
-    rectMode(CENTER);
-    rect(xpos, ypos-30, 0.1*maxEnergy, 6);
+    rect(xpos, ypos-30, 0.1*maxEnergy, 12);
     noStroke();
     fill(0, 0, 255);
-    rect(xpos, ypos-30, 0.1*energy, 6);
+    rect(xpos, ypos-30, 0.1*energy, 12);
 
+    if (inTransit) {
     // draw the outline of the tower's box2D body
-    /*pushMatrix();
-    translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
-    fill(200, 200, 200, 0);
-    stroke(0);
-    ellipse(0, 0, radius*2, radius*2);
-    popMatrix();*/
+      pushMatrix();
+      translate(box2d.getBodyPixelCoord(tower_body).x+xpos, box2d.getBodyPixelCoord(tower_body).y+ypos);
+      fill(0, 0, 0, 0);
+      if (conflict)stroke(255,0,0);
+      else stroke(0,255,0);
+      ellipse(0, 0, radius*2, radius*2);
+      stroke(0);
+      popMatrix();
+    }
+    else if (the_player.placing) {
+      for (tower t : the_player.towers) {
+        if (t != the_player.pickedup) {
+          pushMatrix();
+          translate(box2d.getBodyPixelCoord(t.tower_body).x+xpos, box2d.getBodyPixelCoord(t.tower_body).y+ypos);
+          fill(0, 0, 0, 0);
+          stroke(0);
+          ellipse(0, 0, radius*2, radius*2);
+          stroke(0);
+          popMatrix();
+        }
+      }
+    }
 
     // display resources, now in player
     /*
@@ -192,17 +234,6 @@ class tower {
     projectiles.clear();
   }
 
-  void fire() {
-    switch(activeweapon) {
-    case 1:
-      if (the_player.towers.get(0).activeweapon == 1 && !autofire)fire_projectile();
-      break;
-    case 2:
-      drop_rock();
-      break;
-    }
-  }
-
   void switchtargetMode(char k) {
     if (k == '3'){
       targetMode = 2;
@@ -218,7 +249,7 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(xpos, ypos, angle, dmg, type);
+    projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed);
     projectiles.add(p);
     energy -= ecost;
     imagetimer = 0;
@@ -239,8 +270,9 @@ class tower {
 
   void wave_fire() {
     if (energy < 5) return;
+    if (inTransit) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
-      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type));
+      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
     energy -= 5;
     imagetimer = 0;
     if (playSound) {
@@ -249,19 +281,5 @@ class tower {
       //      gunshot.rewind();
       //      gunshot.play();
     }
-  }
-
-
-  void drop_rock() {
-    float x,y;
-    // Try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
-    x = cameraX + (cameraZ*sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-    y = cameraY + (cameraZ*sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-    if (energy < 100) {
-      return;
-    }
-    energy -= 100;  // uses a lot of energy to drop a rock
-    rock r = new rock((int)x, (int)y);
-    rocks.add(r); // rocks is a global list
   }
 }
