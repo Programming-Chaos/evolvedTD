@@ -110,12 +110,17 @@ class player {
 
   void display() {
     if (selectedCreature != null) {
-      Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
-      cameraX = int(pos.x);
-      cameraY = int(pos.y);
+      // only follow if alive
+      if (selectedCreature.alive) {
+        Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
+        cameraX = int(pos.x);
+        cameraY = int(pos.y);
+      }
       statsPanel.enabled = true;
     }
-    else statsPanel.enabled = false;
+    else {
+      statsPanel.enabled = false;
+    }
     
     for (tower t : towers)  // walk through the towers
       t.display();  // display them all
