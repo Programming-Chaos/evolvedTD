@@ -468,6 +468,9 @@ void mousePressed() { // called if either mouse button is pressed
             the_player.pickedup.inTransit = false;
             the_player.pickedup = null;
             the_player.placing = false;
+            the_player.towerPanel.buttons.get(2).enabled = false;
+            the_player.towerPanel.hiddenpanel = true;
+            the_player.towerPanel.shown = false;
           }
         }
         else {
@@ -512,6 +515,9 @@ void mousePressed() { // called if either mouse button is pressed
           t.ypos = round(mouse_y);
           the_player.pickedup = t;
           the_player.placing = true;
+          the_player.towerPanel.buttons.get(2).enabled = true;
+          the_player.towerPanel.hiddenpanel = false;
+          the_player.towerPanel.shown = true;
           break;
         }
       }

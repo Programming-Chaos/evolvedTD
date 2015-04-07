@@ -85,6 +85,8 @@ class player {
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTurret('r'); } });
     towerPanel.createButton(300, 300, -800, 0, "Flamethrower", 45, 200, 0, 0, new ButtonPress() {public void pressed() { placeTurret('f'); } });
+    towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteTurret(); } });
+    towerPanel.buttons.get(2).enabled = false;
 
     helpPanel = new Panel(600,600,0,0,false);
     helpPanel.enabled = false;
@@ -184,10 +186,18 @@ class player {
       switch (pickedup.type) {
         case 'r':
           towers.remove(pickedup);
+          pickedup = null;
+          towerPanel.buttons.get(2).enabled = false;
+          the_player.towerPanel.hiddenpanel = true;
+          the_player.towerPanel.shown = false;
           if (type == 'f') placeTurret('f');
           break;
         case 'f':
           towers.remove(pickedup);
+          pickedup = null;
+          towerPanel.buttons.get(2).enabled = false;
+          the_player.towerPanel.hiddenpanel = true;
+          the_player.towerPanel.shown = false;
           if (type == 'r') placeTurret('r');
           break;
       }
@@ -196,7 +206,18 @@ class player {
       placing = true;
       pickedup = new tower(type);
       the_player.towers.add(pickedup);
+      towerPanel.buttons.get(2).enabled = true;
+      the_player.towerPanel.hiddenpanel = false;
+      the_player.towerPanel.shown = true;
     }
+  }
+  
+  void deleteTurret() {
+    towers.remove(pickedup);
+    pickedup = null;
+    towerPanel.buttons.get(2).enabled = false;
+    the_player.towerPanel.hiddenpanel = true;
+    the_player.towerPanel.shown = false;
   }
 
   void upgradeBulletSpeed() {
