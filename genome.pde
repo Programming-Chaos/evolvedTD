@@ -1,12 +1,12 @@
 // standard deviation of mutation added to each gene in meiosis
-static final float MUTATION_DEVIATION = 0.03;
-static final float MUTATION_RATE = 0.05;
+static float MUTATION_DEVIATION = 0.03;
+static float MUTATION_RATE = 0.05;
 // standard deviation of initial gene values
-static final float INITIAL_DEVIATION = 0.03;
+static float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
-static final float GENE_MULTIPLIER = 4.0/3.0;
+static float GENE_MULTIPLIER = 4.0/3.0;
 // initial number of segments (should be between 2 and 20)
-static final int STARTING_NUMSEGMENTS = 8;
+static int STARTING_NUMSEGMENTS = 8;
 
 // additional control trait to estimate genetic evolution
 Trait control = new Trait(10);
@@ -331,7 +331,14 @@ class Genome {
     testSuccess = false;
   }
 
+  void testMutation() {
+    if (MUTATION_RATE != 0.05)
+      testFailed("mutation rate is no longer 5 percent");
+  }
+
   void testChromosome() {
+    testSuccess = true;
+
     // test constructors
     Chromosome defaultChromosome = new Chromosome();
 

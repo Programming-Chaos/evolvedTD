@@ -271,7 +271,7 @@ class population {
       c_traitsRow.setInt("   Creature ID   ", c.num);
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
-      c_traitsRow.setFloat("   Density   "  , c.getDensity());
+      c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
       c_traitsRow.setFloat("   Armor   "    , c.getArmor());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
@@ -284,7 +284,7 @@ class population {
       // Update creature trait averages data
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
-      denseAvg += c.getDensity();
+      denseAvg += c.getCreatureDensity();
       armorAvg += c.getArmor();
       velAvg   += c.maxMovementSpeed;
       hpAvg    += c.maxHealth;
