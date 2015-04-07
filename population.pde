@@ -170,7 +170,7 @@ class population {
       }
       
       Gamete g1, g2;
-      int variance = 15;
+      int variance = 15; // Used for variable pop size with random selection
       int size = gametes.size();
       int rand;
       
@@ -216,8 +216,8 @@ class population {
           // Check coordinates for other creatures or rocks spawned in this tile.
           while( checkForCreature(pos, generation) || checkForRock(pos, rocks)){};
           
-          pos.x = pos.x * cellWidth;
-          pos.y = pos.y * cellHeight;
+          pos.x *= cellWidth;
+          pos.y *= cellHeight;
     
           childrenBred++;
           generation.add(new creature(new Genome(g1.gamete, g2.gamete),
@@ -236,10 +236,12 @@ class population {
   Boolean checkForCreature(Vec2 pos, ArrayList<creature> list) {
     Boolean check = false;
     
+    // Check all creatures in list
     for (int c=0; c < list.size(); c++) {
       Vec2 posCheck = box2d.getBodyPixelCoord(list.get(c).body);
+      
       if (checkSpawnLocation(pos, posCheck)) {
-        c = -1;
+        c = -1; // must make it thru whole list without needing to move.
         check = true;
       }
     }
@@ -249,10 +251,12 @@ class population {
   Boolean checkForRock(Vec2 pos, ArrayList<rock> list) {
     Boolean check = false;
     
+    // Check all rocks in list
     for (int c=0; c < list.size(); c++) {
       Vec2 posCheck = box2d.getBodyPixelCoord(list.get(c).the_rock);
+      
       if (checkSpawnLocation(pos, posCheck)) {
-        c = -1;
+        c = -1; // must make it thru whole list without needing to move.
         check = true;
       }
     }

@@ -726,10 +726,10 @@ class creature {
       int posX = (int)(pos.x / cellWidth);
       int posY = (int)(pos.y / cellHeight);
       
-      Gamete g1 = new Gamete(posX + dx, posY + dy, energy, 
-                             (Genome.Chromosome)genome.getGametes().get(0));
-      Gamete g2 = new Gamete(posX - dx, posY - dy, energy, 
-                             (Genome.Chromosome)genome.getGametes().get(0));
+      // Use one of each chromosome from getGametes.
+      ArrayList<Chromosome> newGametes = genome.getGametes();
+      Gamete g1 = new Gamete(posX + dx, posY + dy, energy, newGametes.get(0));
+      Gamete g2 = new Gamete(posX - dx, posY - dy, energy, newGametes.get(1));
                              
       gameteStack.add(g1);
       gameteStack.add(g2);
