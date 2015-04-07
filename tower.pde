@@ -13,7 +13,8 @@ class tower {
   boolean showgunalt = false; // show alternate gun image
   int imagetimer; // timer for alternating gun images
   int soundtimer;
-  float radius = 50; // 80 is the size we were using for a long time
+  float radius = 50;
+  int targetMode = 1;
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
   int dmg; // damage value, changed by turret type
@@ -25,7 +26,7 @@ class tower {
    * f: flamethrower
    */
   Body tower_body;
-  
+
   // constructor function, initializes the tower
   tower(int x, int y, char t) {
     energy = maxEnergy;
@@ -35,11 +36,11 @@ class tower {
     angle = 0;
     imagetimer = 0;
     soundtimer = 0;
-    
+
     xpos = x;
     ypos = y;
     type = t;
-    
+
     switch (type){
       case 'r':
         the_player.numrailguns++;
@@ -60,25 +61,25 @@ class tower {
         ecost = 50;
         break;
     }
-    
+
     BodyDef bd = new BodyDef();
     bd.position.set(box2d.coordPixelsToWorld(new Vec2(0, 17*(radius/80))));
     bd.type = BodyType.STATIC;
     bd.linearDamping = 0.9;
-    
+
     tower_body = box2d.createBody(bd);
     CircleShape sd = new CircleShape();
     sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
     FixtureDef fd = new FixtureDef();
     fd.filter.categoryBits = 2; // food is in filter category 2
-    fd.filter.maskBits = 65531; // doesn't interact with projectiles 
+    fd.filter.maskBits = 65531; // doesn't interact with projectiles
     fd.shape = sd;
     fd.density = 100;
     tower_body.createFixture(fd);
-    
+
     tower_body.setUserData(this);
   }
-  
+
   void update() {
     update_projectiles();
     if (state == State.RUNNING){
@@ -86,9 +87,17 @@ class tower {
       if (autofire) {
         Vec2 target;
         autofirecounter++;
-        if (autofirecounter == firerate) { // only autofire every nth time step where n is the fire rate
-        //target = the_pop.closest(new Vec2(0,0)); // target the closest creature
-          target = the_pop.vec_to_random_creature(); // target a random creature
+        // only autofire every nth time step where n is the fire rate
+        if (autofirecounter == firerate) {
+          // target a random creature
+          target = the_pop.vec_to_random_creature();
+          // target the closest creature
+          if (targetMode == 2) {
+            target = the_pop.closest(new Vec2(0,0));
+          }
+          if (targetMode == 3) {
+            target = the_pop.highestAlpha();
+          }
           angle = atan2(target.y-ypos,target.x-xpos);
           fire_projectile();
           autofirecounter = 0;  // reset the counter
@@ -98,7 +107,7 @@ class tower {
         angle = atan2(mouse_y-ypos, mouse_x-xpos);
     }
   }
-  
+
   void update_projectiles(){
     for (int i = projectiles.size() - 1; i >= 0; i--) {  // walk through particles to avoid missing one
       projectile p = projectiles.get(i);
@@ -107,12 +116,12 @@ class tower {
         p.killBody();  // remove the box2d body
         projectiles.remove(i);  // remove the projectile from the list
       }
-    } 
+    }
   }
-  
+
   void display() {
     /*
-    // draw a line 
+    // draw a line
     stroke(255, 0, 0);
     line(0, 0, 30*cos(angle), 30*sin(angle));
     //draw the tower
@@ -130,7 +139,7 @@ class tower {
       showgunalt = true;
       showgun = false;
     }
-    
+
     pushMatrix();
     float c = angle;
     translate(xpos, ypos, 0);
@@ -138,11 +147,11 @@ class tower {
     if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
-    
+
     for (projectile p: projectiles) { // display the active projectiles
       p.display();
-    } 
-  
+    }
+
     // draw tower energy bar
     noFill();
     stroke(0);
@@ -157,9 +166,9 @@ class tower {
     translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
     fill(200, 200, 200, 0);
     stroke(0);
-    ellipse(0, 0, radius*2, radius*2);  
+    ellipse(0, 0, radius*2, radius*2);
     popMatrix();*/
-    
+
     // display resources, now in player
     /*
     pushMatrix();
@@ -167,12 +176,12 @@ class tower {
       translate(cameraX, cameraY,cameraZ-400);  // centered and below the camera
       fill(0,0,0,200);
       textSize(8);
-      text("Resources: "+(int)resources,0.2*width,-0.25*height); 
-    hint(ENABLE_DEPTH_TEST); 
+      text("Resources: "+(int)resources,0.2*width,-0.25*height);
+    hint(ENABLE_DEPTH_TEST);
     popMatrix();
     */
   }
-  
+
   void next_generation() { // update the tower
     energy = maxEnergy; // reset energy (could/should depend on remaining resources)
     for (projectile p: projectiles) {
@@ -182,7 +191,7 @@ class tower {
     }
     projectiles.clear();
   }
-  
+
   void fire() {
     switch(activeweapon) {
     case 1:
@@ -190,12 +199,21 @@ class tower {
       break;
     case 2:
       drop_rock();
-      break;        
+      break;
     }
   }
-  
+
+  void switchtargetMode(char k) {
+    if (k == '3'){
+      targetMode = 2;
+    }
+    if (k == '4'){
+      targetMode = 3;
+    }
+  }
+
   /* Firing, dropping rocks, etc. uses up some of the tower's energy */
-  
+
   void fire_projectile() {
     if (energy < 10) {
       return;
@@ -214,11 +232,11 @@ class tower {
         else if (playSound) PlaySounds( "assets/railgunfire01slow_01.mp3" );
         break;
       case 'f':
-        if (playSound) PlaySounds( "assets/ricochet1.mp3"); 
+        if (playSound) PlaySounds( "assets/ricochet1.mp3");
         break;
     }
   }
-  
+
   void wave_fire() {
     if (energy < 5) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
@@ -232,8 +250,8 @@ class tower {
       //      gunshot.play();
     }
   }
-    
-  
+
+
   void drop_rock() {
     float x,y;
     // Try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
