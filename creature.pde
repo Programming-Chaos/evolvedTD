@@ -39,7 +39,7 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
+  float baseMaxMovementSpeed = 1000; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
   int hit_indicator=0; //to create animations on creature impacts
 
@@ -357,6 +357,7 @@ class creature {
     alive = true;               // creatures begin life alive
 
     maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
+    if (maxMovementSpeed < 0) maxMovementSpeed = 0;
     for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
 
     scent = setScent();                 // does creature produce scent
@@ -645,14 +646,14 @@ class creature {
     calcBehavior();
     torque = current_actions[0]*0.01;
 
-    // force is a percentage of max movement speed from 10% to 100%, averaging 80%
+    // force is a percentage of max movement speed from 10% to 100%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
-    f = Utilities.MovementForceSigmoid(current_actions[1]);
-    if (current_actions[1] < -50) f *= -1;
-    //f = 0.8;
-    f *= maxMovementSpeed;
-
+    f = (maxMovementSpeed * Utilities.MovementForceSigmoid(current_actions[1]));
+    // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
+    // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
+    
+    //if (selected) println("Creature #" + num + " Sigmoid Input = " + current_actions[1] + " Sigmoid Output = " + Utilities.MovementForceSigmoid(current_actions[1]) + " maxMoveSpeed = " + maxMovementSpeed + " Force = " + f);
     int switchnum;
     if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
       time_in_water++;
@@ -660,8 +661,7 @@ class creature {
     }
     else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
     else switchnum = 2;
-    //println("Creature (" + pos2.x + ", " + pos2.y + ")");
-    //println("Base move speed: " + f);
+    
     float base = f;
 
     // appendages will change the force depending on the environment
