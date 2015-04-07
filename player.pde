@@ -174,9 +174,10 @@ class player {
       upgradePanel.buttons.get(bulletSpeedButtons[bulletSpeedUpgrades+1]).button_text = "Bullet Speed\nX"+ (bulletSpeedUpgrades+3) + "\n" + (((byte)1)<<((bulletSpeedUpgrades+1)*3)) + "00$";
     }
     
-    
-    
     bulletSpeedUpgrades++;
+    
+    for (tower t : towers)
+      t.projectileSpeed = t.baseProjectileSpeed*(bulletSpeedUpgrades+1);
   }
   
   void upgradeBulletDamage() {
@@ -193,18 +194,18 @@ class player {
       upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
     }
     
+    bulletDamageUpgrades++;
+    
     for (tower t : towers) {
       switch (t.type) {
         case 'r':
-          t.dmg += t.baseDamageRailgun;
+          t.dmg = t.baseDamageRailgun*(bulletDamageUpgrades+1);
           break;
         case 'f':
-          t.dmg += t.baseDamageFlamethrower;
+          t.dmg = t.baseDamageFlamethrower*(bulletDamageUpgrades+1);
           break;
       }
     }
-    
-    bulletDamageUpgrades++;
   }
   
   void upgradeFireRate() {
@@ -221,8 +222,18 @@ class player {
       upgradePanel.buttons.get(fireRateButtons[fireRateUpgrades+1]).button_text = "Fire Rate\nX"+ (fireRateUpgrades+3) + "\n" + (((byte)1)<<((fireRateUpgrades+1)*3)) + "00$";
     }
     
-    
-    
     fireRateUpgrades++;
+    
+    for (tower t : towers) {
+      switch (t.type) {
+        case 'r':
+          t.firerate = round((float)t.baseFirerateRailgun/(fireRateUpgrades+1));
+          break;
+        case 'f':
+          t.firerate = round((float)t.baseFirerateFlamethrower/(fireRateUpgrades+1));
+          break;
+      }
+      t.autofirecounter = 0;
+    }
   }
 }
