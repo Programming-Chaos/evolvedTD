@@ -1,6 +1,7 @@
 class food {
   Body the_food;
   int radius;
+  int colortimer;;
   boolean remove = false;
   /*Taste will be 5 types of taste. - sweet, sour, salty, bitter, umami*/
   int []taste;
@@ -8,7 +9,8 @@ class food {
   int[] getTaste() { return taste; };
   
   food(int x, int y) {
-    radius = 3;
+    colortimer = ((int)random(0,100)-50);
+    radius = int (random(3,20));
     makebody(x, y);
     the_food.setUserData(this);
     taste = new int[5];
@@ -20,7 +22,8 @@ class food {
   }
   
   food() {
-    radius = 3;
+    colortimer = ((int)random(0,100)-50);
+    radius = int (random(3,20));
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
     the_food.setUserData(this);
@@ -33,7 +36,8 @@ class food {
   }
   
   food(float x, float y) {
-    radius = 3;
+    colortimer = ((int)random(0,100)-50);
+    radius = int (random(3,20));
     makebody((int)x, (int)y);
     the_food.setUserData(this);
     taste = new int[5];
@@ -66,10 +70,12 @@ class food {
   }
   
   void display() {
+    colortimer++;
+    if (colortimer == 50)colortimer = -50;
     Vec2 pos = box2d.getBodyPixelCoord(the_food);
     //   pushMatrix();
     //   translate(pos.x,pos.y);
-    fill(200,0,100);
+    fill((colortimer<0 ? (((-1*colortimer)*2)+150) : ((colortimer*2)+150)),(colortimer<0 ? ((-1*colortimer)/5) : (colortimer/5)),(colortimer<0 ? ((-1*colortimer)/5) : (colortimer/5)));
     stroke(0);
     ellipse(pos.x, pos.y, radius*2, radius*2);
     if (displayScent) {

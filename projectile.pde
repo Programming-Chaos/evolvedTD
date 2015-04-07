@@ -5,15 +5,36 @@ class projectile {
   boolean remove = false;
   int damage; // how much damge the projectile does
   PImage bullet;    // declare image for gun
+  PImage bulletalt1; // alternate images (if any)
+  PImage bulletalt2;
+  PImage bulletalt3;
+  char type;
+  int imagetimer = 0;
+  /* type is the projectile type
+   * r: rail gun bullet
+   * f: flamethrower "bullet"
+   */
   
   // constructor, creates a projectile
-  projectile(float x, float y, float a, int d) {
+  projectile(float x, float y, float a, int d, char t) {
     radius = (int)(2);
     angle = a;
     damage = d;
     makebody(x, y);
     the_projectile.setUserData(this);
-    bullet = loadImage("assets/Bullet48x48a-01.png");
+    type = t;
+    
+    switch (type){
+      case 'r':
+        bullet = loadImage("assets/Bullet48x48a-01.png");
+        break;
+      case 'f':
+        bullet = loadImage("assets/photon72/Photon01a.png");
+        bulletalt1 = loadImage("assets/photon72/Photon02a.png");
+        bulletalt2 = loadImage("assets/photon72/Photon03a.png");
+        bulletalt3 = loadImage("assets/photon72/Photon04a.png");
+        break;
+    }
   }
   
   void update(){
@@ -48,18 +69,36 @@ class projectile {
   }
 
   void display() {
+    if (imagetimer % 12 == 0)
+      imagetimer = 0;
     Vec2 pos = box2d.getBodyPixelCoord(the_projectile);
     pushMatrix();
     translate(pos.x, pos.y);
     float c = the_projectile.getAngle();
-    rotate(c + PI);
-    image(bullet, -24, -24);
+    switch (type){
+      case 'r':
+        rotate(c + PI);
+        image(bullet, -24, -24);
+        break;
+      case 'f':
+        rotate(c + PI/2);
+        if (imagetimer >= 0 && imagetimer < 3)
+          image(bullet, -36, -36);
+        if (imagetimer >= 3 && imagetimer < 6)
+          image(bulletalt1, -36, -36);
+        if (imagetimer >= 6 && imagetimer < 9)
+          image(bulletalt2, -36, -36);
+        if (imagetimer >= 9 && imagetimer < 12)
+          image(bulletalt3, -36, -36);
+        break;
+    }
     /*
     fill(0, 0, 0);
     stroke(0);
     ellipse(0,0, radius*2, radius*2);
 */    
     popMatrix();
+    imagetimer++;
   }
   
   void makebody(float x, float y) {

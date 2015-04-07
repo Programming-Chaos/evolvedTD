@@ -39,8 +39,9 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  float baseMaxMovementSpeed = 800; //maximum speed without factoring in width and appendages
+  float baseMaxMovementSpeed = 1000; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
+  int hit_indicator=0; //to create animations on creature impacts
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -60,6 +61,7 @@ class creature {
   float max_energy_locomotion;
   float max_energy_health;
   int regen_energy_cost = 5; // value to determine how much regenerating health costs
+  float density;
   metabolic_network metabolism;
 
   // senses/communication
@@ -88,7 +90,7 @@ class creature {
 
   ArrayList<Segment> segments = new ArrayList<Segment>(numSegments);
   ArrayList<Appendage> appendages = new ArrayList<Appendage>(numSegments);
-  
+
   // Data Collection variables
   float total_energy_space;
   float total_energy_consumed = 0;
@@ -98,7 +100,7 @@ class creature {
   float health_used = 0;
   int   hits_by_tower = 0;
   int   hp_removed_by_tower = 0;
-  
+
 
   class Segment {
     int index;
@@ -107,15 +109,21 @@ class creature {
     float restitution;
     Vec2 frontPoint;
     Vec2 backPoint;
+    float area;
 
     Segment(int i) {
       index = i;
       armor = getArmor();
-      density = getDensity();
+      density = getSegmentDensity();
       density *= armor;
       restitution = getRestitution();
       frontPoint = getFrontPoint();
       backPoint = getBackPoint();
+      area = getArea();
+    }
+
+    private float getArea() {
+      return (((sqrt((frontPoint.x*frontPoint.x)+(frontPoint.y*frontPoint.y))*sqrt((backPoint.x*backPoint.x)+(backPoint.y*backPoint.y)))/2)*(sin(PI/numSegments)));
     }
 
     private float getArmor() {
@@ -124,7 +132,7 @@ class creature {
       return (a+1);
     }
 
-    private float getDensity() {
+    private float getSegmentDensity() {
       float d = (genome.sum(segmentTraits.get(index).density));
       // if the value is negative, density approaches zero asympototically from 10
       if (d < 0)
@@ -193,13 +201,14 @@ class creature {
     Vec2 originPoint;
     Vec2 frontPoint;
     Vec2 backPoint;
+    float area;
 
     Appendage(int i) {
       index = i;
       size = getSize();
       if (size>0) {
         armor = getArmor();
-        density = getDensity();
+        density = getAppendageDensity();
         density *= armor;
         getForces();
         angle = getAngle();
@@ -207,7 +216,12 @@ class creature {
         originPoint = getOriginPoint();
         frontPoint = getFrontPoint();
         backPoint = getBackPoint();
+        area = getArea();
       }
+    }
+
+    private float getArea() {
+      return (((sqrt(((originPoint.x-frontPoint.x)*(originPoint.x-frontPoint.x))+((originPoint.y-frontPoint.y)*(originPoint.y-frontPoint.y)))*sqrt(((originPoint.x-backPoint.x)*(originPoint.x-backPoint.x))+((originPoint.y-backPoint.y)*(originPoint.y-backPoint.y))))/2)*(sin(spread)));
     }
 
     private float getSize() {
@@ -223,7 +237,7 @@ class creature {
       return (a+1);
     }
 
-    private float getDensity() {
+    private float getAppendageDensity() {
       float d = (genome.sum(appendageTraits.get(index).density));
       // if the value is negative, density approaches zero asympototically from 10
       if (d < 0)
@@ -283,10 +297,12 @@ class creature {
     angle = a;
     genome = new Genome();
     construct((float)20000, new Vec2(x, y));
+    hit_indicator=0;
   }
 
   // construct a new creature with the given genome and energy
   creature(Genome g, float e) {
+    hit_indicator=0; // starts a creature as not having been hit
     angle = random(0, 2 * PI); // start at a random angle
     genome = g;
     // Currently creatures are 'born' around a circle a fixed distance
@@ -304,18 +320,18 @@ class creature {
     construct(e, pos);
   }
 
-  void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors  
+  void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
     num = creature_count++;
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     genome.inheritance(num);
- 
+
     current_actions = new float[brain.OUTPUTS];
-    
+
     // used for data collection
     sPos = pos.clone();
     total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
-    
+
 
     numSegments = getNumSegments();
     for (int i = 0; i < numSegments; i++) segments.add(new Segment(i));
@@ -323,6 +339,7 @@ class creature {
 
     makeBody(pos);   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
+    density = getCreatureDensity();
 
     float energy_scale = 500; // scales the max energy pool size
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
@@ -340,6 +357,7 @@ class creature {
     alive = true;               // creatures begin life alive
 
     maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
+    if (maxMovementSpeed < 0) maxMovementSpeed = 0;
     for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
 
     scent = setScent();                 // does creature produce scent
@@ -452,7 +470,7 @@ class creature {
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
     energy_health = min(energy_health, max_energy_health);
-    
+
     // data collection
     total_energy_consumed += x;
   }
@@ -492,7 +510,7 @@ class creature {
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
     a = a*(1 + (int)outputs[3]);
-    
+
     /*I turned off alpha value here so I could not draw segmentations on creatures
     The creatures weren't easily visible with a low alpha*/
     return color(r, g, b, 255);
@@ -528,7 +546,7 @@ class creature {
   float getMass() {
     return body.getMass();
   }
-  
+
   float getArmor() {  // gets the sum of armor on all segments and appendages
     float value = 0;
     for (Segment s : segments) {
@@ -537,20 +555,19 @@ class creature {
     for (Appendage a : appendages) {
       value += a.armor;
     }
-    
+
     return value;
   }
-  
-  float getDensity() { // gets the sum of density on all segments and appendages
-    float value = 0;
+
+  float getCreatureDensity() { // gets the creature's density (total mass divided by total area)
+    float area = 0;
     for (Segment s : segments) {
-      value += s.density;
+      area += s.area;
     }
     for (Appendage a : appendages) {
-      value += a.density; 
+      if (a.size > 0) area += a.area;
     }
-    
-    return value;
+    return (body.getMass()/area);
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
@@ -591,7 +608,9 @@ class creature {
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
-    
+    // increase or decrease this number to lengthen or shorten the
+    // animation time on hit
+    hit_indicator = 5;
     // data collection
     hits_by_tower++;
     hp_removed_by_tower += h;
@@ -627,14 +646,14 @@ class creature {
     calcBehavior();
     torque = current_actions[0]*0.01;
 
-    // force is a percentage of max movement speed from 10% to 100%, averaging 80%
+    // force is a percentage of max movement speed from 10% to 100%
     // depending on the output of the neural network in current_actions[1], the movement force may be backwards
     // as of now the creatures never completely stop moving
-    f = Utilities.MovementForceSigmoid(current_actions[1]);
-    if (current_actions[1] < -50) f *= -1;
-    //f = 0.8;
-    f *= maxMovementSpeed;
-
+    f = (maxMovementSpeed * Utilities.MovementForceSigmoid(current_actions[1]));
+    // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
+    // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
+    
+    //if (selected) println("Creature #" + num + " Sigmoid Input = " + current_actions[1] + " Sigmoid Output = " + Utilities.MovementForceSigmoid(current_actions[1]) + " maxMoveSpeed = " + maxMovementSpeed + " Force = " + f);
     int switchnum;
     if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
       time_in_water++;
@@ -642,8 +661,7 @@ class creature {
     }
     else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
     else switchnum = 2;
-    //println("Creature (" + pos2.x + ", " + pos2.y + ")");
-    //println("Base move speed: " + f);
+    
     float base = f;
 
     // appendages will change the force depending on the environment
@@ -679,7 +697,7 @@ class creature {
       body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
       energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
-      
+
       // data collection
       locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
     }
@@ -751,7 +769,7 @@ class creature {
     if (energy_health > 0 && health < maxHealth) {
       health = health + health_regen;
       energy_health = energy_health - regen_energy_cost;
-      
+
       // data collection
       health_used += regen_energy_cost;
     }
@@ -762,62 +780,71 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
+    float sw = 1;
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
     float a = body.getAngle();
+    if(hit_indicator>0){ //makes the animation show up when hit
+    fill (153,0,0);
+    ellipse (pos.x, pos.y, getWidth()+15, getWidth()+15); //this draws the animation when the creature gets hit. Animation is a circle right now
+    hit_indicator=hit_indicator-1;} //this counts down each timestep to make the animation dissapear
 
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-       
+
       pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
-    
-
-    stroke(0);
 
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
         if ((((Segment)f.getUserData()).armor) > 1)
-          strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+          sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         else
-          strokeWeight(((Segment)f.getUserData()).armor);
+          sw = (((Segment)f.getUserData()).armor);
+        //strokeWeight(sw);
+        //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
+        //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
         if ((((Appendage)f.getUserData()).armor) > 1)
-          strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+          sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         else
-          strokeWeight(((Appendage)f.getUserData()).armor);
+          sw = (((Appendage)f.getUserData()).armor);
+        //strokeWeight(sw);
+        //line((int)(((Appendage)f.getUserData()).frontPoint.x),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x),(int)(((Appendage)f.getUserData()).backPoint.y));
+        //line((int)(((Appendage)f.getUserData()).frontPoint.x*-1),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x*-1),(int)(((Appendage)f.getUserData()).backPoint.y));
       }
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       //strokeWeight(.1);
       noStroke();
+      Vec2 v;
       for (int i = 0; i < 3; i++) {
-        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+        v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
     }
-    
+
     //strokeWeight(1);
     // Add some eyespots
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
     popMatrix();
-    
+
     pushMatrix();
     noStroke();
     senses.Draw_Sense(pos.x, pos.y, body.getAngle());
     popMatrix();
-    
+
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();

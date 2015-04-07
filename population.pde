@@ -61,6 +61,23 @@ class population {
     }
     return closest;
   }
+  
+  Vec2 highestAlpha() {
+    Vec2 v = new Vec2(0,0), temp;
+    float tempa;
+    for (creature c: swarm) { 
+      if (c.alive) {
+        temp = c.getPos();
+        tempa = 1000000000;
+        float tempb = c.genome.sum(alphaTrait);
+        if (tempb < tempa ){
+           tempa = tempb;
+           v = c.getPos();     
+        }
+      }
+    }
+    return v;
+  }
 
   // returns the number of living creatures, used to decide whether to
   // end a wave
@@ -271,7 +288,7 @@ class population {
       c_traitsRow.setInt("   Creature ID   ", c.num);
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
-      c_traitsRow.setFloat("   Density   "  , c.getDensity());
+      c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
       c_traitsRow.setFloat("   Armor   "    , c.getArmor());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
@@ -284,7 +301,7 @@ class population {
       // Update creature trait averages data
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
-      denseAvg += c.getDensity();
+      denseAvg += c.getCreatureDensity();
       armorAvg += c.getArmor();
       velAvg   += c.maxMovementSpeed;
       hpAvg    += c.maxHealth;
