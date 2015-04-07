@@ -61,6 +61,23 @@ class population {
     }
     return closest;
   }
+  
+  Vec2 highestAlpha() {
+    Vec2 v = new Vec2(0,0), temp;
+    float tempa;
+    for (creature c: swarm) { 
+      if (c.alive) {
+        temp = c.getPos();
+        tempa = 1000000000;
+        float tempb = c.genome.sum(alphaTrait);
+        if (tempb < tempa ){
+           tempa = tempb;
+           v = c.getPos();     
+        }
+      }
+    }
+    return v;
+  }
 
   // returns the number of living creatures, used to decide whether to
   // end a wave
