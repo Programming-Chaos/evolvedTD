@@ -806,7 +806,7 @@ class creature {
         if ((((Segment)f.getUserData()).armor) > 1)
           sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         else
-          sw = (((Segment)f.getUserData()).armor);
+          sw = 0;
         //strokeWeight(sw);
         //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
         //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
