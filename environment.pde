@@ -22,7 +22,9 @@ static final int GRASS = 0;
 static final int WATER = 1;
 static final int MOUNTAIN = 2;
 
-int initializeRain() { return int(random(1,3)); }
+int[][] bugLoc = new int[100][2];
+
+//int initializeRain() { return int(random(1,3)); }
 
 // Variables for Data Collection
 float rStrikes = 0;
@@ -799,7 +801,7 @@ class environment {
 
   // Randomly decides if lightning should strike
   void chanceOfLightning() {
-    int chance = int(random(1,700));
+    int chance = int(random(1, 700)); // normally 700
     if (chance == 1) {
       lightning();
       
@@ -811,19 +813,53 @@ class environment {
   // Draws rain animation
   void rainfall() {
     float x, y;
-    fill(0, 0, 255, 50);
+    
+    // rainy blue overlay
+    fill(0, 0, 255, 45);
     rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
+    
     for(int i = 0; i < 800; i++) {
-      x = random(-worldWidth, worldWidth);
-      y = random(-worldHeight, worldHeight);
+      x = random((-worldWidth / 2), (worldWidth / 2));
+      y = random((-worldHeight / 2), (worldHeight / 2));
       stroke(0, 0, 200, 120);
       line(x, y, x, y+30);
     }
     chanceOfLightning();
   }
 
+  void findTheBugs() {
+    int arrayTmp = 0;
+    for (int i = 0; i < environHeight; i++) {
+      for (int j = 0; j < environWidth; j++) {
+        if(tileMap[i][j].hasCreature() != null) {
+          bugLoc[arrayTmp][0] = i;
+          bugLoc[arrayTmp][1] = j;
+          arrayTmp++;
+        }
+      }
+    }
+    
+  /*  
+    for(int k = 0; k < bugLoc.length; k++) {
+      println(bugLoc[k][0], ", ", bugLoc[k][1]); 
+    }
+  */
+
+  }
+  
   // Draws lightning and kills a creature if it is on the tile
   void lightning() {
+    
+    // Instead of random here, find a bug!
+    findTheBugs();
+    
+    //int randNum = int(random(1, 30));
+    //int tileX = bugLoc[randNum][0];
+    //int tileY = bugLoc[randNum][1];
+    
+    //int randX = (tileX * 40);
+    //int randY = (tileY * 40);
+    
     int randX = int(random((-worldWidth / 2), worldWidth / 2));
     int randY = int(random((-worldHeight / 2), worldHeight / 2));
 
@@ -855,10 +891,11 @@ class environment {
 
     int tileX = ((randX + (worldWidth)) / 40);
     int tileY = ((randY + (worldHeight)) / 40);
-
+ 
     if(tileMap[tileX][tileY].hasCreature() != null) {
       creature c = tileMap[tileX][tileY].hasCreature();
       c.changeHealth(-1000);
+      println("Killed it!");
       
       // data collection
       rKills++;
@@ -878,21 +915,21 @@ class environment {
       case 1:
         // temperate
         temp = int(random(20, 25));
-        liquid = color(0, 0, 225);
+        liquid = color(0, 0, 175);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
-        altShift = 100;
+        altShift = 80;
         break;
       
       case 2:
         // dry - desert, minimal water
         temp = int(random(40, 45));
-        liquid = color(30, 220, 200);
-        rock = color(204, 102, 0);
-        land = color(240, 231, 100);
-        waterALT = 0.20f;
+        liquid = color(0, 170, 170);
+        rock = color(165, 103, 41);
+        land = color(239, 233, 125); // 240 231 100
+        waterALT = 0.22f;
         rockALT = 0.60f;
         altShift = 100;
         break;
@@ -901,12 +938,12 @@ class environment {
         // rainy - lots of water, always raining
         isRaining = true;
         temp = int(random(15, 20));
-        liquid = color(5, 25, 50);
-        rock = color(150, 150, 150);
-        land = color(8, 90, 8);
+        liquid = color(7, 37, 75);
+        rock = color(125, 125, 75);
+        land = color(10, 125, 10);
         waterALT = 0.45f;
         rockALT = 0.70f;
-        altShift = 60;
+        altShift = 75;
         break;
         
       case 4:
@@ -1101,7 +1138,6 @@ class environment {
         break;
     }
   }
-
 }
 
 
