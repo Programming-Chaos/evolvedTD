@@ -151,12 +151,15 @@ class population {
       }
     }
     // Place gametes in order of time.
-    Collections.sort(gametes, new GameteComparator());
+//    Collections.sort(gametes, new GameteComparator());
     
-    int childrenBred = 0;
-    int childrenNew = 0;
     int multiplier = 0;
     int range;
+    Gamete g1, g2;
+    int variance = 15; // Used for variable pop size with random selection
+    int size = gametes.size();
+    int rand;
+    ArrayList<Integer> inProximity = new ArrayList<Integer>();
     
     while (generation.size() < POP_SIZE) {
       // increase search range with each pass thru.
@@ -169,17 +172,13 @@ class population {
         break;
       }
       
-      Gamete g1, g2;
-      int variance = 15; // Used for variable pop size with random selection
-      int size = gametes.size();
-      int rand;
+      
       
       // i is first gamete j is it's chosen mate
-      for (int i=0; i < variance; i++) {
+      for (int i=0; i < variance && i < size; i++) {
         rand = (int)random(size);
         g1 = gametes.get(rand); // Randomly select a gamete
-        
-        ArrayList<Integer> inProximity = new ArrayList<Integer>();
+        inProximity.clear();
         
         // copy array position of gametes in proximity
         for (int j=0; j < size; j++) {
@@ -219,10 +218,9 @@ class population {
           pos.x *= cellWidth;
           pos.y *= cellHeight;
     
-          childrenBred++;
           generation.add(new creature(new Genome(g1.gamete, g2.gamete),
                                       10000 + g1.energy + g2.energy, pos));
-          break;
+          //break;
         }
         
       }
