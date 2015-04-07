@@ -858,6 +858,20 @@ class creature {
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
+    
+    pushMatrix(); // Draws a "energy" bar above the creature
+    translate(pos.x, pos.y);
+    noFill();
+    stroke(1000);
+    // get the largest dimension of the creature
+    int offset2 = (int)max(getWidth(), getLength());
+    rect(0, -1.1 * offset2, 0.1 * (max_energy_reproduction+max_energy_health+max_energy_locomotion)*0.02, 5); // draw the energy bar that much above it
+    noStroke();
+    fill(255, 0, 0);
+    rect(0, -1.1 * offset2, 0.1 * (energy_reproduction+energy_health+energy_locomotion)*0.02, 5);
+    //Text to display the round counter of each creature for debug purposes
+    //text((int)round_counter, 0.2*width,-0.25*height);
+    popMatrix();
   }
 
   // This function makes a Box2D body for the creature and adds it to the box2d world
