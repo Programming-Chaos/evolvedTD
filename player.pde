@@ -109,13 +109,22 @@ class player {
   }
 
   void display() {
-    if (selectedCreature != null) {
+    if (selectedCreature != null && selectedCreature.alive) {
       Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
+      // make camera follow creature
       cameraX = int(pos.x);
       cameraY = int(pos.y);
       statsPanel.enabled = true;
+    } else if (selectedCreature != null && statsPanel.enabled) {
+      // if creature died while selected, pop back the camera and turn off the display
+      cameraX = 0;
+      cameraY = 0;
+      cameraZ = zoomOffset;
+      statsPanel.enabled = false;
+    } else {
+      // creature was deselected so turn off panel but stay zoomed in
+      statsPanel.enabled = false;
     }
-    else statsPanel.enabled = false;
     
     for (tower t : towers)  // walk through the towers
       t.display();  // display them all
