@@ -524,10 +524,13 @@ void mousePressed() { // called if either mouse button is pressed
       for (tower t : the_player.towers) {
         if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
             && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-          if (the_player.selectedTower != t) {
+          println("herp");
+          if (System.identityHashCode(the_player.selectedTower) != System.identityHashCode(t)) {
+            println("equal");
             the_player.selectedTower = t;
           }
           else {
+            println("not equal");
             t.inTransit = true;
             t.xpos = round(mouse_x);
             t.ypos = round(mouse_y);
@@ -537,6 +540,7 @@ void mousePressed() { // called if either mouse button is pressed
             the_player.towerPanel.hiddenpanel = false;
             the_player.towerPanel.shown = true;
           }
+          println("derp");
           break;
         }
         else the_player.selectedTower = null;
