@@ -53,15 +53,15 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
 
-    towerstatsPanel = new Panel(540,500,-980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
+    towerstatsPanel = new Panel(540,600,-980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
     towerstatsPanel.enabled = false;
-    towerstatsPanel.setupTextBoxList(40,10,50,40);
+    towerstatsPanel.setupTextBoxList(40,50,50,40);
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + ((selectedTower.type == 'r') ? "Railgun" : "Flamethrower")); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedTower.ID); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedTower.bulletSpeedUpgrades+1)); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedTower.bulletDamageUpgrades+1)); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedTower.fireRateUpgrades+1)); } });
-    towerstatsPanel.createButton(300,210,0,110,"Upgrade",50,new ButtonPress() { public void pressed() { selectedTower.upgradePanel.enabled = true; } });
+    towerstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedTower.upgradePanel.enabled = true; } });
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTurret('r'); } });
@@ -131,8 +131,9 @@ class player {
 
   void mouse_pressed() {
     // check if the mouse was pressed in the player panel
-    for (Panel p : panels)
-      mouse_pressed();
+    int s = panels.size();
+    for (int i = 0; i < s; i++)
+      panels.get(i).mouse_pressed();
   }
 
   void wave_fire(){

@@ -53,10 +53,6 @@ class food {
     box2d.destroyBody(the_food);
   }
   
-  void setRemove(boolean x) {
-    remove = x;
-  }
-  
   int update() { // the only update action is, if remove was set to true by a collision then kill the box2d body and return 1 to have the food removed from the list of food
     if (remove) {
       killBody();

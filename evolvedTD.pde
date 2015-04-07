@@ -321,7 +321,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     food p2 = (food)o2;
     p1.senses.Set_Taste(p2);
     if (p2 != null) {
-      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
   }
 
@@ -333,7 +333,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     food p2 = (food)o1;
     p1.senses.Set_Taste(p2);
     if (p2 != null) {
-      p2.setRemove(true); // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
     }
   }
 
@@ -348,7 +348,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     if (f1.getUserData().getClass() == creature.Appendage.class) {
       p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f1.getUserData()).armor)));
     }
-    p2.setRemove(true);
+    p2.remove = true;
   }
 
   if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
@@ -361,7 +361,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     if (f2.getUserData().getClass() == creature.Appendage.class) {
       p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f2.getUserData()).armor)));
     }
-    p2.setRemove(true);
+    p2.remove = true;
   }
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
@@ -525,9 +525,11 @@ void mousePressed() { // called if either mouse button is pressed
     
     if (the_player.selectedCreature == null) {
       // find a tower
+      boolean towerclick = false;
       for (tower t : the_player.towers) {
         if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
             && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
+          towerclick = true;
           if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
               t.inTransit = true;
               t.xpos = round(mouse_x);
@@ -542,6 +544,7 @@ void mousePressed() { // called if either mouse button is pressed
           break;
         }
       }
+      if (!towerclick) the_player.selectedTower = null;
     }
   }
 
