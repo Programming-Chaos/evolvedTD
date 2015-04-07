@@ -1,20 +1,18 @@
 class player {
   ArrayList<tower> towers;
+  ArrayList<Panel> upgradepanels;
   Panel playerPanel;
   Panel statsPanel;
-  Panel upgradePanel;
   Panel hudPanel;
   Panel towerPanel;
   Panel helpPanel;
   Panel towerstatsPanel;
-  int bulletSpeedButtons[] = new int[5];
-  int bulletDamageButtons[] = new int[5];
-  int fireRateButtons[] = new int[5];
   int money = 0;
   int moneyGain = 10; // money per 40 ticks
   int currentMoneyTick;
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
+  int numTowersCreated = 0;
   tower pickedup;
   
   Panel testpanel;
@@ -27,36 +25,13 @@ class player {
 
   player() {
     towers = new ArrayList<tower>();
+    upgradepanels = new ArrayList<Panel>();
     activeweapon = 1;
     
     testpanel = new Panel(400,400,-1000,0,true);
     testpanel.createTextBox(400,200,0,-100,"THIS is a textbox!",40,true);
     testpanel.createButton(300,100,0,100,"Yay BUTTON",30,0,0,0,new ButtonPress() { public void pressed() { println("button has been pressed!!"); } });
     testpanel.enabled = false;
-
-    upgradePanel = new Panel(2000,1800,0,0,false, 200);
-    upgradePanel.enabled = false;
-    upgradePanel.createTextBox(2000,200,0,-800,"Upgrade your defenses",100, true);
-    upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
-      upgradePanel.enabled = false;
-      if(state == State.STAGED)state = State.RUNNING;
-    } });
-    for (int c = 0; c < 5; c++) {
-      
-      if (c>0) {
-        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { selectedTower.upgradeBulletSpeed(); } });
-        upgradePanel.buttons.get(bulletSpeedButtons[c]).grayed = true;
-        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { selectedTower.upgradeBulletDamage(); } });
-        upgradePanel.buttons.get(bulletDamageButtons[c]).grayed = true;
-        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { selectedTower.upgradeFireRate(); } });
-        upgradePanel.buttons.get(fireRateButtons[c]).grayed = true;
-      }
-      else {
-        bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { selectedTower.upgradeBulletSpeed(); } });
-        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { selectedTower.upgradeBulletDamage(); } });
-        fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { selectedTower.upgradeFireRate(); } });
-      }
-    }
 
     playerPanel = new Panel(500,420,980,-1020,true);
     playerPanel.createTextBox(480,50,0,-180,new StringPass() { public String passed() { return ("Resources: " + (int)resources); } },40);
@@ -78,14 +53,15 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
 
-    towerstatsPanel = new Panel(540,400,-980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
+    towerstatsPanel = new Panel(540,500,-980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
     towerstatsPanel.enabled = false;
-    towerstatsPanel.setupTextBoxList(20,10,50,40);
+    towerstatsPanel.setupTextBoxList(40,10,50,40);
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + ((selectedTower.type == 'r') ? "Railgun" : "Flamethrower")); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedTower.ID); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedTower.bulletSpeedUpgrades+1)); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedTower.bulletDamageUpgrades+1)); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedTower.fireRateUpgrades+1)); } });
-    towerstatsPanel.createButton(300,160,0,110,"Upgrade",50,new ButtonPress() { public void pressed() { upgradePanel.enabled = true; } });
+    towerstatsPanel.createButton(300,210,0,110,"Upgrade",50,new ButtonPress() { public void pressed() { selectedTower.upgradePanel.enabled = true; } });
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTurret('r'); } });
@@ -155,8 +131,8 @@ class player {
 
   void mouse_pressed() {
     // check if the mouse was pressed in the player panel
-    for (int i = panels.size() - 1; i >= 0; i--)
-      panels.get(i).mouse_pressed();
+    for (Panel p : panels)
+      mouse_pressed();
   }
 
   void wave_fire(){
@@ -196,27 +172,27 @@ class player {
           towers.remove(pickedup);
           pickedup = null;
           towerPanel.buttons.get(2).enabled = false;
-          the_player.towerPanel.hiddenpanel = true;
-          the_player.towerPanel.shown = false;
+          towerPanel.hiddenpanel = true;
+          towerPanel.shown = false;
           if (type == 'f') placeTurret('f');
           break;
         case 'f':
           towers.remove(pickedup);
           pickedup = null;
           towerPanel.buttons.get(2).enabled = false;
-          the_player.towerPanel.hiddenpanel = true;
-          the_player.towerPanel.shown = false;
+          towerPanel.hiddenpanel = true;
+          towerPanel.shown = false;
           if (type == 'r') placeTurret('r');
           break;
       }
     }
     else {
       placing = true;
-      pickedup = new tower(type);
-      the_player.towers.add(pickedup);
+      pickedup = new tower(type, ++numTowersCreated);
+      towers.add(pickedup);
       towerPanel.buttons.get(2).enabled = true;
-      the_player.towerPanel.hiddenpanel = false;
-      the_player.towerPanel.shown = true;
+      towerPanel.hiddenpanel = false;
+      towerPanel.shown = true;
     }
   }
   
@@ -224,8 +200,8 @@ class player {
     towers.remove(pickedup);
     pickedup = null;
     towerPanel.buttons.get(2).enabled = false;
-    the_player.placing = false;
-    the_player.towerPanel.hiddenpanel = true;
-    the_player.towerPanel.shown = false;
+    placing = false;
+    towerPanel.hiddenpanel = true;
+    towerPanel.shown = false;
   }
 }

@@ -81,10 +81,10 @@ void setup() {
   textFont(font);
   panels = new ArrayList<Panel>();
   the_player = new player();
-  the_player.towers.add(new tower('r'));
+  the_player.towers.add(new tower('r', ++the_player.numTowersCreated));
+  the_player.towers.get(0).inTransit = false;
   the_player.towers.get(0).xpos = 0;
   the_player.towers.get(0).ypos = 0;
-  the_player.towers.get(0).inTransit = false;
 
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/railgunfire01long.mp3");
@@ -233,7 +233,6 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case 'p':  // toggle paused state
       if (state == State.STAGED) {
-        if (the_player.upgradePanel.enabled == true) the_player.upgradePanel.enabled = false;
         state = State.RUNNING;
       }
       else if (state != State.PAUSED)
@@ -242,16 +241,22 @@ void keyPressed() { // if a key is pressed this function is called
         state = State.RUNNING;
       break;
     case 'u':  // toggle upgrade window
-      if (the_player.upgradePanel.enabled == true) {
-        the_player.upgradePanel.enabled = false;
-        if (state == State.STAGED)state = State.RUNNING;
+      boolean temp = false;
+      for (Panel u : the_player.upgradepanels) {
+        if (u.enabled == true) {
+          u.enabled = false;
+          temp = true;
+        }
       }
-      for (tower t : the_player.towers) {
-        if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
-            && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-          the_player.selectedTower = t;
-          the_player.upgradePanel.enabled = true;
-          break;
+      if (temp && state == State.STAGED)state = State.RUNNING;
+      if (!temp) {
+        for (tower t : the_player.towers) {
+          if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
+              && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
+            the_player.selectedTower = t;
+            t.upgradePanel.enabled = true;
+            break;
+          }
         }
       }
       break;
@@ -453,7 +458,6 @@ void nextgeneration() {
   if (!autofire) {
     stateSaved = state;
     state = State.STAGED; // pause the game
-    the_player.upgradePanel.enabled = true;
   }
 }
 
@@ -524,26 +528,19 @@ void mousePressed() { // called if either mouse button is pressed
       for (tower t : the_player.towers) {
         if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
             && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-          println("herp");
-          if (System.identityHashCode(the_player.selectedTower) != System.identityHashCode(t)) {
-            println("equal");
-            the_player.selectedTower = t;
-          }
-          else {
-            println("not equal");
-            t.inTransit = true;
-            t.xpos = round(mouse_x);
-            t.ypos = round(mouse_y);
-            the_player.pickedup = t;
-            the_player.placing = true;
-            the_player.towerPanel.buttons.get(2).enabled = true;
-            the_player.towerPanel.hiddenpanel = false;
-            the_player.towerPanel.shown = true;
-          }
-          println("derp");
+          if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
+              t.inTransit = true;
+              t.xpos = round(mouse_x);
+              t.ypos = round(mouse_y);
+              the_player.pickedup = t;
+              the_player.placing = true;
+              the_player.towerPanel.buttons.get(2).enabled = true;
+              the_player.towerPanel.hiddenpanel = false;
+              the_player.towerPanel.shown = true;
+            }
+            else the_player.selectedTower = t;
           break;
         }
-        else the_player.selectedTower = null;
       }
     }
   }

@@ -68,6 +68,7 @@ class Button {
   }
   
   void buttonPressed() {
+    println("buttonpress");
     if (!enabled)return;
     buttonpressed = true;
     BP.pressed();
