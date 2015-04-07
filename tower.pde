@@ -18,7 +18,11 @@ class tower {
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
   int dmg; // damage value, changed by turret type
+  int baseDamageRailgun = 20;
+  int baseDamageFlamethrower = 200;
   int firerate; // autofire rate, lower values fire faster
+  int baseFirerateRailgun = 25;
+  int baseFirerateFlamethrower = 75;
   int ecost; // per fire energy cost
   char type;
   /* type is the turret type
@@ -103,8 +107,16 @@ class tower {
           autofirecounter = 0;  // reset the counter
         }
       }
-      else // user controlled: calculate the angle to the mouse pointer and point at the mouse
-        angle = atan2(mouse_y-ypos, mouse_x-xpos);
+      else { // user controlled: calculate the angle to the mouse pointer and point at the mouse
+        // calculate the location of the mouse pointer in the world
+        //float x, y;
+        //x = ((mouse_x/((float)zoomOffset/cameraZ))+cameraX-xpos);
+        //y = ((mouse_y/((float)zoomOffset/cameraZ))+cameraY-ypos);
+        //x = (cameraX+((mouseX-(width/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+        //y = (cameraY+((mouseY-(height/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+        //calculate the angle to the mouse pointer
+        angle = atan2(mouse_y-ypos,mouse_x-xpos);//(ypos*((float)worldWidth/width)), x-(xpos*((float)worldWidth/width)));
+      }
     }
   }
 
