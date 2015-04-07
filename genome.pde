@@ -1,12 +1,12 @@
 // standard deviation of mutation added to each gene in meiosis
-static final float MUTATION_DEVIATION = 0.03;
-static final float MUTATION_RATE = 0.05;
+static float MUTATION_DEVIATION = 0.03;
+static float MUTATION_RATE = 0.05;
 // standard deviation of initial gene values
-static final float INITIAL_DEVIATION = 0.03;
+static float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
-static final float GENE_MULTIPLIER = 4.0/3.0;
+static float GENE_MULTIPLIER = 4.0/3.0;
 // initial number of segments (should be between 2 and 20)
-static final int STARTING_NUMSEGMENTS = 8;
+static int STARTING_NUMSEGMENTS = 8;
 
 // additional control trait to estimate genetic evolution
 Trait control = new Trait(10);
@@ -37,6 +37,10 @@ Trait rockTrait = new Trait(10);
 
 // Body
 Trait scentTrait = new Trait(10);
+
+Trait redEyeColor = new Trait(10);
+Trait greenEyeColor = new Trait(10);
+Trait blueEyeColor = new Trait(10);
 
 // maximum number of segments/ribs/spines that can be evolved
 static final int MAX_SEGMENTS = 20;
@@ -193,16 +197,33 @@ class Genome {
     yChromosome = y;
   }
 
+  
   // Returns a list of genes from the X chromosome
   FloatList listX(Trait trait) {
     return xChromosome.list(trait);
   }
 
+  //Creates inheritance value
+  //. between each creature uniqie id between .
+  void inheritance(int num) {
+    if (xChromosome.inherit != "") {
+      xChromosome.inherit += "." + str(num);
+    } else {
+      xChromosome.inherit = str(num);
+    }
+    
+    if (yChromosome.inherit != "") {
+      yChromosome.inherit += "." + str(num);
+    } else {
+      yChromosome.inherit = str(num);
+    }
+  }
   // Returns a list of genes from the Y chromosome
   FloatList listY(Trait trait) {
     return yChromosome.list(trait);
   }
 
+  
   // Returns a combined list of genes from both chromosomes
   FloatList list(Trait trait) {
     FloatList l = listX(trait);
@@ -231,7 +252,8 @@ class Genome {
 
   class Chromosome {
     FloatList genes;
-
+    String inherit = "";
+    
     Chromosome(int n) {
       genes = new FloatList(n);
       for (int i = 0; i < n; i++) {
@@ -272,7 +294,10 @@ class Genome {
     // recombine
     Chromosome x = new Chromosome();
     Chromosome y = new Chromosome();
-
+    //shares info of inheritance
+    x.inherit = xChromosome.inherit;
+    y.inherit = yChromosome.inherit;
+    
     int start = int(random(nGenes));
     int num = int(random(nGenes - start));
 
@@ -306,7 +331,14 @@ class Genome {
     testSuccess = false;
   }
 
+  void testMutation() {
+    if (MUTATION_RATE != 0.05)
+      testFailed("mutation rate is no longer 5 percent");
+  }
+
   void testChromosome() {
+    testSuccess = true;
+
     // test constructors
     Chromosome defaultChromosome = new Chromosome();
 

@@ -24,6 +24,12 @@ static final int MOUNTAIN = 2;
 
 int initializeRain() { return int(random(1,3)); }
 
+// Variables for Data Collection
+float rStrikes = 0;
+float rKills = 0;
+float tStrikes = 0;
+float tKills = 0;
+
 class tile {
   float altitude;
   int coloring;      // 0 to 255 value that describes tile visually
@@ -44,12 +50,12 @@ class tile {
   int biome;
   boolean hasFood;
   boolean hasRock;
+  boolean hasTower;
   boolean hasScent;
   boolean hasCreatureScent;
   boolean hasReproScent;
   boolean hasPainScent;
 
-  boolean hasTower;
   int[] taste;
 
   creature hasCreature; // is there a creature present
@@ -111,13 +117,12 @@ class tile {
   void setReproScent(float s) { reproScent = s;}
   void setPainScent(float s) { painScent = s;}
 
-
-
   void setCreatureScentColor(int c) { creatureScentColor = c; }
 
-  void DEBUG_sensing(boolean s)  { DEBUG_sensing = s; }
+  void DEBUG_sensing(boolean s)  { DEBUG_sensing = false; }
 }
 
+// Unimplemented currently
 class gravityVector {
   float x;
   float y;
@@ -136,6 +141,18 @@ class gravityVector {
   }
 }
 
+class Vegetation {
+  PImage img;
+  int x;
+  int y;
+  
+  void Vegetation() {
+    img = null;
+    x = 0;
+    y = 0;
+  }
+}
+
 class environment {
   int environWidth;
   int environHeight;
@@ -144,45 +161,31 @@ class environment {
   float liquidReservior; // Amount of water the environment is holding to expened into rain
   float temp; // celsius
   PGraphics image;
+  
+  // Coloring for the different terrain types.
+  color liquid;
+  color rock;
+  color land;
+  
+  // offsets designed to make terrain look more dynamic
+  int landOffset = 0;
+  int waterOffset = 0;
+  int rockOffset = 0;
 
   gravityVector[][] gravityMap;
   tile[][] tileMap;
+  ArrayList<Vegetation> vegetation;
 
   environment() {
     environWidth = worldWidth / cellWidth;
     environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
-    temp = (int)random(-40, 50); // celcius
-    //println(temp);
-    rockFrequency = 0;
+    isRaining = false;
+    // Establish world type
+    decideWorldType();
 
-    gravityMap = new gravityVector[environHeight][environWidth];
-    tileMap = new tile[environHeight][environWidth];
-    for (int i = 0; i < environHeight; i++) {
-      for (int j = 0; j < environWidth; j++) {
-        tileMap[i][j] = new tile();
-        gravityMap[i][j] = new gravityVector();
-      }
-    }
-
-    generateAltitudeMap();
-    //generateWaterALT((float)random(0, 70) / 100.0f);
-    generateWaterALT(0.35f); // Just works out better this way
-    generateRockyALT(0.60f);
     spawnRocks();
-    tempInfluence();
     makeImage();
-
-    int chance = initializeRain();
-    if(chance == 1) {
-      isRaining = false;
-      waitRainOff = minute();
-    } else {
-      isRaining = true;
-      waitRainOn = minute();
-    }
-    // makeImageFood();
-    // updateEnviron();
   }
 
 
@@ -278,8 +281,9 @@ class environment {
         if(tileMap[i][j].getAlt() <= alt) {
           tileMap[i][j].biome = WATER;
           tileMap[i][j].setViscosity(255);
-          tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
+          //tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
           tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
+          tileMap[i][j].colors = color(liquid, tileMap[i][j].opacity);
         }
       }
     }
@@ -297,8 +301,9 @@ class environment {
         if(tileMap[i][j].getAlt() >= alt) {
           tileMap[i][j].biome = MOUNTAIN;
           tileMap[i][j].setViscosity(0);
-          tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
+          //tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
           tileMap[i][j].opacity = (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255);
+          tileMap[i][j].colors = color(rock, tileMap[i][j].opacity);
         }
       }
     }
@@ -306,6 +311,7 @@ class environment {
 
   // Spawn rocks with respect to rocky terrian (color); spawn more on rock terrain
   void spawnRocks() {
+    rockFrequency = 0;
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
         if(tileMap[i][j].getViscosity() == 0) {
@@ -319,58 +325,6 @@ class environment {
         }
       }
     }
-  }
-/* this function is unused
-  void generateWater(int numWaterBodies, int initialSize, int deltaSize) {
-    int totalSize = 0;
-    int x = 0;
-    int y = 0;
-    for(int i = 0; i < numWaterBodies; i++) {
-      // water body origin
-      x = (int)random(environWidth);
-      y = (int)random(environHeight);
-
-      // noted extra chance of delta being 0
-      totalSize = initialSize + (int)(random(deltaSize) * random(-1, 1));
-
-      x = x + (totalSize / 2);
-      y = y + (totalSize / 2);
-
-
-      int a, b, r;
-      for(int xOffset = x - (totalSize / 2); xOffset < (x + (totalSize / 2)); xOffset++) {
-        for(int yOffset = y - (totalSize / 2); yOffset < (y + (totalSize / 2)); yOffset++) {
-          a = xOffset - x;
-          b = yOffset - y;
-          r = (totalSize / 2);
-          if(xOffset < environWidth && yOffset < environHeight
-             && xOffset > 0 && yOffset > 0) {
-            if((a * a) + (b * b) <= (r * r) ){
-              tileMap[xOffset][yOffset].biome = WATER;
-              tileMap[xOffset][yOffset].setViscosity(255);
-            }
-          }
-        }
-      }
-    }
-  }
-*/
-  void tempInfluence() {
-    int r = 0;
-    int b = 0;
-    int g = 0;
-    color c;
-    for(int i = 0; i < environHeight; i++) {
-      for(int j = 0; j < environWidth; j++) {
-        c = tileMap[i][j].colors;
-        r = (c >> 16) & 255;
-        b = (c >> 8) & 255;
-        g = (c) & 255;
-        //tileMap[i][j].colors = new color(r, b, g, 1);
-        // change values here and reconstruct color
-      }
-    }
-    //println("red: " + r + " blue: " + b + " green: " + g);
   }
 
   void place_creature(creature cd, float x, float y) {
@@ -609,6 +563,18 @@ class environment {
     }
     return 0;
   }
+  
+  int checkForTower(double x1, double y1){
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
+    if (tileMap[x][y].hasTower()){
+      return 0;
+    }
+    return 1;
+  }
 
   int []checkForTaste(double x1, double y1) {
     int x, y;
@@ -685,11 +651,16 @@ class environment {
     }
     //display_water();
 
-
     // checks to see if it can rain or not
+    if(isRaining == true) {
+      rainfall();
+    }
+    
+    /*
     if(timesteps == 0)
       timeStepTemp = 0;
     updateWaterReserve();
+        
     if(!isRaining)
       chanceOfRain();
 
@@ -697,7 +668,12 @@ class environment {
       rainfall();
       whileRaining();
     }
+    */
+    
     timeStepTemp = timesteps;
+    for(Vegetation i : vegetation) {
+      image(i.img, i.x, i.y);
+    }
   }
 
   void display_scent() {
@@ -776,6 +752,7 @@ class environment {
   /**** WEATHER ****/
 
   // updates the amount of water in the water reserve
+  /*
   void updateWaterReserve() {
     if(isRaining) {
       if(waterReserve <= 0) {}
@@ -811,12 +788,16 @@ class environment {
     if(isRaining == false)
       waitRainOff = minute();
   }
+  */
 
   // Randomly decides if lightning should strike
   void chanceOfLightning() {
-    int chance = int(random(1,30));
+    int chance = int(random(1,700));
     if (chance == 1) {
       lightning();
+      
+      // data collection
+      rStrikes++;
     }
   }
 
@@ -824,23 +805,27 @@ class environment {
   void rainfall() {
     float x, y;
     fill(0, 0, 255, 50);
-    rect((-worldWidth), (-worldHeight), (worldWidth*2), (worldHeight*2));
-    for(int i = 0; i < 600; i++) {
+    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
+    for(int i = 0; i < 800; i++) {
       x = random(-worldWidth, worldWidth);
       y = random(-worldHeight, worldHeight);
-      stroke(0, 0, 200, 95);
+      stroke(0, 0, 200, 120);
       line(x, y, x, y+30);
     }
+    chanceOfLightning();
   }
 
   // Draws lightning and kills a creature if it is on the tile
   void lightning() {
-    int randX = int(random(-worldWidth, worldWidth));
-    int randY = int(random(-worldHeight, worldHeight));
+    int randX = int(random((-worldWidth / 2), worldWidth / 2));
+    int randY = int(random((-worldHeight / 2), worldHeight / 2));
 
     int xOffset = randX;
     int yOffset = -worldHeight;
     int yFinal = randY;
+
+    fill(225, 225, 225, 125);
+    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
 
     noFill();
     strokeWeight(5);
@@ -867,10 +852,245 @@ class environment {
     if(tileMap[tileX][tileY].hasCreature() != null) {
       creature c = tileMap[tileX][tileY].hasCreature();
       c.changeHealth(-1000);
+      
+      // data collection
+      rKills++;
     }
     strokeWeight(1);
+    if( random(-4, 1) < 0 ) PlaySounds( "assets/Thunder.mp3");
     //thunder.rewind();
     //thunder.play();
   }
+  
+  // decides on the world type by choosing random number between 1 and 4
+  void decideWorldType() {
+    int decision = int(random(1, 4.999999));
+    int r = 0, b = 0, g = 0, temp = 0;
+    float waterALT = 0.0, rockALT = 0.0;
+    switch(decision) {
+      case 1:
+        // temperate
+        temp = int(random(20, 25));
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
+        waterALT = 0.35f;
+        rockALT = 0.60f;
+        break;
+      
+      case 2:
+        // dry - desert, minimal water
+        temp = int(random(40, 45));
+        liquid = color(30, 220, 200);
+        rock = color(204, 102, 0);
+        land = color(240, 231, 100);
+        waterALT = 0.20f;
+        rockALT = 0.60f;
+        break;
+        
+      case 3:
+        // rainy - lots of water, always raining
+        isRaining = true;
+        temp = int(random(15, 20));
+        liquid = color(5, 25, 50);
+        rock = color(150, 150, 150);
+        land = color(8, 90, 8);
+        waterALT = 0.45f;
+        rockALT = 0.70f;
+        break;
+        
+      case 4:
+        // cold - snowy
+        temp = int(random(-5, 0));
+        liquid = color(153, 204, 255);
+        rock = color(150, 150, 150);
+        land = color(245, 245, 245); 
+        waterALT = 0.35f;
+        rockALT = 0.60f;
+        break;
+        
+      /*
+      case 5:
+        // radiation - ??
+        temp = int(random(20, 40));
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
+        waterALT = 0.35f;
+        rockALT = 0.60f;
+        break;
+      */
+    }
+    
+    r = (land >> 16) & 255;
+    b = (land >> 8) & 255;
+    g = (land) & 255;
+    gravityMap = new gravityVector[environHeight][environWidth];
+    tileMap = new tile[environHeight][environWidth];
+    for (int i = 0; i < environHeight; i++) {
+      for (int j = 0; j < environWidth; j++) {
+        tileMap[i][j] = new tile();
+        landOffset = int(random(1, 10));
+        tileMap[i][j].colors = color(r + landOffset, b + landOffset, g + landOffset);
+        gravityMap[i][j] = new gravityVector();
+      }
+    }
+    generateAltitudeMap();
+    generateWaterALT(waterALT); // Just works out better this way
+    generateRockyALT(rockALT);
+    spawnVegetation(decision, waterALT, rockALT);
+  }   
+  
+  boolean randBool() {
+  return random(1) < 0.5;
+  }
+
+  void spawnVegetation(int worldType, float waterALT, float rockALT) {
+    vegetation = new ArrayList<Vegetation>();
+    int vegFreq = 0;
+    Vegetation veg;
+    Vegetation veg1;
+    PImage tree;
+    PImage vegies; 
+    switch(worldType) {
+      default: break;
+      case 1:
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(100);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              
+              if(f <= vegFreq) {
+                if(randBool()) {
+                  tree = loadImage("assets/environment/trees/purple" + t + ".png");
+                } else {
+                  tree = loadImage("assets/environment/trees/warm" + t + ".png");
+                }
+                vegies = loadImage("assets/environment/vegitation/warm" + v + ".png");
+                veg = new Vegetation();
+                veg1 = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+                
+                veg1.img = vegies;
+                veg1.x = x;
+                veg1.y = y;
+                
+                if(randBool()) {
+                  vegetation.add(veg1);
+                } else {
+                  vegetation.add(veg);
+                }
+              }
+            }
+          }
+        }
+        break;
+        
+      case 2:
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(1000);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/desert" + t + ".png");
+                vegies = loadImage("assets/environment/vegitation/desert" + v + ".png");
+                veg = new Vegetation();
+                veg1 = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+                
+                veg1.img = vegies;
+                veg1.x = x;
+                veg1.y = y;
+                
+                if(randBool()) {
+                  vegetation.add(veg1);
+                } else {
+                  vegetation.add(veg);
+                }
+              }
+            }
+          }
+        }
+        break;
+        
+      case 3: 
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(300);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/swamp" + t + ".png");
+                vegies = loadImage("assets/environment/vegitation/swamp" + v + ".png");
+                veg = new Vegetation();
+                veg1 = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+                
+                veg1.img = vegies;
+                veg1.x = x;
+                veg1.y = y;
+                
+                if(randBool()) {
+                  vegetation.add(veg1);
+                } else {
+                  vegetation.add(veg);
+                }
+              }
+            }
+          }
+        }
+        break;
+      case 4:
+        for(int i = 0; i < environWidth; i++) {
+          for(int j = 0; j < environHeight; j++) {
+            if(tileMap[i][j].altitude > waterALT && tileMap[i][j].altitude < rockALT){
+              int x = (i * cellWidth) - (worldWidth / 2);
+              int y = (j * cellHeight) - (worldHeight / 2);
+              int f = (int)random(400);
+              int t = (int)random(0,2);
+              int v = (int)random(0,3);
+              if(f <= vegFreq) {
+                tree = loadImage("assets/environment/trees/dead" + t + ".png");
+                veg = new Vegetation();
+                
+                tree.resize(tree.width / 2, tree.height / 2);
+                veg.img = tree;
+                veg.x = x;
+                veg.y = y; 
+               
+                vegetation.add(veg);
+              }
+            }
+          }
+        }
+        break;
+    }
+  }
+
 }
+
+
 

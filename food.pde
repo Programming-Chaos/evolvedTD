@@ -8,7 +8,7 @@ class food {
   int[] getTaste() { return taste; };
   
   food(int x, int y) {
-    radius = 3;
+    radius = int (random(3,20));
     makebody(x, y);
     the_food.setUserData(this);
     taste = new int[5];
@@ -20,7 +20,7 @@ class food {
   }
   
   food() {
-    radius = 3;
+    radius = int (random(3,20));
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
     the_food.setUserData(this);
@@ -33,7 +33,7 @@ class food {
   }
   
   food(float x, float y) {
-    radius = 3;
+    radius = int (random(3,20));
     makebody((int)x, (int)y);
     the_food.setUserData(this);
     taste = new int[5];
@@ -69,7 +69,7 @@ class food {
     Vec2 pos = box2d.getBodyPixelCoord(the_food);
     //   pushMatrix();
     //   translate(pos.x,pos.y);
-    fill(200,0,100);
+    fill(random (100,200), random (0,10), random (0,10));
     stroke(0);
     ellipse(pos.x, pos.y, radius*2, radius*2);
     if (displayScent) {

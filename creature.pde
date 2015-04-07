@@ -60,6 +60,7 @@ class creature {
   float max_energy_locomotion;
   float max_energy_health;
   int regen_energy_cost = 5; // value to determine how much regenerating health costs
+  float density;
   metabolic_network metabolism;
 
   // senses/communication
@@ -78,6 +79,7 @@ class creature {
   color_network coloration;
 
   // Reproduction variables
+  Vec2 sPos; // Starting position of creature
   int baseGameteCost = 10;    // Gametes base energy cost
   int baseGameteTime = 100;   // Gametes base create time in screen updates.
   int baseGameteEnergy = 500; // Gametes base extra energy
@@ -88,6 +90,17 @@ class creature {
   ArrayList<Segment> segments = new ArrayList<Segment>(numSegments);
   ArrayList<Appendage> appendages = new ArrayList<Appendage>(numSegments);
 
+  // Data Collection variables
+  float total_energy_space;
+  float total_energy_consumed = 0;
+  float locomotion_used = 0;
+  float reproduction_used = 0;
+  float reproduction_passed = 0;
+  float health_used = 0;
+  int   hits_by_tower = 0;
+  int   hp_removed_by_tower = 0;
+
+
   class Segment {
     int index;
     float armor;
@@ -95,15 +108,21 @@ class creature {
     float restitution;
     Vec2 frontPoint;
     Vec2 backPoint;
+    float area;
 
     Segment(int i) {
       index = i;
       armor = getArmor();
-      density = getDensity();
+      density = getSegmentDensity();
       density *= armor;
       restitution = getRestitution();
       frontPoint = getFrontPoint();
       backPoint = getBackPoint();
+      area = getArea();
+    }
+
+    private float getArea() {
+      return (((sqrt((frontPoint.x*frontPoint.x)+(frontPoint.y*frontPoint.y))*sqrt((backPoint.x*backPoint.x)+(backPoint.y*backPoint.y)))/2)*(sin(PI/numSegments)));
     }
 
     private float getArmor() {
@@ -112,7 +131,7 @@ class creature {
       return (a+1);
     }
 
-    private float getDensity() {
+    private float getSegmentDensity() {
       float d = (genome.sum(segmentTraits.get(index).density));
       // if the value is negative, density approaches zero asympototically from 10
       if (d < 0)
@@ -181,13 +200,14 @@ class creature {
     Vec2 originPoint;
     Vec2 frontPoint;
     Vec2 backPoint;
+    float area;
 
     Appendage(int i) {
       index = i;
       size = getSize();
       if (size>0) {
         armor = getArmor();
-        density = getDensity();
+        density = getAppendageDensity();
         density *= armor;
         getForces();
         angle = getAngle();
@@ -195,7 +215,12 @@ class creature {
         originPoint = getOriginPoint();
         frontPoint = getFrontPoint();
         backPoint = getBackPoint();
+        area = getArea();
       }
+    }
+
+    private float getArea() {
+      return (((sqrt(((originPoint.x-frontPoint.x)*(originPoint.x-frontPoint.x))+((originPoint.y-frontPoint.y)*(originPoint.y-frontPoint.y)))*sqrt(((originPoint.x-backPoint.x)*(originPoint.x-backPoint.x))+((originPoint.y-backPoint.y)*(originPoint.y-backPoint.y))))/2)*(sin(spread)));
     }
 
     private float getSize() {
@@ -211,7 +236,7 @@ class creature {
       return (a+1);
     }
 
-    private float getDensity() {
+    private float getAppendageDensity() {
       float d = (genome.sum(appendageTraits.get(index).density));
       // if the value is negative, density approaches zero asympototically from 10
       if (d < 0)
@@ -296,7 +321,14 @@ class creature {
     num = creature_count++;
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
+    genome.inheritance(num);
+
     current_actions = new float[brain.OUTPUTS];
+
+    // used for data collection
+    sPos = pos.clone();
+    total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
+
 
     numSegments = getNumSegments();
     for (int i = 0; i < numSegments; i++) segments.add(new Segment(i));
@@ -304,6 +336,7 @@ class creature {
 
     makeBody(pos);   // call the function that makes a Box2D body
     body.setUserData(this);     // required by Box2D
+    density = getCreatureDensity();
 
     float energy_scale = 500; // scales the max energy pool size
     float max_sum = abs(genome.sum(maxReproductiveEnergy)) + abs(genome.sum(maxLocomotionEnergy)) + abs(genome.sum(maxHealthEnergy));
@@ -433,6 +466,9 @@ class creature {
     energy_reproduction = min(energy_reproduction, max_energy_reproduction);
     energy_locomotion = min(energy_locomotion, max_energy_locomotion);
     energy_health = min(energy_health, max_energy_health);
+
+    // data collection
+    total_energy_consumed += x;
   }
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
@@ -470,7 +506,10 @@ class creature {
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
     a = a*(1 + (int)outputs[3]);
-    return color(r, g, b, a);
+
+    /*I turned off alpha value here so I could not draw segmentations on creatures
+    The creatures weren't easily visible with a low alpha*/
+    return color(r, g, b, 255);
   }
 
   // Calculate and return the width of the creature
@@ -502,6 +541,29 @@ class creature {
 
   float getMass() {
     return body.getMass();
+  }
+
+  float getArmor() {  // gets the sum of armor on all segments and appendages
+    float value = 0;
+    for (Segment s : segments) {
+      value += s.armor;
+    }
+    for (Appendage a : appendages) {
+      value += a.armor;
+    }
+
+    return value;
+  }
+
+  float getCreatureDensity() { // gets the creature's density (total mass divided by total area)
+    float area = 0;
+    for (Segment s : segments) {
+      area += s.area;
+    }
+    for (Appendage a : appendages) {
+      if (a.size > 0) area += a.area;
+    }
+    return (body.getMass()/area);
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
@@ -542,6 +604,10 @@ class creature {
   void changeHealth(int h) {
     health += h;
     senses.Set_Current_Pain(-h);
+
+    // data collection
+    hits_by_tower++;
+    hp_removed_by_tower += h;
   }
 
   void calcBehavior(){
@@ -560,6 +626,7 @@ class creature {
     if (!alive) { // dead creatures don't update
       return;
     }
+
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     timestep_counter++;
     float a = body.getAngle();
@@ -624,7 +691,10 @@ class creature {
     if (energy_locomotion > 0) { // If there's energy left apply force
       body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
       energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
-      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.05)));
+      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
+
+      // data collection
+      locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
     }
 
     // Creatures that run off one side of the world wrap to the other side.
@@ -681,6 +751,8 @@ class creature {
 
       // remove energy from creature
       energy_reproduction -= (baseGameteCost * (1+genome.avg(gameteCost)) + baseGameteEnergy * (1+genome.avg(gameteEnergy)));
+      reproduction_used += (baseGameteCost * (1+genome.avg(gameteCost)));
+      reproduction_passed += (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
 
       gameteTimeLapse = 0;
     }
@@ -692,6 +764,9 @@ class creature {
     if (energy_health > 0 && health < maxHealth) {
       health = health + health_regen;
       energy_health = energy_health - regen_energy_cost;
+
+      // data collection
+      health_used += regen_energy_cost;
     }
   }
 
@@ -700,6 +775,7 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
+    float sw = 1;
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
@@ -709,41 +785,56 @@ class creature {
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-    pushMatrix();  // Stores the current drawing reference frame
+
+      pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
     stroke(0);   // Draw polygons with edges
+
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
-        if ((((Segment)f.getUserData()).armor) > 1)  strokeWeight((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else strokeWeight(((Segment)f.getUserData()).armor);
+        if ((((Segment)f.getUserData()).armor) > 1)
+          sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else
+          sw = (((Segment)f.getUserData()).armor);
+        //strokeWeight(sw);
+        //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
+        //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-        if ((((Appendage)f.getUserData()).armor) > 1)  strokeWeight((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        else strokeWeight(((Appendage)f.getUserData()).armor);
+        if ((((Appendage)f.getUserData()).armor) > 1)
+          sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
+        else
+          sw = (((Appendage)f.getUserData()).armor);
+        //strokeWeight(sw);
+        //line((int)(((Appendage)f.getUserData()).frontPoint.x),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x),(int)(((Appendage)f.getUserData()).backPoint.y));
+        //line((int)(((Appendage)f.getUserData()).frontPoint.x*-1),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x*-1),(int)(((Appendage)f.getUserData()).backPoint.y));
       }
+
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
+      //strokeWeight(.1);
+      noStroke();
+      Vec2 v;
       for (int i = 0; i < 3; i++) {
-        Vec2 v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+        v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
       }
       endShape(CLOSE);
     }
-    strokeWeight(1);
+
+    //strokeWeight(1);
     // Add some eyespots
-    fill(0);
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
-    ellipse(eye.x, eye.y, 5, 5);
-    ellipse(-1 * eye.x, eye.y, 5, 5);
-    fill(255);
-    ellipse(eye.x, eye.y - 1, 2, 2);
-    ellipse(-1 * eye.x, eye.y - 1, 2, 2);
+    senses.Draw_Eyes(eye, this);
     popMatrix();
 
+    pushMatrix();
+    noStroke();
     senses.Draw_Sense(pos.x, pos.y, body.getAngle());
+    popMatrix();
 
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
@@ -843,3 +934,4 @@ class creature {
     }
   }
 }
+

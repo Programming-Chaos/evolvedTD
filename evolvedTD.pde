@@ -14,8 +14,9 @@ import org.jbox2d.dynamics.contacts.*;
 
 
 int cameraX, cameraY, cameraZ; // location of the camera
-int worldWidth = 2500;         // size in pixels of the world
-int worldHeight = 2500;
+static int worldWidth = 2500;  // world size
+static int worldHeight = 2500;
+static int zoomOffset = 2163;  // (translate(cameraX, cameraY, cameraZ - zoomOffset)
 
 // see
 State state = State.RUNNING;
@@ -30,35 +31,59 @@ boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
+boolean buttonpressed = false;
+boolean autofire = true;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
+ArrayList<Panel> panels;
 
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
 Minim minim;
 AudioPlayer gunshot, gunshotalt;
-//AudioPlayer thunder;
+AudioPlayer thunder;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
+
+float mouse_x;
+float mouse_y;
+
+// Tables for data collection
+Table c_traits;
+Table c_avgs;
+Table reproduction;
+Table sensing;
+Table metabolism;
+Table lifetime;
+Table p_impact;
+Table p_stats;
+Table env;
+
+// Variables for data collection
+int fStart;
+int fTotal = 0;
+int fConsumed = 0;
 
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
   box2d = new Box2DProcessing(this);
   box2d.createWorld();           // create the box2d world, which tracks physical objects
+  PFont font = createFont("Arial", 100);
+  textFont(font);
+  panels = new ArrayList<Panel>();
   the_player = new player();
-  the_tower = new tower();
-  the_player.addtower(the_tower);
+  the_player.towers.add(new tower(0, 0, 'r'));
 
   minim = new Minim(this);
   gunshot = minim.loadFile("assets/railgunfire01long.mp3");
   gunshotalt = minim.loadFile("assets/railgunfire01slow_01.mp3");
-  //thunder = minim.loadFile("assets/thunder.mp3");
+  thunder = minim.loadFile("assets/Thunder.mp3");
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -83,12 +108,17 @@ void setup() {
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
+  testGenome.testMutation();
+
+  // Init data tables
+  initTables();
 }
 
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-
+  mouse_x = ((mouseX-(width/2)) * ((float)worldWidth/width));
+  mouse_y = ((mouseY-(height/2)) * ((float)worldHeight/height));
 
   if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -152,9 +182,6 @@ void draw() {
   if (state == State.RUNNING) {
     box2d.step();
   }
-  if (state == State.MENU) {
-    display_controls();
-  }
 }  // end of draw loop
 
 void keyPressed() { // if a key is pressed this function is called
@@ -178,10 +205,13 @@ void keyPressed() { // if a key is pressed this function is called
   else {
     switch(key) { // else its a regular character
     case 'a':
-      the_tower.toggleautofire();
+      autofire = !autofire;
       break;
     case 'z':
-      cameraZ = 2150; // zoom all the way out
+      // center camera and zoom all the way out
+      cameraX = 0;
+      cameraY = 0;
+      cameraZ = zoomOffset;
       break;
     case 'w':
       cameraZ -= (12 + int(cameraZ / scale)); // zoom in a little
@@ -200,6 +230,10 @@ void keyPressed() { // if a key is pressed this function is called
         state = State.PAUSED;
       else
         state = State.RUNNING;
+      break;
+    case 'u':  // toggle upgrade window
+      the_player.upgradePanel.enabled = !the_player.upgradePanel.enabled;
+      if (state == State.STAGED) state = State.RUNNING;
       break;
     case 'm':
       playSound = !playSound;
@@ -221,15 +255,15 @@ void keyPressed() { // if a key is pressed this function is called
       displayScent = !displayScent;
       break;
     case '?':
-      controls(); // call the instructions function
+      the_player.helpPanel.enabled = !the_player.helpPanel.enabled;
       break;
     case '1':
     case '2':
-      the_tower.switchweapon(key);
+      the_player.towers.get(0).activeweapon = (key-'0');
       break;
     case '3':
     case '4':
-      the_tower.switchtargetMode(key);
+      the_player.towers.get(0).switchtargetMode(key);
       break;
     default:
 
@@ -382,17 +416,23 @@ void place_food() { // done once at the beginning of the game
                       (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
+  
+  // data collection
+  fStart = foods.size();
+  fTotal += 50;
 }
 
 void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
-  the_tower.next_generation(); // have the tower update itself, reset energy etc.
+  the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
-  if (!the_tower.autofire) {
+  if (!autofire) {
+    stateSaved = state;
     state = State.STAGED; // pause the game
+    the_player.upgradePanel.enabled = true;
   }
 }
 
@@ -401,57 +441,174 @@ void add_food() { // done after each wave/generation
     food f = new food((int)random(-0.2*worldWidth,0.2*worldWidth), (int)random(-0.2*worldHeight,0.2*worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
+  
+  // data collection  
+  fStart = foods.size();
+  fTotal += 10;
 }
 
-void mousePressed() { // called if the (left) mouse button is pressed
-  float x,y;
-  // first we have to try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
-  // this calculation is not correct
-  x = cameraX + (cameraZ * sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-  y = cameraY + (cameraZ * sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
+void mousePressed() { // called if either mouse button is pressed
+  // fire the weapons
+  if (mouseButton == LEFT) {
+    the_player.mouse_pressed();
+    if (!buttonpressed) {
+      if (state == State.RUNNING)
+        for (tower t : the_player.towers)
+          t.fire(); // have the tower fire its active weapon if unpaused
+    }
+    buttonpressed = false;
+  }
 
-  if (state == State.RUNNING)
-    the_tower.fire(); // have the tower fire its active weapon if unpaused
+  // select a creature
+  if (mouseButton == RIGHT) {
+    int radius = 20;
+    // find a creature
+    for (creature c : the_pop.swarm) {
+      Vec2 location = c.getPos();
+      if (mouse_x < location.x + radius && mouse_x > location.x - radius
+          && mouse_y < location.y + radius && mouse_y > location.y - radius) {
+        the_player.selectedCreature = c;
+        // zoom in on click
+        cameraZ = 400;
+        break;
+      }
+      the_player.selectedCreature = null;
+    }
+  }
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
-  translate(x,y);
+  translate(mouse_x,mouse_y);
   ellipse(0,0,30,30);
   popMatrix();
-  the_player.mouse_pressed();
 }
 
-void controls() {
-  if (state != State.MENU) {
-    stateSaved = state;
-    state = State.MENU;
-  }
-  else {
-    state = stateSaved;
-  }
+void initTables() {
+  //creature traits
+  c_traits = new Table();
+  c_traits.addColumn("   Gen   ");
+  c_traits.addColumn("   Creature ID   ");
+  c_traits.addColumn("   Mass   ");
+  c_traits.addColumn("   Width   ");
+  c_traits.addColumn("   Density   ");
+  c_traits.addColumn("   Armor   ");
+  c_traits.addColumn("   Wing #   ");
+  c_traits.addColumn("   Wing Size   ");
+  c_traits.addColumn("   Antennae #   ");
+  c_traits.addColumn("   Color   ");
+  c_traits.addColumn("   Velocity   ");
+  c_traits.addColumn("   Acceleration   ");
+  c_traits.addColumn("   Max HP   ");
+  
+  //creature averages
+  c_avgs = new Table();
+  c_avgs.addColumn("   Gen   ");
+  c_avgs.addColumn("   Avg Mass   ");
+  c_avgs.addColumn("   Avg Width   ");
+  c_avgs.addColumn("   Avg Density   ");
+  c_avgs.addColumn("   Avg Armor   ");
+  c_avgs.addColumn("   Avg Wing #   ");
+  c_avgs.addColumn("   Avg Wing Size   ");
+  c_avgs.addColumn("   Avg Antennae #   ");
+  c_avgs.addColumn("   Avg Color   ");
+  c_avgs.addColumn("   Avg Velocity   ");
+  c_avgs.addColumn("   Avg Acceleration   ");
+  c_avgs.addColumn("   Avg Max HP   ");
+  
+  //reproduction traits
+  reproduction = new Table();
+  reproduction.addColumn("   Gen   ");
+  reproduction.addColumn("   Creature ID   ");
+  reproduction.addColumn("   Spawn X   ");
+  reproduction.addColumn("   Spawn Y   ");
+  reproduction.addColumn("   # of Gametes   ");
+  reproduction.addColumn("   Gamete Cost   ");
+  reproduction.addColumn("   Gamete Time   ");
+  
+  //sensing traits
+  sensing = new Table();
+  sensing.addColumn("   Gen   ");
+  sensing.addColumn("   Creature ID   ");
+  sensing.addColumn("   Creature Scent   ");
+  sensing.addColumn("   Creature Taste   ");
+  
+  //metabolism traits
+  metabolism = new Table();
+  metabolism.addColumn("   Gen   ");
+  metabolism.addColumn("   Creature ID   ");
+  metabolism.addColumn("   Total Energy Space   ");
+  metabolism.addColumn("   Total Energy Consumed   ");
+  metabolism.addColumn("   Locomotion Space   ");
+  metabolism.addColumn("   Locomotion Used   ");
+  metabolism.addColumn("   Reproduction Space   ");
+  metabolism.addColumn("   Reproduction Used   ");
+  metabolism.addColumn("   Reproduction Passed   ");
+  metabolism.addColumn("   Health Space   ");
+  metabolism.addColumn("   Health Used   ");
+  metabolism.addColumn("   Total Energy Used   ");
+  
+  //lifetime ticks
+  lifetime = new Table();
+  lifetime.addColumn("   Gen   ");
+  lifetime.addColumn("   Creature ID   ");
+  lifetime.addColumn("   Ticks on Algae   ");
+  lifetime.addColumn("   Ticks on Water   ");
+  lifetime.addColumn("   Ticks on Rock   ");
+  lifetime.addColumn("   Total Lifetime   ");
+  
+  //player impact
+  p_impact = new Table();
+  p_impact.addColumn("   Gen   ");
+  p_impact.addColumn("   Creature ID   ");
+  p_impact.addColumn("   Died/Survived   ");
+  p_impact.addColumn("   Times Hit by Tower   ");
+  p_impact.addColumn("   HP Removed by Tower   ");
+  p_impact.addColumn("   Final HP   ");
+  
+  //player stats
+  p_stats = new Table();
+  p_stats.addColumn("   Gen   ");
+  p_stats.addColumn("   Tower ID   ");
+  p_stats.addColumn("   Round # of Shots   ");
+  p_stats.addColumn("   Total # of Shots   ");
+  p_stats.addColumn("   Round Successful Hits   ");
+  p_stats.addColumn("   Total Successful Hits   ");
+  p_stats.addColumn("   Round Rock Hits   ");
+  p_stats.addColumn("   Total Rock Hits   ");
+  p_stats.addColumn("   Round Accuracy   ");
+  p_stats.addColumn("   Overall Accuracy   ");
+  p_stats.addColumn("   Round Avg RoF   ");
+  p_stats.addColumn("   Overall Avg RoF   ");
+  p_stats.addColumn("   Round # of Kills   ");
+  p_stats.addColumn("   Total # of Kills   ");
+  p_stats.addColumn("   Round Avg Shots per Kill   ");
+  p_stats.addColumn("   Overall Avg Shots per Kill   ");
+  
+  //environment stats
+  env = new Table();
+  env.addColumn("   Gen   ");
+  env.addColumn("   Food at Start   ");
+  env.addColumn("   Food at End   ");
+  env.addColumn("   Food Consumed   ");
+  env.addColumn("   Total Food   ");
+  env.addColumn("   Total Consumed   ");
+  env.addColumn("   Round Lightning Strikes   ");
+  env.addColumn("   Round Lightning Kills   ");
+  env.addColumn("   Round Lightning Accuracy   ");
+  env.addColumn("   Total Lightning Strikes   ");
+  env.addColumn("   Total Lightning Kills   ");
+  env.addColumn("   Overall Lightning Accuracy   ");
 }
 
-void display_controls() {
-  fill(200,200,200,200); // grey slightly transparent rectangle
-  int leftalign = -90;
-  int topalign = -80;
-  pushMatrix();
-  translate(cameraX, cameraY, cameraZ - 200);
-  rect(0,0,200,200);
-  fill(0);
-  textSize(10);
-  text("Controls",leftalign,topalign);
-  textSize(7);
-  text("w/s - zoom in/out", leftalign, topalign + 10);
-  text("Arrow keys - move camera", leftalign, topalign + 18);
-  text("z - zoom out", leftalign, topalign + 26);
-  text("p - pause/unpause", leftalign, topalign + 34);
-  text("Mouse button - fire", leftalign, topalign + 42);
-  text("Number keys - switch weapons", leftalign, topalign + 50);
-  text("q - hide/unhide food", leftalign, topalign + 58);
-  text("n - hide/unhide scent", leftalign, topalign + 66);
-  text("v - hide/unhide screen", leftalign, topalign + 74);
-  text("? - show/hide controls", leftalign, topalign + 82);
-  text("a - toggle autofire", leftalign, topalign + 90);
-  popMatrix();
+//Test for writing data to excel file
+void writeTables() {
+  saveTable(c_traits, "data/c_traits.csv");
+  saveTable(c_avgs, "data/c_avgs.csv");
+  saveTable(reproduction, "data/reproduction.csv");
+  saveTable(sensing, "data/sensing.csv");
+  saveTable(metabolism, "data/metabolism.csv");
+  saveTable(lifetime, "data/lifetime.csv");
+  saveTable(p_impact, "data/p_impact.csv");
+  saveTable(p_stats, "data/p_stats.csv");
+  saveTable(env, "data/env.csv");
 }
