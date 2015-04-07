@@ -168,109 +168,170 @@ class population {
       }
     }
     // Place gametes in order of time.
-    Collections.sort(gametes, new GameteComparator());
+//    Collections.sort(gametes, new GameteComparator());
     
-    int childrenBred = 0;
-    int childrenNew = 0;
     int multiplier = 0;
     int range;
+    Gamete g1, g2;
+    int variance = 15; // Used for variable pop size with random selection
+    int size = gametes.size();
+    int rand;
+    ArrayList<Integer> inProximity = new ArrayList<Integer>();
     
     while (generation.size() < POP_SIZE) {
       // increase search range with each pass thru.
       range = multiplier++ * 5;
       //TODO: decrease success chance when range is increased.
       
-      // add random creatures if no gametes
+      // print error if not enough gametes
       if (gametes.size() < 2) {
         println("ERROR: Not enough gametes");
         break;
       }
       
-      Gamete g1, g2;
-      int size = gametes.size();
-      // i is first gamete j is it's chosen mate
-      for (int i=0; i < size - 1; i++) {
-        g1 = gametes.get(i);
-        for (int j = i+1; j < size; j++) {
-          g2 = gametes.get(j);
-          
-          if (g2.xPos > g1.xPos - range && g2.xPos < range && // within x range
-              g2.yPos > g1.yPos - range && g2.yPos < range) { // within y range
-            // Remove gametes from list and mate
-            gametes.remove(j); j--;
-            gametes.remove(i); i--;
-            size = gametes.size();
-            
-            // Gamete coordinates
-            int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
-            int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
-            
-            // Check coordinates for other creatures spawned in this tile.
-            for (int c=0; c < generation.size(); c++) {
-              Vec2 posCheck = box2d.getBodyPixelCoord(generation.get(c).body);
-              int xCheck = (int)(posCheck.x / cellWidth);
-              int yCheck = (int)(posCheck.y / cellHeight);
-              
-              // while creature already occupies tile 
-              // (3 is the safety range to prevent stacking)
-              while ((px <= xCheck + 3) && (px >= xCheck - 3) && 
-                     (py <= yCheck + 3) && (py >= yCheck - 3)) {
-                // Reset c.  Need to make it thru entire list without flagging this.
-                c = -1; //c++ == 0
-                // Move new creature in a random direction
-                switch ((int)random(8)) {
-                  case 0: //North
-                    py--;
-                    break;
-                  case 1: //NorthEast
-                    py--;
-                    px++;
-                    break;
-                  case 2: //East
-                    px++;
-                    break;
-                  case 3: //SouthEast
-                    py++;
-                    px++;
-                    break;
-                  case 4: //South
-                    py++;
-                    break;
-                  case 5: //SouthWest
-                    py++;
-                    px--;
-                    break;
-                  case 6: //West
-                    px--;
-                    break;
-                  case 7: //NorthWest
-                    py--;
-                    px++;
-                    break;
-                  default: break;
-                }
-                
-                // Make sure position is still in bounds
-                if (px >= worldWidth   / cellWidth)  px = worldWidth / cellWidth - 5;
-                if (px <= 0)                         px = 5;
-                if (py >= worldHeight  / cellHeight) py = worldHeight / cellHeight - 5;
-                if (py <= 0)                         py = 5;
-              }
-            }
-            Vec2 pos = new Vec2(px * cellWidth, py * cellHeight) ;
       
-            childrenBred++;
-            generation.add(new creature(new Genome(g1.gamete, g2.gamete),
-                                        10000 + g1.energy + g2.energy, pos));
+      
+      // i is first gamete j is it's chosen mate
+      for (int i=0; i < variance && i < size; i++) {
+        rand = (int)random(size);
+        g1 = gametes.get(rand); // Randomly select a gamete
+        inProximity.clear();
+        
+        // copy array position of gametes in proximity
+        for (int j=0; j < size; j++) {
+          if (j == rand) {//if same gamete... skip
+            j++;
+          }
+          if (j >= size) {//if j is beyond the list of gametes, break
             break;
           }
+          
+          g2 = gametes.get(j);
+        
+          // Check if g2 is in range of g1
+          if (g2.xPos > g1.xPos - range && g2.xPos < g1.xPos + range && // within x range
+              g2.yPos > g1.yPos - range && g2.yPos < g1.yPos + range) { // within y range
+            inProximity.add(j);       
+          }
         }
+        
+        // if any match has been found:
+        if (inProximity.size() > 0) {
+          rand = (int)random(inProximity.size());
+          int listPos = inProximity.get(rand);
+          g2 = gametes.get(listPos); //get random mate within range
+          gametes.remove(g1); //remove first gamete
+          gametes.remove(g2); //remove second gamete
+          size = gametes.size(); //update list size variable
+          
+          // Gamete coordinates
+          int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
+          int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
+          Vec2 pos = new Vec2(px, py);
+          
+          // Check coordinates for other creatures or rocks spawned in this tile.
+          while( checkForCreature(pos, generation) || checkForRock(pos, rocks)){};
+          
+          pos.x *= cellWidth;
+          pos.y *= cellHeight;
+    
+          generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+                                      10000 + g1.energy + g2.energy, pos));
+          //break;
+        }
+        
       }
     }
     //println("made " + childrenBred + " and needed " + childrenNew + " more");
     swarm.clear();
     swarm = generation;
     
+  }
+  
+  Boolean checkForCreature(Vec2 pos, ArrayList<creature> list) {
+    Boolean check = false;
+    
+    // Check all creatures in list
+    for (int c=0; c < list.size(); c++) {
+      Vec2 posCheck = box2d.getBodyPixelCoord(list.get(c).body);
+      
+      if (checkSpawnLocation(pos, posCheck)) {
+        c = -1; // must make it thru whole list without needing to move.
+        check = true;
+      }
+    }
+    return check;
+  }
+  
+  Boolean checkForRock(Vec2 pos, ArrayList<rock> list) {
+    Boolean check = false;
+    
+    // Check all rocks in list
+    for (int c=0; c < list.size(); c++) {
+      Vec2 posCheck = box2d.getBodyPixelCoord(list.get(c).the_rock);
+      
+      if (checkSpawnLocation(pos, posCheck)) {
+        c = -1; // must make it thru whole list without needing to move.
+        check = true;
+      }
+    }
+    return check;
+  }
+  
+  Boolean checkSpawnLocation(Vec2 pos, Vec2 posCheck) {
+    Boolean check = false;
+    
+    // Check coordinates for other collidables spawned in this tile.
+    int xCheck = (int)(posCheck.x / cellWidth);
+    int yCheck = (int)(posCheck.y / cellHeight);
+    
+    // while collidable already occupies tile 
+    // (3 is the safety range to prevent stacking)
+    while ((pos.x <= xCheck + 3) && (pos.x >= xCheck - 3) && 
+           (pos.y <= yCheck + 3) && (pos.y >= yCheck - 3)) {
+      check = true;
+      
+      // Move new creature in a random direction
+      switch ((int)random(8)) {
+        case 0: //North
+          pos.y--;
+          break;
+        case 1: //NorthEast
+          pos.y--;
+          pos.x++;
+          break;
+        case 2: //East
+          pos.x++;
+          break;
+        case 3: //SouthEast
+          pos.y++;
+          pos.x++;
+          break;
+        case 4: //South
+          pos.y++;
+          break;
+        case 5: //SouthWest
+          pos.y++;
+          pos.x--;
+          break;
+        case 6: //West
+          pos.x--;
+          break;
+        case 7: //NorthWest
+          pos.y--;
+          pos.x++;
+          break;
+        default: break;
+      }
+      
+      // Make sure position is still in bounds
+      if (pos.x >= worldWidth   / cellWidth)  pos.x = worldWidth / cellWidth - 5;
+      if (pos.x <= 0)                         pos.x = 5;
+      if (pos.y >= worldHeight  / cellHeight) pos.y = worldHeight / cellHeight - 5;
+      if (pos.y <= 0)                         pos.y = 5;
+    }
+
+    return check;
   }
   
   void updateData() {
