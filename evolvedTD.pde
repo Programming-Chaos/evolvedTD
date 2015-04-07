@@ -477,6 +477,7 @@ void mousePressed() { // called if either mouse button is pressed
   if (mouseButton == RIGHT) {
     int radius = 20;
     // find a creature
+    the_player.selectedCreature = null;
     for (creature c : the_pop.swarm) {
       Vec2 location = c.getPos();
       if (mouse_x < location.x + radius && mouse_x > location.x - radius
@@ -486,7 +487,6 @@ void mousePressed() { // called if either mouse button is pressed
         cameraZ = 400;
         break;
       }
-      the_player.selectedCreature = null;
     }
   }
 
