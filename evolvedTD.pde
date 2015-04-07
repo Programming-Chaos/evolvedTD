@@ -117,8 +117,8 @@ void setup() {
 void draw() {
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
-  mouse_x = ((((mouseX-(width/2))*((float)worldWidth/width))/((float)zoomOffset/cameraZ))+cameraX);
-  mouse_y = ((((mouseY-(height/2))*((float)worldHeight/height))/((float)zoomOffset/cameraZ))+cameraY);
+  mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
+  mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
 
   if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
@@ -492,9 +492,11 @@ void mousePressed() { // called if either mouse button is pressed
 
   // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
-  //translate(400,400);//mouse_x,mouse_y);
-  fill(0,0,255,150);
-  ellipse((((float)mouseX-(width/2))*((float)worldWidth/width)),(((float)mouseY-(height/2))*((float)worldHeight/height)),30,30);
+  hint(DISABLE_DEPTH_TEST);
+  translate(cameraX,cameraY,cameraZ-zoomOffset);
+  fill(255,0,255,255);
+  ellipse((((float)mouseX-(width/2))*worldRatioX),(((float)mouseY-(height/2))*worldRatioX),50,50);
+  hint(ENABLE_DEPTH_TEST);
   popMatrix();
 }
 
