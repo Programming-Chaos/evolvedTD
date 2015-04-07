@@ -160,9 +160,11 @@ class player {
   }
 
   void wave_fire(){
-    for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
-      tower t = towers.get(i);
-      t.wave_fire();
+    if (state == State.RUNNING) {
+      for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
+        tower t = towers.get(i);
+        t.wave_fire();
+      }
     }
   }
 
