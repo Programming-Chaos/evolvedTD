@@ -18,7 +18,13 @@ class tower {
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
   int dmg; // damage value, changed by turret type
+  int baseDamageRailgun = 20;
+  int baseDamageFlamethrower = 200;
   int firerate; // autofire rate, lower values fire faster
+  int baseFirerateRailgun = 25;
+  int baseFirerateFlamethrower = 75;
+  int projectileSpeed;
+  int baseProjectileSpeed = 100;
   int ecost; // per fire energy cost
   char type;
   /* type is the turret type
@@ -36,6 +42,7 @@ class tower {
     angle = 0;
     imagetimer = 0;
     soundtimer = 0;
+    projectileSpeed = baseProjectileSpeed*(the_player.bulletSpeedUpgrades+1);
 
     xpos = x;
     ypos = y;
@@ -47,8 +54,8 @@ class tower {
         gunbase = loadImage("assets/Tower_base_02.png");
         gun = loadImage("assets/RailGun-01.png");
         gunalt = loadImage("assets/RailGun-a-01.png");
-        dmg = 20;
-        firerate = 25;
+        dmg = baseDamageRailgun*(the_player.bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerateRailgun/(the_player.fireRateUpgrades+1));
         ecost = 10;
         break;
       case 'f':
@@ -56,8 +63,8 @@ class tower {
         gun = loadImage("assets/FlameThrower01-01.png");
         gunalt = loadImage("assets/FlameThrower02-01.png");
         gunbase = loadImage("assets/Turbase03256.png");
-        dmg = 200;
-        firerate = 75;
+        dmg = baseDamageFlamethrower*(the_player.bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerateFlamethrower/(the_player.fireRateUpgrades+1));
         ecost = 50;
         break;
     }
@@ -103,8 +110,16 @@ class tower {
           autofirecounter = 0;  // reset the counter
         }
       }
-      else // user controlled: calculate the angle to the mouse pointer and point at the mouse
-        angle = atan2(mouse_y-ypos, mouse_x-xpos);
+      else { // user controlled: calculate the angle to the mouse pointer and point at the mouse
+        // calculate the location of the mouse pointer in the world
+        //float x, y;
+        //x = ((mouse_x/((float)zoomOffset/cameraZ))+cameraX-xpos);
+        //y = ((mouse_y/((float)zoomOffset/cameraZ))+cameraY-ypos);
+        //x = (cameraX+((mouseX-(width/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+        //y = (cameraY+((mouseY-(height/2))*(cameraZ/(0.5*sqrt(width*width+height*height)))));
+        //calculate the angle to the mouse pointer
+        angle = atan2(mouse_y-ypos,mouse_x-xpos);//(ypos*((float)worldWidth/width)), x-(xpos*((float)worldWidth/width)));
+      }
     }
   }
 
@@ -218,7 +233,7 @@ class tower {
     if (energy < 10) {
       return;
     }
-    projectile p = new projectile(xpos, ypos, angle, dmg, type);
+    projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed);
     projectiles.add(p);
     energy -= ecost;
     imagetimer = 0;
@@ -240,7 +255,7 @@ class tower {
   void wave_fire() {
     if (energy < 5) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
-      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type));
+      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
     energy -= 5;
     imagetimer = 0;
     if (playSound) {
