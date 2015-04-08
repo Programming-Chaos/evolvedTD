@@ -32,6 +32,7 @@ boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
+boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
 
@@ -291,6 +292,9 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case 'n':
       displayScent = !displayScent;
+      break;
+    case 'e':
+      displayFeelers = !displayFeelers;
       break;
     case '?':
       the_player.helpPanel.enabled = !the_player.helpPanel.enabled;

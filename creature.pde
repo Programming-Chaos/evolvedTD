@@ -861,6 +861,10 @@ class creature {
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
     popMatrix();
+    
+    if (displayFeelers) {
+      senses.Draw_Sense(pos.x, pos.y, a);
+    }
 
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
