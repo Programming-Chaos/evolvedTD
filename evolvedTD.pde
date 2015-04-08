@@ -32,6 +32,7 @@ boolean playSoundSave = true;  // restore sound setting on unhide
 boolean display = true;        // should the world be displayed - false speeds thing up considerably
 boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
+boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
 
@@ -292,16 +293,20 @@ void keyPressed() { // if a key is pressed this function is called
     case 'n':
       displayScent = !displayScent;
       break;
+    case 'e':
+      displayFeelers = !displayFeelers;
+      break;
     case '?':
       the_player.helpPanel.enabled = !the_player.helpPanel.enabled;
       break;
     case '1':
     case '2':
-      the_player.towers.get(0).activeweapon = (key-'0');
+      the_player.activeweapon = (key-'0');
       break;
     case '3':
     case '4':
-      the_player.towers.get(0).switchtargetMode(key);
+    case '5':
+      the_player.targetMode = (key-'2');
       break;
     default:
 
@@ -517,9 +522,12 @@ void mousePressed() { // called if either mouse button is pressed
     }
     buttonpressed = false;
   }
+  
+  boolean upgrading = false;
+  for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
 
   // select a creature or tower
-  if (mouseButton == RIGHT && !the_player.placing) {
+  if (mouseButton == RIGHT && !the_player.placing && !upgrading) {
     int radius = 20;
     // find a creature
     the_player.selectedCreature = null;

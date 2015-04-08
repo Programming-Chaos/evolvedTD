@@ -240,6 +240,7 @@ class Panel {
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x, cameraY+panel_y,cameraZ-zoomOffset);  // centered and below the camera+180+panel_x
         fill(200,200,200,opacity);
+        noStroke();
         rect(0,0,panel_width,panel_height, 10);
         for (Button b : buttons)
           b.display();
@@ -253,6 +254,7 @@ class Panel {
       hint(DISABLE_DEPTH_TEST);
         translate(cameraX+panel_x+current_offsetX, cameraY+panel_y+current_offsetY,cameraZ-zoomOffset);
         fill(200,200,200,opacity);
+        noStroke();
         rect(0,0,panel_width,panel_height, 10);
       hint(ENABLE_DEPTH_TEST); 
       popMatrix();
@@ -275,14 +277,13 @@ class Panel {
         }
       }
     }
-    else if (current_offsetX != offsetX || current_offsetY != offsetY) {
-      if (direction == 0 || direction == 2) {
-        current_offsetY += (offsetY*0.1);
-        if (shown)shown = false;
-      }
-      else {
-        current_offsetX += (offsetX*0.1);
-        if (shown)shown = false;
+    else {
+      if (shown)shown = false;
+      if (current_offsetX != offsetX || current_offsetY != offsetY) {
+        if (direction == 0 || direction == 2)
+          current_offsetY += (offsetY*0.1);
+        else
+          current_offsetX += (offsetX*0.1);
       }
     }
   }
