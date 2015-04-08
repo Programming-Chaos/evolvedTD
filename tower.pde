@@ -3,7 +3,6 @@ class tower {
   int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
   int energyGain;       // energy gain per timestep
   int maxEnergy = 1000; // max energy the tower can have
-  int activeweapon;     // value determines which weapon is active
   ArrayList<projectile> projectiles;  // list of active projectiles
   float angle;    // angle of tower's main, auto-fir weapon
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
@@ -15,7 +14,6 @@ class tower {
   int imagetimer; // timer for alternating gun images
   int soundtimer;
   float radius = 50;
-  int targetMode = 1;
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
   int dmg; // damage value, changed by turret type
@@ -145,14 +143,15 @@ class tower {
         autofirecounter++;
         // only autofire every nth time step where n is the fire rate
         if (autofirecounter == firerate) {
-          // target a random creature
-          target = the_pop.vec_to_random_creature();
-          // target the closest creature
-          if (targetMode == 2) {
-            target = the_pop.closest(new Vec2(0,0));
-          }
-          if (targetMode == 3) {
-            target = the_pop.highestAlpha();
+          switch (the_player.targetMode) {
+            case 2:
+              target = the_pop.closest(new Vec2(0,0));
+              break;
+            case 3:
+              target = the_pop.highestAlpha();
+              break;
+            default:
+              target = the_pop.vec_to_random_creature();
           }
           angle = atan2(target.y-ypos,target.x-xpos);
           fire_projectile();
@@ -211,7 +210,6 @@ class tower {
     // draw tower energy bar
     noFill();
     stroke(0);
-    rectMode(CENTER);
     rect(xpos, ypos-30, 0.1*maxEnergy, 6);
     noStroke();
     fill(0, 0, 255);
@@ -272,15 +270,6 @@ class tower {
       }
     }
     projectiles.clear();
-  }
-
-  void switchtargetMode(char k) {
-    if (k == '3'){
-      targetMode = 2;
-    }
-    if (k == '4'){
-      targetMode = 3;
-    }
   }
 
   /* Firing, dropping rocks, etc. uses up some of the tower's energy */

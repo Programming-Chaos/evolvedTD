@@ -13,6 +13,7 @@ class player {
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
   int numTowersCreated = 0;
+  int targetMode = 1;
   tower pickedup;
   
   Panel testpanel;
@@ -39,7 +40,7 @@ class player {
     playerPanel.createTextBox(480,50,0,-20,new StringPass() { public String passed() { return ("Time left: " + (timepergeneration - timesteps)); } },40);
     playerPanel.createButton(350,100,0,110,"Wave Fire",50,new ButtonPress() { public void pressed() { wave_fire(); } });
 
-    statsPanel = new Panel(500,520,980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
+    statsPanel = new Panel(500,520,980,1020-360,false); // -360 so it's not cut off the bottom of some people's screens
     statsPanel.setupTextBoxList(20,10,50,40);
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Creature: " + selectedCreature.num); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health: " + selectedCreature.health + " / " + selectedCreature.maxHealth + " +" + selectedCreature.health_regen); } });
@@ -52,7 +53,7 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
 
-    towerstatsPanel = new Panel(540,600,-980,1020-200,false);//-200 so it's not cut off the bottom of some people's screens
+    towerstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
     towerstatsPanel.enabled = false;
     towerstatsPanel.setupTextBoxList(40,50,50,40);
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + ((selectedTower.type == 'r') ? "Railgun" : "Flamethrower")); } });
@@ -63,8 +64,8 @@ class player {
     towerstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedTower.upgradePanel.enabled = true; } });
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
-    towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTurret('r'); } });
-    towerPanel.createButton(300, 300, -800, 0, "Flamethrower", 45, 200, 0, 0, new ButtonPress() {public void pressed() { placeTurret('f'); } });
+    towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTower('r'); } });
+    towerPanel.createButton(300, 300, -800, 0, "Flamethrower", 45, 200, 0, 0, new ButtonPress() {public void pressed() { placeTower('f'); } });
     towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteTurret(); } });
     towerPanel.buttons.get(2).enabled = false;
 
@@ -105,7 +106,11 @@ class player {
     } else {
       statsPanel.enabled = false;
     }
+    
+    if (selectedTower != null) towerstatsPanel.enabled = true;
+    else towerstatsPanel.enabled = false;
 
+    rectMode(CENTER);
     for (tower t : towers)  // walk through the towers
       t.display();  // display them all
     for (Panel p : panels)
@@ -154,37 +159,29 @@ class player {
 
   void drop_rock() {
     float x,y;
-    int costPerTurret = round((float)100/towers.size()); // spread out energy cost equally among turrets
+    int costPerTower = round((float)100/towers.size()); // spread out energy cost equally among towers
     
     // Try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
     //x = cameraX + (cameraZ*sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
     //y = cameraY + (cameraZ*sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
     for (tower t : towers)
-      if (t.energy < costPerTurret)return;
+      if (t.energy < costPerTower)return;
     for (tower t : towers)
-      t.energy -= costPerTurret;  // uses a lot of energy to drop a rock
+      t.energy -= costPerTower;  // uses a lot of energy to drop a rock
     rocks.add(new rock(round(mouse_x), round(mouse_y))); // rocks is a global list
   }
   
-  void placeTurret(char type) {
+  void placeTower(char type) {
     if (placing) {
       placing = false;
       switch (pickedup.type) {
         case 'r':
-          towers.remove(pickedup);
-          pickedup = null;
-          towerPanel.buttons.get(2).enabled = false;
-          towerPanel.hiddenpanel = true;
-          towerPanel.shown = false;
-          if (type == 'f') placeTurret('f');
+          deleteTurret();
+          if (type == 'f') placeTower('f');
           break;
         case 'f':
-          towers.remove(pickedup);
-          pickedup = null;
-          towerPanel.buttons.get(2).enabled = false;
-          towerPanel.hiddenpanel = true;
-          towerPanel.shown = false;
-          if (type == 'r') placeTurret('r');
+          deleteTurret();
+          if (type == 'r') placeTower('r');
           break;
       }
     }
@@ -194,7 +191,6 @@ class player {
       towers.add(pickedup);
       towerPanel.buttons.get(2).enabled = true;
       towerPanel.hiddenpanel = false;
-      towerPanel.shown = true;
     }
   }
   
@@ -204,6 +200,6 @@ class player {
     towerPanel.buttons.get(2).enabled = false;
     placing = false;
     towerPanel.hiddenpanel = true;
-    towerPanel.shown = false;
+    selectedTower = null;
   }
 }

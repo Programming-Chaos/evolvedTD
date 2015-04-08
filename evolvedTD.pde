@@ -297,11 +297,12 @@ void keyPressed() { // if a key is pressed this function is called
       break;
     case '1':
     case '2':
-      the_player.towers.get(0).activeweapon = (key-'0');
+      the_player.activeweapon = (key-'0');
       break;
     case '3':
     case '4':
-      the_player.towers.get(0).switchtargetMode(key);
+    case '5':
+      the_player.targetMode = (key-'2');
       break;
     default:
 
@@ -517,9 +518,12 @@ void mousePressed() { // called if either mouse button is pressed
     }
     buttonpressed = false;
   }
+  
+  boolean upgrading = false;
+  for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
 
   // select a creature or tower
-  if (mouseButton == RIGHT && !the_player.placing) {
+  if (mouseButton == RIGHT && !the_player.placing && !upgrading) {
     int radius = 20;
     // find a creature
     the_player.selectedCreature = null;

@@ -46,37 +46,49 @@ class population {
   }
 
   Vec2 closest(Vec2 v) {
-    Vec2 closest = new Vec2(0,0), temp;
-    float distance, tempd;
-    distance = 100000000; // very large value so first living creature will be closer
+    Vec2 ret = new Vec2(0,0);
+    float temp, minDistance = 0;
+    boolean first = true;
     for (creature c: swarm) {
       if (c.alive) { // skip non-alive creatures
-        temp = c.getPos();
-        tempd = sqrt((temp.x-v.x)*(temp.x-v.x)+(temp.y-v.y)*(temp.y-v.y));
-        if (tempd < distance) {
-          distance = tempd;
-          closest = temp;
+        if (first) {
+          ret = c.getPos();
+          minDistance = sqrt((ret.x-v.x)*(ret.x-v.x)+(ret.y-v.y)*(ret.y-v.y));
+          first = false;
+        }
+        else {
+          temp = sqrt((c.getPos().x-v.x)*(c.getPos().x-v.x)+(c.getPos().y-v.y)*(c.getPos().y-v.y));
+          if (temp < minDistance ) {
+             minDistance = temp;
+             ret = c.getPos();
+          }  
         }
       }
     }
-    return closest;
+    return ret;
   }
   
   Vec2 highestAlpha() {
-    Vec2 v = new Vec2(0,0), temp;
-    float tempa;
-    for (creature c: swarm) { 
+    Vec2 ret = new Vec2(0,0);
+    float temp, minAlpha = 0;
+    boolean first = true;
+    for (creature c: swarm) {
       if (c.alive) {
-        temp = c.getPos();
-        tempa = 1000000000;
-        float tempb = c.genome.sum(alphaTrait);
-        if (tempb < tempa ){
-           tempa = tempb;
-           v = c.getPos();     
+        if (first) {
+          minAlpha = c.genome.sum(alphaTrait);
+          ret = c.getPos();
+          first = false;
+        }
+        else {
+          temp = c.genome.sum(alphaTrait);
+          if (temp < minAlpha ) {
+             minAlpha = temp;
+             ret = c.getPos();
+          }  
         }
       }
     }
-    return v;
+    return ret;
   }
 
   // returns the number of living creatures, used to decide whether to
