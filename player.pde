@@ -69,22 +69,36 @@ class player {
     towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteTurret(); } });
     towerPanel.buttons.get(2).enabled = false;
 
-    helpPanel = new Panel(600,600,0,0,false);
+    helpPanel = new Panel(1000,1900,0,0,false,255);
     helpPanel.enabled = false;
-    helpPanel.createTextBox(30,30,"Controls",60);
+    helpPanel.createTextBox(30,20,"Controls",60);
     helpPanel.setupTextBoxList(30,90,40,40);
     helpPanel.pushTextBox("w/s - zoom in/out");
     helpPanel.pushTextBox("Arrow keys - move camera");
-    helpPanel.pushTextBox("z - zoom out");
+    helpPanel.pushTextBox("z - zoom all the way out");
+    helpPanel.pushTextBox("c - center the camera");
+    helpPanel.pushTextBox("a - toggle autofire");
     helpPanel.pushTextBox("p - pause/unpause");
-    helpPanel.pushTextBox("u - show upgrades");
-    helpPanel.pushTextBox("Mouse button - fire");
-    helpPanel.pushTextBox("Number keys - switch weapons");
+    helpPanel.pushTextBox("u - shows upgrades");
+    helpPanel.pushTextBox("     when hovering over tower");
+    helpPanel.pushTextBox("1 - switch to firing mode");
+    helpPanel.pushTextBox("2 - switch to rock placing mode");
     helpPanel.pushTextBox("q - hide/unhide food");
     helpPanel.pushTextBox("n - hide/unhide scent");
+    helpPanel.pushTextBox("e - hide/unhide feelers");
     helpPanel.pushTextBox("v - hide/unhide screen");
     helpPanel.pushTextBox("? - show/hide controls");
-    helpPanel.pushTextBox("a - toggle autofire");
+    helpPanel.pushTextBox("\nClick the Left Mouse button\nto fire or place a rock.\n"
+                         +"Click the Right Mouse button\nto select creature or tower.\n"
+                         +"You can also create new towers by\nhovering near the lower edge of the screen\n"
+                         +"to bring up the tower management panel,\n"
+                         +"and clicking on one of the tower creation buttons.\n"
+                         +"you can then move the new tower\nwhere you'd like it to go,\n"
+                         +"and click the left mouse button to place it down.\n"
+                         +"If you've selected an existing tower\nand you right click it again,\n"
+                         +"you'll pick it up and can move it around\nand place it back down.\n"
+                         +"If you're holding a tower you can delete it\n"
+                         +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
     hudPanel = new Panel(2500,100,0,-1200,false,0);
     hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money); } }, 50);
