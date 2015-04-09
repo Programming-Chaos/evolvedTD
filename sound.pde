@@ -19,5 +19,3 @@ void PlaySounds (String s) {
   Sounds f = new Sounds(a);
   f.start(); 
 }
-
-
