@@ -32,6 +32,8 @@ class tower {
   boolean inTransit = true;
   boolean wasInTransit = true;
   boolean conflict = false;
+  Vec2 target;
+  int firingtimer;
   char type;
   Panel upgradePanel;
   /* type is the turret type
@@ -50,6 +52,7 @@ class tower {
     gunframes = new ArrayList<PImage>();
     angle = 0;
     soundtimer = 0;
+    firingtimer = 0;
 
     xpos = round(mouse_x);
     ypos = round(mouse_y);
@@ -206,29 +209,32 @@ class tower {
     }
     else if (state == State.RUNNING){
       energy += energyGain;  // gain energy
-      if (autofire) {
-        Vec2 target;
-        autofirecounter++;
-        // only autofire every nth time step where n is the fire rate
-        if (autofirecounter == firerate) {
-          switch (the_player.targetMode) {
-            case 2:
-              target = the_pop.closest(new Vec2(0,0));
-              break;
-            case 3:
-              target = the_pop.highestAlpha();
-              break;
-            default:
-              target = the_pop.vec_to_random_creature();
+      if (firingtimer == 0) {
+        if (autofire) {
+          Vec2 target;
+          autofirecounter++;
+          // only autofire every nth time step where n is the fire rate
+          if (autofirecounter == firerate) {
+            switch (the_player.targetMode) {
+              case 2:
+                target = the_pop.closest(new Vec2(0,0));
+                break;
+              case 3:
+                target = the_pop.highestAlpha();
+                break;
+              default:
+                target = the_pop.vec_to_random_creature();
+            }
+            angle = atan2(target.y-ypos,target.x-xpos);
+            fire_projectile();
+            autofirecounter = 0;  // reset the counter
           }
-          angle = atan2(target.y-ypos,target.x-xpos);
-          fire_projectile();
-          autofirecounter = 0;  // reset the counter
         }
+        else // user controlled: calculate the angle to the mouse pointer and point at the mouse
+          //calculate the angle to the mouse pointer
+          angle = atan2(mouse_y-ypos,mouse_x-xpos);//(ypos*((float)worldWidth/width)), x-(xpos*((float)worldWidth/width)));
       }
-      else // user controlled: calculate the angle to the mouse pointer and point at the mouse
-        //calculate the angle to the mouse pointer
-        angle = atan2(mouse_y-ypos,mouse_x-xpos);//(ypos*((float)worldWidth/width)), x-(xpos*((float)worldWidth/width)));
+      else firingtimer--;
     }
   }
 
@@ -326,6 +332,10 @@ class tower {
 
   void fire_projectile() {
     if (energy < ecost) return;
+    if (type == 'l') {
+      firingtimer = projectileSpeed;
+      //windup();
+    }
     projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed);
     projectiles.add(p);
     energy -= ecost;
@@ -354,6 +364,7 @@ class tower {
   }
 
   void wave_fire() {
+    if (type == 'l') return;
     if (energy < 5) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
       projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));

@@ -195,16 +195,25 @@ class player {
           deleteTurret();
           if (type == 'p') placeTower('p');
           else if (type == 'i') placeTower('i');
+          else if (type == 'l') placeTower('l');
           break;
         case 'p':
           deleteTurret();
           if (type == 'r') placeTower('r');
           else if (type == 'i') placeTower('i');
+          else if (type == 'l') placeTower('l');
           break;
         case 'i':
           deleteTurret();
           if (type == 'r') placeTower('r');
           else if (type == 'p') placeTower('p');
+          else if (type == 'l') placeTower('l');
+          break;
+        case 'l':
+          deleteTurret();
+          if (type == 'r') placeTower('r');
+          else if (type == 'p') placeTower('p');
+          else if (type == 'i') placeTower('i');
           break;
       }
     }
