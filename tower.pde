@@ -19,6 +19,7 @@ class tower {
   int dmg; // damage value, changed by turret type
   int baseDamageRailgun = 20;
   int baseDamageFlamethrower = 200;
+  int baseFreezeDuration = 50;
   int firerate; // autofire rate, lower values fire faster
   int baseFirerate;
   int projectileSpeed;
@@ -61,7 +62,9 @@ class tower {
         baseFirerate = 25;
         gunbase = loadImage("assets/Tower_base_02.png");
         gun = loadImage("assets/RailGun-01.png");
-        gunalt = loadImage("assets/RailGun-a-01.png");
+        gun1 = loadImage("assets/RailGun-01.png");
+        gun2 = loadImage("assets/RailGun-a-01.png");
+        gun3 = loadImage("assets/RailGun-a-01.png");
         dmg = baseDamageRailgun*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 10;
@@ -69,9 +72,22 @@ class tower {
       case 'f':
         baseFirerate = 75;
         gun = loadImage("assets/FlameThrower01-01.png");
-        gunalt = loadImage("assets/FlameThrower02-01.png");
+        gun1 = loadImage("assets/FlameThrower01-01.png");
+        gun2 = loadImage("assets/FlameThrower02-01.png");
+        gun3 = loadImage("assets/FlameThrower02-01.png");
         gunbase = loadImage("assets/Turbase03256.png");
         dmg = baseDamageFlamethrower*(bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
+        ecost = 50;
+        break;
+      case 'i':
+        baseFirerate = 100;
+        gun = loadImage("assets/Freezer\ Gun/Freeze01.png");
+        gun1 = loadImage("assets/Freezer\ Gun/Freeze02.png");
+        gun2 = loadImage("assets/Freezer\ Gun/Freeze03.png");
+        gun3 = loadImage("assets/Freezer\ Gun/Freeze04.png");
+        gunbase = loadImage("assets/Turbase02256.png");
+        dmg = baseFreezeDuration*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 50;
         break;
@@ -84,18 +100,37 @@ class tower {
       if(state == State.STAGED)state = State.RUNNING;
     } });
     for (int c = 0; c < 5; c++) {
-      
       if (c>0) {
         bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
         upgradePanel.buttons.get(bulletSpeedButtons[c]).grayed = true;
-        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        switch (type) {
+          case 'r':
+            bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+            break;
+          case 'f':
+            bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Laser Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+            break;
+          case 'i';
+            bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Freeze Duration\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+            break;
+        }
         upgradePanel.buttons.get(bulletDamageButtons[c]).grayed = true;
         fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeFireRate(); } });
         upgradePanel.buttons.get(fireRateButtons[c]).grayed = true;
       }
       else {
         bulletSpeedButtons[c] = upgradePanel.createButton(400, 280, -600, 900-((5-c)*280),"Bullet Speed\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
-        bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        switch (type) {
+          case 'r':
+            bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Bullet Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+            break;
+          case 'f':
+            bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Laser Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+            break;
+          case 'i';
+            bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Freeze Duration\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+            break;
+        }
         fireRateButtons[c] = upgradePanel.createButton(400, 280, 600, 900-((5-c)*280),"Rate of Fire\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeFireRate(); } });
       }
     }
@@ -184,23 +219,17 @@ class tower {
     ellipse(0, 0, 10, 10); // just a circle for now
     */
     image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
-    showgunalt = false;
-    showgun = true;
-    imagetimer++;
-    if (imagetimer > 15) {
-      showgunalt = false;
-      showgun = true;
-    }
-    else {
-      showgunalt = true;
-      showgun = false;
-    }
+    PImage currentgun;
+    if (imagetimer < 16) imagetimer++;
+    if (imagetimer > 15) currentgun = gun;
+    else if (imagetimer > 10) currentgun = gun3;
+    else if (imageTimer > 5) currentgun = gun2;
+    else currentgun = gun1;
 
     pushMatrix();
     translate(xpos, ypos, 0);
     rotate(angle + HALF_PI);
-    if(showgun)image(gun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
-    if(showgunalt)image(gunalt,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    image(currentgun,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
 
     for (projectile p: projectiles) { // display the active projectiles
@@ -264,11 +293,9 @@ class tower {
 
   void next_generation() { // update the tower
     energy = maxEnergy; // reset energy (could/should depend on remaining resources)
-    for (projectile p: projectiles) {
-      if (p != null) {
-        //  p.killBody(); // not sure if this is necessary with the .clear() below
-      }
-    }
+    for (projectile p: projectiles)
+      if (p != null)
+        killBody();
     projectiles.clear();
   }
 
@@ -337,11 +364,31 @@ class tower {
       return;
     }
     the_player.money -= ((((byte)1)<<(bulletDamageUpgrades*3))*100);
-    upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
+    switch (type) {
+      case 'r':
+        upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
+        break;
+      case 'f':
+        upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Laser Damage\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
+        break;
+      case 'i';
+        upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Freeze Duration\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
+        break;
+    }
     upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (bulletDamageUpgrades < 4) {
       upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).grayed = false;
-      upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
+      switch (type) {
+        case 'r':
+          upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Bullet Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
+          break;
+        case 'f':
+          upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Laser Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
+          break;
+        case 'i';
+          upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Freeze Duration\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
+          break;
+      }
     }
     
     bulletDamageUpgrades++;
