@@ -199,7 +199,7 @@ class tower {
             default:
               target = the_pop.vec_to_random_creature();
           }
-          angle = atan2(target.y-ypos,target.x-xpos);
+          angle = atan2(mouse_y-ypos,mouse_x-xpos);
           fire_projectile();
           autofirecounter = 0;  // reset the counter
         }
