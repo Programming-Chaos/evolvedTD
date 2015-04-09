@@ -47,6 +47,7 @@ class creature {
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
   int time_in_water;     // tracks how much time the creature spends in water
   int time_on_land;      // tracks how much time the creature spends on land
+  int freezeTimer;
 
   // encodes the creature's genetic information
   Genome genome;
@@ -297,7 +298,6 @@ class creature {
     angle = a;
     genome = new Genome();
     construct((float)20000, new Vec2(x, y));
-    hit_indicator=0;
   }
 
   // construct a new creature with the given genome and energy
@@ -325,6 +325,8 @@ class creature {
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);
     genome.inheritance(num);
+    freezeTimer = 0;
+    hit_indicator = 0;
 
     current_actions = new float[brain.OUTPUTS];
 
@@ -634,97 +636,99 @@ class creature {
     }
 
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
-    timestep_counter++;
     float a = body.getAngle();
-    float m = body.getMass();
-    float f = 0;
-    double torque = 0;
 
     senses.Update_Pain();
     senses.Update_Senses(pos2.x, pos2.y, a);
 
     calcBehavior();
-    torque = current_actions[0]*0.01;
+    timestep_counter++;
+    float m = body.getMass();
+    float f = 0;
+    double torque = 0;
 
-    // force is a percentage of max movement speed from 10% to 100%
-    // depending on the output of the neural network in current_actions[1], the movement force may be backwards
-    // as of now the creatures never completely stop moving
-    f = (maxMovementSpeed * Utilities.MovementForceSigmoid(current_actions[1]));
-    // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
-    // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
-    
-    //if (selected) println("Creature #" + num + " Sigmoid Input = " + current_actions[1] + " Sigmoid Output = " + Utilities.MovementForceSigmoid(current_actions[1]) + " maxMoveSpeed = " + maxMovementSpeed + " Force = " + f);
-    int switchnum;
-    if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
-      time_in_water++;
-      switchnum = 0;
-    }
-    else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
-    else switchnum = 2;
-    
-    float base = f;
+    if (freezeTimer == 0) {
+      //if (!body.isActive())body.setActive(true);
+      //if (body.getType() == BodyType.STATIC)body.setType(BodyType.DYNAMIC);
+      torque = current_actions[0]*0.01;
 
-    // appendages will change the force depending on the environment
-    for (Appendage app : appendages) {
-      if (app.size > 0) { // if the appendage exists
-        switch (switchnum) {
-        case 0: // if the creature's center is in water
-          f -= (base*app.grassForcePercent)/numSegments;
-          f += (2*base*app.waterForcePercent)/numSegments;
-          f -= (base*app.mountainForcePercent)/numSegments;
-          break;
-        case 1: // if the creature's center is on a mountain
-          f -= (base*app.grassForcePercent)/numSegments;
-          f -= (base*app.waterForcePercent)/numSegments;
-          f += (2*base*app.mountainForcePercent)/numSegments;
-          break;
-        case 2: // if the creature's center is on grass
-          f += (2*base*app.grassForcePercent)/numSegments;
-          f -= (base*app.waterForcePercent)/numSegments;
-          f -= (base*app.mountainForcePercent)/numSegments;
-          break;
+      // force is a percentage of max movement speed from 10% to 100%
+      // depending on the output of the neural network in current_actions[1], the movement force may be backwards
+      // as of now the creatures never completely stop moving
+      f = (maxMovementSpeed * Utilities.MovementForceSigmoid(current_actions[1]));
+      // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
+      // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
+
+      int switchnum;
+      if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
+        time_in_water++;
+        switchnum = 0;
+      }
+      else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
+      else switchnum = 2;
+
+      float base = f;
+
+      // appendages will change the force depending on the environment
+      for (Appendage app : appendages) {
+        if (app.size > 0) { // if the appendage exists
+          switch (switchnum) {
+          case 0: // if the creature's center is in water
+            f -= (base*app.grassForcePercent)/numSegments;
+            f += (2*base*app.waterForcePercent)/numSegments;
+            f -= (base*app.mountainForcePercent)/numSegments;
+            break;
+          case 1: // if the creature's center is on a mountain
+            f -= (base*app.grassForcePercent)/numSegments;
+            f -= (base*app.waterForcePercent)/numSegments;
+            f += (2*base*app.mountainForcePercent)/numSegments;
+            break;
+          case 2: // if the creature's center is on grass
+            f += (2*base*app.grassForcePercent)/numSegments;
+            f -= (base*app.waterForcePercent)/numSegments;
+            f -= (base*app.mountainForcePercent)/numSegments;
+            break;
+          }
         }
       }
+      body.applyTorque((float)torque);
+  
+      if (energy_locomotion > 0) { // If there's energy left apply force
+        body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
+        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
+        energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
+  
+        // data collection
+        locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
+      }
+  
+      // Creatures that run off one side of the world wrap to the other side.
+      if (pos2.x < -0.5 * worldWidth) {
+        pos2.x += worldWidth;
+        body.setTransform(box2d.coordPixelsToWorld(pos2), a);
+      }
+      if (pos2.x > 0.5 * worldWidth) {
+        pos2.x -= worldWidth;
+        body.setTransform(box2d.coordPixelsToWorld(pos2), a);
+      }
+      if (pos2.y < -0.5 * worldHeight) {
+        pos2.y += worldHeight;
+        body.setTransform(box2d.coordPixelsToWorld(pos2), a);
+      }
+      if (pos2.y > 0.5 * worldHeight) {
+        pos2.y -= worldHeight;
+        body.setTransform(box2d.coordPixelsToWorld(pos2), a);
+      }
+  
+      // If a creature runs our of locomotion energy it starts to lose health
+      // It might make more sense to just be based on health energy, but creatures start with zero health energy and health energy doesn't always decrease
+      if(energy_locomotion <= 0) {
+        health = health -1;
+      }
     }
-
-    //println("Environmental speed: " + f);
-
-    body.applyTorque((float)torque);
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
-
-    if (energy_locomotion > 0) { // If there's energy left apply force
-      body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
-      energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
-      energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
-
-      // data collection
-      locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
-    }
-
-    // Creatures that run off one side of the world wrap to the other side.
-    if (pos2.x < -0.5 * worldWidth) {
-      pos2.x += worldWidth;
-      body.setTransform(box2d.coordPixelsToWorld(pos2), a);
-    }
-    if (pos2.x > 0.5 * worldWidth) {
-      pos2.x -= worldWidth;
-      body.setTransform(box2d.coordPixelsToWorld(pos2), a);
-    }
-    if (pos2.y < -0.5 * worldHeight) {
-      pos2.y += worldHeight;
-      body.setTransform(box2d.coordPixelsToWorld(pos2), a);
-    }
-    if (pos2.y > 0.5 * worldHeight) {
-      pos2.y -= worldHeight;
-      body.setTransform(box2d.coordPixelsToWorld(pos2), a);
-    }
-
-    // If a creature runs our of locomotion energy it starts to lose health
-    // It might make more sense to just be based on health energy, but creatures start with zero health energy and health energy doesn't always decrease
-    if(energy_locomotion <= 0) {
-      health = health -1;
-    }
+    if (freezeTimer > 0) freezeTimer--;
 
     // if out of health have the creature "die". Stops participating
     // in the world, still exists for reproducton
@@ -807,10 +811,24 @@ class creature {
     Vec2 pos = box2d.getBodyPixelCoord(body);
     // Get its angle of rotation
     float a = body.getAngle();
-    if(hit_indicator>0){ //makes the animation show up when hit
-    fill (153,0,0);
-    ellipse (pos.x, pos.y, getWidth()+15, getWidth()+15); //this draws the animation when the creature gets hit. Animation is a circle right now
-    hit_indicator=hit_indicator-1;} //this counts down each timestep to make the animation dissapear
+    
+    if (hit_indicator>0) { //makes the animation show up when hit
+      fill (153,0,0);
+      ellipse (pos.x, pos.y, getWidth()+15, getWidth()+15); //this draws the animation when the creature gets hit. Animation is a circle right now
+      hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
+    }
+    
+    /*// this is not useful right now but it's cool and maybe we can use it later
+    pushMatrix();
+      translate(pos.x-round(getWidth()/2), pos.y-round(getWidth()/2));
+      rotate(-a);
+      fill (0,200,255,150);
+      beginShape();
+      for (int c = 0; c < round(random(5,20)); c++)
+        vertex(round(random(0,getWidth())),round(random(0,getWidth())));
+      endShape(CLOSE);
+    popMatrix();
+    */
 
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
@@ -864,6 +882,24 @@ class creature {
     
     if (displayFeelers) {
       senses.Draw_Sense(pos.x, pos.y, a);
+    }
+    
+    if (freezeTimer > 0) {
+      pushMatrix();
+      hint(DISABLE_DEPTH_TEST);
+      translate(pos.x, pos.y);
+      rotate(-a);
+      fill (0,200,255,150);
+      beginShape();
+      for (int i = segments.size()-1; i >= 0; i--) {
+        vertex((segments.get(i).frontPoint.x)*1.2, (segments.get(i).frontPoint.y)*1.2);
+      }
+      for (int i = 0; i < segments.size(); i++) {
+        vertex((-1*segments.get(i).backPoint.x)*1.2, (segments.get(i).backPoint.y)*1.2);
+      }
+      endShape(CLOSE);
+      hint(ENABLE_DEPTH_TEST);
+      popMatrix();
     }
 
     pushMatrix(); // Draws a "health" bar above the creature

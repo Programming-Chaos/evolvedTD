@@ -4,19 +4,18 @@ public class Sounds extends Thread {
   AudioPlayer a;
   
   public Sounds ( AudioPlayer ax ) {
-    a = ax; 
+    a = ax;
   }
-   public void run () {
-     a.rewind();
-     a.play();
-   } 
+  
+  public void run () {
+    a.rewind();
+    a.play();
+  }
 }
 
-void PlaySounds( String s ) {
+void PlaySounds (String s) {
   AudioPlayer a;
   a = minim.loadFile(s);
-   Sounds f = new Sounds(a);
-   f.start(); 
+  Sounds f = new Sounds(a);
+  f.start(); 
 }
-
-

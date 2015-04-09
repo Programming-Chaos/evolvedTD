@@ -13,12 +13,13 @@ class projectile {
   int speed;
   /* type is the projectile type
    * r: rail gun bullet
-   * f: flamethrower "bullet"
+   * p: plasmagun "bullet"
+   * i: ice "bullet"
    */
   
   // constructor, creates a projectile
   projectile(float x, float y, float a, int d, char t, int s) {
-    radius = (int)(2);
+    radius = 2;
     angle = a;
     damage = d;
     speed = s;
@@ -28,13 +29,16 @@ class projectile {
     
     switch (type){
       case 'r':
-        bullet = loadImage("assets/Bullet48x48a-01.png");
+        bullet = loadImage("assets/Turret-Railgun/Bullet48x48a-01.png");
         break;
-      case 'f':
+      case 'p':
         bullet = loadImage("assets/photon72/Photon01a.png");
         bulletalt1 = loadImage("assets/photon72/Photon02a.png");
         bulletalt2 = loadImage("assets/photon72/Photon03a.png");
         bulletalt3 = loadImage("assets/photon72/Photon04a.png");
+        break;
+      case 'i':
+        bullet = loadImage("assets/Turret-Freeze/freezeblast.png");
         break;
     }
   }
@@ -44,7 +48,7 @@ class projectile {
     if (box2d.getBodyPixelCoord(the_projectile).y < (-1*(worldHeight/2)) || box2d.getBodyPixelCoord(the_projectile).y > (worldHeight/2))remove = true;
     Vec2 velocity;
     velocity = the_projectile.getLinearVelocity();
-    if(velocity.length()< 50){  // remove slow projectiles
+    if(velocity.length()< 30){  // remove slow projectiles
       remove = true;
     }
   }   
@@ -65,19 +69,18 @@ class projectile {
   }
 
   void display() {
-    if (imagetimer % 12 == 0)
+    if (imagetimer == 12)
       imagetimer = 0;
     Vec2 pos = box2d.getBodyPixelCoord(the_projectile);
     pushMatrix();
     translate(pos.x, pos.y);
-    float c = the_projectile.getAngle();
     switch (type){
       case 'r':
-        rotate(c + PI);
+        rotate(the_projectile.getAngle() + PI);
         image(bullet, -24, -24);
         break;
-      case 'f':
-        rotate(c + PI/2);
+      case 'p':
+        rotate(the_projectile.getAngle() + PI/2);
         if (imagetimer >= 0 && imagetimer < 3)
           image(bullet, -36, -36);
         if (imagetimer >= 3 && imagetimer < 6)
@@ -87,12 +90,16 @@ class projectile {
         if (imagetimer >= 9 && imagetimer < 12)
           image(bulletalt3, -36, -36);
         break;
+      case 'i':
+        rotate(the_projectile.getAngle() + PI/2);
+        image(bullet, -24, -24);
+        break;
     }
     /*
     fill(0, 0, 0);
     stroke(0);
     ellipse(0,0, radius*2, radius*2);
-*/    
+    */
     popMatrix();
     imagetimer++;
   }
