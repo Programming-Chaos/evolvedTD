@@ -80,7 +80,7 @@ void setup() {
   textFont(font);
   panels = new ArrayList<Panel>();
   the_player = new player();
-  the_player.towers.add(new tower('i', ++the_player.numTowersCreated));
+  the_player.towers.add(new tower('r', ++the_player.numTowersCreated));
   the_player.towers.get(0).inTransit = false;
   the_player.towers.get(0).xpos = 0;
   the_player.towers.get(0).ypos = 0;
