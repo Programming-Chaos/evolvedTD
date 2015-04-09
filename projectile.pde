@@ -1,6 +1,5 @@
 class projectile {
   Body the_projectile;
-  tower parent;
   int radius;
   float angle;
   boolean remove = false;
@@ -14,13 +13,12 @@ class projectile {
   int speed;
   /* type is the projectile type
    * r: rail gun bullet
-   * l: plasmagun "bullet"
+   * p: plasmagun "bullet"
    * i: ice "bullet"
    */
   
   // constructor, creates a projectile
-  projectile(float x, float y, float a, int d, char t, int s, tower p) {
-    parent = p;
+  projectile(float x, float y, float a, int d, char t, int s) {
     radius = 2;
     angle = a;
     damage = d;

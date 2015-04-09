@@ -17,9 +17,7 @@ class tower {
   int xpos; // x position of center of turret
   int ypos; // y position of center of turret
   int dmg; // damage value, changed by turret type
-  int baseDamageRailgun;
-  int baseDamagePlasmagun;
-  int baseFreezeDuration;
+  int baseDamage;
   int firerate; // autofire rate, lower values fire faster
   int baseFirerate;
   int projectileSpeed;
@@ -56,13 +54,10 @@ class tower {
     xpos = round(mouse_x);
     ypos = round(mouse_y);
     type = t;
-    
-    baseDamageRailgun = 20;
-    baseDamagePlasmagun = 200;
-    baseFreezeDuration = 50;
 
     switch (type){
       case 'r':
+        baseDamage = 20;
         baseFirerate = 25;
         baseProjectileSpeed = 100;
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
@@ -72,11 +67,12 @@ class tower {
         gunframes.add(loadImage("assets/Turret-Railgun/RG003.png"));
         gunframes.add(loadImage("assets/Turret-Railgun/RG004.png"));
         gunframes.add(loadImage("assets/Turret-Railgun/RG005.png"));
-        dmg = baseDamageRailgun*(bulletDamageUpgrades+1);
+        dmg = baseDamage*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 10;
         break;
       case 'p':
+        baseDamage = 100;
         baseFirerate = 75;
         baseProjectileSpeed = 150;
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
@@ -85,11 +81,12 @@ class tower {
         gunframes.add(loadImage("assets/Turret-Plasma/PlasmaGun01-01.png"));
         gunframes.add(loadImage("assets/Turret-Plasma/PlasmaGun02-01.png"));
         gunframes.add(loadImage("assets/Turret-Plasma/PlasmaGun02-01.png"));
-        dmg = baseDamagePlasmagun*(bulletDamageUpgrades+1);
+        dmg = baseDamage*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 50;
         break;
       case 'i':
+        baseDamage = 200;
         baseFirerate = 100;
         baseProjectileSpeed = 50;
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
@@ -98,9 +95,9 @@ class tower {
         gunframes.add(loadImage("assets/Turret-Freeze/Freeze02.png"));
         gunframes.add(loadImage("assets/Turret-Freeze/Freeze03.png"));
         gunframes.add(loadImage("assets/Turret-Freeze/Freeze04.png"));
-        dmg = baseFreezeDuration*(bulletDamageUpgrades+1);
+        dmg = baseDamage*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
-        ecost = 50;
+        ecost = 30;
         break;
     }
     animationrate = (3*gunframes.size()); // at most 3 ticks per frame
@@ -226,7 +223,6 @@ class tower {
 
   void display() {
     image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
-    
     animationrate = (3*gunframes.size()); // at most 3 ticks per frame
     if (firerate < animationrate) animationrate = firerate;
     if (imagetimer < animationrate-1) imagetimer++;
@@ -308,7 +304,7 @@ class tower {
 
   void fire_projectile() {
     if (energy < ecost) return;
-    projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed, this);
+    projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed);
     projectiles.add(p);
     energy -= ecost;
     imagetimer = 0;
@@ -333,7 +329,7 @@ class tower {
   void wave_fire() {
     if (energy < 5) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
-      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed, this));
+      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
     energy -= 5;
     imagetimer = 0;
     if (playSound) {
@@ -351,11 +347,6 @@ class tower {
     }
   }
   
-  void killProjectile(projectile p) {
-    projectiles.remove(p);
-    p.killBody();
-  }
-
   void upgradeBulletSpeed() {
     if (bulletSpeedUpgrades > 4)return;
     if (the_player.money < ((((byte)1)<<(bulletSpeedUpgrades*3))*100)) {
@@ -411,14 +402,7 @@ class tower {
     
     bulletDamageUpgrades++;
     
-    switch (type) {
-      case 'r':
-        dmg = baseDamageRailgun*(bulletDamageUpgrades+1);
-        break;
-      case 'p':
-        dmg = baseDamagePlasmagun*(bulletDamageUpgrades+1);
-        break;
-      }
+    dmg = baseDamage*(bulletDamageUpgrades+1);
   }
   
   void upgradeFireRate() {
@@ -436,15 +420,7 @@ class tower {
     }
     
     fireRateUpgrades++;
-    
-    switch (type) {
-      case 'r':
-        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
-        break;
-      case 'p':
-        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
-        break;
-    }
+    firerate = round((float)baseFirerate/(fireRateUpgrades+1));
     autofirecounter = 0;
   }
 }

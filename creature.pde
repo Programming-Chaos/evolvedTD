@@ -818,22 +818,6 @@ class creature {
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
     }
     
-    if (freezeTimer > 0) {
-      pushMatrix();
-      translate(pos.x, pos.y);
-      rotate(-a);
-      fill (0,200,255,150);
-      beginShape();
-        vertex(20, 20);
-        vertex(40, 20);
-        vertex(40, 40);
-        vertex(60, 40);
-        vertex(60, 60);
-        vertex(20, 60);
-      endShape(CLOSE);
-      popMatrix();
-    }
-    
     /*// this is not useful right now but it's cool and maybe we can use it later
     pushMatrix();
       translate(pos.x-round(getWidth()/2), pos.y-round(getWidth()/2));
@@ -844,7 +828,7 @@ class creature {
         vertex(round(random(0,getWidth())),round(random(0,getWidth())));
       endShape(CLOSE);
     popMatrix();
-    /*
+    */
 
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
@@ -898,6 +882,24 @@ class creature {
     
     if (displayFeelers) {
       senses.Draw_Sense(pos.x, pos.y, a);
+    }
+    
+    if (freezeTimer > 0) {
+      pushMatrix();
+      hint(DISABLE_DEPTH_TEST);
+      translate(pos.x, pos.y);
+      rotate(-a);
+      fill (0,200,255,150);
+      beginShape();
+      for (int i = segments.size()-1; i >= 0; i--) {
+        vertex((segments.get(i).frontPoint.x)*1.2, (segments.get(i).frontPoint.y)*1.2);
+      }
+      for (int i = 0; i < segments.size(); i++) {
+        vertex((-1*segments.get(i).backPoint.x)*1.2, (segments.get(i).backPoint.y)*1.2);
+      }
+      endShape(CLOSE);
+      hint(ENABLE_DEPTH_TEST);
+      popMatrix();
     }
 
     pushMatrix(); // Draws a "health" bar above the creature
