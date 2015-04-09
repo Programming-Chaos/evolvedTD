@@ -266,7 +266,7 @@ class tower {
     energy = maxEnergy; // reset energy (could/should depend on remaining resources)
     for (projectile p: projectiles)
       if (p != null)
-        killBody();
+        p.killBody();
     projectiles.clear();
   }
 
