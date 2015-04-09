@@ -329,7 +329,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    if(p1.current_actions[3] > 0.0){
+    if(p1.current_actions[2] > 0.0){
       p1.addEnergy(20000); // getting food is valuable
   
       food p2 = (food)o2;
@@ -344,7 +344,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    if(p1.current_actions[3] > 0.0){
+    if(p1.current_actions[2] > 0.0){
       p1.addEnergy(20000); // getting food is valuable
       food p2 = (food)o1;
       p1.senses.Set_Taste(p2);
