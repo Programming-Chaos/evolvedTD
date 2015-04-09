@@ -303,7 +303,7 @@ class tower {
     imagetimer = 0;
     if (playSound) {
       //      PlaySounds( gunshot );
-        PlaySounds( "assets/railgunfire01long.mp3" );
+ //       PlaySounds( "assets/railgunfire01long.mp3" );
       //      gunshot.rewind();
       //      gunshot.play();
     }
