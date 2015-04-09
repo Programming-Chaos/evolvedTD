@@ -7,7 +7,9 @@ class tower {
   float angle;    // angle of tower's main, auto-fir weapon
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
   PImage gun;    // declare image for gun
-  PImage gunalt; // declare alternate image for animation
+  PImage gun1;   // declare alternate image for animation
+  PImage gun2;   // declare alternate image for animation
+  PImage gun3;   // declare alternate image for animation
   PImage gunbase; // gun base
   boolean showgun = true; // show base gun image
   boolean showgunalt = false; // show alternate gun image
@@ -23,7 +25,7 @@ class tower {
   int firerate; // autofire rate, lower values fire faster
   int baseFirerate;
   int projectileSpeed;
-  int baseProjectileSpeed = 100;
+  int baseProjectileSpeed;
   int ecost; // per fire energy cost
   int bulletSpeedUpgrades = 0;
   int bulletDamageUpgrades = 0;
@@ -60,6 +62,7 @@ class tower {
     switch (type){
       case 'r':
         baseFirerate = 25;
+        baseProjectileSpeed = 100;
         gunbase = loadImage("assets/Tower_base_02.png");
         gun = loadImage("assets/RailGun-01.png");
         gun1 = loadImage("assets/RailGun-01.png");
@@ -71,6 +74,7 @@ class tower {
         break;
       case 'f':
         baseFirerate = 75;
+        baseProjectileSpeed = 150;
         gun = loadImage("assets/FlameThrower01-01.png");
         gun1 = loadImage("assets/FlameThrower01-01.png");
         gun2 = loadImage("assets/FlameThrower02-01.png");
@@ -82,10 +86,11 @@ class tower {
         break;
       case 'i':
         baseFirerate = 100;
-        gun = loadImage("assets/Freezer\ Gun/Freeze01.png");
-        gun1 = loadImage("assets/Freezer\ Gun/Freeze02.png");
-        gun2 = loadImage("assets/Freezer\ Gun/Freeze03.png");
-        gun3 = loadImage("assets/Freezer\ Gun/Freeze04.png");
+        baseProjectileSpeed = 50;
+        gun = loadImage("assets/Freezer Gun/Freeze01.png");
+        gun1 = loadImage("assets/Freezer Gun/Freeze02.png");
+        gun2 = loadImage("assets/Freezer Gun/Freeze03.png");
+        gun3 = loadImage("assets/Freezer Gun/Freeze04.png");
         gunbase = loadImage("assets/Turbase02256.png");
         dmg = baseFreezeDuration*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
@@ -110,7 +115,7 @@ class tower {
           case 'f':
             bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Laser Damage\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
             break;
-          case 'i';
+          case 'i':
             bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Freeze Duration\nX"+ (c+2) + "\n(Locked)", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
             break;
         }
@@ -127,7 +132,7 @@ class tower {
           case 'f':
             bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Laser Damage\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
             break;
-          case 'i';
+          case 'i':
             bulletDamageButtons[c] = upgradePanel.createButton(400, 280, 0, 900-((5-c)*280),"Freeze Duration\nX"+ (c+2) + "\n100$", 60, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
             break;
         }
@@ -223,7 +228,7 @@ class tower {
     if (imagetimer < 16) imagetimer++;
     if (imagetimer > 15) currentgun = gun;
     else if (imagetimer > 10) currentgun = gun3;
-    else if (imageTimer > 5) currentgun = gun2;
+    else if (imagetimer > 5) currentgun = gun2;
     else currentgun = gun1;
 
     pushMatrix();
@@ -295,16 +300,14 @@ class tower {
     energy = maxEnergy; // reset energy (could/should depend on remaining resources)
     for (projectile p: projectiles)
       if (p != null)
-        killBody();
+        p.killBody();
     projectiles.clear();
   }
 
   /* Firing, dropping rocks, etc. uses up some of the tower's energy */
 
   void fire_projectile() {
-    if (energy < 10) {
-      return;
-    }
+    if (energy < ecost) return;
     projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed);
     projectiles.add(p);
     energy -= ecost;
@@ -320,6 +323,9 @@ class tower {
         break;
       case 'f':
         if (playSound) PlaySounds( "assets/ricochet1.mp3");
+        break;
+      case 'i':
+        if (playSound) PlaySounds( "assets/Cannon.mp3");
         break;
     }
   }
@@ -371,7 +377,7 @@ class tower {
       case 'f':
         upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Laser Damage\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
         break;
-      case 'i';
+      case 'i':
         upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades]).button_text = "Freeze Duration\nX"+ (bulletDamageUpgrades+2) + "\nPurchased!";
         break;
     }
@@ -385,7 +391,7 @@ class tower {
         case 'f':
           upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Laser Damage\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
           break;
-        case 'i';
+        case 'i':
           upgradePanel.buttons.get(bulletDamageButtons[bulletDamageUpgrades+1]).button_text = "Freeze Duration\nX"+ (bulletDamageUpgrades+3) + "\n" + (((byte)1)<<((bulletDamageUpgrades+1)*3)) + "00$";
           break;
       }

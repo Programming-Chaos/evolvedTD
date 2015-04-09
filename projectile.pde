@@ -18,7 +18,7 @@ class projectile {
   
   // constructor, creates a projectile
   projectile(float x, float y, float a, int d, char t, int s) {
-    radius = (int)(2);
+    radius = 2;
     angle = a;
     damage = d;
     speed = s;
@@ -31,6 +31,12 @@ class projectile {
         bullet = loadImage("assets/Bullet48x48a-01.png");
         break;
       case 'f':
+        bullet = loadImage("assets/photon72/Photon01a.png");
+        bulletalt1 = loadImage("assets/photon72/Photon02a.png");
+        bulletalt2 = loadImage("assets/photon72/Photon03a.png");
+        bulletalt3 = loadImage("assets/photon72/Photon04a.png");
+        break;
+      case 'i':
         bullet = loadImage("assets/photon72/Photon01a.png");
         bulletalt1 = loadImage("assets/photon72/Photon02a.png");
         bulletalt2 = loadImage("assets/photon72/Photon03a.png");
