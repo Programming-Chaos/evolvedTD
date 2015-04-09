@@ -5,6 +5,12 @@
  * This is done to make sensing efficient - a creature can sense whether there's food (for example) in a cell.
  */
 
+/*  For Zack:
+ *    - Sine wave for water
+ *    - For rock - same as grass but more stark contrast
+ *    - Multi threading so water can look like it's moving
+ */
+
 int cellWidth = 20;
 int cellHeight = 20;
 int maxscent = 255;
@@ -979,6 +985,16 @@ class environment {
         altShift = 100;        
         break;
         
+      case 5:
+        // lava
+        temp = int(random(20, 40));
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
+        waterALT = 0.35f;
+        rockALT = 0.60f;
+        break;
+
       /*
       case 5:
         // radiation - ??
