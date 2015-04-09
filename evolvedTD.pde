@@ -80,7 +80,7 @@ void setup() {
   textFont(font);
   panels = new ArrayList<Panel>();
   the_player = new player();
-  the_player.towers.add(new tower('r', ++the_player.numTowersCreated));
+  the_player.towers.add(new tower('l', ++the_player.numTowersCreated));
   the_player.towers.get(0).inTransit = false;
   the_player.towers.get(0).xpos = 0;
   the_player.towers.get(0).ypos = 0;
@@ -508,7 +508,7 @@ void mousePressed() { // called if either mouse button is pressed
             the_player.pickedup.inTransit = false;
             the_player.pickedup = null;
             the_player.placing = false;
-            the_player.towerPanel.buttons.get(3).enabled = false;
+            the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
             the_player.towerPanel.hiddenpanel = true;
             the_player.towerPanel.shown = false;
           }
@@ -563,7 +563,7 @@ void mousePressed() { // called if either mouse button is pressed
               t.ypos = round(mouse_y);
               the_player.pickedup = t;
               the_player.placing = true;
-              the_player.towerPanel.buttons.get(3).enabled = true;
+              the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
               the_player.towerPanel.hiddenpanel = false;
               the_player.towerPanel.shown = true;
             }

@@ -10,8 +10,6 @@ public class Sounds extends Thread {
   public void run () {
     a.rewind();
     a.play();
-    delay(2000);
-    a.close();
   }
 }
 
