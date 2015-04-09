@@ -80,7 +80,7 @@ class tower {
         baseFirerate = 75;
         baseProjectileSpeed = 150;
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
-        gunbase = loadImage("assets/Turret base 03-01.png");
+        gunbase = loadImage("assets/Turret-Plasma/Turret base 03-01.png");
         gunframes.add(loadImage("assets/Turret-Plasma/PlasmaGun01-01.png"));
         gunframes.add(loadImage("assets/Turret-Plasma/PlasmaGun01-01.png"));
         gunframes.add(loadImage("assets/Turret-Plasma/PlasmaGun02-01.png"));
@@ -308,7 +308,7 @@ class tower {
 
   void fire_projectile() {
     if (energy < ecost) return;
-    projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed);
+    projectile p = new projectile(xpos, ypos, angle, dmg, type, projectileSpeed, this);
     projectiles.add(p);
     energy -= ecost;
     imagetimer = 0;
@@ -333,7 +333,7 @@ class tower {
   void wave_fire() {
     if (energy < 5) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
-      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
+      projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed, this));
     energy -= 5;
     imagetimer = 0;
     if (playSound) {
@@ -349,6 +349,11 @@ class tower {
           break;
       }
     }
+  }
+  
+  void killProjectile(projectile p) {
+    projectiles.remove(p);
+    p.killBody();
   }
 
   void upgradeBulletSpeed() {

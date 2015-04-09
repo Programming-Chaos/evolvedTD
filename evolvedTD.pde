@@ -355,28 +355,40 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // projectiles damage creatures
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    if (f1.getUserData().getClass() == creature.Segment.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Segment)f1.getUserData()).armor)));
+    if (p2.type == 'i') {
+      p1.freezeTimer = p2.damage;
+      p1.hits_by_tower++;
     }
-    if (f1.getUserData().getClass() == creature.Appendage.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f1.getUserData()).armor)));
+    else {
+      if (f1.getUserData().getClass() == creature.Segment.class) {
+        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+      }
+      if (f1.getUserData().getClass() == creature.Appendage.class) {
+        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+      }
     }
     p2.remove = true;
   }
-
-  if (o1.getClass() == projectile.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+  else if (o1.getClass() == projectile.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     // projectiles damage creatures
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    if (f2.getUserData().getClass() == creature.Segment.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Segment)f2.getUserData()).armor)));
+    if (p2.type == 'i') {
+      p1.freezeTimer = p2.damage;
+      p1.hits_by_tower++;
     }
-    if (f2.getUserData().getClass() == creature.Appendage.class) {
-      p1.changeHealth(round(-1*(p2.get_damage()/((creature.Appendage)f2.getUserData()).armor)));
+    else {
+      if (f2.getUserData().getClass() == creature.Segment.class) {
+        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+      }
+      if (f2.getUserData().getClass() == creature.Appendage.class) {
+        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+      }
     }
     p2.remove = true;
   }
-  if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
+  
+  if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
     Vec2 pos_1 = box2d.getBodyPixelCoord(b1);

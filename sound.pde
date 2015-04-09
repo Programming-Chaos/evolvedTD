@@ -4,12 +4,12 @@ public class Sounds extends Thread {
   AudioPlayer a;
   
   public Sounds ( AudioPlayer ax ) {
-    a = ax; 
+    a = ax;
   }
-   public void run () {
-     a.rewind();
-     a.play();
-   } 
+  public void run () {
+    a.rewind();
+    a.play();
+  }
 }
 
 void PlaySounds( String s ) {
