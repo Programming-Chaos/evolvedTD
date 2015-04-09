@@ -264,11 +264,9 @@ class tower {
 
   void next_generation() { // update the tower
     energy = maxEnergy; // reset energy (could/should depend on remaining resources)
-    for (projectile p: projectiles) {
-      if (p != null) {
-        //  p.killBody(); // not sure if this is necessary with the .clear() below
-      }
-    }
+    for (projectile p: projectiles)
+      if (p != null)
+        p.killBody();
     projectiles.clear();
   }
 
