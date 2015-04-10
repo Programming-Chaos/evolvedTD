@@ -361,6 +361,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
     if (p2.type == 'i') {
+      println("hit");
       p1.freezeTimer = p2.damage;
       p1.hits_by_tower++;
     }
@@ -379,6 +380,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
     if (p2.type == 'i') {
+      println("hit");
       p1.freezeTimer = p2.damage;
       p1.hits_by_tower++;
     }

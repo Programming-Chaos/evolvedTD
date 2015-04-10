@@ -83,8 +83,6 @@ class tower {
   boolean conflict = false;
   boolean poweringup = false;
   Vec2 target;
-  PImage laser1 = loadImage("assets/Turret-Laser/Lazer Blast-01.png");
-  PImage laser2 = loadImage("assets/Turret-Laser/Lazer Blasta-01.png");
   char type;
   Panel upgradePanel;
   /* type is the turret type
@@ -112,12 +110,12 @@ class tower {
     type = t;
 
     switch (type){
-      case 'r':
+      case 'r': // railgun
         baseDamage = 20;
         baseFirerate = 25;
         baseProjectileSpeed = 100;
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
-        gunbase = loadImage("assets/Turret-Railgun/Turbase03256.png");
+        gunbase = loadImage("assets/Turret-Railgun/Tower_base_02.png");
         firing.addFrame(loadImage("assets/Turret-Railgun/RG001.png"));
         firing.addFrame(loadImage("assets/Turret-Railgun/RG005.png"));
         firing.addFrame(loadImage("assets/Turret-Railgun/RG004.png"));
@@ -127,7 +125,7 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 10;
         break;
-      case 'p':
+      case 'p': // plasma gun
         baseDamage = 100;
         baseFirerate = 75;
         baseProjectileSpeed = 150;
@@ -144,7 +142,7 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 50;
         break;
-      case 'i':
+      case 'i': // ice gun
         baseDamage = 200; // functions as freeze duration since ice pellets don't do damage
         baseFirerate = 100;
         baseProjectileSpeed = 50;
@@ -158,7 +156,7 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 30;
         break;
-      case 'l':
+      case 'l': // lasergun
         baseDamage = 200;
         baseFirerate = 150;
         baseProjectileSpeed = 60; // functions as powerup ticks since speed is instantaneous
@@ -184,6 +182,17 @@ class tower {
         targeting.addFrame(loadImage("assets/Turret-Laser/LSR/LSR15.png"));
         targeting.addFrame(loadImage("assets/Turret-Laser/LSR/LSR16.png"));
         targeting.addFrame(loadImage("assets/Turret-Laser/LSR/LSR17.png"));
+        dmg = baseDamage*(bulletDamageUpgrades+1);
+        firerate = round((float)baseFirerate/(fireRateUpgrades+1));
+        ecost = 30;
+        break;
+      case 'f': // flamethrower
+        baseDamage = 200;
+        baseFirerate = 100;
+        baseProjectileSpeed = 50;
+        projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
+        gunbase = loadImage("assets/Turret-Graviton/turret2-01.png");
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter01.png"));
         dmg = baseDamage*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 30;
