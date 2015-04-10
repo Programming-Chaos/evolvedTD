@@ -32,13 +32,16 @@ class projectile {
         bullet = loadImage("assets/Turret-Railgun/Bullet48x48a-01.png");
         break;
       case 'p':
-        bullet = loadImage("assets/photon72/Photon01a.png");
-        bulletalt1 = loadImage("assets/photon72/Photon02a.png");
-        bulletalt2 = loadImage("assets/photon72/Photon03a.png");
-        bulletalt3 = loadImage("assets/photon72/Photon04a.png");
+        bullet = loadImage("assets/Turret-Plasma/photon72/Photon01a.png");
+        bulletalt1 = loadImage("assets/Turret-Plasma/photon72/Photon02a.png");
+        bulletalt2 = loadImage("assets/Turret-Plasma/photon72/Photon03a.png");
+        bulletalt3 = loadImage("assets/Turret-Plasma/photon72/Photon04a.png");
         break;
       case 'i':
         bullet = loadImage("assets/Turret-Freeze/freezeblast.png");
+        break;
+      case 'l':
+        bullet = loadImage("assets/Turret-Laser/Lazer Blast-01.png");
         break;
     }
   }
@@ -93,6 +96,10 @@ class projectile {
       case 'i':
         rotate(the_projectile.getAngle() + PI/2);
         image(bullet, -24, -24);
+        break;
+      case 'l':
+        rotate(the_projectile.getAngle() + PI/2);
+        image(bullet, -128, -256);
         break;
     }
     /*
