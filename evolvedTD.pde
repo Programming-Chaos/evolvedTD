@@ -34,7 +34,7 @@ boolean displayFood = true;    // not displaying food speeds things up somewhat
 boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
-boolean autofire = false;
+boolean autofire = true;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -72,7 +72,7 @@ int fConsumed = 0;
 
 void setup() {
   //size(850,850,P3D);  // default window size
-  size(800,800,P3D);             // window size, and makes it a 3D window
+  size(800,800,P3D);    // window size, and makes it a 3D window
   worldRatioX = (float)worldWidth/width;
   worldRatioY = (float)worldHeight/height;
   box2d = new Box2DProcessing(this);
@@ -82,10 +82,6 @@ void setup() {
   panels = new ArrayList<Panel>();
   animations = new ArrayList<Animation>();
   the_player = new player();
-  the_player.towers.add(new tower('l', ++the_player.numTowersCreated));
-  the_player.towers.get(0).inTransit = false;
-  the_player.towers.get(0).xpos = 0;
-  the_player.towers.get(0).ypos = 0;
 
   minim = new Minim(this);
 
