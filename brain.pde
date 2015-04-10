@@ -17,7 +17,7 @@ import java.util.Iterator;
 
 class Brain {
   // Weights for the brain's artificial neural network
-  static final int OUTPUTS = 2;
+  static final int OUTPUTS = 3;
   static final int INPUTS = 1000;
   static final int WEIGHTS = OUTPUTS*INPUTS;
 
