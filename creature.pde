@@ -41,7 +41,7 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 1000; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
-  int hit_indicator=0; //to create animations on creature impacts
+  int hit_indicator = 0; //to create animations on creature impacts
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
