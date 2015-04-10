@@ -33,10 +33,8 @@ class BurntCreature {
     else if (timer <= 20)
       fill (0,0,0,(timer*12));
     beginShape();
-    for (Vec2 v : coords) {
-      if (timer == 20) println("vertex(" + v.x + ", " + v.y + ")");
+    for (Vec2 v : coords)
       vertex(v.x,v.y);
-    }
     /*vertex(20, 20);
     vertex(40, 20);
     vertex(40, 40);
@@ -273,8 +271,13 @@ class tower {
       wasInTransit = false;
     }
     if (inTransit) {
-      if (!wasInTransit)
+      if (!wasInTransit) {
+        if (targeting.timer < (((float)15/18)*targeting.duration) && poweringup) {
+          poweringup = false;
+          targeting.timer = targeting.duration-1;
+        }
         box2d.destroyBody(tower_body); // destroy the body of a just-picked-up tower
+      }
       wasInTransit = true;
       xpos = round(mouse_x);
       ypos = round(mouse_y);
@@ -341,16 +344,17 @@ class tower {
     if (projectileSpeed < targeting.duration) targeting.setDuration(projectileSpeed);
     
     if (laserfiretimer > 0) {
+      float laserlength = sqrt(((xpos-target.x)*(xpos-target.x))+((ypos-target.y)*(ypos-target.y)));
       pushMatrix();
-      //translate(0,0,cameraZ-zoomOffset);
+      translate(xpos,ypos,0);//cameraZ-zoomOffset);
       rotate(angle-(PI/2));
       rectMode(CORNER);
       noStroke();
       fill(255,240,240,255);
-      rect(xpos-6,ypos,12,sqrt(((xpos-target.x)*(xpos-target.x))+((ypos-target.y)*(ypos-target.y))));
+      rect(-6,0,12,laserlength);
       fill(255,0,0,255);
-      rect(xpos+6,ypos,12,sqrt(((xpos-target.x)*(xpos-target.x))+((ypos-target.y)*(ypos-target.y))));
-      rect(xpos-18,ypos,12,sqrt(((xpos-target.x)*(xpos-target.x))+((ypos-target.y)*(ypos-target.y))));
+      rect(6,0,12,laserlength);
+      rect(-18,0,12,laserlength);
       rectMode(CENTER);
       stroke(0);
       popMatrix();
@@ -481,7 +485,8 @@ class tower {
   }
   
   void fire_laser() {
-    laserfiretimer = 5;
+    laserfiretimer = projectileSpeed/18;
+    if (laserfiretimer < 1) laserfiretimer = 1;
     if (playSound) PlaySounds( "assets/Turret-Laser/laser.mp3");
     float creatureradius;
     for (creature c : the_pop.swarm) {
