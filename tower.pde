@@ -125,8 +125,8 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 10;
         break;
-      case 'p': // plasma gun
-        baseDamage = 100;
+      case 'p': // plasma cannon
+        baseDamage = 50;
         baseFirerate = 75;
         baseProjectileSpeed = 150;
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
@@ -142,7 +142,7 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 50;
         break;
-      case 'i': // ice gun
+      case 'i': // freeze turret
         baseDamage = 200; // functions as freeze duration since ice pellets don't do damage
         baseFirerate = 100;
         baseProjectileSpeed = 50;
@@ -156,10 +156,10 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 30;
         break;
-      case 'l': // lasergun
-        baseDamage = 200;
+      case 'l': // laser artillery
+        baseDamage = 80;
         baseFirerate = 150;
-        baseProjectileSpeed = 60; // functions as powerup ticks since speed is instantaneous
+        baseProjectileSpeed = 100; // functions as targeting ticks since speed is instantaneous
         projectileSpeed = round((float)baseProjectileSpeed/(bulletSpeedUpgrades+1));
         gunbase = loadImage("assets/Turret-Laser/Turret base 03-01.png");
         firing.addFrame(loadImage("assets/Turret-Laser/LaserGun01-01.png"));
@@ -186,13 +186,20 @@ class tower {
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 30;
         break;
-      case 'f': // flamethrower
-        baseDamage = 200;
-        baseFirerate = 100;
-        baseProjectileSpeed = 50;
-        projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
-        gunbase = loadImage("assets/Turret-Graviton/turret2-01.png");
-        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter01.png"));
+      case 'g': // graviton launcher
+        baseDamage = 10; // per tick while in range, scales down with further proximity
+        baseFirerate = 200;
+        baseProjectileSpeed = 60; // functions as range as projectile speed is constant
+        projectileSpeed = round((float)baseProjectileSpeed/(bulletSpeedUpgrades+1));
+        gunbase = loadImage("assets/Turret-Graviton/Turbase03256.png");
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter1.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter2.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter3.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter4.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter5.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter6.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter7.png"));
+        firing.addFrame(loadImage("assets/Turret-Graviton/Animated turret/Tbuter8.png"));
         dmg = baseDamage*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         ecost = 30;
@@ -300,8 +307,9 @@ class tower {
         conflict = true;
     }
     else if (state == State.RUNNING) { // tower is placed and running
+      if (laserfiretimer > 0) laserfiretimer--;
       energy += energyGain;  // gain energy
-      if (targeting.timer >= (((float)15/18)*targeting.duration) && poweringup) {
+      if (targeting.timer >= (((float)14/18)*targeting.duration) && poweringup) {
         poweringup = false;
         fire_projectile();
       }
@@ -360,14 +368,13 @@ class tower {
       rectMode(CORNER);
       noStroke();
       fill(255,240,240,255);
-      rect(-6,0,12,laserlength);
+      rect((-1*(bulletDamageUpgrades+1)),0,(2*(bulletDamageUpgrades+1)),laserlength);
       fill(255,0,0,255);
-      rect(6,0,12,laserlength);
-      rect(-18,0,12,laserlength);
+      rect((bulletDamageUpgrades+1),0,(2*(bulletDamageUpgrades+1)),laserlength);
+      rect((-3*(bulletDamageUpgrades+1)),0,(2*(bulletDamageUpgrades+1)),laserlength);
       rectMode(CENTER);
       stroke(0);
       popMatrix();
-      laserfiretimer--;
     }
 
     pushMatrix();
@@ -494,7 +501,8 @@ class tower {
   }
   
   void fire_laser() {
-    laserfiretimer = projectileSpeed/18;
+    laserfiretimer = projectileSpeed/5;
+    if (laserfiretimer > 5) laserfiretimer = 5;
     if (laserfiretimer < 1) laserfiretimer = 1;
     if (playSound) PlaySounds( "assets/Turret-Laser/laser.mp3");
     float creatureradius;

@@ -557,8 +557,21 @@ class creature {
     for (Appendage a : appendages) {
       value += a.armor;
     }
-
     return value;
+  }
+
+  float getArmorAvg() {  // gets the average of armor on all segments and appendages
+    float value = 0;
+    float counter = 0;
+    for (Segment s : segments) {
+      value += s.armor;
+      counter++;
+    }
+    for (Appendage a : appendages) {
+      value += a.armor;
+      counter++;
+    }
+    return value/counter;
   }
 
   float getCreatureDensity() { // gets the creature's density (total mass divided by total area)
@@ -890,7 +903,6 @@ class creature {
     }
     
     if (freezeTimer > 0) {
-      println("frozen");
       pushMatrix();
       hint(DISABLE_DEPTH_TEST);
       translate(pos.x, pos.y);

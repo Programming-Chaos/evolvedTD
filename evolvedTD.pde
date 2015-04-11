@@ -483,6 +483,7 @@ void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
+  println("Wave " + generation);
   the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background

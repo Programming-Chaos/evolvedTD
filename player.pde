@@ -102,8 +102,8 @@ class player {
                          +"If you're holding a tower you can delete it\n"
                          +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
-    hudPanel = new Panel(2500,100,0,-1200,false,0);
-    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money); } }, 50);
+    hudPanel = new Panel(1250,100,-625,-1200,false,100);
+    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money + "\t\t\t\t\t\tWave: " + (generation+1)); } }, 50);
 
     resources = 0;
     resourceGain = 0.1;
