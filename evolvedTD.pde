@@ -42,6 +42,7 @@ player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
 ArrayList<Panel> panels;
+ArrayList<Animation> animations;
 
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
@@ -71,7 +72,7 @@ int fConsumed = 0;
 
 void setup() {
   //size(850,850,P3D);  // default window size
-  size(800,800,P3D);             // window size, and makes it a 3D window
+  size(800,800,P3D);    // window size, and makes it a 3D window
   worldRatioX = (float)worldWidth/width;
   worldRatioY = (float)worldHeight/height;
   box2d = new Box2DProcessing(this);
@@ -79,11 +80,8 @@ void setup() {
   PFont font = createFont("Arial", 100);
   textFont(font);
   panels = new ArrayList<Panel>();
+  animations = new ArrayList<Animation>();
   the_player = new player();
-  the_player.towers.add(new tower('r', ++the_player.numTowersCreated));
-  the_player.towers.get(0).inTransit = false;
-  the_player.towers.get(0).xpos = 0;
-  the_player.towers.get(0).ypos = 0;
 
   minim = new Minim(this);
 
@@ -185,6 +183,9 @@ void draw() {
 
   if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures
+    for (Animation a : animations) {
+      a.update();
+    }
   }
 
   if (the_pop.get_alive() == 0) { // if after updating the population is empty, go ahead and start the next generation
@@ -512,7 +513,7 @@ void mousePressed() { // called if either mouse button is pressed
             the_player.pickedup.inTransit = false;
             the_player.pickedup = null;
             the_player.placing = false;
-            the_player.towerPanel.buttons.get(3).enabled = false;
+            the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
             the_player.towerPanel.hiddenpanel = true;
             the_player.towerPanel.shown = false;
           }
@@ -521,8 +522,12 @@ void mousePressed() { // called if either mouse button is pressed
           if (the_player.towers.size() > 0)
             switch (the_player.activeweapon) {
               case 1:
-                for (tower t : the_player.towers)
-                  t.fire_projectile(); // have the tower fire its active weapon if unpaused
+                for (tower t : the_player.towers) {
+                  if (!t.firing.active() && !t.targeting.active()) {
+                    t.target = new Vec2(mouse_x,mouse_y);
+                    t.fire(); // have the tower fire its active weapon if unpaused
+                  }
+                }
                 break;
               case 2:
                 the_player.drop_rock();
@@ -567,7 +572,7 @@ void mousePressed() { // called if either mouse button is pressed
               t.ypos = round(mouse_y);
               the_player.pickedup = t;
               the_player.placing = true;
-              the_player.towerPanel.buttons.get(3).enabled = true;
+              the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
               the_player.towerPanel.hiddenpanel = false;
               the_player.towerPanel.shown = true;
             }

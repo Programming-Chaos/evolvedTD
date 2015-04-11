@@ -41,7 +41,7 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 1000; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
-  int hit_indicator=0; //to create animations on creature impacts
+  int hit_indicator = 0; //to create animations on creature impacts
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -584,11 +584,11 @@ class creature {
 
   // This function removes the body from the box2d world
   void killBody() {
-    // if its no longer alive creature spawns 2 gametes in a 
-    // radius of 5 tiles and the body can be killed - otherwise it
-    // still "in" the world.  Have to make sure the body isn't
-    // referenced elsewhere
-    
+    // if its no longer alive creature spawns 2 gametes in a     
+    // radius of 5 tiles and the body can be killed - otherwise it    
+    // still "in" the world.  Have to make sure the body isn't    
+    // referenced elsewhere    
+      
     // Spawn gametes
     int dx = (int)random(-5, 6); //from -5 to 5 (6 is not included)
     int dy = (int)random(-5, 6);
@@ -607,7 +607,7 @@ class creature {
                            
     gameteStack.add(g1);
     gameteStack.add(g2);
-      
+    
     // Delete the body
     box2d.destroyBody(body);
   }
@@ -763,7 +763,7 @@ class creature {
       // still "in" the world.  Have to make sure the body isn't
       // referenced elsewhere
       
-      //delete the body
+      // Destroy Body
       killBody();
     }
 
