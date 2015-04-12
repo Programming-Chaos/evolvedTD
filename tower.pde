@@ -207,9 +207,9 @@ class tower {
         ecost = 50;
         break;
       case 'g': // electron cloud generator
-        baseDamage = 1; // damage per tick while in range, scales down linearly with further distance, increasing damage increases electrical range
+        baseDamage = 2; // damage per tick while in range, scales down linearly with further distance, increasing damage increases electrical range
         baseFirerate = 175;
-        baseProjectileSpeed = 200; // functions as range as projectile speed is constant
+        baseProjectileSpeed = 150; // functions as range as projectile speed is constant
         gunbase = loadImage("assets/Turret-Electron/Turbase03256.png");
         firing.addFrame(loadImage("assets/Turret-Electron/Animated turret/Tbuter1.png"));
         firing.addFrame(loadImage("assets/Turret-Electron/Animated turret/Tbuter2.png"));

@@ -77,7 +77,7 @@ class projectile {
         for (creature c : the_pop.swarm) {
           cpos = box2d.getBodyPixelCoord(c.body);
           distance = sqrt(((cpos.x-pos.x)*(cpos.x-pos.x))+((cpos.y-pos.y)*(cpos.y-pos.y)));
-          if (distance < (damage*80) && c.alive) {
+          if (distance < (damage*50) && c.alive) {
             beginShape();
             noFill();
             stroke(255,255,100,255);
@@ -85,13 +85,13 @@ class projectile {
             vertex(pos.x,pos.y);
             int loopfor = round(random(2,8));
             for (int i = 1; i < loopfor; i++)
-              vertex(pos.x+((float)(cpos.x-pos.x)*i/loopfor)+random(-1*distance/loopfor,damage/loopfor),pos.y+((float)(cpos.y-pos.y)*i/loopfor)+random(-1*damage/loopfor,damage/loopfor));
+              vertex(pos.x+((float)(cpos.x-pos.x)*i/loopfor)+random(-0.5*distance/loopfor,0.5*damage/loopfor),pos.y+((float)(cpos.y-pos.y)*i/loopfor)+random(-0.5*damage/loopfor,0.5*damage/loopfor));
             vertex(pos.x+((float)(cpos.x-pos.x)/3),pos.y+((float)(cpos.y-pos.y)/3));
             vertex(cpos.x,cpos.y);
             endShape();
             
-            c.health += (-1*damage);
-            c.senses.Set_Current_Pain(damage);
+            c.health += (-1*damage*(distance/(damage*50)));
+            c.senses.Set_Current_Pain((damage*(distance/(damage*50))));
             // increase or decrease this number to lengthen or shorten the
             // animation time on hit
             c.hit_indicator = 5;
@@ -100,7 +100,7 @@ class projectile {
               c.hits_by_tower++;
               c.shocked = true;
             }
-            c.hp_removed_by_tower += (-1*damage);
+            c.hp_removed_by_tower += ((-1*damage*(distance/(damage*50))));
           }
         }
       }
