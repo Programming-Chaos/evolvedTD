@@ -65,10 +65,12 @@ class player {
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTower('r'); } });
-    towerPanel.createButton(300, 300, -800, 0, "Plasmagun", 45, 200, 0, 0, new ButtonPress() {public void pressed() { placeTower('p'); } });
-    towerPanel.createButton(300, 300, -500, 0, "Freeze gun", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeTower('i'); } });
+    towerPanel.createButton(300, 300, -800, 0, "Plasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeTower('p'); } });
+    towerPanel.createButton(300, 300, -500, 0, "Freeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeTower('i'); } });
+    towerPanel.createButton(300, 300, -200, 0, "Laser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeTower('l'); } });
+    towerPanel.createButton(300, 300, 100, 0, "Electron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeTower('g'); } });
     towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteTurret(); } });
-    towerPanel.buttons.get(3).enabled = false;
+    towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
 
     helpPanel = new Panel(1000,1900,0,0,false,255);
     helpPanel.enabled = false;
@@ -101,8 +103,8 @@ class player {
                          +"If you're holding a tower you can delete it\n"
                          +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
-    hudPanel = new Panel(2500,100,0,-1200,false,0);
-    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money); } }, 50);
+    hudPanel = new Panel(1250,100,-625,-1200,false,100);
+    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money + "\t\t\t\t\t\tWave: " + (generation+1)); } }, 50);
 
     resources = 0;
     resourceGain = 0.1;
@@ -189,29 +191,15 @@ class player {
   void placeTower(char type) {
     if (placing) {
       placing = false;
-      switch (pickedup.type) {
-        case 'r':
-          deleteTurret();
-          if (type == 'p') placeTower('p');
-          else if (type == 'i') placeTower('i');
-          break;
-        case 'p':
-          deleteTurret();
-          if (type == 'r') placeTower('r');
-          else if (type == 'i') placeTower('i');
-          break;
-        case 'i':
-          deleteTurret();
-          if (type == 'r') placeTower('r');
-          else if (type == 'p') placeTower('p');
-          break;
-      }
+      char temppickedup = pickedup.type;
+      deleteTurret();
+      if (type != temppickedup) placeTower(type);
     }
     else {
       placing = true;
       pickedup = new tower(type, ++numTowersCreated);
       towers.add(pickedup);
-      towerPanel.buttons.get(3).enabled = true;
+      towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = true;
       towerPanel.hiddenpanel = false;
     }
   }
@@ -219,7 +207,7 @@ class player {
   void deleteTurret() {
     towers.remove(pickedup);
     pickedup = null;
-    towerPanel.buttons.get(3).enabled = false;
+    towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
     placing = false;
     towerPanel.hiddenpanel = true;
     selectedTower = null;

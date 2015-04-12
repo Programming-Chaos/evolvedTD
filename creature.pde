@@ -41,7 +41,7 @@ class creature {
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
   float baseMaxMovementSpeed = 1000; //maximum speed without factoring in width and appendages
   float maxMovementSpeed;
-  int hit_indicator=0; //to create animations on creature impacts
+  int hit_indicator = 0; //to create animations on creature impacts
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -73,6 +73,7 @@ class creature {
   boolean CreatureScent = false;
   boolean ReproScent = false;
   boolean PainScent = false;
+  boolean shocked = false;
 
   // body
   Body body;
@@ -557,8 +558,21 @@ class creature {
     for (Appendage a : appendages) {
       value += a.armor;
     }
-
     return value;
+  }
+
+  float getArmorAvg() {  // gets the average of armor on all segments and appendages
+    float value = 0;
+    float counter = 0;
+    for (Segment s : segments) {
+      value += s.armor;
+      counter++;
+    }
+    for (Appendage a : appendages) {
+      value += a.armor;
+      counter++;
+    }
+    return value/counter;
   }
 
   float getCreatureDensity() { // gets the creature's density (total mass divided by total area)
@@ -584,11 +598,11 @@ class creature {
 
   // This function removes the body from the box2d world
   void killBody() {
-    // if its no longer alive creature spawns 2 gametes in a 
-    // radius of 5 tiles and the body can be killed - otherwise it
-    // still "in" the world.  Have to make sure the body isn't
-    // referenced elsewhere
-    
+    // if its no longer alive creature spawns 2 gametes in a     
+    // radius of 5 tiles and the body can be killed - otherwise it    
+    // still "in" the world.  Have to make sure the body isn't    
+    // referenced elsewhere    
+      
     // Spawn gametes
     int dx = (int)random(-5, 6); //from -5 to 5 (6 is not included)
     int dy = (int)random(-5, 6);
@@ -607,7 +621,7 @@ class creature {
                            
     gameteStack.add(g1);
     gameteStack.add(g2);
-      
+    
     // Delete the body
     box2d.destroyBody(body);
   }
@@ -751,9 +765,9 @@ class creature {
         health = health -1;
       }
     }
+    else freezeTimer--;
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
     body.setAngularVelocity(body.getAngularVelocity() * 0.9);
-    if (freezeTimer > 0) freezeTimer--;
 
     // if out of health have the creature "die". Stops participating
     // in the world, still exists for reproducton
@@ -763,7 +777,7 @@ class creature {
       // still "in" the world.  Have to make sure the body isn't
       // referenced elsewhere
       
-      //delete the body
+      // Destroy Body
       killBody();
     }
 
@@ -817,7 +831,7 @@ class creature {
     // Get its angle of rotation
     float a = body.getAngle();
     
-    if (hit_indicator>0) { //makes the animation show up when hit
+    if (hit_indicator > 0) { //makes the animation show up when hit
       fill (153,0,0);
       ellipse (pos.x, pos.y, getWidth()+15, getWidth()+15); //this draws the animation when the creature gets hit. Animation is a circle right now
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
