@@ -331,12 +331,14 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    p1.addEnergy(20000); // getting food is valuable
-
-    food p2 = (food)o2;
-    p1.senses.Set_Taste(p2);
-    if (p2 != null) {
-      p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+    if(p1.current_actions[2] > 0.0){
+      p1.addEnergy(20000); // getting food is valuable
+  
+      food p2 = (food)o2;
+      p1.senses.Set_Taste(p2);
+      if (p2 != null) {
+        p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      }
     }
   }
 
@@ -344,11 +346,13 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    p1.addEnergy(20000); // getting food is valuable
-    food p2 = (food)o1;
-    p1.senses.Set_Taste(p2);
-    if (p2 != null) {
-      p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+    if(p1.current_actions[2] > 0.0){
+      p1.addEnergy(20000); // getting food is valuable
+      food p2 = (food)o1;
+      p1.senses.Set_Taste(p2);
+      if (p2 != null) {
+        p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      }
     }
   }
 

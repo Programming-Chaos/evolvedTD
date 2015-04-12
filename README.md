@@ -248,3 +248,26 @@ Library" -> "Add Library" -> "Box2D for Processing". Can also be
 [installed manually][lib].
 
 [lib]: https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library
+
+# Data Collection
+
+If you wish to add a field to the data collection there is a simple process to do so:
+
+1) Add your data field to the correct table
+* Open evolvedTD.pde and find the initTables() function.
+* Find the table you wish to add to. Copy and paste a line from that table to the end of the table.
+* Edit the string passed to the addColumn call to match what you would like to label your column data.
+ * __Note__: _Add columns to the ends of the table as the excel file cells are formatted for the current order of things.  If you need to rearrange the collumns or add formatting to the cells, be sure to edit the excel document._
+ * __Note__: _The labels currently have 3 spaces on each side.  This is for cosmetics and readability inside the excel document only.  However it is important because the entire string is how you reference your column._
+ * __Note__: _Some tables are updated with data from every creature (multiple rows per round) and some are updated with just round data (one row per round).  Assign your data accordingly._
+
+2) Add your row of data to the collection.
+ * Open population.pde and find the updateData() function.
+ * Find the table that you wish to add your data to.
+ * Copy and paste a line from that table and edit it accordingly:
+  * change the setType to setInt, setFloat or setString. These are the 3 data types supported.
+  * change the string to the column label you created in step 1.
+  * change the datafield to your data you want written to the collection.
+  * your line layout should look like this: tableRow.setType("   Label   ", data);
+
+Now your data should show up in the designated table and column in our excel and csv files.
