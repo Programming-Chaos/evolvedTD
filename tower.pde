@@ -222,7 +222,7 @@ class tower {
         nametext = "Electron Cloud Generator";
         button1text = "Electrical Range";
         button2text = "Electrical Damage";
-        button3text = "Gravitational Strength";
+        button3text = "Rate of Fire";
         dmg = baseDamage*(bulletDamageUpgrades+1);
         firerate = round((float)baseFirerate/(fireRateUpgrades+1));
         projectileSpeed = baseProjectileSpeed*(bulletSpeedUpgrades+1);
@@ -233,7 +233,7 @@ class tower {
     if (firerate < firing.duration) firing.setDuration(firerate);
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
     upgradePanel.enabled = false;
-    upgradePanel.createTextBox(2000,200,0,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedTower.ID); } },100, true);
+    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedTower.ID); } },800, true);
     upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
       upgradePanel.enabled = false;
       if(state == State.STAGED)state = State.RUNNING;
