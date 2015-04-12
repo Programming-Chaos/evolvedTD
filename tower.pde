@@ -313,15 +313,15 @@ class tower {
         soundtimer++;
         if (soundtimer == 3){
           soundtimer = 0;
-          if (playSound) PlaySounds( "assets/railgunfire01long.mp3" );
+          if (playSound) PlaySounds( 0 ); //rail long
         }
-        else if (playSound) PlaySounds( "assets/railgunfire01slow_01.mp3" );
+        else if (playSound) PlaySounds( 1 ); //rail slow
         break;
       case 'p':
-        if (playSound) PlaySounds( "assets/ricochet1.mp3");
+        if (playSound) PlaySounds( 2 ); //ricochet
         break;
       case 'i':
-        if (playSound) PlaySounds( "assets/Cannon.mp3");
+        if (playSound) PlaySounds( 3 ); //cannon
         break;
     }
   }
@@ -335,13 +335,13 @@ class tower {
     if (playSound) {
       switch (type) {
         case 'r':
-          PlaySounds( "assets/railgunfire01long.mp3" );
+          PlaySounds( 0 ); //rail long
           break;
         case 'p':
-          PlaySounds( "assets/ricochet1.mp3");
+          PlaySounds( 2 ); //ricochet
           break;
         case 'i':
-          PlaySounds( "assets/Cannon.mp3");
+          PlaySounds( 3 ); //cannon
           break;
       }
     }

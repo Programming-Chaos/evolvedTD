@@ -112,8 +112,10 @@ void setup() {
   testGenome.testChromosome();
   testGenome.testMutation();
 
-  // Init data tables
+  // Initialize data tables
   initTables();
+  // Setup soundfiles array in sound.pde
+  setupSoundFiles();
 }
 
 void draw() {

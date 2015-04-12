@@ -922,7 +922,7 @@ class environment {
       rKills++;
     }
     strokeWeight(1);
-    if( random(-4, 1) < 0 ) PlaySounds( "assets/Thunder.mp3");
+    if( random(-4, 1) < 0 ) PlaySounds( 4 ); //thunder
     //thunder.rewind();
     //thunder.play();
   }
