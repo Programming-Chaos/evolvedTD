@@ -28,7 +28,7 @@ public class Sounds extends Thread {
   
   public Sounds ( AudioPlayer ax, int l ) {
     a = ax;
-    len = l;
+    len = l; //length of sound
   }
   
   public void run () {
