@@ -65,9 +65,10 @@ class player {
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTower('r'); } });
-    towerPanel.createButton(300, 300, -800, 0, "Plasmagun", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeTower('p'); } });
-    towerPanel.createButton(300, 300, -500, 0, "Freeze gun", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeTower('i'); } });
-    towerPanel.createButton(300, 300, -200, 0, "Laser gun", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeTower('l'); } });
+    towerPanel.createButton(300, 300, -800, 0, "Plasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeTower('p'); } });
+    towerPanel.createButton(300, 300, -500, 0, "Freeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeTower('i'); } });
+    towerPanel.createButton(300, 300, -200, 0, "Laser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeTower('l'); } });
+    towerPanel.createButton(300, 300, 100, 0, "Electron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeTower('g'); } });
     towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteTurret(); } });
     towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
 
@@ -190,32 +191,9 @@ class player {
   void placeTower(char type) {
     if (placing) {
       placing = false;
-      switch (pickedup.type) {
-        case 'r':
-          deleteTurret();
-          if (type == 'p') placeTower('p');
-          else if (type == 'i') placeTower('i');
-          else if (type == 'l') placeTower('l');
-          break;
-        case 'p':
-          deleteTurret();
-          if (type == 'r') placeTower('r');
-          else if (type == 'i') placeTower('i');
-          else if (type == 'l') placeTower('l');
-          break;
-        case 'i':
-          deleteTurret();
-          if (type == 'r') placeTower('r');
-          else if (type == 'p') placeTower('p');
-          else if (type == 'l') placeTower('l');
-          break;
-        case 'l':
-          deleteTurret();
-          if (type == 'r') placeTower('r');
-          else if (type == 'p') placeTower('p');
-          else if (type == 'i') placeTower('i');
-          break;
-      }
+      char temppickedup = pickedup.type;
+      deleteTurret();
+      if (type != temppickedup) placeTower(type);
     }
     else {
       placing = true;

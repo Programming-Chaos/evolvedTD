@@ -73,6 +73,7 @@ class creature {
   boolean CreatureScent = false;
   boolean ReproScent = false;
   boolean PainScent = false;
+  boolean shocked = false;
 
   // body
   Body body;

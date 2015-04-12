@@ -360,39 +360,52 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // projectiles damage creatures
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    if (p2.type == 'i') {
-      println("hit");
-      p1.freezeTimer = p2.damage;
-      p1.hits_by_tower++;
-    }
-    else {
-      if (f1.getUserData().getClass() == creature.Segment.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+    if (p2.type != 'g') {
+      if (p2.type == 'i') {
+        p1.freezeTimer = p2.damage;
+        p1.hits_by_tower++;
       }
-      if (f1.getUserData().getClass() == creature.Appendage.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+      else {
+        if (f1.getUserData().getClass() == creature.Segment.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+        }
+        if (f1.getUserData().getClass() == creature.Appendage.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+        }
       }
-    }
-    p2.remove = true;
+      p2.remove = true;
+      }
   }
   else if (o1.getClass() == projectile.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     // projectiles damage creatures
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    if (p2.type == 'i') {
-      println("hit");
-      p1.freezeTimer = p2.damage;
-      p1.hits_by_tower++;
-    }
-    else {
-      if (f2.getUserData().getClass() == creature.Segment.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+    if (p2.type != 'g') {
+      if (p2.type == 'i') {
+        p1.freezeTimer = p2.damage;
+        p1.hits_by_tower++;
       }
-      if (f2.getUserData().getClass() == creature.Appendage.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+      else {
+        if (f2.getUserData().getClass() == creature.Segment.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+        }
+        if (f2.getUserData().getClass() == creature.Appendage.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+        }
       }
+      p2.remove = true;
     }
-    p2.remove = true;
+  }
+
+  if (o1.getClass() == tower.class && o2.getClass() == projectile.class) {
+    println("tower-projectile");
+    tower p1 = (tower)o1;
+    projectile p2 = (projectile)o2;
+  }
+  else if (o1.getClass() == projectile.class && o2.getClass() == tower.class) {
+    println("projectile-tower");
+    tower p1 = (tower)o2;
+    projectile p2 = (projectile)o1;
   }
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
