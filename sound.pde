@@ -11,16 +11,8 @@ class SoundFile {
   } 
 }
 
-// list of soundfiles and their lengths
-ArrayList<SoundFile> soundfiles = new ArrayList<SoundFile>();
-
-void setupSoundFiles() {
-  soundfiles.add(new SoundFile("assets/railgunfire01long.mp3", 3000));     //0
-  soundfiles.add(new SoundFile("assets/railgunfire01slow_01.mp3", 1000));  //1
-  soundfiles.add(new SoundFile("assets/ricochet1.mp3", 2000));             //2
-  soundfiles.add(new SoundFile("assets/Cannon.mp3", 3000));                //3
-  soundfiles.add(new SoundFile("assets/Thunder.mp3", 6000));               //4
-}
+// Table of soundfiles and their lengths
+Table soundfiles = new Table();
 
 public class Sounds extends Thread {
   AudioPlayer a;
@@ -39,11 +31,80 @@ public class Sounds extends Thread {
   }
 }
 
-void PlaySounds (int s) {
+void PlaySounds (String s) {
   AudioPlayer a;
-  String n = soundfiles.get(s).name;
-  int l = soundfiles.get(s).len;
-  a = minim.loadFile(n);
-  Sounds f = new Sounds(a, l);
-  f.start(); 
+  TableRow sound = soundfiles.findRow(s, "Key");
+  
+  if (sound != null) { //make sure that proper key was used
+    String n = sound.getString("File");
+    int l = sound.getInt("Length");
+    
+    a = minim.loadFile(n);
+    Sounds f = new Sounds(a, l);
+    f.start(); 
+  }
+  
+  // print error if bad key was given
+  else println('\"' + s + "\" is not a key in the sound table");
+}
+
+
+// Sets up the storage of our sound files and lengths
+void setupSoundFiles() {
+  soundfiles.addColumn("Key");
+  soundfiles.addColumn("File");
+  soundfiles.addColumn("Length");
+  
+  TableRow sf = soundfiles.addRow(); //Railgun_Long_01
+  sf.setString("Key", "Railgun_Long_01");
+  sf.setString("File", "assets/railgunfire01long.mp3");
+  sf.setInt("Length", 3000);
+  
+  sf = soundfiles.addRow(); //Railgun_Slow_01
+  sf.setString("Key", "Railgun_Slow_01");
+  sf.setString("File", "assets/railgunfire01slow_01.mp3");
+  sf.setInt("Length", 1000);
+  
+  sf = soundfiles.addRow(); //Ricochet_01
+  sf.setString("Key", "Ricochet_01");
+  sf.setString("File", "assets/ricochet1.mp3");
+  sf.setInt("Length", 2000);
+  
+  sf = soundfiles.addRow(); //Cannon_01
+  sf.setString("Key", "Cannon_01");
+  sf.setString("File", "assets/Cannon.mp3");
+  sf.setInt("Length", 3000);
+  
+  sf = soundfiles.addRow(); //Thunder_01
+  sf.setString("Key", "Thunder_01");
+  sf.setString("File", "assets/Thunder.mp3");
+  sf.setInt("Length", 6000);
+  
+  TestSoundFiles();
+}
+
+// Tests if the soundfiles actually exist
+void TestSoundFiles() {
+  AudioPlayer a;
+  String path;
+  Boolean pass = true;
+  
+  for (TableRow row : soundfiles.rows()) {
+    path = row.getString("File");
+    File file = new File(sketchPath(path));
+    
+    if (!file.exists()) {
+      println("Failed to load sound " + path);
+      pass = false;
+    }
+  } 
+  
+  if (pass) {
+    println("All sound files found");
+    println("Passed Sound Check :)");
+  }
+  else {
+    println("Failed to load some sound files");
+    println("Failed Sound Check :(");
+  }
 }

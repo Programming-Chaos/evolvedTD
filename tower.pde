@@ -313,15 +313,15 @@ class tower {
         soundtimer++;
         if (soundtimer == 3){
           soundtimer = 0;
-          if (playSound) PlaySounds( 0 ); //rail long
+          if (playSound) PlaySounds( "Railgun_Long_01" ); //rail long
         }
-        else if (playSound) PlaySounds( 1 ); //rail slow
+        else if (playSound) PlaySounds( "Railgun_Slow_01" ); //rail slow
         break;
       case 'p':
-        if (playSound) PlaySounds( 2 ); //ricochet
+        if (playSound) PlaySounds( "Ricochet_01" ); //ricochet
         break;
       case 'i':
-        if (playSound) PlaySounds( 3 ); //cannon
+        if (playSound) PlaySounds( "Cannon_01" ); //cannon
         break;
     }
   }
@@ -335,13 +335,13 @@ class tower {
     if (playSound) {
       switch (type) {
         case 'r':
-          PlaySounds( 0 ); //rail long
+          PlaySounds( "Railgun_Long_01" ); //rail long
           break;
         case 'p':
-          PlaySounds( 2 ); //ricochet
+          PlaySounds( "Ricochet_01" ); //ricochet
           break;
         case 'i':
-          PlaySounds( 3 ); //cannon
+          PlaySounds( "Cannon_01" ); //cannon
           break;
       }
     }
