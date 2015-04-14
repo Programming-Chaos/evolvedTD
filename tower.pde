@@ -209,7 +209,7 @@ class tower {
       case 'g': // electron cloud generator
         baseDamage = 2; // damage per tick while in range, scales down linearly with further distance, increasing damage increases electrical range
         baseFirerate = 175;
-        baseProjectileSpeed = 150; // functions as range as projectile speed is constant
+        baseProjectileSpeed = 100; // functions as range as projectile speed is constant
         gunbase = loadImage("assets/Turret-Electron/Turbase03256.png");
         firing.addFrame(loadImage("assets/Turret-Electron/Animated turret/Tbuter1.png"));
         firing.addFrame(loadImage("assets/Turret-Electron/Animated turret/Tbuter2.png"));
@@ -233,7 +233,8 @@ class tower {
     if (firerate < firing.duration) firing.setDuration(firerate);
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
     upgradePanel.enabled = false;
-    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedTower.ID); } },800, true);
+    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedTower.ID); } },80, false);
+    upgradePanel.createTextBox(2000,200,0,-800,"",80, true);
     upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
       upgradePanel.enabled = false;
       if(state == State.STAGED)state = State.RUNNING;
@@ -294,10 +295,14 @@ class tower {
       xpos = round(mouse_x);
       ypos = round(mouse_y);
       conflict = false;
-      for (tower t : the_player.towers) { //check for overlap with existing towers
-        if (t != the_player.pickedup)
-          if (sqrt((t.xpos-xpos)*(t.xpos-xpos)+(t.ypos-ypos)*(t.ypos-ypos)) <= radius*2)
+      for (structure s : the_player.structures) { //check for overlap with existing structures
+        if (s != the_player.pickedup) {
+          if (s.type == 'b')
+            if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
+              conflict = true;
+          else if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius*2)
             conflict = true;
+        }
       } // and check if the tower is out-of-bounds
       if (xpos < ((-1*(worldWidth/2))+radius) || xpos > ((worldWidth/2)-radius) || ypos < ((-1*(worldHeight/2))+radius) || ypos > ((worldHeight/2)-radius))
         conflict = true;
