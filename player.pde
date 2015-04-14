@@ -1,5 +1,5 @@
 class player {
-  ArrayList<tower> towers;
+  ArrayList<structure> structures;
   ArrayList<Panel> upgradepanels;
   Panel playerPanel;
   Panel statsPanel;
@@ -14,7 +14,7 @@ class player {
   boolean placing = false;
   int numTowersCreated = 0;
   int targetMode = 1;
-  tower pickedup;
+  structure pickedup;
   
   Panel testpanel;
   
@@ -22,10 +22,10 @@ class player {
   float maxResources;     // max resources the tower can store, may not use, if used should be upgradable
   float resourceGain;     // gain per timestep
   creature selectedCreature;
-  tower selectedTower;
+  structure selectedStructure;
 
   player() {
-    towers = new ArrayList<tower>();
+    structures = new ArrayList<structure>();
     upgradepanels = new ArrayList<Panel>();
     activeweapon = 1;
     
@@ -56,12 +56,22 @@ class player {
     towerstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
     towerstatsPanel.enabled = false;
     towerstatsPanel.setupTextBoxList(40,50,50,40);
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + ((selectedTower.type == 'r') ? "Railgun" : "Plasmagun")); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + selectedStructure.t.nametext); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedTower.ID); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedTower.bulletSpeedUpgrades+1)); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedTower.bulletDamageUpgrades+1)); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedTower.fireRateUpgrades+1)); } });
-    towerstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedTower.upgradePanel.enabled = true; } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedStructure.t.bulletSpeedUpgrades+1)); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedStructure.t.bulletDamageUpgrades+1)); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedStructure.t.fireRateUpgrades+1)); } });
+    towerstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.t.upgradePanel.enabled = true; } });
+
+    farmstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
+    farmstatsPanel.enabled = false;
+    farmstatsPanel.setupTextBoxList(40,50,50,40);
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return "Bioreactor"; } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedStructure.f.ID); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedStructure.t.bulletSpeedUpgrades+1)); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedStructure.t.bulletDamageUpgrades+1)); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedStructure.t.fireRateUpgrades+1)); } });
+    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.t.upgradePanel.enabled = true; } });
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTower('r'); } });

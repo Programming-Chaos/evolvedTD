@@ -3,6 +3,7 @@ class food {
   int radius;
   int colortimer;;
   boolean remove = false;
+  int nourishment = 20000;
   /*Taste will be 5 types of taste. - sweet, sour, salty, bitter, umami*/
   int []taste;
   
