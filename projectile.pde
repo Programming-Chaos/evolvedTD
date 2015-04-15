@@ -35,12 +35,10 @@ class projectile {
       radius = 40;
       wobblestrength = 35;
       makebodyElectron(xpos, ypos);
-      the_projectile.setUserData(this);
     }
     else {
       radius = 2;
       makebody(xpos, ypos);
-      the_projectile.setUserData(this);
       
       switch (type){
         case 'r':
@@ -60,6 +58,7 @@ class projectile {
           break;
       }
     }
+    the_projectile.setUserData(this);
   }
   
   void update(){
@@ -76,8 +75,9 @@ class projectile {
         float distance;
         for (creature c : the_pop.swarm) {
           cpos = box2d.getBodyPixelCoord(c.body);
-          distance = sqrt(((cpos.x-pos.x)*(cpos.x-pos.x))+((cpos.y-pos.y)*(cpos.y-pos.y)));
-          if (distance < (damage*50) && c.alive) {
+          distance = sqrt(((cpos.x-pos.x)*(cpos.x-pos.x))+((cpos.y-pos.y)*(cpos.y-pos.y)))-40;
+          float maxRange = (damage*50);
+          if (distance < maxRange && c.alive) {
             beginShape();
             noFill();
             stroke(255,255,100,255);
@@ -90,8 +90,8 @@ class projectile {
             vertex(cpos.x,cpos.y);
             endShape();
             
-            c.health += (-1*damage*(distance/(damage*50)));
-            c.senses.Set_Current_Pain((damage*(distance/(damage*50))));
+            c.health += (-1*damage*((maxRange-distance)/maxRange));
+            c.senses.Set_Current_Pain((damage*((maxRange-distance)/maxRange)));
             // increase or decrease this number to lengthen or shorten the
             // animation time on hit
             c.hit_indicator = 5;
@@ -100,7 +100,7 @@ class projectile {
               c.hits_by_tower++;
               c.shocked = true;
             }
-            c.hp_removed_by_tower += ((-1*damage*(distance/(damage*50))));
+            c.hp_removed_by_tower += ((-1*damage*((maxRange-distance)/maxRange)));
           }
         }
       }

@@ -85,24 +85,24 @@ class farm {
     shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
     upgradePanel.enabled = false;
-    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedStructure.t.ID); } },80, false);
+    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedStructure.f.ID); } },80, false);
     upgradePanel.createTextBox(2000,200,0,-800,"",80, true);
     upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
       upgradePanel.enabled = false;
       if(state == State.STAGED)state = State.RUNNING; } });
     for (int c = 0; c < 5; c++) {
       if (c > 0) {
-        shieldButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletSpeed(); } });
+        shieldButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeShield(); } });
         upgradePanel.buttons.get(shieldButtons[c]).grayed = true;
-        productionSpeedButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
+        productionSpeedButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeProductionSpeed(); } });
         upgradePanel.buttons.get(productionSpeedButtons[c]).grayed = true;
-        shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
+        shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeShieldRegen(); } });
         upgradePanel.buttons.get(shieldRegenButtons[c]).grayed = true;
       }
       else {
-        shieldButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletSpeed(); } });
-        productionSpeedButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
-        shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
+        shieldButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeShield(); } });
+        productionSpeedButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeProductionSpeed(); } });
+        shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeShieldRegen(); } });
       }
     }
     the_player.upgradepanels.add(upgradePanel);
@@ -214,5 +214,71 @@ class farm {
       stroke(0);
       popMatrix();
     }
+  }
+  
+  void upgradeShield() {
+    if (shieldUpgrades > 4)return;
+    if (the_player.money < ((((byte)1)<<(shieldUpgrades*3))*100)) {
+      println("You do not have sufficient funds to purchase this upgrade...");
+      return;
+    }
+    the_player.money -= ((((byte)1)<<(shieldUpgrades*3))*100);
+    upgradePanel.buttons.get(shieldButtons[shieldUpgrades]).button_text = button1text + "\nX"+ (shieldUpgrades+2) + "\nPurchased!";
+    upgradePanel.buttons.get(shieldButtons[shieldUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
+    if (shieldUpgrades < 4) {
+      upgradePanel.buttons.get(shieldButtons[shieldUpgrades+1]).grayed = false;
+      upgradePanel.buttons.get(shieldButtons[shieldUpgrades+1]).button_text = button1text + "\nX"+ (shieldUpgrades+3) + "\n" + (((byte)1)<<((shieldUpgrades+1)*3)) + "00$";
+    }
+    
+    if (playSound) PlaySounds("Upgrade_01");
+    
+    shieldUpgrades++;
+    
+    float shielddifference = (-1*maxShield);
+    maxShield = baseMaxShield*(shieldUpgrades+1);
+    shielddifference += maxShield;
+    shield += shielddifference;
+  }
+  
+  void upgradeProductionSpeed() {
+    if (productionSpeedUpgrades > 4)return;
+    if (the_player.money < ((((byte)1)<<(productionSpeedUpgrades*3))*100)) {
+      println("You do not have sufficient funds to purchase this upgrade...");
+      return;
+    }
+    the_player.money -= ((((byte)1)<<(productionSpeedUpgrades*3))*100);
+    upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades]).button_text = button2text + "\nX"+ (productionSpeedUpgrades+2) + "\nPurchased!";
+    upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
+    if (productionSpeedUpgrades < 4) {
+      upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades+1]).grayed = false;
+      upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades+1]).button_text = button2text + "\nX"+ (productionSpeedUpgrades+3) + "\n" + (((byte)1)<<((productionSpeedUpgrades+1)*3)) + "00$";
+    }
+    
+    if (playSound) PlaySounds( "Upgrade_01" );
+    
+    productionSpeedUpgrades++;
+    
+    productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
+  }
+  
+  void upgradeShieldRegen() {
+    if (shieldRegenUpgrades > 4)return;
+    if (the_player.money < ((((byte)1)<<(shieldRegenUpgrades*3))*100)) {
+      println("You do not have sufficient funds to purchase this upgrade...");
+      return;
+    }
+    the_player.money -= ((((byte)1)<<(shieldRegenUpgrades*3))*100);
+    upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades]).button_text = button3text + "\nX"+ (shieldRegenUpgrades+2) + "\nPurchased!";
+    upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
+    if (shieldRegenUpgrades < 4) {
+      upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades+1]).grayed = false;
+      upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades+1]).button_text = button3text + "\nX"+ (shieldRegenUpgrades+3) + "\n" + (((byte)1)<<((shieldRegenUpgrades+1)*3)) + "00$";
+    }
+    
+    if (playSound) PlaySounds( "Upgrade_01" );
+    
+    shieldRegenUpgrades++;
+    
+    shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
   }
 }

@@ -359,7 +359,7 @@ class tower {
   }
 
   void display() {
-    image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    //image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     
     if (firerate < firing.duration) firing.setDuration(firerate);
     if (projectileSpeed < targeting.duration) targeting.setDuration(projectileSpeed);
@@ -384,7 +384,7 @@ class tower {
     pushMatrix();
     translate(xpos, ypos);
     rotate(angle + HALF_PI);
-    image(firing.currentFrame(),-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    //image(firing.currentFrame(),-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
     
     if (targeting.active()) {
