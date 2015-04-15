@@ -9,6 +9,7 @@ class player {
   Panel towerstatsPanel;
   Panel farmstatsPanel;
   int money = 0;
+  int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
   int numStructuresCreated = 0;
@@ -164,6 +165,11 @@ class player {
     }
     for (int i = panels.size() - 1; i >= 0; i--)
       panels.get(i).update();
+    if (moneytimer == 10) {
+      moneytimer = 0;
+      money += (generation+1);
+    }
+    moneytimer++;
   }
 
   void mouse_pressed() {

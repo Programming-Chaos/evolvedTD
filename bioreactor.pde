@@ -6,8 +6,7 @@ class structure {
   
   structure(char tp, int id) {
     ID = id;
-    type = tp;
-    switch (type) {
+    switch (tp) {
       case 'b':
         type = 'b';
         f = new farm(ID);
@@ -18,7 +17,7 @@ class structure {
       case 'l':
       case 'g':
         type = 't';
-        t = new tower(type, ID);
+        t = new tower(tp, ID);
         break;
     }
   }
@@ -39,6 +38,7 @@ class farm {
   float maxHealth = 100;
   int productionSpeed;
   int baseProductionSpeed;
+  int productiontimer = 0;
   float shieldRegen;
   float baseShieldRegen;
   int shieldUpgrades = 0;
@@ -81,6 +81,7 @@ class farm {
     button3text = "Shield Regeneration";
     maxShield = baseMaxShield*(shieldUpgrades+1);
     shield = maxShield;
+    health = maxHealth;
     productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
     shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
@@ -111,7 +112,7 @@ class farm {
   void update() {
     if (!inTransit && wasInTransit) { // create a body for a just-placed farm
       BodyDef bd = new BodyDef();
-      bd.position.set(box2d.coordPixelsToWorld(new Vec2(0+xpos, 17*(radius/80)+ypos)));
+      bd.position.set(box2d.coordPixelsToWorld(new Vec2(xpos,ypos)));
       bd.type = BodyType.STATIC;
       bd.linearDamping = 0.9;
       farm_body = box2d.createBody(bd);
@@ -139,9 +140,10 @@ class farm {
       conflict = false;
       for (structure s : the_player.structures) { //check for overlap with existing structures
         if (s != the_player.pickedup) {
-          if (s.type == 'b')
+          if (s.type == 'b') {
             if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
               conflict = true;
+          }
           else if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius*2)
             conflict = true;
         }
@@ -150,37 +152,41 @@ class farm {
         conflict = true;
     }
     else if (state == State.RUNNING) { // farm is placed and running
-      the_player.money += productionSpeed; // this is the point of farms, right now
-      angle += (productionSpeed*PI/16);
+      if (productiontimer == 5) {
+        productiontimer = 0;
+        the_player.money += productionSpeed; // this is the point of farms, right now
+        if (shield < maxShield) shield += shieldRegen;
+      }
+      productiontimer++;
+      angle += (productionSpeed*PI/32);
       if (angle > 2*PI) angle -= 2*PI;
-      if (shield < maxShield) shield += shieldRegen;
     }
   }
 
   void display() {
-    image(base,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    image(base,xpos-((float)radius*1.15),ypos-((float)radius*1.15),((float)radius*1.15)*2,((float)radius*1.15)*2);
 
     pushMatrix();
     translate(xpos, ypos);
     rotate(angle);
-    image(rotator,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    image(rotator,-1*((float)radius*1.15),-1*((float)radius*1.15), ((float)radius*1.15)*2, ((float)radius*1.15)*2);
     popMatrix();
 
     // draw farm health bar
     noFill();
     stroke(0);
-    rect(xpos, ypos-42, 0.1*maxHealth, 12);
+    rect(xpos, ypos-56, 0.2*maxHealth, 6);
     noStroke();
     fill(100, 255, 100);
-    rect(xpos, ypos-42, 0.1*health, 12);
+    rect(xpos, ypos-56, 0.2*health, 6);
 
     // draw farm shield bar
     noFill();
     stroke(0);
-    rect(xpos, ypos-30, 0.1*maxShield, 12);
+    rect(xpos, ypos-50, 0.2*maxShield, 6);
     noStroke();
     fill(20, 200, 255);
-    rect(xpos, ypos-30, 0.1*shield, 12);
+    rect(xpos, ypos-50, 0.2*shield, 6);
 
     if (inTransit) {
     // draw the outline of the farm's box2D body

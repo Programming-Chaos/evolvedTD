@@ -70,6 +70,16 @@ class projectile {
         for (creature c : the_pop.swarm) c.shocked = false;
       }
       else {
+        if (box2d.getBodyPixelCoord(the_projectile).x-radius <= (-1*(worldWidth/2)) || box2d.getBodyPixelCoord(the_projectile).x+radius >= (worldWidth/2)) {
+          the_projectile.setLinearVelocity(new Vec2(-1*the_projectile.getLinearVelocity().x,the_projectile.getLinearVelocity().y));
+          angle *= -1;
+          wobblestrength += 15;
+        }
+        if (box2d.getBodyPixelCoord(the_projectile).y-radius <= (-1*(worldHeight/2)) || box2d.getBodyPixelCoord(the_projectile).y+radius >= (worldHeight/2)) {
+          the_projectile.setLinearVelocity(new Vec2(the_projectile.getLinearVelocity().x,-1*the_projectile.getLinearVelocity().y));
+          angle *= -1;
+          wobblestrength += 15;
+        }
         Vec2 cpos;
         Vec2 pos = box2d.getBodyPixelCoord(the_projectile);
         float distance;

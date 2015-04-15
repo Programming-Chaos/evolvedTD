@@ -99,6 +99,7 @@ class tower {
   // constructor function, initializes the tower
   tower(char t, int id) {
     ID = id;
+    type = t;
     energy = maxEnergy;
     energyGain = 0;  // should be determined by upgrades, can start at 0
     projectiles = new ArrayList<projectile>();
@@ -111,9 +112,8 @@ class tower {
 
     xpos = round(mouse_x);
     ypos = round(mouse_y);
-    type = t;
 
-    switch (type){
+    switch (type) {
       case 'r': // railgun
         baseDamage = 20;
         baseFirerate = 25;
@@ -134,7 +134,7 @@ class tower {
         ecost = 10;
         break;
       case 'p': // plasma cannon
-        baseDamage = 50;
+        baseDamage = 40;
         baseFirerate = 75;
         baseProjectileSpeed = 150;
         gunbase = loadImage("assets/Turret-Plasma/Turbase03256.png");
@@ -173,7 +173,7 @@ class tower {
         ecost = 20;
         break;
       case 'l': // laser artillery
-        baseDamage = 80;
+        baseDamage = 70;
         baseFirerate = 150;
         baseProjectileSpeed = 100; // functions as targeting ticks since speed is instantaneous
         gunbase = loadImage("assets/Turret-Laser/Turret base 03-01.png");
@@ -258,6 +258,7 @@ class tower {
   }
 
   void update() {
+    println("u1");
     update_projectiles();
     if (state == State.RUNNING) {
       for (int i = burntcreatures.size()-1; i >= 0; i--) {
@@ -266,9 +267,10 @@ class tower {
         if (b.timer == 0) burntcreatures.remove(i);
       }
     }
+    println("u2");
     if (!inTransit && wasInTransit) { // create a body for a just-placed tower
       BodyDef bd = new BodyDef();
-      bd.position.set(box2d.coordPixelsToWorld(new Vec2(0+xpos, 17*(radius/80)+ypos)));
+      bd.position.set(box2d.coordPixelsToWorld(new Vec2(xpos,ypos)));
       bd.type = BodyType.STATIC;
       bd.linearDamping = 0.9;
       tower_body = box2d.createBody(bd);
@@ -283,7 +285,9 @@ class tower {
       tower_body.setUserData(this);
       wasInTransit = false;
     }
+    println("u3");
     if (inTransit) {
+      println("t1");
       if (!wasInTransit) {
         if (targeting.timer < (((float)15/18)*targeting.duration) && poweringup) {
           poweringup = false;
@@ -293,22 +297,30 @@ class tower {
         for (Fixture f = tower_body.getFixtureList(); f != null; f = f.getNext())
           f.setUserData(null);
         box2d.destroyBody(tower_body); // destroy the body of a just-picked-up tower
+        wasInTransit = true;
       }
-      wasInTransit = true;
+      println("t2");
       xpos = round(mouse_x);
       ypos = round(mouse_y);
+      println("t3");
       conflict = false;
+      println("t4");
       for (structure s : the_player.structures) { //check for overlap with existing structures
-        if (s != the_player.pickedup) {
-          if (s.type == 'b')
+        if (s.ID != the_player.pickedup.ID) {
+          println("1 " + s.type);
+          if (s.type == 'b') {
             if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
               conflict = true;
+          }
           else if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius*2)
             conflict = true;
+          println("2 " + s.type);
         }
       } // and check if the tower is out-of-bounds
+      println("t5");
       if (xpos < ((-1*(worldWidth/2))+radius) || xpos > ((worldWidth/2)-radius) || ypos < ((-1*(worldHeight/2))+radius) || ypos > ((worldHeight/2)-radius))
         conflict = true;
+      println("t6");
     }
     else if (state == State.RUNNING) { // tower is placed and running
       if (laserfiretimer > 0) laserfiretimer--;
@@ -345,6 +357,7 @@ class tower {
         if (autofirecounter < firerate-1) autofirecounter++;
       }
     }
+    println("u4");
   }
 
   void update_projectiles(){
@@ -359,11 +372,14 @@ class tower {
   }
 
   void display() {
-    //image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    println("d1");
+    image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     
+    println("d2");
     if (firerate < firing.duration) firing.setDuration(firerate);
     if (projectileSpeed < targeting.duration) targeting.setDuration(projectileSpeed);
     
+    println("d3");
     if (laserfiretimer > 0) {
       float laserlength = sqrt(((xpos-target.x)*(xpos-target.x))+((ypos-target.y)*(ypos-target.y)));
       pushMatrix();
@@ -380,13 +396,15 @@ class tower {
       stroke(0);
       popMatrix();
     }
+    println("d4");
 
     pushMatrix();
     translate(xpos, ypos);
     rotate(angle + HALF_PI);
-    //image(firing.currentFrame(),-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    image(firing.currentFrame(),-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
     
+    println("d5");
     if (targeting.active()) {
       pushMatrix();
         translate(target.x,target.y);
@@ -394,10 +412,12 @@ class tower {
         image(targeting.currentFrame(),-512,-512);
       popMatrix();
     }
+    println("d6");
 
     for (projectile p: projectiles) { // display the active projectiles
       p.display();
     }
+    println("d7");
 
     // draw tower energy bar
     noFill();
@@ -406,6 +426,7 @@ class tower {
     noStroke();
     fill(0, 0, 255);
     rect(xpos, ypos-30, 0.1*energy, 6);
+    println("d8");
 
     if (inTransit) {
     // draw the outline of the tower's box2D body
@@ -439,6 +460,7 @@ class tower {
       stroke(0);
       popMatrix();
     }
+    println("d9");
   }
 
   void next_generation() { // update the tower
@@ -503,12 +525,13 @@ class tower {
     if (laserfiretimer > 5) laserfiretimer = 5;
     if (laserfiretimer < 1) laserfiretimer = 1;
     if (playSound) PlaySounds( "Laser_01" );
-    float creatureradius;
+    float armoravg;
     for (creature c : the_pop.swarm) {
       if (target.x < c.getPos().x + (c.getWidth()/2) && target.x > c.getPos().x - (c.getWidth()/2) 
-          && target.y < c.getPos().y + (c.getWidth()/2) && target.y > c.getPos().y - (c.getWidth()/2)) {
-        if (c.health <= dmg) burntcreatures.add(new BurntCreature(c));
-        c.changeHealth(-1*dmg); // laser cannon ignores armor (for now)
+       && target.y < c.getPos().y + (c.getWidth()/2) && target.y > c.getPos().y - (c.getWidth()/2)) {
+         armoravg = c.getArmorAvg();
+        if (c.health <= dmg/armoravg) burntcreatures.add(new BurntCreature(c));
+        c.changeHealth(round(-1*dmg/armoravg)); // laser cannon can be mitigated by creature's average armor
       }
     }
   }

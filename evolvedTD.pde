@@ -400,13 +400,48 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     }
   }
 
-  /*if (o1.getClass() == tower.class && o2.getClass() == projectile.class) {
-    tower p1 = (tower)o1;
-    projectile p2 = (projectile)o2;
+  /*if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
+    creature p1 = (creature)o1;
+    tower p2 = (tower)o2;
   }
-  else if (o1.getClass() == projectile.class && o2.getClass() == tower.class) {
-    tower p1 = (tower)o2;
-    projectile p2 = (projectile)o1;
+  else if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
+    creature p1 = (creature)o2;
+    tower p2 = (tower)o1;
+  }*/
+
+  /*if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
+    creature p1 = (creature)o1;
+    farm p2 = (farm)o2;
+    if(true){//p1.current_actions[2] > 0.0){
+      int munched = 10;
+      if (p2.shield < munched) {
+        if (p2.health < munched) {
+          munched = round(p2.health);
+          p2.health = 0;
+        }
+        else p2.health -= (munched-p2.shield);
+        p2.shield = 0;
+      }
+      else p2.shield -= munched;
+      p1.addEnergy(1000*munched); // munching a bioreactor is valuable
+    }
+  }
+  else if (o1.getClass() == creature.class && o2.getClass() == farm.class) {
+    creature p1 = (creature)o2;
+    farm p2 = (farm)o1;
+    if(true){//p1.current_actions[2] > 0.0){
+      int munched = 10;
+      if (p2.shield < munched) {
+        if (p2.health < munched) {
+          munched = round(p2.health);
+          p2.health = 0;
+        }
+        else p2.health -= (munched-p2.shield);
+        p2.shield = 0;
+      }
+      else p2.shield -= munched;
+      p1.addEnergy(1000*munched); // munching a bioreactor is valuable
+    }
   }*/
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
