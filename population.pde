@@ -200,8 +200,6 @@ class population {
         break;
       }
       
-      
-      
       // i is first gamete j is it's chosen mate
       for (int i=0; i < variance && i < size; i++) {
         rand = (int)random(size);
@@ -248,15 +246,11 @@ class population {
     
           generation.add(new creature(new Genome(g1.gamete, g2.gamete),
                                       10000 + g1.energy + g2.energy, pos));
-          //break;
         }
         
       }
     }
-    //println("made " + childrenBred + " and needed " + childrenNew + " more");
-    swarm.clear();
     swarm = generation;
-    
   }
   
   Boolean checkForCreature(Vec2 pos, ArrayList<creature> list) {
