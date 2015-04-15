@@ -126,8 +126,7 @@ class population {
    * than 2 standard deviations, then the parents are by default
    * incompatible
    */
-  boolean areGametesCompatible(Genome.Chromosome gamete1,
-                               Genome.Chromosome gamete2) {
+  boolean areGametesCompatible(Chromosome gamete1, Chromosome gamete2) {
     if (gamete1 == null || gamete2 == null)
       return false;
 

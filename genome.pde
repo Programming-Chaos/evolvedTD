@@ -54,8 +54,7 @@ ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_
 
 // maximum number of feelers that can be evolved
 static final int MAX_FEELERS = 40;
-ArrayList<FeelerTrait> feelers
-  = new ArrayList<FeelerTrait>(MAX_FEELERS);
+ArrayList<FeelerTrait> feelers = new ArrayList<FeelerTrait>(MAX_FEELERS);
 // encodes number of feelers actually expressed
 Trait expressedFeelers = new Trait(10);
 
@@ -250,41 +249,8 @@ class Genome {
     return (xChromosome.avg(trait) + yChromosome.avg(trait)) / 2;
   }
 
-  class Chromosome {
-    FloatList genes;
-    String inherit = "";
-    
-    Chromosome(int n) {
-      genes = new FloatList(n);
-      for (int i = 0; i < n; i++) {
-        // give each gene a random value near zero
-        genes.append(randomGaussian() * INITIAL_DEVIATION);
-      }
     }
 
-    Chromosome() {
-     genes = new FloatList();
-    }
-
-    FloatList list(Trait trait) {
-      return genes.getSubset(trait.index, trait.genes);
-    }
-
-    float sum(Trait trait) {
-      return list(trait).sum();
-    }
-
-    float avg(Trait trait) {
-      return sum(trait) / trait.genes;
-    }
-
-    void mutate() {
-      for (int i = 0; i < genes.size(); i++) {
-        // mutate only a select number of random genes
-        if (random(1) < MUTATION_RATE) {
-          genes.add(i, randomGaussian() * MUTATION_DEVIATION);
-        }
-      }
     }
   }
 
@@ -358,8 +324,46 @@ class Genome {
       testFailed("controlt trait in nChromosome avg does not equal sum/traits");
 
     if (testSuccess)
-      println("Genome.Chromosome tests PASSED :)");
+      println("Chromosome tests PASSED :)");
     else
-      println("Genome.Chromosome tests FAILED :(");
+      println("Chromosome tests FAILED :(");
+  }
+}
+
+class Chromosome {
+  FloatList genes;
+  String inherit = "";
+
+  Chromosome(int n) {
+    genes = new FloatList(n);
+    for (int i = 0; i < n; i++) {
+      // give each gene a random value near zero
+      genes.append(randomGaussian() * INITIAL_DEVIATION);
+    }
+  }
+
+  Chromosome() {
+    genes = new FloatList();
+  }
+
+  FloatList list(Trait trait) {
+    return genes.getSubset(trait.index, trait.genes);
+  }
+
+  float sum(Trait trait) {
+    return list(trait).sum();
+  }
+
+  float avg(Trait trait) {
+    return sum(trait) / trait.genes;
+  }
+
+  void mutate() {
+    for (int i = 0; i < genes.size(); i++) {
+      // mutate only a select number of random genes
+      if (random(1) < MUTATION_RATE) {
+        genes.add(i, randomGaussian() * MUTATION_DEVIATION);
+      }
+    }
   }
 }

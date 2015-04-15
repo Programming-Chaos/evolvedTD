@@ -6,9 +6,9 @@ class Gamete {
   int xPos, yPos;
   int time;
   int energy;
-  Genome.Chromosome gamete;
+  Chromosome gamete;
 
-  Gamete(int x, int y, int e, Genome.Chromosome g){
+  Gamete(int x, int y, int e, Chromosome g){
     xPos = x;
     yPos = y;
     time = timesteps;
@@ -16,11 +16,11 @@ class Gamete {
     gamete = g;
   }
 
-  int getX()                      { return xPos; }
-  int getY()                      { return yPos; }
-  int getTime()                   { return time; }
-  int getEnergy()                 { return energy; }
-  Genome.Chromosome getGamete()   { return gamete; }
+  int getX()             { return xPos; }
+  int getY()             { return yPos; }
+  int getTime()          { return time; }
+  int getEnergy()        { return energy; }
+  Chromosome getGamete() { return gamete; }
 }
 
 class GameteComparator implements Comparator<Gamete> {
@@ -599,7 +599,7 @@ class creature {
     int posY = (int)(pos.y / cellHeight);
     
     // Use one of each chromosome from getGametes.
-    ArrayList<Genome.Chromosome> newGametes = new ArrayList<Genome.Chromosome>(2);
+    ArrayList<Chromosome> newGametes = new ArrayList<Chromosome>(2);
     newGametes = genome.getGametes();
     
     Gamete g1 = new Gamete(posX + dx, posY + dy, energy, newGametes.get(0));
@@ -786,7 +786,7 @@ class creature {
 
       // Create gamete and place in gameteSack
       Gamete g = new Gamete(xPos, yPos, energy,
-                            (Genome.Chromosome)genome.getGametes().get(0));
+                            (Chromosome)genome.getGametes().get(0));
       gameteStack.add(g);
 
       // remove energy from creature
