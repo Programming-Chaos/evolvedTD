@@ -36,6 +36,8 @@ class rock {
   // This function removes the particle from the box2d world
   void killBody() {
     the_rock.setUserData(null);
+    for (Fixture f = the_rock.getFixtureList(); f != null; f = f.getNext())
+      f.setUserData(null);
     box2d.destroyBody(the_rock);
   }
   

@@ -170,6 +170,8 @@ class tower {
     if (inTransit) {
       if (!wasInTransit) {
         tower_body.setUserData(null);
+        for (Fixture f = tower_body.getFixtureList(); f != null; f = f.getNext())
+          f.setUserData(null);
         box2d.destroyBody(tower_body);
       }
       wasInTransit = true;

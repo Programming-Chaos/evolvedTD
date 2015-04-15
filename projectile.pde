@@ -57,6 +57,8 @@ class projectile {
   void killBody() {
     if (the_projectile != null) {
       the_projectile.setUserData(null);
+      for (Fixture f = the_projectile.getFixtureList(); f != null; f = f.getNext())
+        f.setUserData(null);
       box2d.destroyBody(the_projectile);
     }
   }
