@@ -261,12 +261,16 @@ our objects.
 After a [long search][sway] for our memory leak, we have found that
 the fix for this is to remove the reference via
 `body.setUserData(null)` when the body is no longer needed (that is,
-in `killBody()` for the respective object). Please ensure this is done
-for any new body types added to EvolvedTD. See #203 for more
-information.
+in `killBody()` for the respective object). Box2D bodies also have
+fixture lists, which similarly need their user data set to null. If we
+ever add joints, they would need to be taken care of as well. Please
+ensure this is done for any new body types added to EvolvedTD. See
+[#203][] and [#205][] for more information.
 
 [lib]: https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library
 [sway]: https://sway.com/3xv6q3uMP1SzS6OW
+[#203]: https://github.com/tsoule88/evolvedTD/pull/203
+[#205]: https://github.com/tsoule88/evolvedTD/pull/205
 
 # Data Collection
 
