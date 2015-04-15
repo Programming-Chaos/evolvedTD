@@ -196,32 +196,15 @@ class Genome {
     yChromosome = y;
   }
 
-  
   // Returns a list of genes from the X chromosome
   FloatList listX(Trait trait) {
     return xChromosome.list(trait);
   }
 
-  //Creates inheritance value
-  //. between each creature uniqie id between .
-  void inheritance(int num) {
-    if (xChromosome.inherit != "") {
-      xChromosome.inherit += "." + str(num);
-    } else {
-      xChromosome.inherit = str(num);
-    }
-    
-    if (yChromosome.inherit != "") {
-      yChromosome.inherit += "." + str(num);
-    } else {
-      yChromosome.inherit = str(num);
-    }
-  }
   // Returns a list of genes from the Y chromosome
   FloatList listY(Trait trait) {
     return yChromosome.list(trait);
   }
-
   
   // Returns a combined list of genes from both chromosomes
   FloatList list(Trait trait) {
@@ -249,8 +232,19 @@ class Genome {
     return (xChromosome.avg(trait) + yChromosome.avg(trait)) / 2;
   }
 
+  //Creates inheritance value
+  //. between each creature uniqie id between .
+  void inheritance(int num) {
+    if (xChromosome.inherit != "") {
+      xChromosome.inherit += "." + str(num);
+    } else {
+      xChromosome.inherit = str(num);
     }
 
+    if (yChromosome.inherit != "") {
+      yChromosome.inherit += "." + str(num);
+    } else {
+      yChromosome.inherit = str(num);
     }
   }
 
