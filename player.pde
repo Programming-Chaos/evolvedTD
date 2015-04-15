@@ -7,12 +7,11 @@ class player {
   Panel towerPanel;
   Panel helpPanel;
   Panel towerstatsPanel;
+  Panel farmstatsPanel;
   int money = 0;
-  int moneyGain = 10; // money per 40 ticks
-  int currentMoneyTick;
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
-  int numTowersCreated = 0;
+  int numStructuresCreated = 0;
   int targetMode = 1;
   structure pickedup;
   
@@ -57,7 +56,7 @@ class player {
     towerstatsPanel.enabled = false;
     towerstatsPanel.setupTextBoxList(40,50,50,40);
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + selectedStructure.t.nametext); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedTower.ID); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedStructure.ID); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedStructure.t.bulletSpeedUpgrades+1)); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedStructure.t.bulletDamageUpgrades+1)); } });
     towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedStructure.t.fireRateUpgrades+1)); } });
@@ -66,20 +65,21 @@ class player {
     farmstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
     farmstatsPanel.enabled = false;
     farmstatsPanel.setupTextBoxList(40,50,50,40);
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return "Bioreactor"; } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedStructure.f.ID); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedStructure.t.bulletSpeedUpgrades+1)); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedStructure.t.bulletDamageUpgrades+1)); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedStructure.t.fireRateUpgrades+1)); } });
-    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.t.upgradePanel.enabled = true; } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return selectedStructure.f.nametext; } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedStructure.ID); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)); } });
+    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.f.upgradePanel.enabled = true; } });
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
-    towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeTower('r'); } });
-    towerPanel.createButton(300, 300, -800, 0, "Plasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeTower('p'); } });
-    towerPanel.createButton(300, 300, -500, 0, "Freeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeTower('i'); } });
-    towerPanel.createButton(300, 300, -200, 0, "Laser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeTower('l'); } });
-    towerPanel.createButton(300, 300, 100, 0, "Electron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeTower('g'); } });
-    towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteTurret(); } });
+    towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
+    towerPanel.createButton(300, 300, -800, 0, "Plasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
+    towerPanel.createButton(300, 300, -500, 0, "Freeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
+    towerPanel.createButton(300, 300, -200, 0, "Laser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
+    towerPanel.createButton(300, 300, 100, 0, "Electron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
+    towerPanel.createButton(300, 300, 800, 0, "Bioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
+    towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
     towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
 
     helpPanel = new Panel(1000,1900,0,0,false,255);
@@ -134,12 +134,21 @@ class player {
       statsPanel.enabled = false;
     }
     
-    if (selectedTower != null) towerstatsPanel.enabled = true;
-    else towerstatsPanel.enabled = false;
+    if (selectedStructure != null) {
+      if (selectedStructure.type == 'b') farmstatsPanel.enabled = true;
+      else towerstatsPanel.enabled = false;
+    }
+    else {
+      towerstatsPanel.enabled = false;
+      farmstatsPanel.enabled = false;
+    }
 
     rectMode(CENTER);
-    for (tower t : towers)  // walk through the towers
-      t.display();  // display them all
+    for (structure s : structures) { // walk through the structures
+      if (s.type == 'b') s.f.display();  // display them all
+      else s.t.display();
+      
+    }
     for (Panel p : panels)
       p.display();
   }
@@ -147,15 +156,12 @@ class player {
   void update() {
     if (state == State.RUNNING) {
       resources += resourceGain;
-      currentMoneyTick++;
-      if (currentMoneyTick == 40) {
-        currentMoneyTick = 0;
-        money += moneyGain;
-      }
     }
-    // walk through the towers
-    for (int i = towers.size() - 1; i >= 0; i--)
-      towers.get(i).update();   // update them
+    // walk through the structures
+    for (int i = structures.size() - 1; i >= 0; i--) {
+      if (structures.get(i).type == 'b') structures.get(i).f.update();
+      else structures.get(i).t.update();   // update them
+    }
     for (int i = panels.size() - 1; i >= 0; i--)
       panels.get(i).update();
   }
@@ -168,63 +174,52 @@ class player {
   }
 
   void wave_fire(){
-    if (state == State.RUNNING) {
-      for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
-        tower t = towers.get(i);
-        t.wave_fire();
-      }
-    }
+    if (state == State.RUNNING)
+      for (int i = structures.size() - 1; i >= 0; i--) // walk through the towers
+        if (structures.get(i).type == 't') structures.get(i).t.wave_fire();
   }
 
   void next_generation(){
-    for (int i = towers.size() - 1; i >= 0; i--){  // walk through the towers
-      tower t = towers.get(i);
-      t.next_generation();
-    }
-    moneyGain *= 2;
+    for (int i = structures.size() - 1; i >= 0; i--) // walk through the towers
+      if (structures.get(i).type == 't') structures.get(i).t.next_generation();
   }
 
   void drop_rock() {
-    float x,y;
-    int costPerTower = round((float)100/towers.size()); // spread out energy cost equally among towers
-    
-    // Try to figure out, given the pixel coordinates of the mouse and the camera position, where in the virtual world the cursor is
-    //x = cameraX + (cameraZ*sin(PI/2.0)*1.15) * ((mouseX-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-    //y = cameraY + (cameraZ*sin(PI/2.0)*1.15) * ((mouseY-width*0.5)/(width*0.5)) * 0.5; // not sure why 1.15
-    for (tower t : towers)
-      if (t.energy < costPerTower)return;
-    for (tower t : towers)
-      t.energy -= costPerTower;  // uses a lot of energy to drop a rock
+    if (money < 50) {
+      println("You do not have enough money to place a rock (costs 50)");
+      return;
+    }
+    money -= 50;
     rocks.add(new rock(round(mouse_x), round(mouse_y))); // rocks is a global list
   }
   
-  void placeTower(char type) {
+  void placeStructure(char type) {
     if (placing) {
-      if (type != pickedup.type) switchTurret(type);
-      else deleteTurret();
+      if (type != pickedup.type) switchStructure(type);
+      else deleteStructure();
     }
     else {
       placing = true;
-      pickedup = new tower(type, ++numTowersCreated);
-      towers.add(pickedup);
+      pickedup = new structure(type, ++numStructuresCreated);
+      structures.add(pickedup);
       towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = true;
       towerPanel.hiddenpanel = false;
     }
   }
   
-  void switchTurret(char type) {
-    towers.remove(pickedup);
-    selectedTower = null;
-    pickedup = new tower(type, ++numTowersCreated);
-    towers.add(pickedup);
+  void switchStructure(char type) {
+    structures.remove(pickedup);
+    selectedStructure = null;
+    pickedup = new structure(type, ++numStructuresCreated);
+    structures.add(pickedup);
   }
   
-  void deleteTurret() {
+  void deleteStructure() {
     placing = false;
-    towers.remove(pickedup);
+    structures.remove(pickedup);
     pickedup = null;
     towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
     towerPanel.hiddenpanel = true;
-    selectedTower = null;
+    selectedStructure = null;
   }
 }

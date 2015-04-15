@@ -6,9 +6,10 @@ class structure {
   
   structure(char tp, int id) {
     ID = id;
+    type = tp;
     switch (type) {
       case 'b':
-        type = 'b'
+        type = 'b';
         f = new farm(ID);
         break;
       case 'r':
@@ -25,22 +26,30 @@ class structure {
 
 class farm {
   int ID;
-  PImage base; // gun base
+  float angle; // angle of farm's production rotation platform
+  PImage base; // farm base
+  PImage rotator; // farm rotation platform
   float radius = 50;
   int xpos; // x position of center of farm
   int ypos; // y position of center of farm
-  int shield;
-  int baseShield;
+  float shield;
+  float maxShield;
+  float baseMaxShield;
   float health;
   float maxHealth = 100;
   int productionSpeed;
   int baseProductionSpeed;
+  float shieldRegen;
+  float baseShieldRegen;
   int shieldUpgrades = 0;
   int productionSpeedUpgrades = 0;
+  int shieldRegenUpgrades = 0;
   int shieldButtons[] = new int[5];
   int productionSpeedButtons[] = new int[5];
+  int shieldRegenButtons[] = new int[5];
   String button1text;
   String button2text;
+  String button3text;
   String nametext;
   boolean inTransit = true;
   boolean wasInTransit = true;
@@ -54,37 +63,46 @@ class farm {
   Body farm_body;
 
   // constructor function, initializes the tower
-  bioreactor(int id) {
+  farm(int id) {
     ID = id;
+    angle = 0;
 
     xpos = round(mouse_x);
     ypos = round(mouse_y);
 
-    baseShield = 50;
-    baseProductionSpeed = 5;
-    base = loadImage("assets/bioreactor/Farm Base model-01.png");
+    baseMaxShield = 50;
+    baseProductionSpeed = 1;
+    baseShieldRegen = 1;
+    base = loadImage("assets/bioreactor/BioGen Base-01.png");
+    rotator = loadImage("assets/bioreactor/BioGen Top-01.png");
     nametext = "Bioreactor";
     button1text = "Shield Strength";
     button2text = "Production Speed";
-    shield = baseShield*(shieldUpgrades+1);
+    button3text = "Shield Regeneration";
+    maxShield = baseMaxShield*(shieldUpgrades+1);
+    shield = maxShield;
     productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
+    shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
     upgradePanel.enabled = false;
-    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedTower.ID); } },80, false);
+    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedStructure.t.ID); } },80, false);
     upgradePanel.createTextBox(2000,200,0,-800,"",80, true);
     upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
       upgradePanel.enabled = false;
       if(state == State.STAGED)state = State.RUNNING; } });
     for (int c = 0; c < 5; c++) {
       if (c > 0) {
-        shieldButtons[c] = upgradePanel.createButton(400, 280, -400, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
+        shieldButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletSpeed(); } });
         upgradePanel.buttons.get(shieldButtons[c]).grayed = true;
-        productionSpeedButtons[c] = upgradePanel.createButton(400, 280, 400, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        productionSpeedButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
         upgradePanel.buttons.get(productionSpeedButtons[c]).grayed = true;
+        shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
+        upgradePanel.buttons.get(shieldRegenButtons[c]).grayed = true;
       }
       else {
-        shieldButtons[c] = upgradePanel.createButton(400, 280, -400, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
-        productionSpeedButtons[c] = upgradePanel.createButton(400, 280, 400, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        shieldButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletSpeed(); } });
+        productionSpeedButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
+        shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
       }
     }
     the_player.upgradepanels.add(upgradePanel);
@@ -96,7 +114,7 @@ class farm {
       bd.position.set(box2d.coordPixelsToWorld(new Vec2(0+xpos, 17*(radius/80)+ypos)));
       bd.type = BodyType.STATIC;
       bd.linearDamping = 0.9;
-      tower_body = box2d.createBody(bd);
+      farm_body = box2d.createBody(bd);
       CircleShape sd = new CircleShape();
       sd.m_radius = box2d.scalarPixelsToWorld(radius); //radius;
       FixtureDef fd = new FixtureDef();
@@ -109,8 +127,12 @@ class farm {
       wasInTransit = false;
     }
     if (inTransit) {
-      if (!wasInTransit)
-        box2d.destroyBody(tower_body); // destroy the body of a just-picked-up farm
+      if (!wasInTransit) {
+        farm_body.setUserData(null);
+        for (Fixture f = farm_body.getFixtureList(); f != null; f = f.getNext())
+          f.setUserData(null);
+        box2d.destroyBody(farm_body); // destroy the body of a just-picked-up farm
+      }
       wasInTransit = true;
       xpos = round(mouse_x);
       ypos = round(mouse_y);
@@ -128,61 +150,40 @@ class farm {
         conflict = true;
     }
     else if (state == State.RUNNING) { // farm is placed and running
-      
+      the_player.money += productionSpeed; // this is the point of farms, right now
+      angle += (productionSpeed*PI/16);
+      if (angle > 2*PI) angle -= 2*PI;
+      if (shield < maxShield) shield += shieldRegen;
     }
   }
 
   void display() {
-    image(gunbase,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
-    
-    if (firerate < firing.duration) firing.setDuration(firerate);
-    if (projectileSpeed < targeting.duration) targeting.setDuration(projectileSpeed);
-    
-    if (laserfiretimer > 0) {
-      float laserlength = sqrt(((xpos-target.x)*(xpos-target.x))+((ypos-target.y)*(ypos-target.y)));
-      pushMatrix();
-      translate(xpos,ypos,0);//cameraZ-zoomOffset);
-      rotate(angle-(PI/2));
-      rectMode(CORNER);
-      noStroke();
-      fill(255,240,240,255);
-      rect((-1*(bulletDamageUpgrades+1)),0,(2*(bulletDamageUpgrades+1)),laserlength);
-      fill(255,0,0,255);
-      rect((bulletDamageUpgrades+1),0,(2*(bulletDamageUpgrades+1)),laserlength);
-      rect((-3*(bulletDamageUpgrades+1)),0,(2*(bulletDamageUpgrades+1)),laserlength);
-      rectMode(CENTER);
-      stroke(0);
-      popMatrix();
-    }
+    image(base,xpos-(radius*((float)128/80)),ypos-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
 
     pushMatrix();
     translate(xpos, ypos);
-    rotate(angle + HALF_PI);
-    image(firing.currentFrame(),-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+    rotate(angle);
+    image(rotator,-(radius*((float)128/80)),-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
     popMatrix();
-    
-    if (targeting.active()) {
-      pushMatrix();
-        translate(target.x,target.y);
-        rotate(targeting.currentFrameIndex() < 16 ? (float)targeting.currentFrameIndex()/5 : 3);
-        image(targeting.currentFrame(),-512,-512);
-      popMatrix();
-    }
 
-    for (projectile p: projectiles) { // display the active projectiles
-      p.display();
-    }
-
-    // draw tower energy bar
+    // draw farm health bar
     noFill();
     stroke(0);
-    rect(xpos, ypos-30, 0.1*maxEnergy, 6);
+    rect(xpos, ypos-42, 0.1*maxHealth, 12);
     noStroke();
-    fill(0, 0, 255);
-    rect(xpos, ypos-30, 0.1*energy, 6);
+    fill(100, 255, 100);
+    rect(xpos, ypos-42, 0.1*health, 12);
+
+    // draw farm shield bar
+    noFill();
+    stroke(0);
+    rect(xpos, ypos-30, 0.1*maxShield, 12);
+    noStroke();
+    fill(20, 200, 255);
+    rect(xpos, ypos-30, 0.1*shield, 12);
 
     if (inTransit) {
-    // draw the outline of the tower's box2D body
+    // draw the outline of the farm's box2D body
       pushMatrix();
       translate(xpos,ypos);
       fill(0, 0, 0, 0);
@@ -191,10 +192,11 @@ class farm {
       ellipse(0, 0, radius*2, radius*2);
       stroke(0);
       popMatrix();
-      for (tower t : the_player.towers) { // draw the outlines of all the other towers' bodies
-        if (t != the_player.pickedup) {
+      for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
+        if (s != the_player.pickedup) {
           pushMatrix();
-          translate(box2d.getBodyPixelCoord(t.tower_body).x, box2d.getBodyPixelCoord(t.tower_body).y);
+          if (s.type == 'b') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
+          else translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
           fill(0, 0, 0, 0);
           stroke(0);
           ellipse(0, 0, radius*2, radius*2);
@@ -203,34 +205,14 @@ class farm {
         }
       }
     }
-    else if (the_player.selectedTower != null && the_player.selectedTower.ID == ID) {
+    else if (the_player.selectedStructure != null && the_player.selectedStructure.ID == ID) {
       pushMatrix();
-      translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
+      translate(box2d.getBodyPixelCoord(farm_body).x, box2d.getBodyPixelCoord(farm_body).y);
       fill(0, 0, 0, 0);
       stroke(255,255,0);
       ellipse(0, 0, radius*2, radius*2);
       stroke(0);
       popMatrix();
     }
-
-    // display resources, now in player
-    /*
-    pushMatrix();
-    hint(DISABLE_DEPTH_TEST);
-      translate(cameraX, cameraY,cameraZ-400);  // centered and below the camera
-      fill(0,0,0,200);
-      textSize(8);
-      text("Resources: "+(int)resources,0.2*width,-0.25*height);
-    hint(ENABLE_DEPTH_TEST);
-    popMatrix();
-    */
-  }
-
-  void next_generation() { // update the tower
-    energy = maxEnergy; // reset energy (could/should depend on remaining resources)
-    for (projectile p: projectiles)
-      if (p != null)
-        p.killBody();
-    projectiles.clear();
   }
 }

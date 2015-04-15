@@ -55,7 +55,7 @@ class tower {
   int maxEnergy = 1000; // max energy the tower can have
   ArrayList<projectile> projectiles;  // list of active projectiles
   ArrayList<BurntCreature> burntcreatures;
-  float angle;    // angle of tower's main, auto-fir weapon
+  float angle;    // angle of tower's main, auto-fire weapon
   int autofirecounter;  // don't want to autofire every timestep - uses up energy too fast
   Animation firing;
   Animation targeting;
@@ -233,7 +233,7 @@ class tower {
     if (firerate < firing.duration) firing.setDuration(firerate);
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
     upgradePanel.enabled = false;
-    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedTower.ID); } },80, false);
+    upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedStructure.t.ID); } },80, false);
     upgradePanel.createTextBox(2000,200,0,-800,"",80, true);
     upgradePanel.createButton(200,200,-900,-800,"Close",60,220,0,0,new ButtonPress() { public void pressed() {
       upgradePanel.enabled = false;
@@ -241,17 +241,17 @@ class tower {
     } });
     for (int c = 0; c < 5; c++) {
       if (c > 0) {
-        bulletSpeedButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
+        bulletSpeedButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletSpeed(); } });
         upgradePanel.buttons.get(bulletSpeedButtons[c]).grayed = true;
-        bulletDamageButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
+        bulletDamageButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
         upgradePanel.buttons.get(bulletDamageButtons[c]).grayed = true;
-        fireRateButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeFireRate(); } });
+        fireRateButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n(Locked)", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeFireRate(); } });
         upgradePanel.buttons.get(fireRateButtons[c]).grayed = true;
       }
       else {
-        bulletSpeedButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletSpeed(); } });
-        bulletDamageButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeBulletDamage(); } });
-        fireRateButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedTower.upgradeFireRate(); } });
+        bulletSpeedButtons[c] = upgradePanel.createButton(420, 280, -600, 900-((5-c)*280),button1text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletSpeed(); } });
+        bulletDamageButtons[c] = upgradePanel.createButton(420, 280, 0, 900-((5-c)*280),button2text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeBulletDamage(); } });
+        fireRateButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.t.upgradeFireRate(); } });
       }
     }
     the_player.upgradepanels.add(upgradePanel);
@@ -412,15 +412,16 @@ class tower {
       pushMatrix();
       translate(xpos,ypos);
       fill(0, 0, 0, 0);
-      if (conflict)stroke(255,0,0);
+      if (conflict) stroke(255,0,0);
       else stroke(0,255,0);
       ellipse(0, 0, radius*2, radius*2);
       stroke(0);
       popMatrix();
-      for (tower t : the_player.towers) { // draw the outlines of all the other towers' bodies
-        if (t != the_player.pickedup) {
+      for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
+        if (s != the_player.pickedup) {
           pushMatrix();
-          translate(box2d.getBodyPixelCoord(t.tower_body).x, box2d.getBodyPixelCoord(t.tower_body).y);
+          if (s.type == 'b') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
+          else translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
           fill(0, 0, 0, 0);
           stroke(0);
           ellipse(0, 0, radius*2, radius*2);
@@ -429,7 +430,7 @@ class tower {
         }
       }
     }
-    else if (the_player.selectedTower != null && the_player.selectedTower.ID == ID) {
+    else if (the_player.selectedStructure != null && the_player.selectedStructure.ID == ID) {
       pushMatrix();
       translate(box2d.getBodyPixelCoord(tower_body).x, box2d.getBodyPixelCoord(tower_body).y);
       fill(0, 0, 0, 0);
@@ -438,18 +439,6 @@ class tower {
       stroke(0);
       popMatrix();
     }
-
-    // display resources, now in player
-    /*
-    pushMatrix();
-    hint(DISABLE_DEPTH_TEST);
-      translate(cameraX, cameraY,cameraZ-400);  // centered and below the camera
-      fill(0,0,0,200);
-      textSize(8);
-      text("Resources: "+(int)resources,0.2*width,-0.25*height);
-    hint(ENABLE_DEPTH_TEST);
-    popMatrix();
-    */
   }
 
   void next_generation() { // update the tower
