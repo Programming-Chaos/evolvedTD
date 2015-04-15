@@ -57,28 +57,43 @@ void setupSoundFiles() {
   
   TableRow sf = soundfiles.addRow(); //Railgun_Long_01
   sf.setString("Key", "Railgun_Long_01");
-  sf.setString("File", "assets/railgunfire01long.mp3");
+  sf.setString("File", "assets/Turret-Railgun/railgunfire01long.mp3");
   sf.setInt("Length", 3000);
   
   sf = soundfiles.addRow(); //Railgun_Slow_01
   sf.setString("Key", "Railgun_Slow_01");
-  sf.setString("File", "assets/railgunfire01slow_01.mp3");
+  sf.setString("File", "assets/Turret-Railgun/railgunfire01slow_01.mp3");
   sf.setInt("Length", 1000);
   
   sf = soundfiles.addRow(); //Ricochet_01
   sf.setString("Key", "Ricochet_01");
-  sf.setString("File", "assets/ricochet1.mp3");
+  sf.setString("File", "assets/Turret-Plasma/ricochet1.mp3");
+  sf.setInt("Length", 2000);
+  
+  sf = soundfiles.addRow(); //Ricochet_02
+  sf.setString("Key", "Ricochet_02");
+  sf.setString("File", "assets/Turret-Plasma/ricochet2.mp3");
+  sf.setInt("Length", 2000);
+  
+  sf = soundfiles.addRow(); //Laser_01
+  sf.setString("Key", "Laser_01");
+  sf.setString("File", "assets/Turret-Laser/laser.mp3");
   sf.setInt("Length", 2000);
   
   sf = soundfiles.addRow(); //Cannon_01
   sf.setString("Key", "Cannon_01");
-  sf.setString("File", "assets/Cannon.mp3");
+  sf.setString("File", "assets/Turret-Freeze/Cannon.mp3");
   sf.setInt("Length", 3000);
   
   sf = soundfiles.addRow(); //Thunder_01
   sf.setString("Key", "Thunder_01");
   sf.setString("File", "assets/Thunder.mp3");
   sf.setInt("Length", 6000);
+  
+  sf = soundfiles.addRow(); //Upgrade_01
+  sf.setString("Key", "Upgrade_01");
+  sf.setString("File", "assets/upgrade.mp3");
+  sf.setInt("Length", 1000);
   
   TestSoundFiles();
 }
