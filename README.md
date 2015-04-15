@@ -1,6 +1,6 @@
 # Getting Started
 
-Welcome to [EvolveTD][wiki], an evolutionary Tower Defense game!
+Welcome to [EvolvedTD][wiki], an Evolutionary Tower Defense game!
 
 The following sections walk you through cloning, branching, pulling,
 commiting, pushing, and reviewing code changes using
