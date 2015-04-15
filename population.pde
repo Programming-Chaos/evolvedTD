@@ -126,8 +126,7 @@ class population {
    * than 2 standard deviations, then the parents are by default
    * incompatible
    */
-  boolean areGametesCompatible(Genome.Chromosome gamete1,
-                               Genome.Chromosome gamete2) {
+  boolean areGametesCompatible(Chromosome gamete1, Chromosome gamete2) {
     if (gamete1 == null || gamete2 == null)
       return false;
 
@@ -201,8 +200,6 @@ class population {
         break;
       }
       
-      
-      
       // i is first gamete j is it's chosen mate
       for (int i=0; i < variance && i < size; i++) {
         rand = (int)random(size);
@@ -249,15 +246,11 @@ class population {
     
           generation.add(new creature(new Genome(g1.gamete, g2.gamete),
                                       10000 + g1.energy + g2.energy, pos));
-          //break;
         }
         
       }
     }
-    //println("made " + childrenBred + " and needed " + childrenNew + " more");
-    swarm.clear();
     swarm = generation;
-    
   }
   
   Boolean checkForCreature(Vec2 pos, ArrayList<creature> list) {

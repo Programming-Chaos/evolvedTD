@@ -200,10 +200,8 @@ class player {
   
   void placeTower(char type) {
     if (placing) {
-      placing = false;
-      char temppickedup = pickedup.type;
-      deleteTurret();
-      if (type != temppickedup) placeTower(type);
+      if (type != pickedup.type) switchTurret(type);
+      else deleteTurret();
     }
     else {
       placing = true;
@@ -214,11 +212,18 @@ class player {
     }
   }
   
+  void switchTurret(char type) {
+    towers.remove(pickedup);
+    selectedTower = null;
+    pickedup = new tower(type, ++numTowersCreated);
+    towers.add(pickedup);
+  }
+  
   void deleteTurret() {
+    placing = false;
     towers.remove(pickedup);
     pickedup = null;
     towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
-    placing = false;
     towerPanel.hiddenpanel = true;
     selectedTower = null;
   }
