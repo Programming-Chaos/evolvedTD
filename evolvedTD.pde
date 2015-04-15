@@ -427,6 +427,10 @@ void endContact(Contact cp) {
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
 
+  // skip contact if bodies have been "removed"
+  if (o1 == null || o2 == null)
+    return;
+
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
@@ -444,9 +448,6 @@ void endContact(Contact cp) {
     p2.senses.Remove_Side_Pressure(ID);
   }
 
-
-
-
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
@@ -459,8 +460,6 @@ void endContact(Contact cp) {
     creature p1 = (creature)o2;
     p1.senses.Remove_Taste();
   }
-
-
 }
 
 void place_food() { // done once at the beginning of the game
