@@ -110,8 +110,10 @@ void setup() {
   testGenome.testChromosome();
   testGenome.testMutation();
 
-  // Init data tables
+  // Initialize data tables
   initTables();
+  // Setup soundfiles array in sound.pde
+  setupSoundFiles();
 }
 
 void draw() {
@@ -443,6 +445,10 @@ void endContact(Contact cp) {
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
 
+  // skip contact if bodies have been "removed"
+  if (o1 == null || o2 == null)
+    return;
+
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
@@ -460,9 +466,6 @@ void endContact(Contact cp) {
     p2.senses.Remove_Side_Pressure(ID);
   }
 
-
-
-
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
@@ -475,8 +478,6 @@ void endContact(Contact cp) {
     creature p1 = (creature)o2;
     p1.senses.Remove_Taste();
   }
-
-
 }
 
 void place_food() { // done once at the beginning of the game
@@ -522,10 +523,9 @@ void mousePressed() { // called if either mouse button is pressed
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
     if (!buttonpressed) {
-      if (state == State.RUNNING) { 
+      if (state == State.RUNNING) {
         if (the_player.placing) {
-          if (!the_player.pickedup.conflict)
-          {
+          if (!the_player.pickedup.conflict) {
             the_player.pickedup.inTransit = false;
             the_player.pickedup = null;
             the_player.placing = false;
@@ -535,7 +535,7 @@ void mousePressed() { // called if either mouse button is pressed
           }
         }
         else {
-          if (the_player.towers.size() > 0)
+          if (the_player.towers.size() > 0) {
             switch (the_player.activeweapon) {
               case 1:
                 for (tower t : the_player.towers) {
@@ -549,29 +549,31 @@ void mousePressed() { // called if either mouse button is pressed
                 the_player.drop_rock();
                 break;
             }
+          }
         }
       }
     }
     buttonpressed = false;
   }
-  
-  boolean upgrading = false;
-  for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
 
   // select a creature or tower
-  if (mouseButton == RIGHT && !the_player.placing && !upgrading) {
-    int radius = 20;
-    // find a creature
-    the_player.selectedCreature = null;
-    for (creature c : the_pop.swarm) {
-      Vec2 location = c.getPos();
-      if (mouse_x < location.x + radius && mouse_x > location.x - radius
-          && mouse_y < location.y + radius && mouse_y > location.y - radius) {
-        the_player.selectedCreature = c;
-        the_player.selectedTower = null;
-        // zoom in on click
-        cameraZ = 400;
-        break;
+  if (mouseButton == RIGHT && !the_player.placing) {
+    boolean upgrading = false;
+    for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
+    if (!upgrading) {
+      int radius = 20;
+      // find a creature
+      the_player.selectedCreature = null;
+      for (creature c : the_pop.swarm) {
+        Vec2 location = c.getPos();
+        if (mouse_x < location.x + radius && mouse_x > location.x - radius
+            && mouse_y < location.y + radius && mouse_y > location.y - radius) {
+          the_player.selectedCreature = c;
+          the_player.selectedTower = null;
+          // zoom in on click
+          cameraZ = 400;
+          break;
+        }
       }
     }
     
@@ -600,7 +602,7 @@ void mousePressed() { // called if either mouse button is pressed
     }
   }
 
-  // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
+  // for dubugging purposes draw a circle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
   hint(DISABLE_DEPTH_TEST);
   translate(cameraX,cameraY,cameraZ-zoomOffset);

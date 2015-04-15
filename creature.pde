@@ -621,7 +621,11 @@ class creature {
                            
     gameteStack.add(g1);
     gameteStack.add(g2);
-    
+
+    // remove reference to creature
+    body.setUserData(null);
+    for (Fixture f = body.getFixtureList(); f != null; f = f.getNext())
+      f.setUserData(null);
     // Delete the body
     box2d.destroyBody(body);
   }
