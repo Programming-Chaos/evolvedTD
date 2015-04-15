@@ -51,6 +51,8 @@ class food {
   // This function removes the particle from the box2d world
   void killBody() {
     the_food.setUserData(null);
+    for (Fixture f = the_food.getFixtureList(); f != null; f = f.getNext())
+      f.setUserData(null);
     box2d.destroyBody(the_food);
   }
   
