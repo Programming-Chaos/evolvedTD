@@ -399,16 +399,14 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     }
   }
 
-  if (o1.getClass() == tower.class && o2.getClass() == projectile.class) {
-    println("tower-projectile");
+  /*if (o1.getClass() == tower.class && o2.getClass() == projectile.class) {
     tower p1 = (tower)o1;
     projectile p2 = (projectile)o2;
   }
   else if (o1.getClass() == projectile.class && o2.getClass() == tower.class) {
-    println("projectile-tower");
     tower p1 = (tower)o2;
     projectile p2 = (projectile)o1;
-  }
+  }*/
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
@@ -497,7 +495,6 @@ void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
   add_food(); // add some more food
-  println("Wave " + generation);
   the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
@@ -555,50 +552,61 @@ void mousePressed() { // called if either mouse button is pressed
     }
     buttonpressed = false;
   }
-
-  // select a creature or tower
-  if (mouseButton == RIGHT && !the_player.placing) {
-    boolean upgrading = false;
-    for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
-    if (!upgrading) {
-      int radius = 20;
-      // find a creature
-      the_player.selectedCreature = null;
-      for (creature c : the_pop.swarm) {
-        Vec2 location = c.getPos();
-        if (mouse_x < location.x + radius && mouse_x > location.x - radius
-            && mouse_y < location.y + radius && mouse_y > location.y - radius) {
-          the_player.selectedCreature = c;
-          the_player.selectedTower = null;
-          // zoom in on click
-          cameraZ = 400;
-          break;
-        }
+  
+  if (mouseButton == RIGHT) {
+    if (the_player.placing) {
+      if (!the_player.pickedup.conflict) {
+        the_player.pickedup.inTransit = false;
+        the_player.pickedup = null;
+        the_player.placing = false;
+        the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
+        the_player.towerPanel.hiddenpanel = true;
+        the_player.towerPanel.shown = false;
       }
     }
-    
-    if (the_player.selectedCreature == null) {
-      // find a tower
-      boolean towerclick = false;
-      for (tower t : the_player.towers) {
-        if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
-            && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-          towerclick = true;
-          if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
-              t.inTransit = true;
-              t.xpos = round(mouse_x);
-              t.ypos = round(mouse_y);
-              the_player.pickedup = t;
-              the_player.placing = true;
-              the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
-              the_player.towerPanel.hiddenpanel = false;
-              the_player.towerPanel.shown = true;
-            }
-            else the_player.selectedTower = t;
-          break;
+    else { // select a creature or structure
+      boolean upgrading = false;
+      for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
+      if (!upgrading) {
+        int radius = 20;
+        // find a creature
+        the_player.selectedCreature = null;
+        for (creature c : the_pop.swarm) {
+          Vec2 location = c.getPos();
+          if (mouse_x < location.x + radius && mouse_x > location.x - radius
+              && mouse_y < location.y + radius && mouse_y > location.y - radius) {
+            the_player.selectedCreature = c;
+            the_player.selectedTower = null;
+            // zoom in on click
+            cameraZ = 400;
+            break;
+          }
         }
       }
-      if (!towerclick) the_player.selectedTower = null;
+      
+      if (the_player.selectedCreature == null) {
+        // try to select a structure
+        boolean towerclick = false;
+        for (tower t : the_player.towers) {
+          if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
+              && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
+            towerclick = true;
+            if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
+                t.inTransit = true;
+                t.xpos = round(mouse_x);
+                t.ypos = round(mouse_y);
+                the_player.pickedup = t;
+                the_player.placing = true;
+                the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
+                the_player.towerPanel.hiddenpanel = false;
+                the_player.towerPanel.shown = true;
+              }
+              else the_player.selectedTower = t;
+            break;
+          }
+        }
+        if (!towerclick) the_player.selectedTower = null;
+      }
     }
   }
 
