@@ -56,6 +56,7 @@ class projectile {
   // This function removes the particle from the box2d world
   void killBody() {
     if (the_projectile != null) {
+      the_projectile.setUserData(null);
       box2d.destroyBody(the_projectile);
     }
   }

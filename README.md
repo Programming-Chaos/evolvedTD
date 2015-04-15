@@ -243,11 +243,30 @@ menu "Tools" -> "Install 'processing-java'".
 - [Releases](https://github.com/shiffman/Box2D-for-Processing/releases)
 - [Distribution](https://github.com/shiffman/Box2D-for-Processing/releases/download/2.0/box2d_processing.zip)
 
+### Installing
+
 Can be installed through the Processing IDE menu "Sketch" -> "Import
 Library" -> "Add Library" -> "Box2D for Processing". Can also be
 [installed manually][lib].
 
+### Handling Memory Leaks
+
+Box2D has an issue with memory leaks. Specifically, it keeps
+references to bodies around much longer than it is supposed to. The
+bodies have a `userData` field with a reference to our objects
+(creatures, projectiles, food, etc.). When the body sticks around with
+the reference, it prevents Java's garbage collector from cleaning up
+our objects.
+
+After a [long search][sway] for our memory leak, we have found that
+the fix for this is to remove the reference via
+`body.setUserData(null)` when the body is no longer needed (that is,
+in `killBody()` for the respective object). Please ensure this is done
+for any new body types added to EvolvedTD. See #203 for more
+information.
+
 [lib]: https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library
+[sway]: https://sway.com/3xv6q3uMP1SzS6OW
 
 # Data Collection
 

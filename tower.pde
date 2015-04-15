@@ -168,8 +168,10 @@ class tower {
       wasInTransit = false;
     }
     if (inTransit) {
-      if (!wasInTransit)
+      if (!wasInTransit) {
+        tower_body.setUserData(null);
         box2d.destroyBody(tower_body);
+      }
       wasInTransit = true;
       xpos = round(mouse_x);
       ypos = round(mouse_y);
