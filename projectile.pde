@@ -70,28 +70,45 @@ class projectile {
         for (creature c : the_pop.swarm) c.shocked = false;
       }
       else {
+        if (box2d.getBodyPixelCoord(the_projectile).x-radius <= (-1*(worldWidth/2)) || box2d.getBodyPixelCoord(the_projectile).x+radius >= (worldWidth/2)) {
+          the_projectile.setLinearVelocity(new Vec2(-1*the_projectile.getLinearVelocity().x,the_projectile.getLinearVelocity().y));
+          angle -= PI/2;
+          if (angle < -PI) angle += 2*PI;
+          angle *= -1;
+          angle += PI/2;
+          if (angle > PI) angle -= 2*PI;
+          wobblestrength += 15;
+          if (wobblestrength > 39) wobblestrength = 39;
+        }
+        if (box2d.getBodyPixelCoord(the_projectile).y-radius <= (-1*(worldHeight/2)) || box2d.getBodyPixelCoord(the_projectile).y+radius >= (worldHeight/2)) {
+          the_projectile.setLinearVelocity(new Vec2(the_projectile.getLinearVelocity().x,-1*the_projectile.getLinearVelocity().y));
+          angle *= -1;
+          wobblestrength += 15;
+          if (wobblestrength > 39) wobblestrength = 39;
+        }
         Vec2 cpos;
         Vec2 pos = box2d.getBodyPixelCoord(the_projectile);
         float distance;
+        float maxRange;
+        int loopfor;
         for (creature c : the_pop.swarm) {
           cpos = box2d.getBodyPixelCoord(c.body);
           distance = sqrt(((cpos.x-pos.x)*(cpos.x-pos.x))+((cpos.y-pos.y)*(cpos.y-pos.y)))-40;
-          float maxRange = (damage*50);
+          maxRange = (damage*50);
           if (distance < maxRange && c.alive) {
             beginShape();
             noFill();
             stroke(255,255,100,255);
             strokeWeight(1);
             vertex(pos.x,pos.y);
-            int loopfor = round(random(2,8));
+            loopfor = round(random(2,8));
             for (int i = 1; i < loopfor; i++)
-              vertex(pos.x+((float)(cpos.x-pos.x)*i/loopfor)+random(-0.5*distance/loopfor,0.5*damage/loopfor),pos.y+((float)(cpos.y-pos.y)*i/loopfor)+random(-0.5*damage/loopfor,0.5*damage/loopfor));
-            vertex(pos.x+((float)(cpos.x-pos.x)/3),pos.y+((float)(cpos.y-pos.y)/3));
+              vertex(pos.x+((float)(cpos.x-pos.x)*i/loopfor)+random(-1*distance/loopfor,damage/loopfor),pos.y+((float)(cpos.y-pos.y)*i/loopfor)+random(-1*damage/loopfor,damage/loopfor));
             vertex(cpos.x,cpos.y);
             endShape();
             
             c.health += (-1*damage*((maxRange-distance)/maxRange));
-            c.senses.Set_Current_Pain((damage*((maxRange-distance)/maxRange)));
+            c.senses.Set_Current_Pain(damage*((maxRange-distance)/maxRange));
             // increase or decrease this number to lengthen or shorten the
             // animation time on hit
             c.hit_indicator = 5;
@@ -100,7 +117,7 @@ class projectile {
               c.hits_by_tower++;
               c.shocked = true;
             }
-            c.hp_removed_by_tower += ((-1*damage*((maxRange-distance)/maxRange)));
+            c.hp_removed_by_tower += (-1*damage*((maxRange-distance)/maxRange));
           }
         }
       }
@@ -163,7 +180,7 @@ class projectile {
         if (wobblestrength < 1) wobblestrength = 0;
         if (traveltimer > round((float)speed*((float)2/3)) && traveltimer <= speed) { // increasingly random stuff as the orb becomes more unstable and disintegrates
           pushMatrix();
-            rotate(the_projectile.getAngle());
+            rotate(angle);
             fill(100,255,200,200-(100*((traveltimer - round((float)speed*((float)2/3)))/(speed - round((float)speed*((float)2/3))))));//(198-(traveltimer-201)));
             stroke(1,200-(100*((traveltimer - round((float)speed*((float)2/3)))/(speed - round((float)speed*((float)2/3)))))); // round((float)speed*2/3) < traveltimer < speed
             strokeWeight(0.1);
@@ -179,7 +196,7 @@ class projectile {
           popMatrix();
         }
         else { // stable trajectory, if a little wobbly
-          rotate(the_projectile.getAngle());
+          rotate(angle);
           strokeWeight(0.1);
           fill(100,255,200,200);
           float wobble = ((abs(((float)wobbletimer*2)/wobblespeed)-1)*wobblestrength);

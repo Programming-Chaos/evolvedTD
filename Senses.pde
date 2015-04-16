@@ -268,6 +268,22 @@ class Sensory_Systems {
       }
     }
   }
+ /*Sets taste once creature comes in contact with a tower*/
+  void Set_Taste(tower t) {
+    if (taste) {
+      for (int i = 0; i < 5; i++) {
+        brain_array[b_taste + i] = t.taste[i];
+      }
+    }
+  }
+ /*Sets taste once creature comes in contact with a farm*/
+  void Set_Taste(farm b) {
+    if (taste) {
+      for (int i = 0; i < 5; i++) {
+        brain_array[b_taste + i] = b.taste[i];
+      }
+    }
+  }
 
   /*Removes taste from eating*/
   void Remove_Taste() {
