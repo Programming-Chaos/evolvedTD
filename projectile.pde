@@ -72,13 +72,19 @@ class projectile {
       else {
         if (box2d.getBodyPixelCoord(the_projectile).x-radius <= (-1*(worldWidth/2)) || box2d.getBodyPixelCoord(the_projectile).x+radius >= (worldWidth/2)) {
           the_projectile.setLinearVelocity(new Vec2(-1*the_projectile.getLinearVelocity().x,the_projectile.getLinearVelocity().y));
+          angle -= PI/2;
+          if (angle < -PI) angle += 2*PI;
           angle *= -1;
+          angle += PI/2;
+          if (angle > PI) angle -= 2*PI;
           wobblestrength += 15;
+          if (wobblestrength > 39) wobblestrength = 39;
         }
         if (box2d.getBodyPixelCoord(the_projectile).y-radius <= (-1*(worldHeight/2)) || box2d.getBodyPixelCoord(the_projectile).y+radius >= (worldHeight/2)) {
           the_projectile.setLinearVelocity(new Vec2(the_projectile.getLinearVelocity().x,-1*the_projectile.getLinearVelocity().y));
           angle *= -1;
           wobblestrength += 15;
+          if (wobblestrength > 39) wobblestrength = 39;
         }
         Vec2 cpos;
         Vec2 pos = box2d.getBodyPixelCoord(the_projectile);
@@ -173,7 +179,7 @@ class projectile {
         if (wobblestrength < 1) wobblestrength = 0;
         if (traveltimer > round((float)speed*((float)2/3)) && traveltimer <= speed) { // increasingly random stuff as the orb becomes more unstable and disintegrates
           pushMatrix();
-            rotate(the_projectile.getAngle());
+            rotate(angle);
             fill(100,255,200,200-(100*((traveltimer - round((float)speed*((float)2/3)))/(speed - round((float)speed*((float)2/3))))));//(198-(traveltimer-201)));
             stroke(1,200-(100*((traveltimer - round((float)speed*((float)2/3)))/(speed - round((float)speed*((float)2/3)))))); // round((float)speed*2/3) < traveltimer < speed
             strokeWeight(0.1);
@@ -189,7 +195,7 @@ class projectile {
           popMatrix();
         }
         else { // stable trajectory, if a little wobbly
-          rotate(the_projectile.getAngle());
+          rotate(angle);
           strokeWeight(0.1);
           fill(100,255,200,200);
           float wobble = ((abs(((float)wobbletimer*2)/wobblespeed)-1)*wobblestrength);

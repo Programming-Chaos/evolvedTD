@@ -4,11 +4,17 @@ class player {
   Panel playerPanel;
   Panel statsPanel;
   Panel hudPanel;
-  Panel towerPanel;
+  Panel structurePanel;
   Panel helpPanel;
   Panel towerstatsPanel;
   Panel farmstatsPanel;
-  int money = 0;
+  int rcost = 300;
+  int pcost = 600;
+  int icost = 1000;
+  int lcost = 2000;
+  int gcost = 4000;
+  int bcost = 150;
+  int money = 100;
   int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
@@ -75,15 +81,15 @@ class player {
     farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)) : ""); } });
     farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'b') selectedStructure.f.upgradePanel.enabled = true; } });
 
-    towerPanel = new Panel(2500, 300, 0, 1100, true);
-    towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
-    towerPanel.createButton(300, 300, -800, 0, "Plasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
-    towerPanel.createButton(300, 300, -500, 0, "Freeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
-    towerPanel.createButton(300, 300, -200, 0, "Laser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
-    towerPanel.createButton(300, 300, 100, 0, "Electron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
-    towerPanel.createButton(300, 300, 800, 0, "Bioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
-    towerPanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
-    towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
+    structurePanel = new Panel(2500, 300, 0, 1100-140, true); // -140 so it's not cut off the bottom of some people's screens
+    structurePanel.createButton(300, 300, -1100, 0, rcost + "$\nRailgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
+    structurePanel.createButton(300, 300, -800, 0, pcost + "$\nPlasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
+    structurePanel.createButton(300, 300, -500, 0, icost + "$\nFreeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
+    structurePanel.createButton(300, 300, -200, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
+    structurePanel.createButton(300, 300, 100, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
+    structurePanel.createButton(300, 300, 800, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
+    structurePanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
+    structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
 
     helpPanel = new Panel(1000,1900,0,0,false,255);
     helpPanel.enabled = false;
@@ -117,7 +123,7 @@ class player {
                          +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
     hudPanel = new Panel(1250,100,-625,-1200,false,100);
-    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money + "\t\t\t\t\t\tWave: " + (generation+1) + "\t\t\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
+    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
 
     resources = 0;
     resourceGain = 0.1;
@@ -229,31 +235,90 @@ class player {
   
   void placeStructure(char type) {
     if (placing) {
-      if (type != pickedup.type) switchStructure(type);
-      else deleteStructure();
+      if (type == (pickedup.type == 'b' ? 'b' : pickedup.t.type))
+        deleteStructure();
+      else switchStructure(type);
     }
     else {
+      int cost = 0;
+      switch (type) {
+        case 'r':
+          cost = rcost;
+          break;
+        case 'p':
+          cost = pcost;
+          break;
+        case 'i':
+          cost = icost;
+          break;
+        case 'l':
+          cost = lcost;
+          break;
+        case 'g':
+          cost = gcost;
+          break;
+        case 'b':
+          cost = bcost;
+          break;
+      }
+      if (money < cost) {
+        println("You do not have sufficient funds to purchase this structure...");
+        return;
+      }
+      money -= cost;
       placing = true;
       pickedup = new structure(type, ++numStructuresCreated);
       structures.add(pickedup);
-      towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = true;
-      towerPanel.hiddenpanel = false;
+      structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = true;
+      structurePanel.hiddenpanel = false;
     }
   }
   
   void switchStructure(char type) {
+    money += (pickedup.moneyinvested/2);
     structures.remove(pickedup);
     selectedStructure = null;
+    int cost = 0;
+    switch (type) {
+      case 'r':
+        cost = rcost;
+        break;
+      case 'p':
+        cost = pcost;
+        break;
+      case 'i':
+        cost = icost;
+        break;
+      case 'l':
+        cost = lcost;
+        break;
+      case 'g':
+        cost = gcost;
+        break;
+      case 'b':
+        cost = bcost;
+        break;
+    }
+    if (money < cost) {
+      println("You do not have sufficient funds to purchase this structure...");
+      placing = false;
+      pickedup = null;
+      structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
+      structurePanel.hiddenpanel = true;
+      return;
+    }
+    money -= cost;
     pickedup = new structure(type, ++numStructuresCreated);
     structures.add(pickedup);
   }
   
   void deleteStructure() {
     placing = false;
+    money += (pickedup.moneyinvested/2);
     structures.remove(pickedup);
     pickedup = null;
-    towerPanel.buttons.get(towerPanel.buttons.size()-1).enabled = false;
-    towerPanel.hiddenpanel = true;
+    structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
+    structurePanel.hiddenpanel = true;
     selectedStructure = null;
   }
 }

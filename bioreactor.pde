@@ -3,13 +3,15 @@ class structure {
   char type;
   tower t;
   farm f;
+  int moneyinvested;
   
   structure(char tp, int id) {
+    moneyinvested = 0;
     ID = id;
     switch (tp) {
       case 'b':
         type = 'b';
-        f = new farm(ID);
+        f = new farm(ID, this);
         break;
       case 'r':
       case 'p':
@@ -17,7 +19,7 @@ class structure {
       case 'l':
       case 'g':
         type = 't';
-        t = new tower(tp, ID);
+        t = new tower(tp, ID, this);
         break;
     }
   }
@@ -57,6 +59,7 @@ class farm {
   boolean remove = false;
   int[] taste;
   Panel upgradePanel;
+  structure parent;
   /* type is the turret type
    * r: default rail gun
    * l: plasmagun
@@ -65,7 +68,8 @@ class farm {
   Body farm_body;
 
   // constructor function, initializes the tower
-  farm(int id) {
+  farm(int id, structure prnt) {
+    parent = prnt;
     ID = id;
     angle = 0;
     taste = new int[5]; // bioreactors taste like food (for now)
@@ -78,6 +82,7 @@ class farm {
     xpos = round(mouse_x);
     ypos = round(mouse_y);
 
+    parent.moneyinvested += the_player.bcost;
     baseProductionSpeed = 1;
     baseMaxShield = 50;
     baseShieldRegen = 1;
@@ -240,6 +245,7 @@ class farm {
       return;
     }
     the_player.money -= ((((byte)1)<<(productionSpeedUpgrades*3))*100);
+    parent.moneyinvested += ((((byte)1)<<(productionSpeedUpgrades*3))*100);
     upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades]).button_text = button1text + "\nX"+ (productionSpeedUpgrades+2) + "\nPurchased!";
     upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (productionSpeedUpgrades < 4) {
@@ -261,6 +267,7 @@ class farm {
       return;
     }
     the_player.money -= ((((byte)1)<<(shieldUpgrades*3))*100);
+    parent.moneyinvested += ((((byte)1)<<(shieldUpgrades*3))*100);
     upgradePanel.buttons.get(shieldButtons[shieldUpgrades]).button_text = button2text + "\nX"+ (shieldUpgrades+2) + "\nPurchased!";
     upgradePanel.buttons.get(shieldButtons[shieldUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (shieldUpgrades < 4) {
@@ -285,6 +292,7 @@ class farm {
       return;
     }
     the_player.money -= ((((byte)1)<<(shieldRegenUpgrades*3))*100);
+    parent.moneyinvested += ((((byte)1)<<(shieldRegenUpgrades*3))*100);
     upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades]).button_text = button3text + "\nX"+ (shieldRegenUpgrades+2) + "\nPurchased!";
     upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades]).BP = new ButtonPress() { public void pressed() { println("You have already purchased this upgrade"); } };
     if (shieldRegenUpgrades < 4) {

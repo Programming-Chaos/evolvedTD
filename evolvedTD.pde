@@ -35,6 +35,7 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
+boolean mistermoneybagsmode = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -117,6 +118,7 @@ void setup() {
 }
 
 void draw() {
+  if (mistermoneybagsmode) the_player.money = 1000000000;
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
   mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
@@ -602,9 +604,9 @@ void mousePressed() { // called if either mouse button is pressed
               the_player.pickedup.f.inTransit = false;
               the_player.pickedup = null;
               the_player.placing = false;
-              the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
-              the_player.towerPanel.hiddenpanel = true;
-              the_player.towerPanel.shown = false;
+              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+              the_player.structurePanel.hiddenpanel = true;
+              the_player.structurePanel.shown = false;
             }
           }
           else {
@@ -612,9 +614,9 @@ void mousePressed() { // called if either mouse button is pressed
               the_player.pickedup.t.inTransit = false;
               the_player.pickedup = null;
               the_player.placing = false;
-              the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
-              the_player.towerPanel.hiddenpanel = true;
-              the_player.towerPanel.shown = false;
+              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+              the_player.structurePanel.hiddenpanel = true;
+              the_player.structurePanel.shown = false;
             }
           }
         }
@@ -656,9 +658,9 @@ void mousePressed() { // called if either mouse button is pressed
           the_player.pickedup.f.inTransit = false;
           the_player.pickedup = null;
           the_player.placing = false;
-          the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
-          the_player.towerPanel.hiddenpanel = true;
-          the_player.towerPanel.shown = false;
+          the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+          the_player.structurePanel.hiddenpanel = true;
+          the_player.structurePanel.shown = false;
         }
       }
       else {
@@ -666,9 +668,9 @@ void mousePressed() { // called if either mouse button is pressed
           the_player.pickedup.t.inTransit = false;
           the_player.pickedup = null;
           the_player.placing = false;
-          the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
-          the_player.towerPanel.hiddenpanel = true;
-          the_player.towerPanel.shown = false;
+          the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+          the_player.structurePanel.hiddenpanel = true;
+          the_player.structurePanel.shown = false;
         }
       }
     }
@@ -710,9 +712,9 @@ void mousePressed() { // called if either mouse button is pressed
                 s.f.ypos = round(mouse_y);
                 the_player.pickedup = s;
                 the_player.placing = true;
-                the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
-                the_player.towerPanel.hiddenpanel = false;
-                the_player.towerPanel.shown = true;
+                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
+                the_player.structurePanel.hiddenpanel = false;
+                the_player.structurePanel.shown = true;
               }
               else the_player.selectedStructure = s;
               break;
@@ -727,9 +729,9 @@ void mousePressed() { // called if either mouse button is pressed
                 s.t.ypos = round(mouse_y);
                 the_player.pickedup = s;
                 the_player.placing = true;
-                the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
-                the_player.towerPanel.hiddenpanel = false;
-                the_player.towerPanel.shown = true;
+                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
+                the_player.structurePanel.hiddenpanel = false;
+                the_player.structurePanel.shown = true;
               }
               else the_player.selectedStructure = s;
               break;
