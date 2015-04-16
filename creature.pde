@@ -48,7 +48,8 @@ class creature {
   int time_in_water;     // tracks how much time the creature spends in water
   int time_on_land;      // tracks how much time the creature spends on land
   int freezeTimer;
-
+  int timefrozen = 0; 
+  
   // encodes the creature's genetic information
   Genome genome;
   Brain brain;

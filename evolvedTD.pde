@@ -361,6 +361,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     projectile p2 = (projectile)o2;
     if (p2.type == 'i') {
       p1.freezeTimer = p2.damage;
+      p1.timefrozen += p2.damage;
       p1.hits_by_tower++;
     }
     else {
@@ -670,6 +671,7 @@ void initTables() {
   p_impact.addColumn("   Times Hit by Tower   ");
   p_impact.addColumn("   HP Removed by Tower   ");
   p_impact.addColumn("   Final HP   ");
+  p_impact.addColumn("   Time Frozen   ");
   
   //player stats
   p_stats = new Table();

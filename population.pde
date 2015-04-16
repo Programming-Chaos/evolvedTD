@@ -432,6 +432,7 @@ class population {
       impactRow.setInt("   Times Hit by Tower   "   , c.hits_by_tower);
       impactRow.setFloat("   HP Removed by Tower   ", c.hp_removed_by_tower);
       impactRow.setFloat("   Final HP   "           , c.health);
+      impactRow.setFloat("   Time Frozen   "        , c.timefrozen);
       
       count ++;
     }
