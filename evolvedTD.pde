@@ -42,6 +42,7 @@ player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
 ArrayList<Panel> panels;
+ArrayList<Animation> animations;
 
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
@@ -79,11 +80,8 @@ void setup() {
   PFont font = createFont("Arial", 100);
   textFont(font);
   panels = new ArrayList<Panel>();
+  animations = new ArrayList<Animation>();
   the_player = new player();
-  the_player.towers.add(new tower('r', ++the_player.numTowersCreated));
-  the_player.towers.get(0).inTransit = false;
-  the_player.towers.get(0).xpos = 0;
-  the_player.towers.get(0).ypos = 0;
 
   minim = new Minim(this);
 
@@ -112,8 +110,10 @@ void setup() {
   testGenome.testChromosome();
   testGenome.testMutation();
 
-  // Init data tables
+  // Initialize data tables
   initTables();
+  // Setup soundfiles array in sound.pde
+  setupSoundFiles();
 }
 
 void draw() {
@@ -185,6 +185,9 @@ void draw() {
 
   if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures
+    for (Animation a : animations) {
+      a.update();
+    }
   }
 
   if (the_pop.get_alive() == 0) { // if after updating the population is empty, go ahead and start the next generation
@@ -329,12 +332,14 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    p1.addEnergy(20000); // getting food is valuable
-
-    food p2 = (food)o2;
-    p1.senses.Set_Taste(p2);
-    if (p2 != null) {
-      p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+    if(p1.current_actions[2] > 0.0){
+      p1.addEnergy(20000); // getting food is valuable
+  
+      food p2 = (food)o2;
+      p1.senses.Set_Taste(p2);
+      if (p2 != null) {
+        p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      }
     }
   }
 
@@ -342,11 +347,13 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    p1.addEnergy(20000); // getting food is valuable
-    food p2 = (food)o1;
-    p1.senses.Set_Taste(p2);
-    if (p2 != null) {
-      p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+    if(p1.current_actions[2] > 0.0){
+      p1.addEnergy(20000); // getting food is valuable
+      food p2 = (food)o1;
+      p1.senses.Set_Taste(p2);
+      if (p2 != null) {
+        p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
+      }
     }
   }
 
@@ -355,38 +362,51 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // projectiles damage creatures
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    if (p2.type == 'i') {
-      p1.freezeTimer = p2.damage;
-      p1.hits_by_tower++;
-    }
-    else {
-      if (f1.getUserData().getClass() == creature.Segment.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+    if (p2.type != 'g') {
+      if (p2.type == 'i') {
+        p1.freezeTimer = p2.damage;
+        p1.hits_by_tower++;
       }
-      if (f1.getUserData().getClass() == creature.Appendage.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+      else {
+        if (f1.getUserData().getClass() == creature.Segment.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+        }
+        if (f1.getUserData().getClass() == creature.Appendage.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+        }
       }
-    }
-    p2.remove = true;
+      p2.remove = true;
+      }
   }
   else if (o1.getClass() == projectile.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     // projectiles damage creatures
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    if (p2.type == 'i') {
-      p1.freezeTimer = p2.damage;
-      p1.hits_by_tower++;
-    }
-    else {
-      if (f2.getUserData().getClass() == creature.Segment.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+    if (p2.type != 'g') {
+      if (p2.type == 'i') {
+        p1.freezeTimer = p2.damage;
+        p1.hits_by_tower++;
       }
-      if (f2.getUserData().getClass() == creature.Appendage.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+      else {
+        if (f2.getUserData().getClass() == creature.Segment.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+        }
+        if (f2.getUserData().getClass() == creature.Appendage.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+        }
       }
+      p2.remove = true;
     }
-    p2.remove = true;
   }
+
+  /*if (o1.getClass() == tower.class && o2.getClass() == projectile.class) {
+    tower p1 = (tower)o1;
+    projectile p2 = (projectile)o2;
+  }
+  else if (o1.getClass() == projectile.class && o2.getClass() == tower.class) {
+    tower p1 = (tower)o2;
+    projectile p2 = (projectile)o1;
+  }*/
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
@@ -423,6 +443,10 @@ void endContact(Contact cp) {
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
 
+  // skip contact if bodies have been "removed"
+  if (o1 == null || o2 == null)
+    return;
+
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
@@ -440,9 +464,6 @@ void endContact(Contact cp) {
     p2.senses.Remove_Side_Pressure(ID);
   }
 
-
-
-
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
@@ -455,8 +476,6 @@ void endContact(Contact cp) {
     creature p1 = (creature)o2;
     p1.senses.Remove_Taste();
   }
-
-
 }
 
 void place_food() { // done once at the beginning of the game
@@ -501,81 +520,97 @@ void mousePressed() { // called if either mouse button is pressed
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
     if (!buttonpressed) {
-      if (state == State.RUNNING) { 
+      if (state == State.RUNNING) {
         if (the_player.placing) {
-          if (!the_player.pickedup.conflict)
-          {
+          if (!the_player.pickedup.conflict) {
             the_player.pickedup.inTransit = false;
             the_player.pickedup = null;
             the_player.placing = false;
-            the_player.towerPanel.buttons.get(3).enabled = false;
+            the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
             the_player.towerPanel.hiddenpanel = true;
             the_player.towerPanel.shown = false;
           }
         }
         else {
-          if (the_player.towers.size() > 0)
+          if (the_player.towers.size() > 0) {
             switch (the_player.activeweapon) {
               case 1:
-                for (tower t : the_player.towers)
-                  t.fire_projectile(); // have the tower fire its active weapon if unpaused
+                for (tower t : the_player.towers) {
+                  if (!t.firing.active() && !t.targeting.active()) {
+                    t.target = new Vec2(mouse_x,mouse_y);
+                    t.fire(); // have the tower fire its active weapon if unpaused
+                  }
+                }
                 break;
               case 2:
                 the_player.drop_rock();
                 break;
             }
+          }
         }
       }
     }
     buttonpressed = false;
   }
   
-  boolean upgrading = false;
-  for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
-
-  // select a creature or tower
-  if (mouseButton == RIGHT && !the_player.placing && !upgrading) {
-    int radius = 20;
-    // find a creature
-    the_player.selectedCreature = null;
-    for (creature c : the_pop.swarm) {
-      Vec2 location = c.getPos();
-      if (mouse_x < location.x + radius && mouse_x > location.x - radius
-          && mouse_y < location.y + radius && mouse_y > location.y - radius) {
-        the_player.selectedCreature = c;
-        the_player.selectedTower = null;
-        // zoom in on click
-        cameraZ = 400;
-        break;
+  if (mouseButton == RIGHT) {
+    if (the_player.placing) {
+      if (!the_player.pickedup.conflict) {
+        the_player.pickedup.inTransit = false;
+        the_player.pickedup = null;
+        the_player.placing = false;
+        the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = false;
+        the_player.towerPanel.hiddenpanel = true;
+        the_player.towerPanel.shown = false;
       }
     }
-    
-    if (the_player.selectedCreature == null) {
-      // find a tower
-      boolean towerclick = false;
-      for (tower t : the_player.towers) {
-        if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
-            && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-          towerclick = true;
-          if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
-              t.inTransit = true;
-              t.xpos = round(mouse_x);
-              t.ypos = round(mouse_y);
-              the_player.pickedup = t;
-              the_player.placing = true;
-              the_player.towerPanel.buttons.get(3).enabled = true;
-              the_player.towerPanel.hiddenpanel = false;
-              the_player.towerPanel.shown = true;
-            }
-            else the_player.selectedTower = t;
-          break;
+    else { // select a creature or structure
+      boolean upgrading = false;
+      for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
+      if (!upgrading) {
+        int radius = 20;
+        // find a creature
+        the_player.selectedCreature = null;
+        for (creature c : the_pop.swarm) {
+          Vec2 location = c.getPos();
+          if (mouse_x < location.x + radius && mouse_x > location.x - radius
+              && mouse_y < location.y + radius && mouse_y > location.y - radius) {
+            the_player.selectedCreature = c;
+            the_player.selectedTower = null;
+            // zoom in on click
+            cameraZ = 400;
+            break;
+          }
         }
       }
-      if (!towerclick) the_player.selectedTower = null;
+      
+      if (the_player.selectedCreature == null) {
+        // try to select a structure
+        boolean towerclick = false;
+        for (tower t : the_player.towers) {
+          if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
+              && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
+            towerclick = true;
+            if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
+                t.inTransit = true;
+                t.xpos = round(mouse_x);
+                t.ypos = round(mouse_y);
+                the_player.pickedup = t;
+                the_player.placing = true;
+                the_player.towerPanel.buttons.get(the_player.towerPanel.buttons.size()-1).enabled = true;
+                the_player.towerPanel.hiddenpanel = false;
+                the_player.towerPanel.shown = true;
+              }
+              else the_player.selectedTower = t;
+            break;
+          }
+        }
+        if (!towerclick) the_player.selectedTower = null;
+      }
     }
   }
 
-  // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
+  // for dubugging purposes draw a circle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
   hint(DISABLE_DEPTH_TEST);
   translate(cameraX,cameraY,cameraZ-zoomOffset);
