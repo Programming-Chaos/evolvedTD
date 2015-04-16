@@ -152,7 +152,7 @@ class tower {
         baseDamage = 20;
         baseFirerate = 25;
         baseProjectileSpeed = 100;
-        gunbase = loadImage("assets/Turret-Railgun/Tower_base_02.png");
+        gunbase = loadImage("assets/Turret-Railgun/Turbase03256.png");
         firing.addFrame(loadImage("assets/Turret-Railgun/RG001.png"));
         firing.addFrame(loadImage("assets/Turret-Railgun/RG005.png"));
         firing.addFrame(loadImage("assets/Turret-Railgun/RG004.png"));
