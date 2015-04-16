@@ -379,6 +379,9 @@ class tower {
                 target = the_pop.closest(new Vec2(0,0));
                 break;
               case 3:
+                target = the_pop.closest(new Vec2(xpos,ypos));
+                break;
+              case 4:
                 target = the_pop.highestAlpha();
                 break;
               default:
