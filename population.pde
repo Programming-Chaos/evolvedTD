@@ -160,10 +160,6 @@ class population {
 
   // creates the next generation
   void next_generation() {
-    // at end of wave, update data collection
-    if (swarm.size() > 0) {
-      updateData();
-    }
     
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
@@ -178,6 +174,8 @@ class population {
         gametes.add(g);
       }
     }
+    // at end of wave, update data collection
+    updateData();
     // Place gametes in order of time.
 //    Collections.sort(gametes, new GameteComparator());
     
