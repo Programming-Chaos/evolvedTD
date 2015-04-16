@@ -53,25 +53,27 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
 
-    towerstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
+    towerstatsPanel = new Panel(540,700,-960,930-360,false); // -360 so it's not cut off the bottom of some people's screens
     towerstatsPanel.enabled = false;
     towerstatsPanel.setupTextBoxList(40,50,50,40);
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Turret type: " + selectedStructure.t.nametext); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedStructure.ID); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet speed: X" + (selectedStructure.t.bulletSpeedUpgrades+1)); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Bullet damage: X" + (selectedStructure.t.bulletDamageUpgrades+1)); } });
-    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Rate of fire: X" + (selectedStructure.t.fireRateUpgrades+1)); } });
-    towerstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.t.upgradePanel.enabled = true; } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("Turret type: " + selectedStructure.t.nametext) : ""); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("ID# " + selectedStructure.ID) : ""); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("Bullet speed: X" + (selectedStructure.t.bulletSpeedUpgrades+1)) : ""); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("Bullet damage: X" + (selectedStructure.t.bulletDamageUpgrades+1)) : ""); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("Rate of fire: X" + (selectedStructure.t.fireRateUpgrades+1)) : ""); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("Shield Strength: X" + (selectedStructure.t.shieldUpgrades+1)) : ""); } });
+    towerstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 't' ? ("Shield Regeneration: X" + (selectedStructure.t.shieldRegenUpgrades+1)) : ""); } });
+    towerstatsPanel.createButton(300,200,0,200,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.t.upgradePanel.enabled = true; } });
 
     farmstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
     farmstatsPanel.enabled = false;
     farmstatsPanel.setupTextBoxList(40,50,50,40);
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return selectedStructure.f.nametext; } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("ID# " + selectedStructure.ID); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)); } });
-    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { selectedStructure.f.upgradePanel.enabled = true; } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Farm type: " + selectedStructure.f.nametext) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("ID# " + selectedStructure.ID) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)) : ""); } });
+    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'b') selectedStructure.f.upgradePanel.enabled = true; } });
 
     towerPanel = new Panel(2500, 300, 0, 1100, true);
     towerPanel.createButton(300, 300, -1100, 0, "Railgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
@@ -115,7 +117,7 @@ class player {
                          +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
     hudPanel = new Panel(1250,100,-625,-1200,false,100);
-    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money + "\t\t\t\t\t\tWave: " + (generation+1)); } }, 50);
+    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + money + "\t\t\t\t\t\tWave: " + (generation+1) + "\t\t\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
 
     resources = 0;
     resourceGain = 0.1;
@@ -136,8 +138,14 @@ class player {
     }
     
     if (selectedStructure != null) {
-      if (selectedStructure.type == 'b') farmstatsPanel.enabled = true;
-      else towerstatsPanel.enabled = false;
+      if (selectedStructure.type == 'b') {
+        towerstatsPanel.enabled = false;
+        farmstatsPanel.enabled = true;
+      }
+      else {
+        farmstatsPanel.enabled = false;
+        towerstatsPanel.enabled = true;
+      }
     }
     else {
       towerstatsPanel.enabled = false;
@@ -160,16 +168,36 @@ class player {
     }
     // walk through the structures
     for (int i = structures.size() - 1; i >= 0; i--) {
-      if (structures.get(i).type == 'b') structures.get(i).f.update();
-      else structures.get(i).t.update();   // update them
+      if (structures.get(i).type == 'b') {
+        structures.get(i).f.update(); // update them
+        if (structures.get(i).f.remove) { // delete if it's dead
+          structures.get(i).f.farm_body.setUserData(null);
+          for (Fixture f = structures.get(i).f.farm_body.getFixtureList(); f != null; f = f.getNext())
+            f.setUserData(null);
+          box2d.destroyBody(structures.get(i).f.farm_body); // destroy the body of a dead farm
+          structures.remove(i);
+        }
+      }
+      else {
+        structures.get(i).t.update(); // update them
+        if (structures.get(i).t.remove) { // delete if it's dead
+          structures.get(i).t.tower_body.setUserData(null);
+          for (Fixture f = structures.get(i).t.tower_body.getFixtureList(); f != null; f = f.getNext())
+            f.setUserData(null);
+          box2d.destroyBody(structures.get(i).t.tower_body); // destroy the body of a dead tower
+          structures.remove(i);
+        }
+      }
     }
     for (int i = panels.size() - 1; i >= 0; i--)
       panels.get(i).update();
-    if (moneytimer == 10) {
-      moneytimer = 0;
-      money += (generation+1);
+    if (state == State.RUNNING) {
+      if (moneytimer == 10) {
+        moneytimer = 0;
+        money += (generation+1);
+      }
+      moneytimer++;
     }
-    moneytimer++;
   }
 
   void mouse_pressed() {

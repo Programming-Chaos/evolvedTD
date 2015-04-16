@@ -409,10 +409,10 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     tower p2 = (tower)o1;
   }*/
 
-  /*if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
+  if (o1.getClass() == creature.class && o2.getClass() == farm.class) {
     creature p1 = (creature)o1;
     farm p2 = (farm)o2;
-    if(true){//p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0){
       int munched = 10;
       if (p2.shield < munched) {
         if (p2.health < munched) {
@@ -424,13 +424,14 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       }
       else p2.shield -= munched;
       p1.addEnergy(1000*munched); // munching a bioreactor is valuable
+      p1.senses.Set_Taste(p2);
     }
   }
-  else if (o1.getClass() == creature.class && o2.getClass() == farm.class) {
+  else if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
     creature p1 = (creature)o2;
     farm p2 = (farm)o1;
-    if(true){//p1.current_actions[2] > 0.0){
-      int munched = 10;
+    if(p1.current_actions[2] > 0.0) { // if the creature is hungry
+      int munched = 10; // this is the damage a creature's bite does
       if (p2.shield < munched) {
         if (p2.health < munched) {
           munched = round(p2.health);
@@ -441,8 +442,46 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       }
       else p2.shield -= munched;
       p1.addEnergy(1000*munched); // munching a bioreactor is valuable
+      p1.senses.Set_Taste(p2);
     }
-  }*/
+  }
+
+  if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
+    creature p1 = (creature)o1;
+    tower p2 = (tower)o2;
+    if(p1.current_actions[2] > 0.0) { // if the creature is hungry
+      int munched = 10; // this is the damage a creature's bite does
+      if (p2.shield < munched) {
+        if (p2.health < munched) {
+          munched = round(p2.health);
+          p2.health = 0;
+        }
+        else p2.health -= (munched-p2.shield);
+        p2.shield = 0;
+      }
+      else p2.shield -= munched;
+      p1.addEnergy(100*munched); // munching a tower is less valuable than munching a bioreactor
+      p1.senses.Set_Taste(p2);
+    }
+  }
+  else if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
+    creature p1 = (creature)o2;
+    tower p2 = (tower)o1;
+    if(p1.current_actions[2] > 0.0){
+      int munched = 10;
+      if (p2.shield < munched) {
+        if (p2.health < munched) {
+          munched = round(p2.health);
+          p2.health = 0;
+        }
+        else p2.health -= (munched-p2.shield);
+        p2.shield = 0;
+      }
+      else p2.shield -= munched;
+      p1.addEnergy(200*munched); // munching a tower is less valuable than munching a bioreactor
+      p1.senses.Set_Taste(p2);
+    }
+  }
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
@@ -663,10 +702,9 @@ void mousePressed() { // called if either mouse button is pressed
         boolean structureclick = false;
         for (structure s : the_player.structures) {
           if (s.type == 'b') {
-            if (mouse_x < s.f.xpos + s.f.radius && mouse_x > s.f.xpos - s.f.radius
-             && mouse_y < s.f.ypos + s.f.radius && mouse_y > s.f.ypos - s.f.radius) {
+            if (sqrt(((mouse_x-s.f.xpos)*(mouse_x-s.f.xpos))+((mouse_y-s.f.ypos)*(mouse_y-s.f.ypos))) < s.f.radius) {
               structureclick = true;
-              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) {
+              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
                 s.f.inTransit = true;
                 s.f.xpos = round(mouse_x);
                 s.f.ypos = round(mouse_y);
@@ -681,10 +719,9 @@ void mousePressed() { // called if either mouse button is pressed
             }
           }
           else {
-            if (mouse_x < s.t.xpos + s.t.radius && mouse_x > s.t.xpos - s.t.radius
-             && mouse_y < s.t.ypos + s.t.radius && mouse_y > s.t.ypos - s.t.radius) {
+            if (sqrt(((mouse_x-s.t.xpos)*(mouse_x-s.t.xpos))+((mouse_y-s.t.ypos)*(mouse_y-s.t.ypos))) < s.t.radius) {
               structureclick = true;
-              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) {
+              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
                 s.t.inTransit = true;
                 s.t.xpos = round(mouse_x);
                 s.t.ypos = round(mouse_y);
