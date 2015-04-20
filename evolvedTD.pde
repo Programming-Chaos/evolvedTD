@@ -96,7 +96,7 @@ void setup() {
 
   place_food();                  // calls the place food function below
   rocks = new ArrayList<rock>();
-  for (int i = 0; i < 10; i++) { // creates 10 random rocks,
+  for (int i = 0; i < 0; i++) { // creates 10 random rocks,
     rock r = new rock((int)random(-0.5 * worldWidth, 0.5 * worldWidth),
                       (int)random(-0.5 * worldHeight, 0.5 * worldHeight));
     rocks.add(r);
@@ -558,15 +558,16 @@ void endContact(Contact cp) {
 
 void place_food() { // done once at the beginning of the game
   foods = new ArrayList<food>();
-  for (int i = 0; i < 50; i++) {
-    food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
-                      (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
+  int addFood = 100;
+  for (int i = 0; i < addFood; i++) {
+    food f = new food((int)random(-0.5 * worldWidth, 0.5 * worldWidth),
+                      (int)random(-0.5 * worldHeight, 0.5 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
   
   // data collection
   fStart = foods.size();
-  fTotal += 50;
+  fTotal += addFood;
 }
 
 void nextgeneration() {
@@ -583,14 +584,19 @@ void nextgeneration() {
 }
 
 void add_food() { // done after each wave/generation
-  for (int i = 0; i < 35; i++) { // why add exactly 35 food each time?
-    food f = new food((int)random(-0.4*worldWidth,0.3*worldWidth), (int)random(-0.3*worldHeight,0.4*worldHeight)); // places food randomly near the tower
+  //for(food f : foods) {
+  //  f.killBody();
+  //}
+
+  int addFood = 100 - foods.size();
+  for (int i = 0; i < addFood; i++) { // why add exactly 35 food each time?
+    food f = new food((int)random(-0.5 * worldWidth, 0.5 * worldWidth), (int)random(-0.5 * worldHeight, 0.5 * worldHeight)); // places food randomly near the tower
     foods.add(f);
   }
   
   // data collection  
   fStart = foods.size();
-  fTotal += 10;
+  fTotal += addFood;
 }
 
 void mousePressed() { // called if either mouse button is pressed
@@ -762,14 +768,8 @@ void initTables() {
   c_traits.addColumn("   Mass   ");
   c_traits.addColumn("   Width   ");
   c_traits.addColumn("   Density   ");
-  c_traits.addColumn("   Armor   ");
-  c_traits.addColumn("   Wing #   ");
   c_traits.addColumn("   Wing Size   ");
-  c_traits.addColumn("   Antennae #   ");
-  c_traits.addColumn("   Color   ");
   c_traits.addColumn("   Velocity   ");
-  c_traits.addColumn("   Acceleration   ");
-  c_traits.addColumn("   Max HP   ");
   
   //creature averages
   c_avgs = new Table();
@@ -778,30 +778,8 @@ void initTables() {
   c_avgs.addColumn("   Avg Width   ");
   c_avgs.addColumn("   Avg Density   ");
   c_avgs.addColumn("   Avg Armor   ");
-  c_avgs.addColumn("   Avg Wing #   ");
   c_avgs.addColumn("   Avg Wing Size   ");
-  c_avgs.addColumn("   Avg Antennae #   ");
-  c_avgs.addColumn("   Avg Color   ");
   c_avgs.addColumn("   Avg Velocity   ");
-  c_avgs.addColumn("   Avg Acceleration   ");
-  c_avgs.addColumn("   Avg Max HP   ");
-  
-  //reproduction traits
-  reproduction = new Table();
-  reproduction.addColumn("   Gen   ");
-  reproduction.addColumn("   Creature ID   ");
-  reproduction.addColumn("   Spawn X   ");
-  reproduction.addColumn("   Spawn Y   ");
-  reproduction.addColumn("   # of Gametes   ");
-  reproduction.addColumn("   Gamete Cost   ");
-  reproduction.addColumn("   Gamete Time   ");
-  
-  //sensing traits
-  sensing = new Table();
-  sensing.addColumn("   Gen   ");
-  sensing.addColumn("   Creature ID   ");
-  sensing.addColumn("   Creature Scent   ");
-  sensing.addColumn("   Creature Taste   ");
   
   //metabolism traits
   metabolism = new Table();
@@ -809,51 +787,7 @@ void initTables() {
   metabolism.addColumn("   Creature ID   ");
   metabolism.addColumn("   Total Energy Space   ");
   metabolism.addColumn("   Total Energy Consumed   ");
-  metabolism.addColumn("   Locomotion Space   ");
-  metabolism.addColumn("   Locomotion Used   ");
-  metabolism.addColumn("   Reproduction Space   ");
-  metabolism.addColumn("   Reproduction Used   ");
-  metabolism.addColumn("   Reproduction Passed   ");
-  metabolism.addColumn("   Health Space   ");
-  metabolism.addColumn("   Health Used   ");
   metabolism.addColumn("   Total Energy Used   ");
-  
-  //lifetime ticks
-  lifetime = new Table();
-  lifetime.addColumn("   Gen   ");
-  lifetime.addColumn("   Creature ID   ");
-  lifetime.addColumn("   Ticks on Algae   ");
-  lifetime.addColumn("   Ticks on Water   ");
-  lifetime.addColumn("   Ticks on Rock   ");
-  lifetime.addColumn("   Total Lifetime   ");
-  
-  //player impact
-  p_impact = new Table();
-  p_impact.addColumn("   Gen   ");
-  p_impact.addColumn("   Creature ID   ");
-  p_impact.addColumn("   Died/Survived   ");
-  p_impact.addColumn("   Times Hit by Tower   ");
-  p_impact.addColumn("   HP Removed by Tower   ");
-  p_impact.addColumn("   Final HP   ");
-  
-  //player stats
-  p_stats = new Table();
-  p_stats.addColumn("   Gen   ");
-  p_stats.addColumn("   Tower ID   ");
-  p_stats.addColumn("   Round # of Shots   ");
-  p_stats.addColumn("   Total # of Shots   ");
-  p_stats.addColumn("   Round Successful Hits   ");
-  p_stats.addColumn("   Total Successful Hits   ");
-  p_stats.addColumn("   Round Rock Hits   ");
-  p_stats.addColumn("   Total Rock Hits   ");
-  p_stats.addColumn("   Round Accuracy   ");
-  p_stats.addColumn("   Overall Accuracy   ");
-  p_stats.addColumn("   Round Avg RoF   ");
-  p_stats.addColumn("   Overall Avg RoF   ");
-  p_stats.addColumn("   Round # of Kills   ");
-  p_stats.addColumn("   Total # of Kills   ");
-  p_stats.addColumn("   Round Avg Shots per Kill   ");
-  p_stats.addColumn("   Overall Avg Shots per Kill   ");
   
   //environment stats
   env = new Table();
@@ -861,25 +795,12 @@ void initTables() {
   env.addColumn("   Food at Start   ");
   env.addColumn("   Food at End   ");
   env.addColumn("   Food Consumed   ");
-  env.addColumn("   Total Food   ");
-  env.addColumn("   Total Consumed   ");
-  env.addColumn("   Round Lightning Strikes   ");
-  env.addColumn("   Round Lightning Kills   ");
-  env.addColumn("   Round Lightning Accuracy   ");
-  env.addColumn("   Total Lightning Strikes   ");
-  env.addColumn("   Total Lightning Kills   ");
-  env.addColumn("   Overall Lightning Accuracy   ");
 }
 
 //Test for writing data to excel file
 void writeTables() {
   saveTable(c_traits, "data/c_traits.csv");
   saveTable(c_avgs, "data/c_avgs.csv");
-  saveTable(reproduction, "data/reproduction.csv");
-  saveTable(sensing, "data/sensing.csv");
   saveTable(metabolism, "data/metabolism.csv");
-  saveTable(lifetime, "data/lifetime.csv");
-  saveTable(p_impact, "data/p_impact.csv");
-  saveTable(p_stats, "data/p_stats.csv");
   saveTable(env, "data/env.csv");
 }

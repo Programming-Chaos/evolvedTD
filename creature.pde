@@ -102,6 +102,7 @@ class creature {
   float health_used = 0;
   int   hits_by_tower = 0;
   int   hp_removed_by_tower = 0;
+  
 
 
   class Segment {
@@ -299,6 +300,16 @@ class creature {
     angle = a;
     genome = new Genome();
     construct((float)20000, new Vec2(x, y));
+  }
+  
+  public float getMaxWingSize() {
+    float size = 0;
+    for(Appendage a : appendages) {
+      if(a.getSize() > size) {
+        size = a.getSize();
+      }
+    }
+    return size;
   }
 
   // construct a new creature with the given genome and energy

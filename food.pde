@@ -3,7 +3,7 @@ class food {
   int radius;
   int colortimer;;
   boolean remove = false;
-  int nourishment = 20000;
+  int nourishment = 2000;
   /*Taste will be 5 types of taste. - sweet, sour, salty, bitter, umami*/
   int []taste;
   
@@ -11,7 +11,7 @@ class food {
   
   food(int x, int y) {
     colortimer = ((int)random(0,100)-50);
-    radius = int (random(3,20));
+    radius = 6;//int (random(3,20));
     makebody(x, y);
     the_food.setUserData(this);
     taste = new int[5];

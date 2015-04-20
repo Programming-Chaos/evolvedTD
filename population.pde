@@ -5,7 +5,7 @@ import java.util.Collections;
 
 class population {
   ArrayList<creature> swarm;
-  static final int POP_SIZE = 35;
+  static final int POP_SIZE = 50;
 
   float baseGameteChance = 0.4; // Base gamete success rate
   int baseGameteRadius = 6; // Base gamete mating range
@@ -341,7 +341,7 @@ class population {
     
     //average variables
     float massAvg = 0, widthAvg = 0, denseAvg = 0, armorAvg = 0, 
-          wingAvg = 0, wingSizeAvg = 0, antennaeAvg = 0, colorAvg = 0, 
+          wingAvg = 0, wingSizeAvg = 0, avgWingSize = 0, antennaeAvg = 0, colorAvg = 0, 
           velAvg = 0, acclAvg = 0, hpAvg = 0;
     int count = 0;
     
@@ -353,14 +353,8 @@ class population {
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
       c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
-      c_traitsRow.setFloat("   Armor   "    , c.getArmor());
-      //c_traitsRow.setFloat("   Wing #   ", );
-      //c_traitsRow.setFloat("   Wing Size   ", );
-      //c_traitsRow.setFloat("   Antennae #   ", );
-      //c_traitsRow.setFloat("   Color   ", );
+      c_traitsRow.setFloat("   Wing Size   ", c.getMaxWingSize());
       c_traitsRow.setFloat("   Velocity   " , c.maxMovementSpeed);
-      //c_traitsRow.setFloat("   Acceleration   ", );
-      c_traitsRow.setFloat("   Max HP   "   , c.maxHealth); 
       
       // Update creature trait averages data
       massAvg  += c.getMass();
@@ -369,60 +363,15 @@ class population {
       armorAvg += c.getArmor();
       velAvg   += c.maxMovementSpeed;
       hpAvg    += c.maxHealth;
-      
-      // Update creature reproduction data
-      TableRow repRow = reproduction.addRow();
-      repRow.setInt("   Gen   "          , generation);
-      repRow.setInt("   Creature ID   "  , c.num);
-      repRow.setInt("   Spawn X   "      , (int)c.sPos.x / cellWidth);
-      repRow.setInt("   Spawn Y   "      , (int)c.sPos.y / cellHeight);
-      repRow.setInt("   # of Gametes   " , c.gameteStack.size());
-      repRow.setFloat("   Gamete Cost   ", c.baseGameteCost + c.genome.avg(gameteCost));
-      repRow.setFloat("   Gamete Time   ", c.baseGameteTime + c.genome.avg(gameteTime));
-      repRow.setString("   Inheritance Chromo 1   ", c.genome.xChromosome.inherit);   
-      repRow.setString("   Inheritance Chromo 2   ", c.genome.yChromosome.inherit);  
-      
-      // Update the creature senses data
-      TableRow senseRow = sensing.addRow();
-      senseRow.setInt("   Gen   "           , generation);
-      senseRow.setInt("   Creature ID   "   , c.num);
-      senseRow.setInt("   Creature Scent   ", c.getScentType());
-      //senseRow.setInt("   Creature Taste   ", );
-      
+      avgWingSize += c.getMaxWingSize();
+   
       // Update the creature metabolism data
       TableRow metabRow = metabolism.addRow();
       metabRow.setInt("   Gen   "                    , generation);
       metabRow.setInt("   Creature ID   "            , c.num);
       metabRow.setFloat("   Total Energy Space   "   , c.total_energy_space);
       metabRow.setFloat("   Total Energy Consumed   ", c.total_energy_consumed);
-      metabRow.setFloat("   Locomotion Space   "     , c.max_energy_locomotion);
-      metabRow.setFloat("   Locomotion Used   "      , c.locomotion_used);
-      metabRow.setFloat("   Reproduction Space   "   , c.max_energy_reproduction);
-      metabRow.setFloat("   Reproduction Used   "    , c.reproduction_used);
-      metabRow.setFloat("   Reproduction Passed   "  , c.reproduction_passed);
-      metabRow.setFloat("   Health Space   "         , c.max_energy_health);
-      metabRow.setFloat("   Health Used   "          , c.health_used);
       metabRow.setFloat("   Total Energy Used   "    , c.locomotion_used + c.reproduction_used + c. health_used);
-      
-      // Update the creature lifetime ticks data
-      TableRow ticksRow = lifetime.addRow();
-      ticksRow.setInt("   Gen   "           , generation);
-      ticksRow.setInt("   Creature ID   "   , c.num);
-      ticksRow.setInt("   Ticks on Algae   ", c.time_on_land);
-      ticksRow.setInt("   Ticks on Water   ", c.time_in_water);
-      //ticksRow.setInt("   Ticks on Rock   " , );
-      ticksRow.setInt("   Total Lifetime   ", c.timestep_counter);
-      
-      // Update the player impact data
-      String status;
-      if(c.alive) status = "Survived";  else status = "Died";
-      TableRow impactRow = p_impact.addRow();
-      impactRow.setInt("   Gen   "                  , generation);
-      impactRow.setInt("   Creature ID   "          , c.num);
-      impactRow.setString("   Died/Survived   "     , status);
-      impactRow.setInt("   Times Hit by Tower   "   , c.hits_by_tower);
-      impactRow.setFloat("   HP Removed by Tower   ", c.hp_removed_by_tower);
-      impactRow.setFloat("   Final HP   "           , c.health);
       
       count ++;
     }
@@ -433,35 +382,9 @@ class population {
     c_avgsRow.setFloat("   Avg Mass   ", massAvg/count);
     c_avgsRow.setFloat("   Avg Width   ", widthAvg/count);
     c_avgsRow.setFloat("   Avg Density   ", denseAvg/count);
-    c_avgsRow.setFloat("   Avg Armor   ", armorAvg/count);
-    c_avgsRow.setFloat("   Avg Wing #   ", wingAvg/count);
     c_avgsRow.setFloat("   Avg Wing Size   ", wingSizeAvg/count);
-    c_avgsRow.setFloat("   Avg Antennae #   ", antennaeAvg/count);
-    c_avgsRow.setFloat("   Avg Color   ", colorAvg/count);
-    c_avgsRow.setFloat("   Avg Velocity   ", velAvg/count);
-    c_avgsRow.setFloat("   Avg Acceleration   ", acclAvg/count);
-    c_avgsRow.setFloat("   Avg Max HP   ", hpAvg/count);
+    c_avgsRow.setFloat("   Avg Velocity   ", velAvg/count);   
     
-  //TODO: Create loop thru for all towers
-      // Update the player stats data
-      TableRow pstatsRow = p_stats.addRow();
-      pstatsRow.setInt("   Gen   "                         , generation);
-      //pstatsRow.setInt("   Tower ID   "                    , );
-      //pstatsRow.setInt("   Round # of Shots   "            , );
-      //pstatsRow.setInt("   Total # of Shots   "            , );
-      //pstatsRow.setInt("   Round Successful Hits   "       , );
-      //pstatsRow.setInt("   Total Successful Hits   "       , );
-      //pstatsRow.setInt("   Round Rock Hits   "             , );
-      //pstatsRow.setInt("   Total Rock Hits   "             , );
-      //pstatsRow.setFloat("   Round Accuracy   "            , );
-      //pstatsRow.setFloat("   Overall Accuracy   "          , );
-      //pstatsRow.setFloat("   Round Avg RoF   "             , );
-      //pstatsRow.setFloat("   Overall Avg RoF   "           , );
-      //pstatsRow.setInt("   Round # of Kills   "            , );
-      //pstatsRow.setInt("   Total # of Kills   "            , );
-      //pstatsRow.setFloat("   Round Avg Shots per Kill   "  , );
-      //pstatsRow.setFloat("   Overall Avg Shots per Kill   ", );
-      
     // Update the environment data
     fConsumed += (fStart - foods.size());
     tStrikes += rStrikes;
@@ -471,14 +394,6 @@ class population {
     envRow.setInt("   Food at Start   "             , fStart);
     envRow.setInt("   Food at End   "               , foods.size());
     envRow.setInt("   Food Consumed   "             , fStart - foods.size());
-    envRow.setInt("   Total Food   "                , fTotal);
-    envRow.setInt("   Total Consumed   "            , fConsumed);
-    envRow.setInt("   Round Lightning Strikes   "   , (int)rStrikes);
-    envRow.setInt("   Round Lightning Kills   "     , (int)rKills);
-    envRow.setFloat("   Round Lightning Accuracy   ",  rKills / rStrikes);
-    envRow.setInt("   Total Lightning Strikes   "   , (int)tStrikes);
-    envRow.setInt("   Total Lightning Kills   "     , (int)tKills);
-    envRow.setFloat("   Overall Lightning Accuracy   ", tKills / tStrikes);
     //reset environment round variables.
     rStrikes = 0;
     rKills = 0;

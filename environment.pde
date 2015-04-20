@@ -19,8 +19,8 @@ int waterReserveMax = 10000; // the world is only allowed to contain a certain a
 int waterReserve = int(random(1, 10000)); // start of game water reserve amount
 
 static final int GRASS = 0;
-static final int WATER = 1;
-static final int MOUNTAIN = 2;
+static final int WATER = 0;
+static final int MOUNTAIN = 0;
 
 int[][] bugLoc = new int[100][2];
 
@@ -701,9 +701,9 @@ class environment {
     */
     
     timeStepTemp = timesteps;
-    for(Vegetation i : vegetation) {
+    /*for(Vegetation i : vegetation) {
       image(i.img, i.x, i.y);
-    }
+    }*/
   }
 
   void display_scent() {
@@ -929,7 +929,7 @@ class environment {
   
   // decides on the world type by choosing random number between 1 and 4
   int decideWorldType() {
-    int decision = int(random(1, 4.999999));
+    int decision = 1;
     int altShift = 0;
     int r = 0, b = 0, g = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;
@@ -1006,9 +1006,10 @@ class environment {
       }
     }
     generateAltitudeMap();
-    generateWaterALT(waterALT); // Just works out better this way
-    generateRockyALT(rockALT);
-    spawnVegetation(decision, waterALT, rockALT);
+    //generateWaterALT(waterALT); // Just works out better this way
+    //generateRockyALT(rockALT);
+    //spawnVegetation(decision, waterALT, rockALT);
+    vegetation = null;
     return altShift;
   }   
   
