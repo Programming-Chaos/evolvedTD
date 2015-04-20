@@ -84,8 +84,8 @@ class creature {
 
   // Reproduction variables
   Vec2 sPos; // Starting position of creature
-  int baseGameteCost = 10;    // Gametes base energy cost
-  int baseGameteTime = 100;   // Gametes base create time in screen updates.
+  int baseGameteCost = 500;    // Gametes base energy cost
+  int baseGameteTime = 1;   // Gametes base create time in screen updates.
   int baseGameteEnergy = 500; // Gametes base extra energy
   int gameteTimeLapse = 0;    // Keeps track of time since last gamete
 
