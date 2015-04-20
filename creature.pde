@@ -265,6 +265,7 @@ class creature {
       float mountain = (genome.avg(appendageTraits.get(index).mountainForce));
       mountainForce = ((-1/(1.01+(mountain*mountain)))+1);
       //mountainForce *= 4;
+      
       float divisor = waterForce+grassForce+mountainForce;
       waterForcePercent = waterForce/divisor;
       grassForcePercent = grassForce/divisor;
