@@ -961,7 +961,7 @@ class creature {
     BodyDef bd = new BodyDef();  // Define a new Box2D body object
     bd.type = BodyType.DYNAMIC;  // Make the body dynamic (Box2d bodies can also be static: unmoving)
     bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
-    bd.linearDamping = 0.9;  // Give it some friction, could be evolved
+    bd.linearDamping = 0.999;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
     body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
 
