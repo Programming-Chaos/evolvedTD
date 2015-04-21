@@ -654,16 +654,18 @@ class environment {
     noFill();
     for (int i = 0; i < environHeight; i++) {
       for (int j = 0; j < environWidth; j++) {
+        /*
         if (tileMap[i][j].hasCreature() != null) {
           stroke(255, 0, 0);
           rect(offsetx+i*cellHeight, offsety+j*cellWidth, cellHeight, cellWidth);
         }
+        */
         /*  debug code to make sure the correct cells are marked as food present
             if (foodpresent[i][j]) {
             stroke(0, 255, 0);
             rect(offsetx+i*cellHeight, offsety+j*cellWidth, cellHeight, cellWidth);
             }
-        */
+        
         if (tileMap[i][j].hasRock()) {
           stroke(0, 0, 0);
           rect(offsetx+i*cellHeight, offsety+j*cellWidth, cellHeight, cellWidth);
@@ -673,6 +675,7 @@ class environment {
           rect(offsetx+i*cellHeight, offsety+j*cellWidth, cellHeight, cellWidth);
           tileMap[i][j].DEBUG_sensing(false);
         }
+        */
       }
     }
     if (displayScent) {

@@ -358,7 +358,7 @@ class population {
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
       //c_traitsRow.setFloat("   Color   ", );
-      c_traitsRow.setFloat("   Velocity   " , c.maxMovementSpeed);
+      c_traitsRow.setFloat("   Velocity   " , c.maxMovementForce);
       //c_traitsRow.setFloat("   Acceleration   ", );
       c_traitsRow.setFloat("   Max HP   "   , c.maxHealth); 
       
@@ -367,7 +367,7 @@ class population {
       widthAvg += c.getWidth();
       denseAvg += c.getCreatureDensity();
       armorAvg += c.getArmor();
-      velAvg   += c.maxMovementSpeed;
+      velAvg   += c.maxMovementForce;
       hpAvg    += c.maxHealth;
       
       // Update creature reproduction data
