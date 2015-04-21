@@ -65,6 +65,7 @@ Table lifetime;
 Table p_impact;
 Table p_stats;
 Table env;
+Table locomotion;
 
 // Variables for data collection
 int fStart;
@@ -572,6 +573,7 @@ void place_food() { // done once at the beginning of the game
 void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
+  println("Wave " + (generation+1));
   add_food(); // add some more food
   the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
@@ -579,6 +581,10 @@ void nextgeneration() {
   if (!autofire) {
     stateSaved = state;
     state = State.STAGED; // pause the game
+  }
+  if (generation == 50) {
+    PlaySounds( "Upgrade_01" );
+    exit();
   }
 }
 
@@ -869,6 +875,14 @@ void initTables() {
   env.addColumn("   Total Lightning Strikes   ");
   env.addColumn("   Total Lightning Kills   ");
   env.addColumn("   Overall Lightning Accuracy   ");
+  
+  //locomotion stats
+  locomotion = new Table();
+  locomotion.addColumn("   Gen   ");
+  locomotion.addColumn("   Avg maxMovementForce   ");
+  locomotion.addColumn("   Avg Mountain maxMovementForce   ");
+  locomotion.addColumn("   Avg Grass maxMovementForce   ");
+  locomotion.addColumn("   Avg Water maxMovementForce   ");
 }
 
 //Test for writing data to excel file
@@ -882,4 +896,5 @@ void writeTables() {
   saveTable(p_impact, "data/p_impact.csv");
   saveTable(p_stats, "data/p_stats.csv");
   saveTable(env, "data/env.csv");
+  saveTable(locomotion, "data/locomotion.csv");
 }

@@ -353,7 +353,7 @@ class population {
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
       c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
-      c_traitsRow.setFloat("   Armor   "    , c.getArmor());
+      c_traitsRow.setFloat("   Armor   "    , c.getArmorAvg());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
@@ -366,7 +366,7 @@ class population {
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
       denseAvg += c.getCreatureDensity();
-      armorAvg += c.getArmor();
+      armorAvg += c.getArmorAvg();
       velAvg   += c.maxMovementForce;
       hpAvg    += c.maxHealth;
       
@@ -482,6 +482,27 @@ class population {
     //reset environment round variables.
     rStrikes = 0;
     rKills = 0;
+      
+    // Update the locomotion data
+    int numcreatures = 0;
+    float avgMaxMovementForce = 0, avgMountainMaxMovementForce = 0, avgGrassMaxMovementForce = 0, avgWaterMaxMovementForce = 0;
+    for (creature c : the_pop.swarm) {
+      numcreatures++;
+      avgMaxMovementForce += c.maxMovementForce;
+      avgMountainMaxMovementForce += c.getEnvironmentalMaxMovementSpeed(1);
+      avgGrassMaxMovementForce += c.getEnvironmentalMaxMovementSpeed(2);
+      avgWaterMaxMovementForce += c.getEnvironmentalMaxMovementSpeed(0);
+    }
+    avgMaxMovementForce /= numcreatures;
+    avgMountainMaxMovementForce /= numcreatures;
+    avgGrassMaxMovementForce /= numcreatures;
+    avgWaterMaxMovementForce /= numcreatures;
+    TableRow locoRow = locomotion.addRow();
+    locoRow.setInt("   Gen   ", generation);
+    locoRow.setFloat("   Avg maxMovementForce   ", avgMaxMovementForce);
+    locoRow.setFloat("   Avg Mountain maxMovementForce   ", avgMountainMaxMovementForce);
+    locoRow.setFloat("   Avg Grass maxMovementForce   ", avgGrassMaxMovementForce);
+    locoRow.setFloat("   Avg Water maxMovementForce   ", avgWaterMaxMovementForce);
     
     writeTables(); 
   }

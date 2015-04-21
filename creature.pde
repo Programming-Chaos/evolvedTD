@@ -363,7 +363,7 @@ class creature {
 
     maxMovementForce = baseMaxMovementForce - (2*getWidth());
     if (maxMovementForce < 0) maxMovementForce = 0;
-    for (Appendage app : appendages) maxMovementForce += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
+    for (Appendage app : appendages) maxMovementForce += 50*app.size; // Every appendage contributes to overall movement speed a little, 50 to start out. This encourages the evolution of appendages in the first place.
 
     scent = setScent();                 // does creature produce scent
     scentStrength = setScentStrength(); // how strong is the scent
@@ -586,6 +586,36 @@ class creature {
       if (a.size > 0) area += a.area;
     }
     return (body.getMass()/area);
+  }
+  
+  float getEnvironmentalMaxMovementSpeed(int switchnum) { // 0 for water, 1 for mountain, 2 for grass
+    float f = maxMovementForce;
+    float base = f;
+    
+    // appendages will change the force depending on the environment
+    for (Appendage app : appendages) {
+      if (app.size > 0) { // if the appendage exists
+        switch (switchnum) {
+        case 0: // if the creature's center is in water
+          f -= (base*app.grassForcePercent)/numSegments;
+          f += (2*base*app.waterForcePercent)/numSegments;
+          f -= (base*app.mountainForcePercent)/numSegments;
+          break;
+        case 1: // if the creature's center is on a mountain
+          f -= (base*app.grassForcePercent)/numSegments;
+          f -= (base*app.waterForcePercent)/numSegments;
+          f += (2*base*app.mountainForcePercent)/numSegments;
+          break;
+        case 2: // if the creature's center is on grass
+          f += (2*base*app.grassForcePercent)/numSegments;
+          f -= (base*app.waterForcePercent)/numSegments;
+          f -= (base*app.mountainForcePercent)/numSegments;
+          break;
+        }
+      }
+    }
+    
+    return f;
   }
 
   // can be from 2 to Genome.MAX_SEGMENTS
@@ -877,7 +907,7 @@ class creature {
         //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
-        fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
+        fill(((Appendage)f.getUserData()).mountainForcePercent*85,((Appendage)f.getUserData()).grassForcePercent*85,((Appendage)f.getUserData()).waterForcePercent*85); // Get the creature's color
         //if ((((Appendage)f.getUserData()).armor) > 1)
         //  sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
         //else

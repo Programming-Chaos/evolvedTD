@@ -299,7 +299,7 @@ class environment {
   void generateWaterALT(float alt) {
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
-        if(tileMap[i][j].getAlt() <= alt) {
+        if(false){//tileMap[i][j].getAlt() <= alt) {
           tileMap[i][j].biome = WATER;
           tileMap[i][j].setViscosity(255);
           //tileMap[i][j].colors = color(20, 50, 200, (int)((abs((tileMap[i][j].getAlt()) - 1) + 0.2) * 255));
@@ -319,7 +319,7 @@ class environment {
   void generateRockyALT(float alt) {
     for(int i = 0; i < environWidth; i++) {
       for(int j = 0; j < environHeight; j++) {
-        if(tileMap[i][j].getAlt() >= alt) {
+        if(true){//tileMap[i][j].getAlt() >= alt) {
           tileMap[i][j].biome = MOUNTAIN;
           tileMap[i][j].setViscosity(0);
           //tileMap[i][j].colors = color(170, 190, 215, (int)((abs((tileMap[i][j].getAlt()) - 0.9) * 255)));
