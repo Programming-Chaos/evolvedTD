@@ -353,7 +353,7 @@ class population {
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
       c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
-      c_traitsRow.setFloat("   Armor   "    , c.getArmor());
+      c_traitsRow.setFloat("   Armor   "    , c.getArmorAvg());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
@@ -366,7 +366,7 @@ class population {
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
       denseAvg += c.getCreatureDensity();
-      armorAvg += c.getArmor();
+      armorAvg += c.getArmorAvg();
       velAvg   += c.maxMovementForce;
       hpAvg    += c.maxHealth;
       
