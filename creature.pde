@@ -23,13 +23,6 @@ class Gamete {
   Chromosome getGamete() { return gamete; }
 }
 
-class GameteComparator implements Comparator<Gamete> {
-  public int compare(Gamete x, Gamete y) {
-    // return the Java comparison of two integers
-    return Integer.valueOf(x.getTime()).compareTo(Integer.valueOf(y.getTime()));
-  }
-}
-
 class creature {
   // stats
   int num;               // unique creature identifier
@@ -843,18 +836,6 @@ class creature {
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
     }
     
-    /*// this is not useful right now but it's cool and maybe we can use it later
-    pushMatrix();
-      translate(pos.x-round(getWidth()/2), pos.y-round(getWidth()/2));
-      rotate(-a);
-      fill (0,200,255,150);
-      beginShape();
-      for (int c = 0; c < round(random(5,20)); c++)
-        vertex(round(random(0,getWidth())),round(random(0,getWidth())));
-      endShape(CLOSE);
-    popMatrix();
-    */
-
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
@@ -863,28 +844,13 @@ class creature {
     pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    //stroke(0);   // Draw polygons with edges
     
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
-        //if ((((Segment)f.getUserData()).armor) > 1)
-        //  sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        //else
-        //  sw = (((Segment)f.getUserData()).armor);
-        //strokeWeight(sw);
-        //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
-        //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-        //if ((((Appendage)f.getUserData()).armor) > 1)
-        //  sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        //else
-        //  sw = (((Appendage)f.getUserData()).armor);
-        //strokeWeight(sw);
-        //line((int)(((Appendage)f.getUserData()).frontPoint.x),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x),(int)(((Appendage)f.getUserData()).backPoint.y));
-        //line((int)(((Appendage)f.getUserData()).frontPoint.x*-1),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x*-1),(int)(((Appendage)f.getUserData()).backPoint.y));
       }
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
@@ -899,7 +865,6 @@ class creature {
       endShape(CLOSE);
     }
 
-    //strokeWeight(1);
     // Add some eyespots
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
@@ -1039,4 +1004,3 @@ class creature {
     }
   }
 }
-
