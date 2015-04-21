@@ -178,8 +178,6 @@ class population {
     }
     // at end of wave, update data collection
     updateData();
-    // Place gametes in order of time.
-//    Collections.sort(gametes, new GameteComparator());
     
     int multiplier = 0;
     int range;
