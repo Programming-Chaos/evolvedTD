@@ -160,7 +160,6 @@ class population {
 
   // creates the next generation
   void next_generation() {
-    
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
     
@@ -168,7 +167,6 @@ class population {
       // Kill the bodies of any creatures that are still alive
       if (c.alive) {
         c.killBody();
-        c.alive = false;
       }
 
       // Add all of a creatures gametes to the gamete pool
@@ -178,7 +176,12 @@ class population {
     }
     // at end of wave, update data collection
     updateData();
-    
+
+    // "kill" all creatures so camera stops following them
+    for (creature c : swarm) {
+      c.alive = false;
+    }
+
     int multiplier = 0;
     int range;
     Gamete g1, g2;
