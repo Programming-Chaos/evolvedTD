@@ -95,6 +95,21 @@ void setupSoundFiles() {
   sf.setString("File", "assets/upgrade.mp3");
   sf.setInt("Length", 1000);
   
+  sf = soundfiles.addRow(); //Munch_01
+  sf.setString("Key", "Munch_01");
+  sf.setString("File", "assets/munch1.mp3");
+  sf.setInt("Length", 1000);
+  
+  sf = soundfiles.addRow(); //Munch_02
+  sf.setString("Key", "Munch_02");
+  sf.setString("File", "assets/munch2.mp3");
+  sf.setInt("Length", 1000);
+  
+  sf = soundfiles.addRow(); //Munch_03
+  sf.setString("Key", "Munch_03");
+  sf.setString("File", "assets/munch3.mp3");
+  sf.setInt("Length", 1000);
+  
   TestSoundFiles();
 }
 
