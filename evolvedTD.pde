@@ -97,11 +97,11 @@ void setup() {
 
   place_food();                  // calls the place food function below
   rocks = new ArrayList<rock>();
-  /*for (int i = 0; i < 10; i++) { // creates 10 random rocks,
+  for (int i = 0; i < 10; i++) { // creates 10 random rocks,
     rock r = new rock((int)random(-0.5 * worldWidth, 0.5 * worldWidth),
                       (int)random(-0.5 * worldHeight, 0.5 * worldHeight));
     rocks.add(r);
-  }*/
+  }
   rectMode(CENTER);              // drawing mode fore rectangles,
   
   environ = new environment();   // must occur after creatures, etc. created
@@ -143,16 +143,7 @@ void draw() {
     environ.display();
   }
 
-  for (int i = 0; i < foods.size(); i++) { // go through the list of food and if any was collided into by a creature, remove it.
-    food f = foods.get(i);
-    if (f != null) {
-      if (f.update() == 1) {
-        foods.remove(i); // if a food was eaten remove it from the list
-        food new_f = new food((int)random(-worldWidth,worldWidth), (int)random(-worldHeight,worldHeight)); // places food randomly near the tower
-        foods.add(new_f);
-      }
-    }
-  }
+
 
   if (display && displayFood) {
     for (food f: foods) { // go through the array list of food and display them
@@ -569,7 +560,7 @@ void place_food() { // done once at the beginning of the game
 void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
-  //add_food(); // add some more food
+  add_food(); // add some more food
   the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background

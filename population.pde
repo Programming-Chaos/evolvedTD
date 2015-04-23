@@ -166,8 +166,10 @@ class population {
     
     for (creature c : swarm) {
       // Kill the bodies of any creatures that are still alive
-      if (c.alive)
+      if (c.alive) {
         c.killBody();
+        c.alive = false;
+      }
 
       // Add all of a creatures gametes to the gamete pool
       for(Gamete g : c.gameteStack) {
@@ -176,8 +178,6 @@ class population {
     }
     // at end of wave, update data collection
     updateData();
-    // Place gametes in order of time.
-//    Collections.sort(gametes, new GameteComparator());
     
     int multiplier = 0;
     int range;
@@ -353,12 +353,12 @@ class population {
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
       c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
-      c_traitsRow.setFloat("   Armor   "    , c.getArmor());
+      c_traitsRow.setFloat("   Armor   "    , c.getArmorAvg());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
       //c_traitsRow.setFloat("   Color   ", );
-      c_traitsRow.setFloat("   Velocity   " , c.maxMovementSpeed);
+      c_traitsRow.setFloat("   Velocity   " , c.maxMovementForce);
       //c_traitsRow.setFloat("   Acceleration   ", );
       c_traitsRow.setFloat("   Max HP   "   , c.maxHealth); 
       
@@ -366,8 +366,8 @@ class population {
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
       denseAvg += c.getCreatureDensity();
-      armorAvg += c.getArmor();
-      velAvg   += c.maxMovementSpeed;
+      armorAvg += c.getArmorAvg();
+      velAvg   += c.maxMovementForce;
       hpAvg    += c.maxHealth;
       
       // Update creature reproduction data

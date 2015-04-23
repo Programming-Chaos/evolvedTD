@@ -11,7 +11,7 @@ class food {
   
   food(int x, int y) {
     colortimer = ((int)random(0,100)-50);
-    radius = int (3);
+    radius = int (random(3,25));
     makebody(x, y);
     the_food.setUserData(this);
     taste = new int[5];
@@ -24,7 +24,7 @@ class food {
   
   food() {
     colortimer = ((int)random(0,100)-50);
-    radius = int (random(3));
+    radius = int (random(3,25));
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
              (int)random(-0.5*worldHeight, 0.5*worldHeight));
     the_food.setUserData(this);
@@ -38,7 +38,7 @@ class food {
   
   food(float x, float y) {
     colortimer = ((int)random(0,100)-50);
-    radius = int ((3));
+    radius = int (random(3,25));
     makebody((int)x, (int)y);
     the_food.setUserData(this);
     taste = new int[5];

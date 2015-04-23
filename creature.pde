@@ -23,13 +23,6 @@ class Gamete {
   Chromosome getGamete() { return gamete; }
 }
 
-class GameteComparator implements Comparator<Gamete> {
-  public int compare(Gamete x, Gamete y) {
-    // return the Java comparison of two integers
-    return Integer.valueOf(x.getTime()).compareTo(Integer.valueOf(y.getTime()));
-  }
-}
-
 class creature {
   // stats
   int num;               // unique creature identifier
@@ -39,8 +32,9 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  float baseMaxMovementSpeed = 1000; //maximum speed without factoring in width and appendages
-  float maxMovementSpeed;
+  float baseMaxMovementForce = 4000; //maximum speed without factoring in width and appendages
+  float maxMovementForce;
+  float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
 
   // timers
@@ -83,8 +77,8 @@ class creature {
 
   // Reproduction variables
   Vec2 sPos; // Starting position of creature
-  int baseGameteCost = 10;    // Gametes base energy cost
-  int baseGameteTime = 100;   // Gametes base create time in screen updates.
+  int baseGameteCost = 500;    // Gametes base energy cost
+  int baseGameteTime = 1;   // Gametes base create time in screen updates.
   int baseGameteEnergy = 500; // Gametes base extra energy
   int gameteTimeLapse = 0;    // Keeps track of time since last gamete
 
@@ -264,6 +258,7 @@ class creature {
       float mountain = (genome.avg(appendageTraits.get(index).mountainForce));
       mountainForce = ((-1/(1.01+(mountain*mountain)))+1);
       //mountainForce *= 4;
+      
       float divisor = waterForce+grassForce+mountainForce;
       waterForcePercent = waterForce/divisor;
       grassForcePercent = grassForce/divisor;
@@ -359,9 +354,9 @@ class creature {
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
 
-    maxMovementSpeed = baseMaxMovementSpeed - (2*getWidth());
-    if (maxMovementSpeed < 0) maxMovementSpeed = 0;
-    for (Appendage app : appendages) maxMovementSpeed += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
+    maxMovementForce = baseMaxMovementForce - (2*getWidth());
+    if (maxMovementForce < 0) maxMovementForce = 0;
+    for (Appendage app : appendages) maxMovementForce += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
 
     scent = setScent();                 // does creature produce scent
     scentStrength = setScentStrength(); // how strong is the scent
@@ -691,13 +686,17 @@ class creature {
     if (freezeTimer == 0) {
       //if (!body.isActive())body.setActive(true);
       //if (body.getType() == BodyType.STATIC)body.setType(BodyType.DYNAMIC);
+
       torque = current_actions[0];
+
+      //torque = current_actions[0]*baseMaxTorque;
 
       // force is a percentage of max movement speed from 10% to 100%
       // depending on the output of the neural network in current_actions[1], the movement force may be backwards
       // as of now the creatures never completely stop moving
-      
-      f = (maxMovementSpeed*10 * Utilities.MovementForceSigmoid(current_actions[1]));
+
+      f = (maxMovementForce * Utilities.MovementForceSigmoid(current_actions[1]));
+
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
 
@@ -841,18 +840,6 @@ class creature {
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
     }
     
-    /*// this is not useful right now but it's cool and maybe we can use it later
-    pushMatrix();
-      translate(pos.x-round(getWidth()/2), pos.y-round(getWidth()/2));
-      rotate(-a);
-      fill (0,200,255,150);
-      beginShape();
-      for (int c = 0; c < round(random(5,20)); c++)
-        vertex(round(random(0,getWidth())),round(random(0,getWidth())));
-      endShape(CLOSE);
-    popMatrix();
-    */
-
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
@@ -861,28 +848,13 @@ class creature {
     pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    //stroke(0);   // Draw polygons with edges
     
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
-        //if ((((Segment)f.getUserData()).armor) > 1)
-        //  sw = ((((((Segment)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        //else
-        //  sw = (((Segment)f.getUserData()).armor);
-        //strokeWeight(sw);
-        //line((int)(((Segment)f.getUserData()).frontPoint.x),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x),(int)(((Segment)f.getUserData()).backPoint.y));
-        //line((int)(((Segment)f.getUserData()).frontPoint.x*-1),(int)(((Segment)f.getUserData()).frontPoint.y),(int)(((Segment)f.getUserData()).backPoint.x*-1),(int)(((Segment)f.getUserData()).backPoint.y));
       }
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-        //if ((((Appendage)f.getUserData()).armor) > 1)
-        //  sw = ((((((Appendage)f.getUserData()).armor)-1)*50)+1); // make armor more visible
-        //else
-        //  sw = (((Appendage)f.getUserData()).armor);
-        //strokeWeight(sw);
-        //line((int)(((Appendage)f.getUserData()).frontPoint.x),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x),(int)(((Appendage)f.getUserData()).backPoint.y));
-        //line((int)(((Appendage)f.getUserData()).frontPoint.x*-1),(int)(((Appendage)f.getUserData()).frontPoint.y),(int)(((Appendage)f.getUserData()).backPoint.x*-1),(int)(((Appendage)f.getUserData()).backPoint.y));
       }
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
@@ -896,8 +868,10 @@ class creature {
       }
       endShape(CLOSE);
     }
+
     stroke(10);
     //strokeWeight(1);
+
     // Add some eyespots
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
@@ -957,7 +931,7 @@ class creature {
     BodyDef bd = new BodyDef();  // Define a new Box2D body object
     bd.type = BodyType.DYNAMIC;  // Make the body dynamic (Box2d bodies can also be static: unmoving)
     bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
-    bd.linearDamping = 0.9;  // Give it some friction, could be evolved
+    bd.linearDamping = 0.999;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
     body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
 
@@ -1034,4 +1008,3 @@ class creature {
     }
   }
 }
-
