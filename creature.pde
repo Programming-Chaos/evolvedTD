@@ -697,7 +697,7 @@ class creature {
       // depending on the output of the neural network in current_actions[1], the movement force may be backwards
       // as of now the creatures never completely stop moving
       
-      f = (maxMovementSpeed*2 * Utilities.MovementForceSigmoid(current_actions[1]));
+      f = (maxMovementSpeed*10 * Utilities.MovementForceSigmoid(current_actions[1]));
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
 
@@ -771,7 +771,7 @@ class creature {
     }
     else freezeTimer--;
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
-    body.setAngularVelocity(body.getAngularVelocity() * 0.9);
+    body.setAngularVelocity(body.getAngularVelocity() * 0.99);
 
     // if out of health have the creature "die". Stops participating
     // in the world, still exists for reproducton

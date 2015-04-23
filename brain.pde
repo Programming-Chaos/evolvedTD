@@ -32,9 +32,9 @@ class Brain {
       for (int j = 0; j < INPUTS; j++) {
         weights[i][j] = genome.sum(brainTraits.get(i*INPUTS + j));
         if (j == 0 && i == 0) {
-          weights[i][j] -= 10;
+          weights[i][j] -= 115;
         } else if (j == 1 && i == 0) {
-          weights[i][j] += 10;
+          weights[i][j] += 115;
         }
         
       }

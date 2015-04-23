@@ -13,7 +13,6 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
-String type = "Lets_See_Test_2dot2_Senses";
 
 int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
@@ -72,7 +71,7 @@ Table env;
 int fStart;
 int fTotal = 0;
 int fConsumed = 0;
-int replicate = 0;
+
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
@@ -104,7 +103,7 @@ void setup() {
     rocks.add(r);
   }*/
   rectMode(CENTER);              // drawing mode fore rectangles,
-  replicate += 1;
+  
   environ = new environment();   // must occur after creatures, etc. created
   lasttime = 0;
   generation = 0;
@@ -121,13 +120,7 @@ void setup() {
 }
 
 void draw() {
-  if (replicate == 20) {
-    exit(); 
-  }
-  
-  if (generation == 50) {
-    setup();
-  }
+
   
   if (mistermoneybagsmode) the_player.money = 1000000000;
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
@@ -877,13 +870,13 @@ void initTables() {
 
 //Test for writing data to excel file
 void writeTables() {
-  saveTable(c_traits, type + str(replicate) + "data/c_traits.csv");
-  saveTable(c_avgs,  type + str(replicate) + "data/c_avgs.csv");
-  saveTable(reproduction,  type + str(replicate) + "data/reproduction.csv");
-  saveTable(sensing,  type + str(replicate) + "data/sensing.csv");
-  saveTable(metabolism,  type + str(replicate) + "data/metabolism.csv");
-  saveTable(lifetime,  type + str(replicate) + "data/lifetime.csv");
-  saveTable(p_impact,  type + str(replicate) + "data/p_impact.csv");
-  saveTable(p_stats,  type + str(replicate) + "data/p_stats.csv");
-  saveTable(env,  type + str(replicate) + "data/env.csv");
+  saveTable(c_traits, "data/c_traits.csv");
+  saveTable(c_avgs,   "data/c_avgs.csv");
+  saveTable(reproduction,   "data/reproduction.csv");
+  saveTable(sensing,  "data/sensing.csv");
+  saveTable(metabolism,  "data/metabolism.csv");
+  saveTable(lifetime, "data/lifetime.csv");
+  saveTable(p_impact,   "data/p_impact.csv");
+  saveTable(p_stats,   "data/p_stats.csv");
+  saveTable(env,  "data/env.csv");
 }
