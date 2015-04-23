@@ -186,7 +186,7 @@ class environment {
     // Establish world type
     int altShift = decideWorldType();
     
-    spawnRocks();
+    //spawnRocks();
     altitudeShift(altShift);
     makeImage();
   }

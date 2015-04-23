@@ -13,6 +13,8 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
+String type = "Lets_See_Test_2dot2_Senses";
+
 int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
@@ -70,7 +72,7 @@ Table env;
 int fStart;
 int fTotal = 0;
 int fConsumed = 0;
-
+int replicate = 0;
 void setup() {
   //size(850,850,P3D);  // default window size
   size(800,800,P3D);             // window size, and makes it a 3D window
@@ -96,16 +98,17 @@ void setup() {
 
   place_food();                  // calls the place food function below
   rocks = new ArrayList<rock>();
-  for (int i = 0; i < 10; i++) { // creates 10 random rocks,
+  /*for (int i = 0; i < 10; i++) { // creates 10 random rocks,
     rock r = new rock((int)random(-0.5 * worldWidth, 0.5 * worldWidth),
                       (int)random(-0.5 * worldHeight, 0.5 * worldHeight));
     rocks.add(r);
-  }
+  }*/
   rectMode(CENTER);              // drawing mode fore rectangles,
-
+  replicate += 1;
   environ = new environment();   // must occur after creatures, etc. created
   lasttime = 0;
-
+  generation = 0;
+  
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
@@ -118,6 +121,14 @@ void setup() {
 }
 
 void draw() {
+  if (replicate == 20) {
+    exit(); 
+  }
+  
+  if (generation == 50) {
+    setup();
+  }
+  
   if (mistermoneybagsmode) the_player.money = 1000000000;
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
@@ -144,6 +155,8 @@ void draw() {
     if (f != null) {
       if (f.update() == 1) {
         foods.remove(i); // if a food was eaten remove it from the list
+        food new_f = new food((int)random(-worldWidth,worldWidth), (int)random(-worldHeight,worldHeight)); // places food randomly near the tower
+        foods.add(new_f);
       }
     }
   }
@@ -340,7 +353,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     food p2 = (food)o2;
     if(p1.current_actions[2] > 0.0){
       p1.addEnergy(p2.nourishment); // getting food is valuable
-      p1.senses.Set_Taste(p2);
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
@@ -354,7 +366,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     food p2 = (food)o1;
     if(p1.current_actions[2] > 0.0){
       p1.addEnergy(p2.nourishment); // getting food is valuable
-      p1.senses.Set_Taste(p2);
+      
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
@@ -427,7 +439,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       }
       else p2.shield -= munched;
       p1.addEnergy(1000*munched); // munching a bioreactor is valuable
-      p1.senses.Set_Taste(p2);
     }
   }
   else if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
@@ -445,7 +456,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       }
       else p2.shield -= munched;
       p1.addEnergy(1000*munched); // munching a bioreactor is valuable
-      p1.senses.Set_Taste(p2);
     }
   }
 
@@ -464,7 +474,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       }
       else p2.shield -= munched;
       p1.addEnergy(100*munched); // munching a tower is less valuable than munching a bioreactor
-      p1.senses.Set_Taste(p2);
     }
   }
   else if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
@@ -482,7 +491,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       }
       else p2.shield -= munched;
       p1.addEnergy(200*munched); // munching a tower is less valuable than munching a bioreactor
-      p1.senses.Set_Taste(p2);
     }
   }
   
@@ -501,8 +509,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       ID = collision_2;
     }
 
-    p1.senses.Add_Side_Pressure(ID, PI);
-    p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+
   }
 }
 
@@ -538,21 +545,18 @@ void endContact(Contact cp) {
     } else {
       ID = collision_2;
     }
-    p1.senses.Remove_Side_Pressure(ID);
-    p2.senses.Remove_Side_Pressure(ID);
+
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    p1.senses.Remove_Taste();
   }
 
   // check the class of the objects and respond accordingly
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    p1.senses.Remove_Taste();
   }
 }
 
@@ -572,7 +576,7 @@ void place_food() { // done once at the beginning of the game
 void nextgeneration() {
   generation++;
   the_pop.next_generation(); // update the population
-  add_food(); // add some more food
+  //add_food(); // add some more food
   the_player.next_generation(); // have the tower update itself, reset energy etc.
   // if in autofire mode don't both pausing - useful for evolving in
   // the background
@@ -873,13 +877,13 @@ void initTables() {
 
 //Test for writing data to excel file
 void writeTables() {
-  saveTable(c_traits, "data/c_traits.csv");
-  saveTable(c_avgs, "data/c_avgs.csv");
-  saveTable(reproduction, "data/reproduction.csv");
-  saveTable(sensing, "data/sensing.csv");
-  saveTable(metabolism, "data/metabolism.csv");
-  saveTable(lifetime, "data/lifetime.csv");
-  saveTable(p_impact, "data/p_impact.csv");
-  saveTable(p_stats, "data/p_stats.csv");
-  saveTable(env, "data/env.csv");
+  saveTable(c_traits, type + str(replicate) + "data/c_traits.csv");
+  saveTable(c_avgs,  type + str(replicate) + "data/c_avgs.csv");
+  saveTable(reproduction,  type + str(replicate) + "data/reproduction.csv");
+  saveTable(sensing,  type + str(replicate) + "data/sensing.csv");
+  saveTable(metabolism,  type + str(replicate) + "data/metabolism.csv");
+  saveTable(lifetime,  type + str(replicate) + "data/lifetime.csv");
+  saveTable(p_impact,  type + str(replicate) + "data/p_impact.csv");
+  saveTable(p_stats,  type + str(replicate) + "data/p_stats.csv");
+  saveTable(env,  type + str(replicate) + "data/env.csv");
 }
