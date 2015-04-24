@@ -143,7 +143,14 @@ void draw() {
     environ.display();
   }
 
-
+  for (int i = 0; i < foods.size(); i++) { // go through the list of food and if any was collided into by a creature, remove it.
+    food f = foods.get(i);
+    if (f != null) {
+      if (f.update() == 1) {
+        foods.remove(i); // if a food was eaten remove it from the list
+      }
+    }
+  }
 
   if (display && displayFood) {
     for (food f: foods) { // go through the array list of food and display them
@@ -350,7 +357,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     food p2 = (food)o1;
     if(p1.current_actions[2] > 0.0){
       p1.addEnergy(p2.nourishment); // getting food is valuable
-      
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
