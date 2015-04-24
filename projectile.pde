@@ -108,7 +108,6 @@ class projectile {
             endShape();
             
             c.health += (-1*damage*((maxRange-distance)/maxRange));
-            c.senses.Set_Current_Pain(damage*((maxRange-distance)/maxRange));
             // increase or decrease this number to lengthen or shorten the
             // animation time on hit
             c.hit_indicator = 5;
