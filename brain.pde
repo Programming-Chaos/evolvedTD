@@ -18,7 +18,7 @@ import java.util.Iterator;
 class Brain {
   // Weights for the brain's artificial neural network
   static final int OUTPUTS = 3;
-  static final int INPUTS = 1000;
+  static final int INPUTS = 2;
   static final int WEIGHTS = OUTPUTS*INPUTS;
 
   //DATA
@@ -31,6 +31,12 @@ class Brain {
     for(int i = 0; i < OUTPUTS; i++) {
       for (int j = 0; j < INPUTS; j++) {
         weights[i][j] = genome.sum(brainTraits.get(i*INPUTS + j));
+        if (j == 0 && i == 0) {
+          weights[i][j] -= 115;
+        } else if (j == 1 && i == 0) {
+          weights[i][j] += 115;
+        }
+        
       }
     }
   }

@@ -13,6 +13,7 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
+
 int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
@@ -103,10 +104,11 @@ void setup() {
     rocks.add(r);
   }
   rectMode(CENTER);              // drawing mode fore rectangles,
-
+  
   environ = new environment();   // must occur after creatures, etc. created
   lasttime = 0;
-
+  generation = 0;
+  
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
@@ -119,6 +121,8 @@ void setup() {
 }
 
 void draw() {
+
+  
   if (mistermoneybagsmode) the_player.money = 1000000000;
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
@@ -339,9 +343,9 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     food p2 = (food)o2;
-    if(p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
-      p1.senses.Set_Taste(p2);
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
@@ -353,9 +357,9 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o2;
     food p2 = (food)o1;
-    if(p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
-      p1.senses.Set_Taste(p2);
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
@@ -433,8 +437,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       ID = collision_2;
     }
 
-    p1.senses.Add_Side_Pressure(ID, PI);
-    p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+
   }
 }
 
@@ -470,21 +473,18 @@ void endContact(Contact cp) {
     } else {
       ID = collision_2;
     }
-    p1.senses.Remove_Side_Pressure(ID);
-    p2.senses.Remove_Side_Pressure(ID);
+
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    p1.senses.Remove_Taste();
   }
 
   // check the class of the objects and respond accordingly
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    p1.senses.Remove_Taste();
   }
   
   if ((o1.getClass() == creature.class && o2.getClass() == farm.class) || (o1.getClass() == creature.class && o2.getClass() == tower.class)) {
@@ -813,12 +813,12 @@ void initTables() {
 //Test for writing data to excel file
 void writeTables() {
   saveTable(c_traits, "data/c_traits.csv");
-  saveTable(c_avgs, "data/c_avgs.csv");
-  saveTable(reproduction, "data/reproduction.csv");
-  saveTable(sensing, "data/sensing.csv");
-  saveTable(metabolism, "data/metabolism.csv");
+  saveTable(c_avgs,   "data/c_avgs.csv");
+  saveTable(reproduction,   "data/reproduction.csv");
+  saveTable(sensing,  "data/sensing.csv");
+  saveTable(metabolism,  "data/metabolism.csv");
   saveTable(lifetime, "data/lifetime.csv");
-  saveTable(p_impact, "data/p_impact.csv");
-  saveTable(p_stats, "data/p_stats.csv");
-  saveTable(env, "data/env.csv");
+  saveTable(p_impact,   "data/p_impact.csv");
+  saveTable(p_stats,   "data/p_stats.csv");
+  saveTable(env,  "data/env.csv");
 }

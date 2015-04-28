@@ -651,7 +651,7 @@ class creature {
 
   void changeHealth(int h) {
     health += h;
-    senses.Set_Current_Pain(-h);
+    //senses.Set_Current_Pain(-h);
     // increase or decrease this number to lengthen or shorten the
     // animation time on hit
     hit_indicator = 5;
@@ -676,12 +676,10 @@ class creature {
     if (!alive) { // dead creatures don't update
       return;
     }
-
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     float a = body.getAngle();
 
-    senses.Update_Pain();
-    senses.Update_Senses(pos2.x, pos2.y, a);
+  
 
     calcBehavior();
     timestep_counter++;
@@ -710,7 +708,7 @@ class creature {
                 munching.f.shield -= munchstrength;
                 addEnergy(200*munchstrength); // munching a bioreactor is valuable
               }
-              senses.Set_Taste(munching.f);
+              //senses.Set_Taste(munching.f);
               if (munching.f.health == 0) munchnext = null;
             }
             else {
@@ -729,7 +727,7 @@ class creature {
                 munching.t.shield -= munchstrength;
                 addEnergy(40*munchstrength); // munching a tower is less valuable than munching a bioreactor
               }
-              senses.Set_Taste(munching.t);
+              //senses.Set_Taste(munching.t);
               if (munching.t.health == 0) munchnext = null;
             }
           }
@@ -743,12 +741,17 @@ class creature {
     if (freezeTimer == 0) {
       //if (!body.isActive())body.setActive(true);
       //if (body.getType() == BodyType.STATIC)body.setType(BodyType.DYNAMIC);
-      torque = current_actions[0]*baseMaxTorque;
+
+      torque = current_actions[0];
+
+      //torque = current_actions[0]*baseMaxTorque;
 
       // force is a percentage of max movement speed from 10% to 100%
       // depending on the output of the neural network in current_actions[1], the movement force may be backwards
       // as of now the creatures never completely stop moving
+
       f = (maxMovementForce * Utilities.MovementForceSigmoid(current_actions[1]));
+
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
 
@@ -795,6 +798,7 @@ class creature {
         locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
       }
   
+      senses.Update_Senses(pos2.x, pos2.y, a);
       // Creatures that run off one side of the world wrap to the other side.
       if (pos2.x < -0.5 * worldWidth) {
         pos2.x += worldWidth;
@@ -821,7 +825,7 @@ class creature {
     }
     else freezeTimer--;
     // Angular velocity is reduced each timestep to mimic friction (and keep creatures from spinning endlessly)
-    body.setAngularVelocity(body.getAngularVelocity() * 0.9);
+    body.setAngularVelocity(body.getAngularVelocity() * 0.99);
 
     // if out of health have the creature "die". Stops participating
     // in the world, still exists for reproducton
@@ -911,7 +915,7 @@ class creature {
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       //strokeWeight(.1);
-      noStroke();
+     // noStroke();
       Vec2 v;
       for (int i = 0; i < 3; i++) {
         v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
@@ -920,14 +924,15 @@ class creature {
       endShape(CLOSE);
     }
 
+    stroke(10);
+    //strokeWeight(1);
+
     // Add some eyespots
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
+
     popMatrix();
     
-    if (displayFeelers) {
-      senses.Draw_Sense(pos.x, pos.y, a);
-    }
     
     if (freezeTimer > 0) {
       pushMatrix();
@@ -950,11 +955,10 @@ class creature {
     pushMatrix(); // Draws a "health" bar above the creature
     translate(pos.x, pos.y);
     noFill();
-    stroke(0);
+    //stroke(0);
     // get the largest dimension of the creature
     int offset = (int)max(getWidth(), getLength());
     rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it
-    noStroke();
     fill(0, 0, 255);
     rect(0, -1 * offset, 0.1 * health, 3);
     //Text to display the round counter of each creature for debug purposes
@@ -968,7 +972,7 @@ class creature {
     // get the largest dimension of the creature
     int offset2 = (int)max(getWidth(), getLength());
     rect(0, -1.1 * offset2, 0.1 * (max_energy_reproduction+max_energy_health+max_energy_locomotion)*0.02, 5); // draw the energy bar that much above it
-    noStroke();
+    //noStroke();
     fill(255, 0, 0);
     rect(0, -1.1 * offset2, 0.1 * (energy_reproduction+energy_health+energy_locomotion)*0.02, 5);
     //Text to display the round counter of each creature for debug purposes
