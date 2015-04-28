@@ -73,9 +73,9 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Time in water: " + selectedCreature.time_in_water); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Time on land: " + selectedCreature.time_on_land); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Scent strength: " + selectedCreature.scentStrength); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Reproduction energy: " + (int)selectedCreature.energy_reproduction); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Locomotion energy: " + (int)selectedCreature.energy_locomotion); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health energy: " + (int)selectedCreature.energy_health); } });
+    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Red: " + selectedCreature.r); } });
+    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Green: " + selectedCreature.g); } });
+    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Blue: " + selectedCreature.b); } });
 
     towerstatsPanel = new Panel(540,700,-960,930-360,false); // -360 so it's not cut off the bottom of some people's screens
     towerstatsPanel.enabled = false;
