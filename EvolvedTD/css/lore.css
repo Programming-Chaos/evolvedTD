@@ -1,0 +1,32 @@
+img { 
+    position: relative;
+}
+
+#chuck {
+    width: 12em;   
+}
+
+#chuck-helmet {
+    width: 8em;   
+}
+
+#nomurai {
+    margin-top: 0.8em;
+    width: 12em;
+}
+
+#solarWin {
+    margin-top: 0.8em;
+    padding: 1em;
+    width: 10em;   
+}
+
+#biomat {
+    width: 5.6em;
+    top: -1.4em;
+}
+
+#nebula {
+    width: 13em; 
+    right: 0;
+}

@@ -1,0 +1,100 @@
+* {
+    margin: 0 0;
+    padding: 0 0;
+}
+
+body {
+    background: url(../images/background.jpg);   
+    background-attachment: fixed;
+    background-size: cover;
+    font-family: Helvetica;
+}
+
+header {
+    position: relative;
+    display: block;
+    margin: auto;
+    width: 64em;
+    height: 10em;
+    background: url(../images/banner.jpg);
+    background-position: center;
+    
+}
+
+menu {
+    position: relative;
+    display: block;
+    left: -2em;
+    margin: auto;
+    width: 60em;
+    height: 3em;
+}
+menu li.tab {
+    position: relative;
+    display: inline-block;
+    width: 9em;
+    height: 100%;
+    overflow: hidden;
+}
+menu li.tab a {
+    display: block;
+    width: 100%;
+    height: 1em;
+    padding: 1.0em 0.0em;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background: rgba(50, 50, 50, 0.3);
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+menu li.unselected a:hover {
+    text-shadow: 0 0 0.2em #2060b7, 0 0 0.5em #2060b7, 0 0 1.0em #202452, 0 0 1.5em #202452, 0 0 2.0em #202452, 0 0 2.5em #202452, 0 0 3.0em #202452, 0 0 3.5em #202452, 0 0 4.0em #202452, 0 0 4.5em #202452, 0 0 5.0em #202452, 0 0 5.5em #202452, 0 0 6.0em #202452;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+menu li.selected a {
+    text-shadow: 0 0 0.2em #2060b7, 0 0 0.5em #2060b7;
+    background: rgba(0, 0, 0, 0.8);   
+}
+
+#main-body {   
+    margin: auto;
+}
+section.content-block {
+    position: relative;
+    display: block;
+    padding: 2em 2em;
+    width: 60em;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+article {
+    position: relative;
+    display: block;
+    margin-top: 1em;
+    margin-bottom: 3em;
+}
+article p {
+    position: relative;
+    display: block;
+    margin-top: 3em;
+}
+article span {
+    display: inline-block;
+    margin: 0em 2em;
+}
+
+h2 {
+    padding: 0.3em;
+    background: rgba(172, 184, 209, 0.2);
+    border: solid #0af;
+}
