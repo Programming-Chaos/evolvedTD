@@ -229,7 +229,7 @@ class population {
           pos.x *= cellWidth;
           pos.y *= cellHeight;
 
-          generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+          generation.add(new creature(new Genome(g1.getGamete(), g2.getGamete()),
                                       10000 + g1.energy + g2.energy, pos));
         }
       }
