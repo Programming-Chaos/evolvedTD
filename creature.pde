@@ -6,21 +6,22 @@ class Gamete {
   int xPos, yPos;
   int time;
   int energy;
-  Chromosome gamete;
+  creature parent;
 
-  Gamete(int x, int y, int e, Chromosome g){
+  Gamete(int x, int y, int e, creature p){
     xPos = x;
     yPos = y;
     time = timesteps;
     energy = e;
-    gamete = g;
+    parent = p;
   }
 
   int getX()             { return xPos; }
   int getY()             { return yPos; }
   int getTime()          { return time; }
   int getEnergy()        { return energy; }
-  Chromosome getGamete() { return gamete; }
+  // TODO: use other gamete from getGametes()
+  Chromosome getGamete() { return (Chromosome)parent.genome.getGametes().get(0); }
 }
 
 class creature {
@@ -607,15 +608,8 @@ class creature {
     int posX = (int)(pos.x / cellWidth);
     int posY = (int)(pos.y / cellHeight);
     
-    // Use one of each chromosome from getGametes.
-    ArrayList<Chromosome> newGametes = new ArrayList<Chromosome>(2);
-    newGametes = genome.getGametes();
-    
-    Gamete g1 = new Gamete(posX + dx, posY + dy, energy, newGametes.get(0));
-    Gamete g2 = new Gamete(posX - dx, posY - dy, energy, newGametes.get(1));
-                           
-    gameteStack.add(g1);
-    gameteStack.add(g2);
+    gameteStack.add(new Gamete(posX + dx, posY + dy, energy, this));
+    gameteStack.add(new Gamete(posX - dx, posY - dy, energy, this));
 
     // remove reference to creature
     body.setUserData(null);
@@ -798,8 +792,7 @@ class creature {
       int energy = (int) (baseGameteEnergy * (1+genome.avg(gameteEnergy)));
 
       // Create gamete and place in gameteSack
-      Gamete g = new Gamete(xPos, yPos, energy,
-                            (Chromosome)genome.getGametes().get(0));
+      Gamete g = new Gamete(xPos, yPos, energy, this);
       gameteStack.add(g);
 
       // remove energy from creature
