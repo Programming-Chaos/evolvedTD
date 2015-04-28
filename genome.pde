@@ -69,8 +69,7 @@ Trait angularMomentumTrait = new Trait(10);
 Trait massTrait = new Trait(10);
 Trait energyTrait = new Trait(10);
 
-ArrayList<Trait> colorTraits = new ArrayList<Trait>(color_network.num_weights);
-// TODO: will these traits be gone with the use of a color network?
+// colors
 Trait redColorTrait = new Trait(10);
 Trait greenColorTrait = new Trait(10);
 Trait blueColorTrait = new Trait(10);
@@ -169,11 +168,6 @@ class FeelerTrait {
     // initialize the feelers and their traits
     for (int i = 0; i < (MAX_FEELERS); i++) {
       feelers.add(new FeelerTrait());
-    }
-
-    // initialize the color network weights
-    for (int i = 0; i < color_network.num_weights; i++) {
-      colorTraits.add(new Trait(10));
     }
   }
 

@@ -68,6 +68,10 @@ class creature {
   float density;
   metabolic_network metabolism;
 
+  // dominant colors
+  color bodyColor;
+  int r, g, b;
+
   // senses/communication
   Sensory_Systems senses;
   boolean scent;     // used to determine if creature is capable of producing scent
@@ -82,7 +86,6 @@ class creature {
   Body body;
   float angle;
   int numSegments;
-  color_network coloration;
 
   // Reproduction variables
   Vec2 sPos; // Starting position of creature
@@ -367,7 +370,6 @@ class creature {
     energy_health = 0;                                      // have to collect energy to regenerate, later this may be evolved
     //println(max_energy_reproduction + " " + max_energy_locomotion + ":" +energy_locomotion + " "+ max_energy_health);  // for debugging
     metabolism = new metabolic_network(genome);
-    coloration = new color_network(genome);
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
@@ -379,6 +381,7 @@ class creature {
     scent = setScent();                 // does creature produce scent
     scentStrength = setScentStrength(); // how strong is the scent
     scentType = setScentType();         // what color is the scent
+    bodyColor = getColor();
   }
 
   boolean getScent()     { return scent; }
@@ -493,43 +496,29 @@ class creature {
 
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
-  private color getColor(int n) {
-    // TODO: refactor for color per segment
-    float[] inputs = new float[coloration.getNumInputs()];
+  private color getColor() {
     float redColor = genome.sum(redColorTrait);
     float greenColor = genome.sum(greenColorTrait);
     float blueColor = genome.sum(blueColorTrait);
-    float alphaColor = genome.sum(alphaTrait);
 
-    int r = 126 + (int)(126*(redColor/(1+abs(redColor))));
-    int g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
-    int b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
-    int a = 126 + (int)(126*(alphaColor/(1+abs(alphaColor))));
-    inputs[0] = 1;   // bias
-    inputs[1] = timestep_counter*0.001;
-    inputs[2] = health/maxHealth;
-    inputs[3] = time_in_water/(timestep_counter+1); // percentage of time in water
-    inputs[4] = r/255;
-    inputs[5] = g/255;
-    inputs[6] = b/255;
-    inputs[7] = a/255;
-    inputs[8] = n;
-    float[] outputs = new float[coloration.getNumOutputs()];
-    coloration.calculate(inputs, outputs);
-    float sum = 0;
-    for(int i = 0; i < coloration.getNumOutputs(); i++){
-      outputs[i] = abs(outputs[i]);
-      sum += outputs[i];
+    r = 126 + (int)(126*(redColor/(1+abs(redColor))));
+    g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
+    b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
+
+    IntDict colors = new IntDict();
+    colors.set("red", r);
+    colors.set("green", g);
+    colors.set("blue", b);
+
+    // keep dominant color
+    String dominantColor = colors.maxKey();
+    for (String key : colors.keys()) {
+      if (key != dominantColor) {
+        colors.set(key, 0);
+      }
     }
 
-    r = r*(1 + (int)outputs[0]);
-    g = g*(1 + (int)outputs[1]);
-    b = b*(1 + (int)outputs[2]);
-    a = a*(1 + (int)outputs[3]);
-
-    /*I turned off alpha value here so I could not draw segmentations on creatures
-    The creatures weren't easily visible with a low alpha*/
-    return color(r, g, b, 255);
+    return color(colors.get("red"), colors.get("green"), colors.get("blue"));
   }
 
   // Calculate and return the width of the creature
@@ -912,10 +901,10 @@ class creature {
     
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
-        fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
+        fill(bodyColor); // Get the creature's color
       }
       if (f.getUserData().getClass() == Appendage.class) {
-        fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
+        fill(bodyColor);
       }
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
