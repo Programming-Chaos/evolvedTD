@@ -37,6 +37,7 @@ boolean displayFeelers = false;// displaying feelers makes the creatures look a 
 boolean buttonpressed = false;
 boolean autofire = true;
 boolean mistermoneybagsmode = false;
+boolean invinciblestructures = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -342,7 +343,8 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     food p2 = (food)o2;
-    if(p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -355,7 +357,8 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o2;
     food p2 = (food)o1;
-    if(p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -405,83 +408,18 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     }
   }
 
-  /*if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
-    creature p1 = (creature)o1;
-    tower p2 = (tower)o2;
-  }
-  else if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
-    creature p1 = (creature)o2;
-    tower p2 = (tower)o1;
-  }*/
-
   if (o1.getClass() == creature.class && o2.getClass() == farm.class) {
-    creature p1 = (creature)o1;
-    farm p2 = (farm)o2;
-    if(p1.current_actions[2] > 0.0){
-      int munched = 10;
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(1000*munched); // munching a bioreactor is valuable
-    }
+    if (((farm)o2).health > 0) ((creature)o1).munchnext = ((farm)o2).parent;
   }
   else if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
-    creature p1 = (creature)o2;
-    farm p2 = (farm)o1;
-    if(p1.current_actions[2] > 0.0) { // if the creature is hungry
-      int munched = 10; // this is the damage a creature's bite does
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(1000*munched); // munching a bioreactor is valuable
-    }
+    if (((farm)o1).health > 0) ((creature)o2).munchnext = ((farm)o1).parent;
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
-    creature p1 = (creature)o1;
-    tower p2 = (tower)o2;
-    if(p1.current_actions[2] > 0.0) { // if the creature is hungry
-      int munched = 10; // this is the damage a creature's bite does
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(100*munched); // munching a tower is less valuable than munching a bioreactor
-    }
+    if (((tower)o2).health > 0) ((creature)o1).munchnext = ((tower)o2).parent;
   }
   else if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
-    creature p1 = (creature)o2;
-    tower p2 = (tower)o1;
-    if(p1.current_actions[2] > 0.0){
-      int munched = 10;
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(200*munched); // munching a tower is less valuable than munching a bioreactor
-    }
+    if (((tower)o1).health > 0) ((creature)o2).munchnext = ((tower)o1).parent;
   }
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
@@ -547,6 +485,13 @@ void endContact(Contact cp) {
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
+  }
+  
+  if ((o1.getClass() == creature.class && o2.getClass() == farm.class) || (o1.getClass() == creature.class && o2.getClass() == tower.class)) {
+    ((creature)o1).munchnext = null;
+  }
+  else if ((o1.getClass() == farm.class && o2.getClass() == creature.class) || (o1.getClass() == tower.class && o2.getClass() == creature.class)) {
+    ((creature)o2).munchnext = null;
   }
 }
 

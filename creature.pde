@@ -28,6 +28,10 @@ class creature {
   // stats
   int num;               // unique creature identifier
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
+  int munchtimer = 0;
+  int munchstrength = 50;// should be evolved
+  structure munching = null;
+  structure munchnext = null;
   float fitness;         // used for selection
   float health;          // 0 health, creature dies
   float maxHealth = 100; // TODO: should be evolved
@@ -676,6 +680,57 @@ class creature {
     float m = body.getMass();
     float f = 0;
     double torque = 0;
+    
+    munching = munchnext;
+    if (munching != null) {
+      if (munchtimer == 50) {
+        if(current_actions[2] > 0.0) { // if the creature is hungry
+          if (!invinciblestructures) {
+            if (munching.type == 'b') {
+              if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
+                if (munching.f.health < munchstrength) { // this bite will kill the structure
+                  addEnergy(200*round(munching.f.health));
+                  munching.f.health = 0;
+                }
+                else {
+                  munching.f.health -= (munchstrength-munching.f.shield);
+                  addEnergy(200*munchstrength);
+                }
+                munching.f.shield = 0;
+              }
+              else {
+                munching.f.shield -= munchstrength;
+                addEnergy(200*munchstrength); // munching a bioreactor is valuable
+              }
+              //senses.Set_Taste(munching.f);
+              if (munching.f.health == 0) munchnext = null;
+            }
+            else {
+              if (munching.t.shield < munchstrength) { // this bite will deplete the last of the shield
+                if (munching.t.health < munchstrength) { // this bite will kill the structure
+                  addEnergy(40*round(munching.t.health));
+                  munching.t.health = 0;
+                }
+                else {
+                  munching.t.health -= (munchstrength-munching.t.shield);
+                  addEnergy(40*munchstrength);
+                }
+                munching.t.shield = 0;
+              }
+              else {
+                munching.t.shield -= munchstrength;
+                addEnergy(40*munchstrength); // munching a tower is less valuable than munching a bioreactor
+              }
+              //senses.Set_Taste(munching.t);
+              if (munching.t.health == 0) munchnext = null;
+            }
+          }
+          if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+        }
+        munchtimer = 0;
+      }
+      munchtimer++;
+    }
 
     if (freezeTimer == 0) {
       //if (!body.isActive())body.setActive(true);

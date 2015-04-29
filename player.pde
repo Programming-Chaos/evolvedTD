@@ -15,6 +15,7 @@ class player {
   int gcost = 4000;
   int bcost = 150;
   int money = 100;
+  int currentcost = 0;
   int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
@@ -124,6 +125,10 @@ class player {
 
     hudPanel = new Panel(1250,100,-625,-1200,false,100);
     hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
+
+    //pricePanel = new Panel(100,40,0,0,false,150);
+    //pricePanel.createTextBox
+    //pricePanel.enabled = false;
 
     resources = 0;
     resourceGain = 0.1;
