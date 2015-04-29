@@ -536,9 +536,13 @@ void add_food() { // done after each wave/generation
   fTotal += 10;
 }
 
-void mousePressed() { // called if either mouse button is pressed
+void mousePressed() {
+  if (mouseButton != LEFT) return;
   mouse_x_p = mouse_x;
   mouse_y_p = mouse_y;
+}
+
+void mouseClicked() { // called if either mouse button is pressed and released without any dragging
   // fire the weapons
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
@@ -713,6 +717,7 @@ void mouseWheel(MouseEvent event) {
 }
 
 void mouseDragged() {
+  if (mouseButton != LEFT) return;
   cameraX += round(mouse_x_p - mouse_x);
   cameraY += round(mouse_y_p - mouse_y);
 }
