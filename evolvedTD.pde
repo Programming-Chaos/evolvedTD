@@ -693,6 +693,19 @@ void mousePressed() { // called if either mouse button is pressed
   popMatrix();
 }
 
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  cameraZ += e * 25;
+
+  // most zoomed in
+  if (cameraZ < 70)
+    cameraZ = 70;
+
+  // most zoomed out
+  if (cameraZ > zoomOffset)
+    cameraZ = zoomOffset;
+}
+
 void initTables() {
   //creature traits
   c_traits = new Table();
