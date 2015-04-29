@@ -37,7 +37,7 @@ boolean displayFeelers = false;// displaying feelers makes the creatures look a 
 boolean buttonpressed = false;
 boolean autofire = true;
 boolean mistermoneybagsmode = true;
-boolean invinciblestructures = false;
+boolean invinciblestructures = true;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
