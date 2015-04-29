@@ -54,8 +54,12 @@ Minim minim;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
+// transformed location of mouse
 float mouse_x;
 float mouse_y;
+// transformed location of mouse when pressed
+float mouse_x_p;
+float mouse_y_p;
 
 // Tables for data collection
 Table c_traits;
@@ -532,7 +536,13 @@ void add_food() { // done after each wave/generation
   fTotal += 10;
 }
 
-void mousePressed() { // called if either mouse button is pressed
+void mousePressed() {
+  if (mouseButton != LEFT) return;
+  mouse_x_p = mouse_x;
+  mouse_y_p = mouse_y;
+}
+
+void mouseClicked() { // called if either mouse button is pressed and released without any dragging
   // fire the weapons
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
@@ -691,6 +701,25 @@ void mousePressed() { // called if either mouse button is pressed
   ellipse((((float)mouseX-(width/2))*worldRatioX),(((float)mouseY-(height/2))*worldRatioX),50,50);
   hint(ENABLE_DEPTH_TEST);
   popMatrix();
+}
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  cameraZ += e * 25;
+
+  // most zoomed in
+  if (cameraZ < 70)
+    cameraZ = 70;
+
+  // most zoomed out
+  if (cameraZ > zoomOffset)
+    cameraZ = zoomOffset;
+}
+
+void mouseDragged() {
+  if (mouseButton != LEFT) return;
+  cameraX += round(mouse_x_p - mouse_x);
+  cameraY += round(mouse_y_p - mouse_y);
 }
 
 void initTables() {
