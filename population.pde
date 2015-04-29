@@ -2,6 +2,7 @@
  * Each generation/wave the whole population attacks.
  */
 import java.util.Collections;
+import java.util.Comparator;
 
 class population {
   ArrayList<creature> swarm;
@@ -67,28 +68,17 @@ class population {
     }
     return ret;
   }
-  
-  Vec2 highestAlpha() {
-    Vec2 ret = new Vec2(0,0);
-    float temp, minAlpha = 0;
-    boolean first = true;
-    for (creature c: swarm) {
-      if (c.alive) {
-        if (first) {
-          minAlpha = c.genome.sum(alphaTrait);
-          ret = c.getPos();
-          first = false;
-        }
-        else {
-          temp = c.genome.sum(alphaTrait);
-          if (temp < minAlpha ) {
-             minAlpha = temp;
-             ret = c.getPos();
-          }  
-        }
-      }
-    }
-    return ret;
+
+  Vec2 mostRed() {
+    return java.util.Collections.max(swarm, new redComparator()).getPos();
+  }
+
+  Vec2 mostGreen() {
+    return java.util.Collections.max(swarm, new greenComparator()).getPos();
+  }
+
+  Vec2 mostBlue() {
+    return java.util.Collections.max(swarm, new blueComparator()).getPos();
   }
 
   // returns the number of living creatures, used to decide whether to

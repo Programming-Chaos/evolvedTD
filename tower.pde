@@ -375,14 +375,14 @@ class tower {
           // only autofire every nth time step where n is the fire rate
           if (autofirecounter == firerate) {
             switch (the_player.targetMode) {
+              case 0:
+                target = the_pop.mostRed();
+                break;
+              case 1:
+                target = the_pop.mostGreen();
+                break;
               case 2:
-                target = the_pop.closest(new Vec2(0,0));
-                break;
-              case 3:
-                target = the_pop.closest(new Vec2(xpos,ypos));
-                break;
-              case 4:
-                target = the_pop.highestAlpha();
+                target = the_pop.mostBlue();
                 break;
               default:
                 target = the_pop.vec_to_random_creature();

@@ -36,7 +36,7 @@ class player {
   int activeweapon;     // value determines which weapon is active
   boolean placing = false;
   int numStructuresCreated = 0;
-  int targetMode = 1;
+  int targetMode = 0;
   structure pickedup;
   
   Panel testpanel;
