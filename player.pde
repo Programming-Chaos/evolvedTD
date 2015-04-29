@@ -69,10 +69,10 @@ class player {
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Creature: " + selectedCreature.num); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Health: " + selectedCreature.health + " / " + selectedCreature.maxHealth + " +" + selectedCreature.health_regen); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Fitness: " + selectedCreature.fitness); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Max speed: " + (int)selectedCreature.maxMovementForce); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Time in water: " + selectedCreature.time_in_water); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Time on land: " + selectedCreature.time_on_land); } });
-    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Scent strength: " + selectedCreature.scentStrength); } });
+    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Self: " + selectedCreature.num); } });
+    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Mother: " + selectedCreature.parents[0]); } });
+    statsPanel.pushTextBox(new StringPass() { String passed() { return ("Father: " + selectedCreature.parents[1]); } });
+    statsPanel.pushTextBox("Color RGB Values");
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Red: " + selectedCreature.r); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Green: " + selectedCreature.g); } });
     statsPanel.pushTextBox(new StringPass() { String passed() { return ("Blue: " + selectedCreature.b); } });

@@ -228,16 +228,18 @@ class population {
 
           pos.x *= cellWidth;
           pos.y *= cellHeight;
+
           creature c = new creature(new Genome(g1.getGamete(), g2.getGamete()),
-                                      10000 + g1.energy + g2.energy, pos);
+                                    10000 + g1.energy + g2.energy, pos);
+
           c.parents[0] = g1.parent.num;
           c.parents[1] = g2.parent.num;
-          
+
           c.grandparents[0] = g1.parent.parents[0];
           c.grandparents[1] = g1.parent.parents[1];
           c.grandparents[2] = g2.parent.parents[0];
-          c.grandparents[3] = g2.parent.parents[1]; 
-          
+          c.grandparents[3] = g2.parent.parents[1];
+
           generation.add(c);
         }
       }
