@@ -54,8 +54,12 @@ Minim minim;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
+// transformed location of mouse
 float mouse_x;
 float mouse_y;
+// transformed location of mouse when pressed
+float mouse_x_p;
+float mouse_y_p;
 
 // Tables for data collection
 Table c_traits;
@@ -533,6 +537,8 @@ void add_food() { // done after each wave/generation
 }
 
 void mousePressed() { // called if either mouse button is pressed
+  mouse_x_p = mouse_x;
+  mouse_y_p = mouse_y;
   // fire the weapons
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
