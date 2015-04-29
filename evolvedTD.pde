@@ -712,6 +712,11 @@ void mouseWheel(MouseEvent event) {
     cameraZ = zoomOffset;
 }
 
+void mouseDragged() {
+  cameraX += round(mouse_x_p - mouse_x);
+  cameraY += round(mouse_y_p - mouse_y);
+}
+
 void initTables() {
   //creature traits
   c_traits = new Table();
