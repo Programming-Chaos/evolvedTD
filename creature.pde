@@ -70,7 +70,7 @@ class creature {
 
   // dominant colors
   color bodyColor;
-  int r, g, b;
+  Integer r, g, b;
 
   // senses/communication
   Sensory_Systems senses;
@@ -827,11 +827,9 @@ class creature {
     // in the world, still exists for reproducton
     if (health <= 0) {
       alive = false;
-      // if its no longer alive the body can be killed - otherwise it
-      // still "in" the world.  Have to make sure the body isn't
-      // referenced elsewhere
-      
-      // Destroy Body
+      r = 0;
+      g = 0;
+      b = 0;
       killBody();
     }
 
@@ -1056,5 +1054,23 @@ class creature {
         body.createFixture(fd);  // Create the actual fixture, which adds it to the body
       }
     }
+  }
+}
+
+class redComparator implements Comparator<creature> {
+  public int compare(creature a, creature b) {
+    return a.r.compareTo(b.r);
+  }
+}
+
+class greenComparator implements Comparator<creature> {
+  public int compare(creature a, creature b) {
+    return a.g.compareTo(b.g);
+  }
+}
+
+class blueComparator implements Comparator<creature> {
+  public int compare(creature a, creature b) {
+    return a.b.compareTo(b.b);
   }
 }
