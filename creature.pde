@@ -494,6 +494,10 @@ class creature {
     total_energy_consumed += x;
   }
 
+  private float sigmoid(float n) {
+    return float(1)/(float(1) + exp(-n));
+  }
+
   // Mapping from allele value to color is a sigmoid mapping to 0 to
   // 255 centered on 126
   private color getColor() {
@@ -501,9 +505,9 @@ class creature {
     float greenColor = genome.sum(greenColorTrait);
     float blueColor = genome.sum(blueColorTrait);
 
-    r = 126 + (int)(126*(redColor/(1+abs(redColor))));
-    g = 126 + (int)(126*(greenColor/(1+abs(greenColor))));
-    b = 126 + (int)(126*(blueColor/(1+abs(blueColor))));
+    r = 126 + int(126 * sigmoid(redColor));
+    g = 126 + int(126 * sigmoid(greenColor));
+    b = 126 + int(126 * sigmoid(blueColor));
 
     IntDict colors = new IntDict();
     colors.set("red", r);
