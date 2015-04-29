@@ -11,7 +11,7 @@ img {
 }
 
 #nomurai {
-    margin-top: 0.8em;
+    margin-top: 1.8em;
     width: 12em;
 }
 
@@ -29,4 +29,14 @@ img {
 #nebula {
     width: 13em; 
     right: 0;
+}
+
+#redhook {
+    margin-top: 5em;
+    width: 12em;
+}
+
+#swarm {
+    margin-top: 1.6em;
+    width: 12em;   
 }
