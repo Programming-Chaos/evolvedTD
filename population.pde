@@ -14,7 +14,7 @@ class population {
     swarm = new ArrayList<creature>();
     float a;
     for (int i = 0; i < POP_SIZE; i++) {
-      a = random(0, 2*PI);
+      a = i*(2*PI/POP_SIZE);//random(0, 2*PI);
       creature c = new creature(0.45*worldWidth*sin(a),0.45*worldWidth*cos(a),a);
       swarm.add(c);
     }
@@ -126,8 +126,7 @@ class population {
    * than 2 standard deviations, then the parents are by default
    * incompatible
    */
-  boolean areGametesCompatible(Genome.Chromosome gamete1,
-                               Genome.Chromosome gamete2) {
+  boolean areGametesCompatible(Chromosome gamete1, Chromosome gamete2) {
     if (gamete1 == null || gamete2 == null)
       return false;
 
@@ -161,103 +160,81 @@ class population {
 
   // creates the next generation
   void next_generation() {
-    // at end of wave, update data collection
-    if (swarm.size() > 0) {
-      updateData();
-    }
-    
     ArrayList<Gamete> gametes = new ArrayList();
     ArrayList<creature> generation = new ArrayList<creature>();
     
     for (creature c : swarm) {
       // Kill the bodies of any creatures that are still alive
-      if (c.alive)
+      if (c.alive) {
         c.killBody();
-
-      // Add all of a creatures gametes to the gamete pool
-      for(Gamete g : c.gameteStack) {
-        gametes.add(g);
       }
+      gametes.addAll(c.gameteStack);
     }
-    // Place gametes in order of time.
-//    Collections.sort(gametes, new GameteComparator());
-    
+    // at end of wave, update data collection
+    updateData();
+
+    // "kill" all creatures so camera stops following them
+    for (creature c : swarm) {
+      c.alive = false;
+    }
+
     int multiplier = 0;
     int range;
-    Gamete g1, g2;
     int variance = 15; // Used for variable pop size with random selection
-    int size = gametes.size();
-    int rand;
-    ArrayList<Integer> inProximity = new ArrayList<Integer>();
-    
+
     while (generation.size() < POP_SIZE) {
       // increase search range with each pass thru.
       range = multiplier++ * 5;
       //TODO: decrease success chance when range is increased.
-      
+
       // print error if not enough gametes
       if (gametes.size() < 2) {
         println("ERROR: Not enough gametes");
         break;
       }
-      
-      
-      
-      // i is first gamete j is it's chosen mate
-      for (int i=0; i < variance && i < size; i++) {
-        rand = (int)random(size);
-        g1 = gametes.get(rand); // Randomly select a gamete
-        inProximity.clear();
-        
-        // copy array position of gametes in proximity
-        for (int j=0; j < size; j++) {
-          if (j == rand) {//if same gamete... skip
-            j++;
-          }
-          if (j >= size) {//if j is beyond the list of gametes, break
-            break;
-          }
-          
-          g2 = gametes.get(j);
-        
+
+      ArrayList<Gamete> inProximity = new ArrayList<Gamete>();
+      Gamete g1;
+      // i is first gamete j is its chosen mate
+      for (int i=0; i < variance && i < gametes.size(); i++) {
+        int rand = int(random(gametes.size()));
+        g1 = gametes.get(rand);
+
+        // get gametes in proximity
+        for (Gamete g2 : gametes) {
+          if (g2 == g1)
+            continue;
+
           // Check if g2 is in range of g1
           if (g2.xPos > g1.xPos - range && g2.xPos < g1.xPos + range && // within x range
               g2.yPos > g1.yPos - range && g2.yPos < g1.yPos + range) { // within y range
-            inProximity.add(j);       
+            inProximity.add(g2);
           }
         }
-        
+
         // if any match has been found:
-        if (inProximity.size() > 0) {
-          rand = (int)random(inProximity.size());
-          int listPos = inProximity.get(rand);
-          g2 = gametes.get(listPos); //get random mate within range
+        if (!inProximity.isEmpty()) {
+          Gamete g2 = inProximity.get(int(random(inProximity.size())));
           gametes.remove(g1); //remove first gamete
           gametes.remove(g2); //remove second gamete
-          size = gametes.size(); //update list size variable
-          
+
           // Gamete coordinates
           int px = (g1.xPos - (g1.xPos-g2.xPos)/2);
           int py = (g1.yPos - (g1.yPos-g2.yPos)/2);
           Vec2 pos = new Vec2(px, py);
-          
+
           // Check coordinates for other creatures or rocks spawned in this tile.
           while( checkForCreature(pos, generation) || checkForRock(pos, rocks)){};
-          
+
           pos.x *= cellWidth;
           pos.y *= cellHeight;
-    
-          generation.add(new creature(new Genome(g1.gamete, g2.gamete),
+
+          generation.add(new creature(new Genome(g1.getGamete(), g2.getGamete()),
                                       10000 + g1.energy + g2.energy, pos));
-          //break;
         }
-        
       }
+      swarm = generation;
     }
-    //println("made " + childrenBred + " and needed " + childrenNew + " more");
-    swarm.clear();
-    swarm = generation;
-    
   }
   
   Boolean checkForCreature(Vec2 pos, ArrayList<creature> list) {
@@ -362,12 +339,12 @@ class population {
       c_traitsRow.setFloat("   Mass   "     , c.getMass());
       c_traitsRow.setFloat("   Width   "    , c.getWidth());
       c_traitsRow.setFloat("   Density   "  , c.getCreatureDensity());
-      c_traitsRow.setFloat("   Armor   "    , c.getArmor());
+      c_traitsRow.setFloat("   Armor   "    , c.getArmorAvg());
       //c_traitsRow.setFloat("   Wing #   ", );
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
       //c_traitsRow.setFloat("   Color   ", );
-      c_traitsRow.setFloat("   Velocity   " , c.maxMovementSpeed);
+      c_traitsRow.setFloat("   Velocity   " , c.maxMovementForce);
       //c_traitsRow.setFloat("   Acceleration   ", );
       c_traitsRow.setFloat("   Max HP   "   , c.maxHealth); 
       
@@ -375,8 +352,8 @@ class population {
       massAvg  += c.getMass();
       widthAvg += c.getWidth();
       denseAvg += c.getCreatureDensity();
-      armorAvg += c.getArmor();
-      velAvg   += c.maxMovementSpeed;
+      armorAvg += c.getArmorAvg();
+      velAvg   += c.maxMovementForce;
       hpAvg    += c.maxHealth;
       
       // Update creature reproduction data

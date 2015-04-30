@@ -332,7 +332,7 @@ class Panel {
   int createTextBox(float tw, float th, float tx, float ty, String tt, int ts) {//tx and ty are the coordinates of the textbox's center (boxed-style)
     textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,CENTER,CENTER, false));//specifies a size for the text to wrap within
     return (textboxes.size() - 1); // return the index of this textbox for later reference
-  }//in boxed-style, the origin of the textbox's coordinates is the topleft of the panel
+  }//in boxed-style, the origin of the textbox's coordinates is the center of the panel
   //This is a cornered-style textbox. The text will not wrap. It will just keep going off the page unless you put linebreaks.
   int createTextBox(float tx, float ty, String tt, int ts) {//tx and ty are the coordinates of the topleft corner with the panel's topleft corner as the origin (cornered style)
     textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),tt,ts,this,LEFT,TOP, false));
