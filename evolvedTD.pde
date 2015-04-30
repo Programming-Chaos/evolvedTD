@@ -37,6 +37,7 @@ boolean displayFeelers = false;// displaying feelers makes the creatures look a 
 boolean buttonpressed = false;
 boolean autofire = true;
 boolean mistermoneybagsmode = false;
+boolean invinciblestructures = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -53,8 +54,12 @@ Minim minim;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
+// transformed location of mouse
 float mouse_x;
 float mouse_y;
+// transformed location of mouse when pressed
+float mouse_x_p;
+float mouse_y_p;
 
 // Tables for data collection
 Table c_traits;
@@ -343,7 +348,8 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     food p2 = (food)o2;
-    if(p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -356,7 +362,8 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o2;
     food p2 = (food)o1;
-    if(p1.current_actions[2] > 0.0){
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -406,83 +413,18 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     }
   }
 
-  /*if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
-    creature p1 = (creature)o1;
-    tower p2 = (tower)o2;
-  }
-  else if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
-    creature p1 = (creature)o2;
-    tower p2 = (tower)o1;
-  }*/
-
   if (o1.getClass() == creature.class && o2.getClass() == farm.class) {
-    creature p1 = (creature)o1;
-    farm p2 = (farm)o2;
-    if(p1.current_actions[2] > 0.0){
-      int munched = 10;
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(1000*munched); // munching a bioreactor is valuable
-    }
+    if (((farm)o2).health > 0) ((creature)o1).munchnext = ((farm)o2).parent;
   }
   else if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
-    creature p1 = (creature)o2;
-    farm p2 = (farm)o1;
-    if(p1.current_actions[2] > 0.0) { // if the creature is hungry
-      int munched = 10; // this is the damage a creature's bite does
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(1000*munched); // munching a bioreactor is valuable
-    }
+    if (((farm)o1).health > 0) ((creature)o2).munchnext = ((farm)o1).parent;
   }
 
   if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
-    creature p1 = (creature)o1;
-    tower p2 = (tower)o2;
-    if(p1.current_actions[2] > 0.0) { // if the creature is hungry
-      int munched = 10; // this is the damage a creature's bite does
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(100*munched); // munching a tower is less valuable than munching a bioreactor
-    }
+    if (((tower)o2).health > 0) ((creature)o1).munchnext = ((tower)o2).parent;
   }
   else if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
-    creature p1 = (creature)o2;
-    tower p2 = (tower)o1;
-    if(p1.current_actions[2] > 0.0){
-      int munched = 10;
-      if (p2.shield < munched) {
-        if (p2.health < munched) {
-          munched = round(p2.health);
-          p2.health = 0;
-        }
-        else p2.health -= (munched-p2.shield);
-        p2.shield = 0;
-      }
-      else p2.shield -= munched;
-      p1.addEnergy(200*munched); // munching a tower is less valuable than munching a bioreactor
-    }
+    if (((tower)o1).health > 0) ((creature)o2).munchnext = ((tower)o1).parent;
   }
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
@@ -549,6 +491,13 @@ void endContact(Contact cp) {
     // creatures grab food
     creature p1 = (creature)o2;
   }
+  
+  if ((o1.getClass() == creature.class && o2.getClass() == farm.class) || (o1.getClass() == creature.class && o2.getClass() == tower.class)) {
+    ((creature)o1).munchnext = null;
+  }
+  else if ((o1.getClass() == farm.class && o2.getClass() == creature.class) || (o1.getClass() == tower.class && o2.getClass() == creature.class)) {
+    ((creature)o2).munchnext = null;
+  }
 }
 
 void place_food() { // done once at the beginning of the game
@@ -588,7 +537,13 @@ void add_food() { // done after each wave/generation
   fTotal += 10;
 }
 
-void mousePressed() { // called if either mouse button is pressed
+void mousePressed() {
+  if (mouseButton != LEFT) return;
+  mouse_x_p = mouse_x;
+  mouse_y_p = mouse_y;
+}
+
+void mouseClicked() { // called if either mouse button is pressed and released without any dragging
   // fire the weapons
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
@@ -747,6 +702,25 @@ void mousePressed() { // called if either mouse button is pressed
   ellipse((((float)mouseX-(width/2))*worldRatioX),(((float)mouseY-(height/2))*worldRatioX),50,50);
   hint(ENABLE_DEPTH_TEST);
   popMatrix();
+}
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  cameraZ += e * 25;
+
+  // most zoomed in
+  if (cameraZ < 70)
+    cameraZ = 70;
+
+  // most zoomed out
+  if (cameraZ > zoomOffset)
+    cameraZ = zoomOffset;
+}
+
+void mouseDragged() {
+  if (mouseButton != LEFT) return;
+  cameraX += round(mouse_x_p - mouse_x);
+  cameraY += round(mouse_y_p - mouse_y);
 }
 
 void initTables() {
