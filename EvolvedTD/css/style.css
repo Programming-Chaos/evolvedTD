@@ -135,6 +135,7 @@ section.content-block {
 section.content-block.left {
     left: 0;
     width: 15em;
+    padding-top: 0.4em;
     border-right: 3px solid #0af;   
 }
 
