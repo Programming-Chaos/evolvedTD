@@ -987,16 +987,16 @@ class environment {
         
       case 5:
         // lava
-        temp = int(random(20, 40));
-        liquid = color(0, 0, 225);
-        rock = color(150, 150, 150);
-        land = color(0, 150, 0);
+        temp = int(random(300, 320));
+        liquid = color(225, 0, 0);
+        rock = color(50, 50, 50);
+        land = color(100, 50, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
         break;
 
       /*
-      case 5:
+      case 6:
         // radiation - ??
         temp = int(random(20, 40));
         liquid = color(0, 0, 225);
