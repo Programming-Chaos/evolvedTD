@@ -13,6 +13,7 @@ import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
 
+
 int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
 static int worldHeight = 2500;
@@ -35,6 +36,8 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
+boolean mistermoneybagsmode = false;
+boolean invinciblestructures = false;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -42,6 +45,7 @@ player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
 ArrayList<Panel> panels;
+ArrayList<Animation> animations;
 
 Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
@@ -50,8 +54,12 @@ Minim minim;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
+// transformed location of mouse
 float mouse_x;
 float mouse_y;
+// transformed location of mouse when pressed
+float mouse_x_p;
+float mouse_y_p;
 
 // Tables for data collection
 Table c_traits;
@@ -79,11 +87,8 @@ void setup() {
   PFont font = createFont("Arial", 100);
   textFont(font);
   panels = new ArrayList<Panel>();
+  animations = new ArrayList<Animation>();
   the_player = new player();
-  the_player.towers.add(new tower('r', ++the_player.numTowersCreated));
-  the_player.towers.get(0).inTransit = false;
-  the_player.towers.get(0).xpos = 0;
-  the_player.towers.get(0).ypos = 0;
 
   minim = new Minim(this);
 
@@ -103,20 +108,26 @@ void setup() {
     rocks.add(r);
   }
   rectMode(CENTER);              // drawing mode fore rectangles,
-
+  
   environ = new environment();   // must occur after creatures, etc. created
   lasttime = 0;
-
+  generation = 0;
+  
   // Run unit tests
   Genome testGenome = new Genome();
   testGenome.testChromosome();
   testGenome.testMutation();
 
-  // Init data tables
+  // Initialize data tables
   initTables();
+  // Setup soundfiles array in sound.pde
+  setupSoundFiles();
 }
 
 void draw() {
+
+  
+  if (mistermoneybagsmode) the_player.money = 1000000000;
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
   mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
@@ -176,15 +187,11 @@ void draw() {
     the_player.display(); // display the interface for the player
   }
 
-  /*
-    the_tower.update();
-    if (display) {
-    the_tower.display(); // display the tower
-    }
-  */
-
   if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures
+    for (Animation a : animations) {
+      a.update();
+    }
   }
 
   if (the_pop.get_alive() == 0) { // if after updating the population is empty, go ahead and start the next generation
@@ -259,12 +266,22 @@ void keyPressed() { // if a key is pressed this function is called
       }
       if (temp && state == State.STAGED)state = State.RUNNING;
       if (!temp) {
-        for (tower t : the_player.towers) {
-          if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
-              && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-            the_player.selectedTower = t;
-            t.upgradePanel.enabled = true;
-            break;
+        for (structure s : the_player.structures) {
+          if (s.type == 'b') {
+            if (mouse_x < s.f.xpos + s.f.radius && mouse_x > s.f.xpos - s.f.radius
+             && mouse_y < s.f.ypos + s.f.radius && mouse_y > s.f.ypos - s.f.radius) {
+              the_player.selectedStructure = s;
+              s.f.upgradePanel.enabled = true;
+              break;
+            }
+          }
+          else {
+            if (mouse_x < s.t.xpos + s.t.radius && mouse_x > s.t.xpos - s.t.radius
+             && mouse_y < s.t.ypos + s.t.radius && mouse_y > s.t.ypos - s.t.radius) {
+              the_player.selectedStructure = s;
+              s.t.upgradePanel.enabled = true;
+              break;
+            }
           }
         }
       }
@@ -301,6 +318,7 @@ void keyPressed() { // if a key is pressed this function is called
     case '3':
     case '4':
     case '5':
+    case '6':
       the_player.targetMode = (key-'2');
       break;
     default:
@@ -313,9 +331,8 @@ void keyPressed() { // if a key is pressed this function is called
 }
 
 void beginContact(Contact cp) { // called when two box2d objects collide
-  if (state != State.RUNNING) { // probably not necessary?
+  if (state != State.RUNNING) // probably not necessary?
     return;
-  }
   // Get both fixtures that collided from the Contact object cp (which was passed in as an argument)
   Fixture f1 = cp.getFixtureA();
   Fixture f2 = cp.getFixtureB();
@@ -329,11 +346,10 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    if(p1.current_actions[2] > 0.0){
-      p1.addEnergy(20000); // getting food is valuable
-  
-      food p2 = (food)o2;
-      p1.senses.Set_Taste(p2);
+    food p2 = (food)o2;
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+      p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
@@ -344,10 +360,10 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    if(p1.current_actions[2] > 0.0){
-      p1.addEnergy(20000); // getting food is valuable
-      food p2 = (food)o1;
-      p1.senses.Set_Taste(p2);
+    food p2 = (food)o1;
+    if(p1.current_actions[2] > 0.0) {
+      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+      p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
       }
@@ -359,37 +375,55 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // projectiles damage creatures
     creature p1 = (creature)o1;
     projectile p2 = (projectile)o2;
-    if (p2.type == 'i') {
-      p1.freezeTimer = p2.damage;
-      p1.hits_by_tower++;
-    }
-    else {
-      if (f1.getUserData().getClass() == creature.Segment.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+    if (p2.type != 'g') {
+      if (p2.type == 'i') {
+        p1.freezeTimer = p2.damage;
+        p1.hits_by_tower++;
       }
-      if (f1.getUserData().getClass() == creature.Appendage.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+      else {
+        if (f1.getUserData().getClass() == creature.Segment.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f1.getUserData()).armor)));
+        }
+        if (f1.getUserData().getClass() == creature.Appendage.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f1.getUserData()).armor)));
+        }
       }
-    }
-    p2.remove = true;
+      p2.remove = true;
+      }
   }
   else if (o1.getClass() == projectile.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
     // projectiles damage creatures
     creature p1 = (creature)o2;
     projectile p2 = (projectile)o1;
-    if (p2.type == 'i') {
-      p1.freezeTimer = p2.damage;
-      p1.hits_by_tower++;
-    }
-    else {
-      if (f2.getUserData().getClass() == creature.Segment.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+    if (p2.type != 'g') {
+      if (p2.type == 'i') {
+        p1.freezeTimer = p2.damage;
+        p1.hits_by_tower++;
       }
-      if (f2.getUserData().getClass() == creature.Appendage.class) {
-        p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+      else {
+        if (f2.getUserData().getClass() == creature.Segment.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Segment)f2.getUserData()).armor)));
+        }
+        if (f2.getUserData().getClass() == creature.Appendage.class) {
+          p1.changeHealth(round(-1*(p2.damage/((creature.Appendage)f2.getUserData()).armor)));
+        }
       }
+      p2.remove = true;
     }
-    p2.remove = true;
+  }
+
+  if (o1.getClass() == creature.class && o2.getClass() == farm.class) {
+    if (((farm)o2).health > 0) ((creature)o1).munchnext = ((farm)o2).parent;
+  }
+  else if (o1.getClass() == farm.class && o2.getClass() == creature.class) {
+    if (((farm)o1).health > 0) ((creature)o2).munchnext = ((farm)o1).parent;
+  }
+
+  if (o1.getClass() == creature.class && o2.getClass() == tower.class) {
+    if (((tower)o2).health > 0) ((creature)o1).munchnext = ((tower)o2).parent;
+  }
+  else if (o1.getClass() == tower.class && o2.getClass() == creature.class) {
+    if (((tower)o1).health > 0) ((creature)o2).munchnext = ((tower)o1).parent;
   }
   
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) { // check the class of the objects and respond accordingly
@@ -407,8 +441,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
       ID = collision_2;
     }
 
-    p1.senses.Add_Side_Pressure(ID, PI);
-    p2.senses.Add_Side_Pressure(ID, atan((pos_1.y - pos_2.y)/(pos_1.x-pos_2.x)));
+
   }
 }
 
@@ -427,6 +460,10 @@ void endContact(Contact cp) {
   Object o1 = b1.getUserData();
   Object o2 = b2.getUserData();
 
+  // skip contact if bodies have been "removed"
+  if (o1 == null || o2 == null)
+    return;
+
   if (o1.getClass() == creature.class && o2.getClass() == creature.class) {// check the class of the objects and respond accordingly
     creature p1 = (creature)o1;
     creature p2 = (creature)o2;
@@ -440,27 +477,26 @@ void endContact(Contact cp) {
     } else {
       ID = collision_2;
     }
-    p1.senses.Remove_Side_Pressure(ID);
-    p2.senses.Remove_Side_Pressure(ID);
+
   }
-
-
-
 
   if (o1.getClass() == creature.class && o2.getClass() == food.class) {// check the class of the objects and respond accordingly
     // creatures grab food
     creature p1 = (creature)o1;
-    p1.senses.Remove_Taste();
   }
 
   // check the class of the objects and respond accordingly
   if (o1.getClass() == food.class && o2.getClass() == creature.class) {
     // creatures grab food
     creature p1 = (creature)o2;
-    p1.senses.Remove_Taste();
   }
-
-
+  
+  if ((o1.getClass() == creature.class && o2.getClass() == farm.class) || (o1.getClass() == creature.class && o2.getClass() == tower.class)) {
+    ((creature)o1).munchnext = null;
+  }
+  else if ((o1.getClass() == farm.class && o2.getClass() == creature.class) || (o1.getClass() == tower.class && o2.getClass() == creature.class)) {
+    ((creature)o2).munchnext = null;
+  }
 }
 
 void place_food() { // done once at the beginning of the game
@@ -500,86 +536,164 @@ void add_food() { // done after each wave/generation
   fTotal += 10;
 }
 
-void mousePressed() { // called if either mouse button is pressed
+void mousePressed() {
+  if (mouseButton != LEFT) return;
+  mouse_x_p = mouse_x;
+  mouse_y_p = mouse_y;
+}
+
+void mouseClicked() { // called if either mouse button is pressed and released without any dragging
   // fire the weapons
   if (mouseButton == LEFT) {
     the_player.mouse_pressed();
     if (!buttonpressed) {
-      if (state == State.RUNNING) { 
+      if (state == State.RUNNING) {
         if (the_player.placing) {
-          if (!the_player.pickedup.conflict)
-          {
-            the_player.pickedup.inTransit = false;
-            the_player.pickedup = null;
-            the_player.placing = false;
-            the_player.towerPanel.buttons.get(3).enabled = false;
-            the_player.towerPanel.hiddenpanel = true;
-            the_player.towerPanel.shown = false;
+          if (the_player.pickedup.type == 'b') {
+            if (!the_player.pickedup.f.conflict) {
+              the_player.pickedup.f.inTransit = false;
+              the_player.pickedup = null;
+              the_player.placing = false;
+              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+              the_player.structurePanel.hiddenpanel = true;
+              the_player.structurePanel.shown = false;
+            }
+          }
+          else {
+            if (!the_player.pickedup.t.conflict) {
+              the_player.pickedup.t.inTransit = false;
+              the_player.pickedup = null;
+              the_player.placing = false;
+              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+              the_player.structurePanel.hiddenpanel = true;
+              the_player.structurePanel.shown = false;
+            }
           }
         }
         else {
-          if (the_player.towers.size() > 0)
+          boolean towersBuilt = false;
+          for (structure s : the_player.structures) {
+            if (s.type != 'b') {
+              towersBuilt = true;
+              break;
+            }
+        }
+          if (towersBuilt) {
             switch (the_player.activeweapon) {
               case 1:
-                for (tower t : the_player.towers)
-                  t.fire_projectile(); // have the tower fire its active weapon if unpaused
+                for (structure s : the_player.structures) {
+                  if (s.type != 'b') {
+                    if (!s.t.firing.active() && !s.t.targeting.active()) {
+                      s.t.target = new Vec2(mouse_x,mouse_y);
+                      s.t.fire(); // have the tower fire its active weapon if unpaused
+                    }
+                  }
+                }
                 break;
               case 2:
                 the_player.drop_rock();
                 break;
             }
+          }
         }
       }
     }
     buttonpressed = false;
   }
   
-  boolean upgrading = false;
-  for (tower t : the_player.towers) if (t.upgradePanel.enabled) upgrading = true;
-
-  // select a creature or tower
-  if (mouseButton == RIGHT && !the_player.placing && !upgrading) {
-    int radius = 20;
-    // find a creature
-    the_player.selectedCreature = null;
-    for (creature c : the_pop.swarm) {
-      Vec2 location = c.getPos();
-      if (mouse_x < location.x + radius && mouse_x > location.x - radius
-          && mouse_y < location.y + radius && mouse_y > location.y - radius) {
-        the_player.selectedCreature = c;
-        the_player.selectedTower = null;
-        // zoom in on click
-        cameraZ = 400;
-        break;
-      }
-    }
-    
-    if (the_player.selectedCreature == null) {
-      // find a tower
-      boolean towerclick = false;
-      for (tower t : the_player.towers) {
-        if (mouse_x < t.xpos + t.radius && mouse_x > t.xpos - t.radius
-            && mouse_y < t.ypos + t.radius && mouse_y > t.ypos - t.radius) {
-          towerclick = true;
-          if (the_player.selectedTower != null && the_player.selectedTower.ID == t.ID) {
-              t.inTransit = true;
-              t.xpos = round(mouse_x);
-              t.ypos = round(mouse_y);
-              the_player.pickedup = t;
-              the_player.placing = true;
-              the_player.towerPanel.buttons.get(3).enabled = true;
-              the_player.towerPanel.hiddenpanel = false;
-              the_player.towerPanel.shown = true;
-            }
-            else the_player.selectedTower = t;
-          break;
+  if (mouseButton == RIGHT) {
+    if (the_player.placing) {
+      if (the_player.pickedup.type == 'b') {
+        if (!the_player.pickedup.f.conflict) {
+          the_player.pickedup.f.inTransit = false;
+          the_player.pickedup = null;
+          the_player.placing = false;
+          the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+          the_player.structurePanel.hiddenpanel = true;
+          the_player.structurePanel.shown = false;
         }
       }
-      if (!towerclick) the_player.selectedTower = null;
+      else {
+        if (!the_player.pickedup.t.conflict) {
+          the_player.pickedup.t.inTransit = false;
+          the_player.pickedup = null;
+          the_player.placing = false;
+          the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+          the_player.structurePanel.hiddenpanel = true;
+          the_player.structurePanel.shown = false;
+        }
+      }
+    }
+    else { // select a creature or tower
+      boolean upgrading = false;
+      for (structure s : the_player.structures) {
+        if (s.type == 'b') {
+          if (s.f.upgradePanel.enabled) upgrading = true;
+        }
+        else if (s.t.upgradePanel.enabled) upgrading = true;
+      }
+      if (!upgrading) {
+        // find a creature
+        the_player.selectedCreature = null;
+        for (creature c : the_pop.swarm) {
+          Vec2 location = c.getPos();
+          float crad = (c.getWidth()/2);
+          if (mouse_x < location.x + crad && mouse_x > location.x - crad
+           && mouse_y < location.y + crad && mouse_y > location.y - crad) {
+            the_player.selectedCreature = c;
+            the_player.selectedStructure = null;
+            // zoom in on click
+            cameraZ = 400;
+            break;
+          }
+        }
+      }
+      
+      if (the_player.selectedCreature == null) {
+        // find a structure
+        boolean structureclick = false;
+        for (structure s : the_player.structures) {
+          if (s.type == 'b') {
+            if (sqrt(((mouse_x-s.f.xpos)*(mouse_x-s.f.xpos))+((mouse_y-s.f.ypos)*(mouse_y-s.f.ypos))) < s.f.radius) {
+              structureclick = true;
+              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
+                s.f.inTransit = true;
+                s.f.xpos = round(mouse_x);
+                s.f.ypos = round(mouse_y);
+                the_player.pickedup = s;
+                the_player.placing = true;
+                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
+                the_player.structurePanel.hiddenpanel = false;
+                the_player.structurePanel.shown = true;
+              }
+              else the_player.selectedStructure = s;
+              break;
+            }
+          }
+          else {
+            if (sqrt(((mouse_x-s.t.xpos)*(mouse_x-s.t.xpos))+((mouse_y-s.t.ypos)*(mouse_y-s.t.ypos))) < s.t.radius) {
+              structureclick = true;
+              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
+                s.t.inTransit = true;
+                s.t.xpos = round(mouse_x);
+                s.t.ypos = round(mouse_y);
+                the_player.pickedup = s;
+                the_player.placing = true;
+                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
+                the_player.structurePanel.hiddenpanel = false;
+                the_player.structurePanel.shown = true;
+              }
+              else the_player.selectedStructure = s;
+              break;
+            }
+          }
+        }
+        if (!structureclick) the_player.selectedStructure = null;
+      }
     }
   }
 
-  // for dubugging purposes draw a cricle where the program thinks the mouse is in the world - it's right(?)
+  // for dubugging purposes draw a circle where the program thinks the mouse is in the world - it's right(?)
   pushMatrix();
   hint(DISABLE_DEPTH_TEST);
   translate(cameraX,cameraY,cameraZ-zoomOffset);
@@ -587,6 +701,25 @@ void mousePressed() { // called if either mouse button is pressed
   ellipse((((float)mouseX-(width/2))*worldRatioX),(((float)mouseY-(height/2))*worldRatioX),50,50);
   hint(ENABLE_DEPTH_TEST);
   popMatrix();
+}
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  cameraZ += e * 25;
+
+  // most zoomed in
+  if (cameraZ < 70)
+    cameraZ = 70;
+
+  // most zoomed out
+  if (cameraZ > zoomOffset)
+    cameraZ = zoomOffset;
+}
+
+void mouseDragged() {
+  if (mouseButton != LEFT) return;
+  cameraX += round(mouse_x_p - mouse_x);
+  cameraY += round(mouse_y_p - mouse_y);
 }
 
 void initTables() {
@@ -709,12 +842,12 @@ void initTables() {
 //Test for writing data to excel file
 void writeTables() {
   saveTable(c_traits, "data/c_traits.csv");
-  saveTable(c_avgs, "data/c_avgs.csv");
-  saveTable(reproduction, "data/reproduction.csv");
-  saveTable(sensing, "data/sensing.csv");
-  saveTable(metabolism, "data/metabolism.csv");
+  saveTable(c_avgs,   "data/c_avgs.csv");
+  saveTable(reproduction,   "data/reproduction.csv");
+  saveTable(sensing,  "data/sensing.csv");
+  saveTable(metabolism,  "data/metabolism.csv");
   saveTable(lifetime, "data/lifetime.csv");
-  saveTable(p_impact, "data/p_impact.csv");
-  saveTable(p_stats, "data/p_stats.csv");
-  saveTable(env, "data/env.csv");
+  saveTable(p_impact,   "data/p_impact.csv");
+  saveTable(p_stats,   "data/p_stats.csv");
+  saveTable(env,  "data/env.csv");
 }

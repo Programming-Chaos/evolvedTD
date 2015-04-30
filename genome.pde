@@ -1,6 +1,6 @@
 // standard deviation of mutation added to each gene in meiosis
 static float MUTATION_DEVIATION = 0.03;
-static float MUTATION_RATE = 0.05;
+static float MUTATION_RATE = 0.2;
 // standard deviation of initial gene values
 static float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
@@ -54,8 +54,7 @@ ArrayList<AppendageTraits> appendageTraits = new ArrayList<AppendageTraits>(MAX_
 
 // maximum number of feelers that can be evolved
 static final int MAX_FEELERS = 40;
-ArrayList<FeelerTrait> feelers
-  = new ArrayList<FeelerTrait>(MAX_FEELERS);
+ArrayList<FeelerTrait> feelers = new ArrayList<FeelerTrait>(MAX_FEELERS);
 // encodes number of feelers actually expressed
 Trait expressedFeelers = new Trait(10);
 
@@ -197,32 +196,15 @@ class Genome {
     yChromosome = y;
   }
 
-  
   // Returns a list of genes from the X chromosome
   FloatList listX(Trait trait) {
     return xChromosome.list(trait);
   }
 
-  //Creates inheritance value
-  //. between each creature uniqie id between .
-  void inheritance(int num) {
-    if (xChromosome.inherit != "") {
-      xChromosome.inherit += "." + str(num);
-    } else {
-      xChromosome.inherit = str(num);
-    }
-    
-    if (yChromosome.inherit != "") {
-      yChromosome.inherit += "." + str(num);
-    } else {
-      yChromosome.inherit = str(num);
-    }
-  }
   // Returns a list of genes from the Y chromosome
   FloatList listY(Trait trait) {
     return yChromosome.list(trait);
   }
-
   
   // Returns a combined list of genes from both chromosomes
   FloatList list(Trait trait) {
@@ -250,41 +232,19 @@ class Genome {
     return (xChromosome.avg(trait) + yChromosome.avg(trait)) / 2;
   }
 
-  class Chromosome {
-    FloatList genes;
-    String inherit = "";
-    
-    Chromosome(int n) {
-      genes = new FloatList(n);
-      for (int i = 0; i < n; i++) {
-        // give each gene a random value near zero
-        genes.append(randomGaussian() * INITIAL_DEVIATION);
-      }
+  //Creates inheritance value
+  //. between each creature uniqie id between .
+  void inheritance(int num) {
+    if (xChromosome.inherit != "") {
+      xChromosome.inherit += "." + str(num);
+    } else {
+      xChromosome.inherit = str(num);
     }
 
-    Chromosome() {
-     genes = new FloatList();
-    }
-
-    FloatList list(Trait trait) {
-      return genes.getSubset(trait.index, trait.genes);
-    }
-
-    float sum(Trait trait) {
-      return list(trait).sum();
-    }
-
-    float avg(Trait trait) {
-      return sum(trait) / trait.genes;
-    }
-
-    void mutate() {
-      for (int i = 0; i < genes.size(); i++) {
-        // mutate only a select number of random genes
-        if (random(1) < MUTATION_RATE) {
-          genes.add(i, randomGaussian() * MUTATION_DEVIATION);
-        }
-      }
+    if (yChromosome.inherit != "") {
+      yChromosome.inherit += "." + str(num);
+    } else {
+      yChromosome.inherit = str(num);
     }
   }
 
@@ -332,7 +292,7 @@ class Genome {
   }
 
   void testMutation() {
-    if (MUTATION_RATE != 0.05)
+    if (MUTATION_RATE != 0.2)
       testFailed("mutation rate is no longer 5 percent");
   }
 
@@ -358,8 +318,46 @@ class Genome {
       testFailed("controlt trait in nChromosome avg does not equal sum/traits");
 
     if (testSuccess)
-      println("Genome.Chromosome tests PASSED :)");
+      println("Chromosome tests PASSED :)");
     else
-      println("Genome.Chromosome tests FAILED :(");
+      println("Chromosome tests FAILED :(");
+  }
+}
+
+class Chromosome {
+  FloatList genes;
+  String inherit = "";
+
+  Chromosome(int n) {
+    genes = new FloatList(n);
+    for (int i = 0; i < n; i++) {
+      // give each gene a random value near zero
+      genes.append(randomGaussian() * INITIAL_DEVIATION);
+    }
+  }
+
+  Chromosome() {
+    genes = new FloatList();
+  }
+
+  FloatList list(Trait trait) {
+    return genes.getSubset(trait.index, trait.genes);
+  }
+
+  float sum(Trait trait) {
+    return list(trait).sum();
+  }
+
+  float avg(Trait trait) {
+    return sum(trait) / trait.genes;
+  }
+
+  void mutate() {
+    for (int i = 0; i < genes.size(); i++) {
+      // mutate only a select number of random genes
+      if (random(1) < MUTATION_RATE) {
+        genes.add(i, randomGaussian() * MUTATION_DEVIATION);
+      }
+    }
   }
 }
