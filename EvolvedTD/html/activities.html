@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    
+</head>
+
+<body>
+    <section class="content-block left">
+        <li id="first" class="activity">First Activity<span></span></li>
+        <li id="second" class="activity">Second Activity<span></span></li>
+    </section>
+    <section class="content-block right">
+    
+    </section>
+    
+    <style>
+        section li.activity {
+            position: relative;
+            display: block;
+            margin-right: 2px;
+            margin-bottom: 0.4em;
+            padding: 1em;
+            text-align: right;
+            text-indent: 5em;
+            border-right: 1px solid #0af;
+        }
+        section li.activity:hover {
+            cursor: pointer;
+        }
+        section li.activity:hover > span {
+            width: 99%;
+            opacity: 1.0;
+        }
+        section li.activity span {
+            position: absolute;
+            right: 0;
+            height: 100%;
+            width: 0%;
+            margin-top: -1em;
+            opacity: 0.0;
+            border-left: 1px solid #0af;
+            background: -webkit-linear-gradient(red, blue); /* For Safari 5.1 to 6.0 */
+            background: -o-linear-gradient(red, blue); /* For Opera 11.1 to 12.0 */
+            background: -moz-linear-gradient(red, blue); /* For Firefox 3.6 to 15 */
+            background: linear-gradient(to top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%);
+            /* Standard syntax */
+
+            -webkit-transition: all 1.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</body>
+</html>

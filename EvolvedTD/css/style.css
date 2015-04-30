@@ -65,16 +65,51 @@ menu li.selected a {
     background: rgba(0, 0, 0, 0.8);   
 }
 
-#main-body {   
-    margin: auto;
+div.content {
+    overflow: hidden;
 }
-section.content-block {
+div.hidden {
+    opacity: 0.0;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+div.visible {
+    opacity: 1.0;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+
+#main-body {   
     position: relative;
     display: block;
+    margin: auto;
     padding: 2em 2em;
     width: 60em;
     color: #ddd;
     background: rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+section.content-block {
+    position: relative;
+    display: inline-block;
+}
+section.content-block.left {
+    left: 0;
+    width: 15em;
+    height: 30em;
+    border-right: 3px solid #0af;   
 }
 
 article {
