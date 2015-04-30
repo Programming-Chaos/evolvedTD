@@ -23,14 +23,14 @@ window.onhashchange = function() {
     $('div.content').removeClass('visible').addClass('hidden');
     setTimeout(function() {
         $('#content').load('html/' + newPage + '.html');
-    }, 500);
+    }, 300);
     setTimeout(function() {
         $('#main-body').height($('#content').height());
-    }, 530);
+    }, 330);
     setTimeout(function() {
         $('div.content').removeClass('hidden').addClass('visible');
-    }, 650);    
+    }, 400);    
     setTimeout(function() {
         $('#main-body').height($('#content').height());
-    }, 680);
+    }, 430);
 }
