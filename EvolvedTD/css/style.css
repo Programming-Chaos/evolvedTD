@@ -51,13 +51,8 @@ menu li.tab a {
     -ms-transition: all 0.5s ease-in-out;
     transition: all 0.5s ease-in-out;
 }
-menu li.unselected a:hover {
+menu li.tab:not(.selected) a:hover {
     text-shadow: 0 0 0.2em #2060b7, 0 0 0.5em #2060b7, 0 0 1.0em #202452, 0 0 1.5em #202452, 0 0 2.0em #202452, 0 0 2.5em #202452, 0 0 3.0em #202452, 0 0 3.5em #202452, 0 0 4.0em #202452, 0 0 4.5em #202452, 0 0 5.0em #202452, 0 0 5.5em #202452, 0 0 6.0em #202452;
-    -webkit-transition: all 0.5s ease-in-out;
-    -moz-transition: all 0.5s ease-in-out;
-    -o-transition: all 0.5s ease-in-out;
-    -ms-transition: all 0.5s ease-in-out;
-    transition: all 0.5s ease-in-out;
 }
 menu li.selected a {
     text-shadow: 0 0 0.2em #2060b7, 0 0 0.5em #2060b7;
@@ -66,22 +61,15 @@ menu li.selected a {
 
 div.content {
     overflow: hidden;
-}
-div.hidden {
-    opacity: 0.0;
+    opacity: 1.0;
     -webkit-transition: all 0.3s ease-in-out;
     -moz-transition: all 0.3s ease-in-out;
     -o-transition: all 0.3s ease-in-out;
     -ms-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
 }
-div.visible {
-    opacity: 1.0;
-    -webkit-transition: all 0.5s ease-in-out;
-    -moz-transition: all 0.5s ease-in-out;
-    -o-transition: all 0.5s ease-in-out;
-    -ms-transition: all 0.5s ease-in-out;
-    transition: all 0.5s ease-in-out;
+div.content.hidden {
+    opacity: 0.0;
 }
 
 #main-body {   
@@ -180,4 +168,24 @@ section.left li.tab > span {
     -o-transition: all 0.3s ease-in-out;
     -ms-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
+}
+section.left li.tab.selected > span {
+    width: 99%;
+    opacity: 1.0;
+    background: -webkit-linear-gradient(top, transparent, rgba(255, 0, 0, 0.3) 15%, rgba(255, 0, 0, 0.3) 85%, transparent 100%); 
+    background: -moz-linear-gradient(top, transparent, rgba(255, 0, 0, 0.3) 15%, rgba(255, 0, 0, 0.3) 85%, transparent 100%); 
+    background: linear-gradient(to top, transparent, rgba(255, 0, 0, 0.3) 15%, rgba(255, 0, 0, 0.3) 85%, transparent 100%);
+}
+
+section.content-block.right {
+    opacity: 1.0;
+    
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}    
+section.content-block.right.hidden {
+    opacity: 0.0;
 }

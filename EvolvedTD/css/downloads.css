@@ -1,0 +1,70 @@
+div.downloads-content {
+    position: relative;
+    display: block;
+    top: 4em;   
+    height: 22em;
+}
+
+img.download-logo {
+    position: relative;
+    left: 50%;
+    margin-left: -4.21em;
+    height: 10em;
+}
+
+div.downloads-content > span >  a {
+    position: relative;
+    display: block;
+    top: 3em;
+    padding: 0.5em 0.0em 1.5em 0.0em;
+    color: #0af;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 0 0.05em #fff;
+}
+div.downloads-content > span > a:hover {
+    text-shadow: 0 0 0.1em #0af;
+}
+div.downloads-content > span  a span {
+    position: absolute;
+    left: 50%;
+    margin-top: -0.5em;
+    line-height: 1.5em;
+    width: 0%;
+    height: 100%;
+    opacity: 0.0;
+    border-left: 1px solid #0af;
+    border-right: 1px solid #0af;
+    overflow: hidden;
+    text-shadow: 0 0 0.1em #0af;
+    background: -webkit-linear-gradient(top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%); 
+    background: -moz-linear-gradient(top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%); 
+    background: linear-gradient(to top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%);
+
+    -webkit-transition: all 1.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+div.downloads-content > span > a:hover > span {
+    left: 0.0em;
+    width: 100%;
+    opacity: 1.0;
+}
+
+div.downloads-content > span {
+    position: absolute;
+    width: 10em;
+
+}
+#windows {
+    left: 7em;   
+}
+#osx {
+    left: 50%;
+    margin-left: -4.21em;
+}
+#linux {
+    right: 7em;   
+}
