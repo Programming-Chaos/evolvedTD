@@ -1,15 +1,6 @@
+var refresh = false;
 $(document).ready(function() {
-    // Handle reload button
-    var frag = location.hash.split("#");
-    if (frag.length == 1) { //empty hash
-        location.hash = '~home';
-    }
-    else {
-        var page = location.hash;
-        page = page.replace('#','');
-        location.hash = '';
-        location.hash = page; //initial hash
-    }
+    checkReload();
 });
                 
 var oldPage = location.hash.split('&');
@@ -23,8 +14,23 @@ window.onhashchange = function() {
     changePage(newPage[0]);
 } 
 
+function checkReload() {
+    // Handle reload button
+    var frag = location.hash.split("#");
+    if (frag.length == 1) { //empty hash
+        location.hash = '~home';
+    }
+    else {
+        var page = location.hash;
+        page = page.replace('#','');
+        location.hash = '';
+        location.hash = page; //initial hash
+        refresh = true;
+    }
+}
+
 function changePage(newPage) {
-    if (oldPage != newPage) {
+    if (oldPage != newPage || refresh) {
         // Load page
         $('menu li.selected').removeClass('selected');
         $('#' + newPage).addClass('selected');
@@ -44,5 +50,6 @@ function changePage(newPage) {
         }, 430);
 
         oldPage = newPage;
+        refresh = false;
     }  
 }

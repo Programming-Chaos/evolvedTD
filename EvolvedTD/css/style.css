@@ -18,7 +18,20 @@ header {
     height: 10em;
     background: url(../images/banner.png);
     background-position: center;
-    
+}
+
+a {
+    text-decoration: none;
+    color: #0af;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+span > li {
+    position: relative;
+    display: block;
+    margin-bottom: 0.7em;
 }
 
 menu {
@@ -115,13 +128,33 @@ h2 {
     background: linear-gradient(to top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%);
 }
 
+h4 {
+    display: table;
+    padding: 0.2em 0.5em;
+    margin-top: 1em;
+    text-shadow: 0 0 0.1em #0af;
+    border-bottom: 1px solid #0af;
+    background: -webkit-linear-gradient(top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%);  
+    background: -moz-linear-gradient(top, transparent, rgba(0, 170, 255, 0.2) 15%, rgba(0, 170, 255, 0.2) 85%, transparent 100%); 
+    background: linear-gradient(to top,rgba(0, 170, 255, 0.2) 5%, transparent 30%);
+}
+h4 + span {
+    margin-top: 1em;
+    margin-bottom: 2em;
+    padding: 0;
+}
+h4 + span p {
+    margin: 0;   
+}
+
 /* Information display formatting */
 section.content-block {
     position: relative;
-    display: inline-block;
+    display: block;
+    float: left;
 }
 section.content-block.left {
-    left: 0;
+    left: 0em;
     width: 15em;
     padding-top: 0.4em;
     border-right: 3px solid #0af;   
@@ -178,7 +211,11 @@ section.left li.tab.selected > span {
 }
 
 section.content-block.right {
+    padding: 0em 0em 0em 2em;
+    margin-left: -3px;
+    width: 42.6em;
     opacity: 1.0;
+    border-left: 3px solid #0af;
     
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
@@ -188,4 +225,8 @@ section.content-block.right {
 }    
 section.content-block.right.hidden {
     opacity: 0.0;
+}
+section.content-block.right h2 + p {
+    margin-left: 2em;
+    margin-right: 2em;
 }
