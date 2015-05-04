@@ -113,6 +113,29 @@ class population {
     }
     return ret;
   }
+  
+    Vec2 lowestWidth() {
+    Vec2 ret = new Vec2(0,0);
+    float temp, minWidth = 0;
+    boolean first = true;
+    for (creature c: swarm) {
+      if (c.alive) {
+        if (first) {
+          minWidth = c.getWidth();
+          ret = c.getPos();
+          first = false;
+        }
+        else {
+          temp = c.getWidth();
+          if (temp < minWidth) {
+            minWidth = temp;
+            ret = c.getPos();
+          }
+        }
+      }
+    }
+    return ret;
+  }
 
   // returns the number of living creatures, used to decide whether to
   // end a wave
