@@ -5,9 +5,9 @@
 \SweaveOpts{concordance=TRUE}
 
 <<tidy=TRUE,echo=FALSE>>=
-data_met <- read.table("~/School/Master_Test/evolvedTD/data/metabolism.csv", as.is = T, header=T, fill = T, sep= ",")
-data_rep <- read.table("~/School/Master_Test/evolvedTD/data/reproduction.csv", as.is = T, header=T, fill = T, sep= ",")
-data_life <- read.table("~/School/Master_Test/evolvedTD/data/lifetime.csv", as.is = T, header=T, fill = T, sep= ",")
+data_met <- read.table("../data/metabolism.csv", as.is = T, header=T, fill = T, sep= ",")
+data_rep <- read.table("../data/reproduction.csv", as.is = T, header=T, fill = T, sep= ",")
+data_life <- read.table("../data/lifetime.csv", as.is = T, header=T, fill = T, sep= ",")
 tmp <- sapply(sapply(strsplit(data_rep[data_rep$X...Gen...!=1,]$X...Inheritance.Chromo.2..., " "), tail, 2)[1,], head, 1)
 nas <- rep(NA, 35)
 tmp <- c(nas, as.numeric(tmp))
