@@ -41,6 +41,8 @@ class creature {
   float maxMovementForce;
   float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
+  int bodyTemp;        // determining factor in how creature responds to air temp
+
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -358,6 +360,8 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    bodyTemp = 37;            // creatures internal body temperature
+
 
     maxMovementForce = baseMaxMovementForce - (2*getWidth());
     if (maxMovementForce < 0) maxMovementForce = 0;

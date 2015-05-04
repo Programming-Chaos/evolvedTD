@@ -11,6 +11,24 @@
  *    - Multi threading so water can look like it's moving
  */
 
+/*  For Chase:
+ *    - Tie temperature to creatures
+         - internal body temp [DONE]
+         - make temperature more dynamic [WHY]
+         - make the creature compare their body temp to air temp, then decide
+           - IF bodyTemp > temperature:
+               1. increase metabolic rate (spend energy faster)
+               2. huddle together
+           - IF bodyTemp < temperature:
+               1. seek bodies of water to cool off in
+               2. lighter colored creatures will lose energy slower than darker ones
+               
+ *    - Create Radiation
+ *    - Tie radiation to creatures
+ *    - A couple new biomes? (optional)
+ */
+
+
 int cellWidth = 20;
 int cellHeight = 20;
 int maxscent = 255;
