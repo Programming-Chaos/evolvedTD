@@ -635,6 +635,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
       if (!upgrading) {
         // find a creature
         the_player.selectedCreature = null;
+        follow_selected= true;
         for (creature c : the_pop.swarm) {
           Vec2 location = c.getPos();
           float crad = (c.getWidth()/2);
@@ -651,6 +652,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
       
       if (the_player.selectedCreature == null) {
         // find a structure
+        selected_creature = "No Creature Selected";
         boolean structureclick = false;
         for (structure s : the_player.structures) {
           if (s.type == 'b') {
@@ -671,6 +673,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
             }
           }
           else {
+            selected_creature = "Creature Selected";
             if (sqrt(((mouse_x-s.t.xpos)*(mouse_x-s.t.xpos))+((mouse_y-s.t.ypos)*(mouse_y-s.t.ypos))) < s.t.radius) {
               structureclick = true;
               if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure

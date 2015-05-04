@@ -1,0 +1,133 @@
+\documentclass{article}
+
+\begin{document}
+
+\SweaveOpts{concordance=TRUE}
+
+<<tidy=TRUE,echo=FALSE>>=
+data_met <- read.table("~/School/Master_Test/evolvedTD/data/metabolism.csv", as.is = T, header=T, fill = T, sep= ",")
+data_rep <- read.table("~/School/Master_Test/evolvedTD/data/reproduction.csv", as.is = T, header=T, fill = T, sep= ",")
+data_life <- read.table("~/School/Master_Test/evolvedTD/data/lifetime.csv", as.is = T, header=T, fill = T, sep= ",")
+tmp <- sapply(sapply(strsplit(data_rep[data_rep$X...Gen...!=1,]$X...Inheritance.Chromo.2..., " "), tail, 2)[1,], head, 1)
+nas <- rep(NA, 35)
+tmp <- c(nas, as.numeric(tmp))
+data_rep$parent_2 <- tmp
+
+tmp <- sapply(sapply(strsplit(data_rep[data_rep$X...Gen...!=1,]$X...Inheritance.Chromo.1..., " "), tail, 2)[1,], head, 1)
+nas <- rep(NA, 35)
+tmp <- c(nas, as.numeric(tmp))
+data_rep$parent_1 <- tmp
+
+child_id <- max(data_rep$X...Creature.ID...)
+data_rep$gamete_count <- NA
+data_rep$self_fert_count <- NA
+data_rep$self_fert <- ifelse(data_rep$parent_1 == data_rep$parent_2, T, NA)
+
+for ( i in 0:child_id) {
+  data_rep$gamete_count[i+1] <- sum(!is.na(data_rep[data_rep$parent_1==i, ]$parent_1)) + sum(!is.na(data_rep[data_rep$parent_2==i, ]$parent_2))
+  data_rep$self_fert_count[i+1] <- sum(!is.na(data_rep[data_rep$parent_1==i, ]$self_fert))
+}
+
+
+@
+
+\begin{figure}
+<<label=Figure1,fig=True,echo=FALSE>>=
+plot(data_rep$X...Creature.ID..., data_rep$gamete_count, col = data_rep$X...Gen..., xlab = "Creature ID", ylab = "Number of Succesful Gametes", main = "Reproduction Success")
+
+
+@
+\caption{Successful gametes of each creature. Each different color grouping is a new generation.}
+
+\end{figure}
+
+
+
+\begin{figure}
+<<label=Figure1,fig=True,echo=FALSE>>=
+plot(data_rep$X...Creature.ID..., data_rep$gamete_count, col = data_rep$X...Gen..., xlab = "Creature ID", ylab = "Number of Succesful Gametes", main = "Reproduction Success")
+
+
+@
+\caption{Successful gametes of each creature. Each different color grouping is a new generation.}
+
+\end{figure}
+
+
+\begin{figure}
+<<label=Figure2,fig=True,echo=FALSE>>=
+plot(data_rep$X...Creature.ID..., data_rep$self_fert_count, col = data_rep$X...Gen..., xlab = "Creature ID", ylab = "Number of Inbred Offspring", main = "Inbred Offspring by Creature")
+@
+\caption{Successful number of inbred offspring. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+
+\begin{figure}
+<<label=Figure3,fig=True,echo=FALSE>>=
+
+tmp <-aggregate(data_rep$self_fert_count, list(gen = data_rep$X...Gen...), sum)
+plot(tmp$gen, tmp$x, col = tmp$gen, xlab = "Generation", ylab = "Number of Inbred Offspring", main = "Inbred Offspring by generation")
+@
+\caption{Successful number of inbred offspring. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+\begin{figure}
+<<label=Figure4,fig=True,echo=FALSE>>=
+plot(data_rep$X...Creature.ID..., data_rep$X...Gamete.Cost..., xlab = "Creature ID", ylab = "Cost per Gamete", main="Gamete Cost per Creature", col = data_rep$X...Gen...)
+@
+\caption{Amount of energy per Gamate per Creature. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+\begin{figure}
+<<label=Figure5,fig=True,echo=FALSE>>=
+plot(data_rep$X...Creature.ID..., data_rep$X...Gamete.Time..., xlab = "Creature ID", ylab = "Time per Gamete", main="Gamete Production Time per Creature", col = data_rep$X...Gen...)
+@
+\caption{Amount of time required to create one gamete per Creature. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+\begin{figure}
+<<label=Figure6,fig=True,echo=FALSE>>=
+plot(data_met$X...Creature.ID..., data_met$X...Locomotion.Used..., xlab = "Creature ID", ylab = "Locomotion Energy Used", main="Locomtion energy used per creature", col = data_met$X...Gen...)
+@
+\caption{Locomotion energy used per creature. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+
+\begin{figure}
+<<label=Figure6,fig=True,echo=FALSE>>=
+plot(data_met$X...Creature.ID..., data_met$X...Total.Energy.Consumed..., xlab = "Creature ID", ylab = "Energy Consumed", main="Energy Consumed per Creature", col = data_met$X...Gen...)
+@
+\caption{Energy consumed per creature. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+\begin{figure}
+<<label=Figure9,fig=True,echo=FALSE>>=
+plot(data_rep$gamete_count, data_met$X...Total.Energy.Consumed..., xlab = "Number of Successful Gametes", ylab = "Energy Consumed", main="Energy Consumed per Creature versus Number of Succesful Gametes", col = data_met$X...Gen...)
+@
+\caption{Energy consumed versus how many succeful gametes the creature produced. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+\begin{figure}
+<<label=Figure8,fig=True,echo=FALSE>>=
+plot(data_life$X...Creature.ID..., data_life$X...Total.Lifetime..., xlab = "Creature ID", ylab = "Lifetime Ticks", main="Life time of creatures", col = data_life$X...Gen...)
+@
+\caption{Lifetime of creatures. The different coloring indicates different generations.}
+
+\end{figure}
+
+
+\end{document}
