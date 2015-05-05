@@ -23,9 +23,9 @@
                1. increase metabolic rate (spend energy fast)
                2. lighter colored creatures will lose energy slower than darker ones
                
- *    - Create Radiation
- *    - Tie radiation to creatures
- *    - A couple new biomes? (optional)
+ *    - Create Radiation [DONE]
+ *    - Tie radiation to creatures [DONE]
+ *    - A couple new biomes? (optional) [DONE-ish]
  */
 
 
@@ -179,8 +179,8 @@ class environment {
   int environAltitude;
   int rockFrequency;
   float liquidReservior; // Amount of water the environment is holding to expened into rain
-  float temp;       // celsius
-  float radiation;  // scaled from 1-10
+  float temperature;       // celsius
+  float radiation;  
   PGraphics image;
   
   // Coloring for the different terrain types.
@@ -202,6 +202,7 @@ class environment {
     environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
     isRaining = false;
+    
     // Establish world type
     int altShift = decideWorldType();
     
@@ -949,15 +950,15 @@ class environment {
   
   // decides on the world type by choosing random number between 1 and 4
   int decideWorldType() {
-    int decision = int(random(1, 4.999999));
+    int decision = int(random(1, 5.999999));
     int altShift = 0;
     int r = 0, b = 0, g = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;
     switch(decision) {
       case 1:
         // temperate
-        temp = int(random(20, 25));
-        radiation = 5;
+        temperature = int(random(20, 25));
+        radiation = 0.2;
         liquid = color(0, 0, 175);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
@@ -968,8 +969,8 @@ class environment {
       
       case 2:
         // desert
-        temp = int(random(40, 45));
-        radiation = 8;        
+        temperature = int(random(40, 45));
+        radiation = 0.3;        
         liquid = color(0, 170, 170);
         rock = color(165, 103, 41);
         land = color(239, 233, 125); // 240 231 100
@@ -981,8 +982,8 @@ class environment {
       case 3:
         // rainy
         isRaining = true;
-        temp = int(random(15, 20));
-        radiation = 3;
+        temperature = int(random(15, 20));
+        radiation = 0.18;
         liquid = color(7, 37, 75);
         rock = color(125, 125, 75);
         land = color(10, 125, 10);
@@ -993,8 +994,8 @@ class environment {
         
       case 4:
         // snowy
-        temp = int(random(-5, 0));
-        radiation = 2;
+        temperature = int(random(-5, 0));
+        radiation = 0.17;
         liquid = color(153, 204, 255);
         rock = color(150, 150, 150);
         land = color(245, 245, 245); 
@@ -1005,8 +1006,8 @@ class environment {
         
       case 5:
         // lava
-        temp = int(random(300, 320));
-        radiation = 20;
+        temperature = int(random(300, 320));
+        radiation = 1.0;
         liquid = color(225, 0, 0);
         rock = color(50, 50, 50);
         land = color(100, 50, 0);

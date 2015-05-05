@@ -1,6 +1,7 @@
 import java.util.Comparator;
 
 static int creature_count = 0;
+int temp = 0;
 
 class Gamete {
   int xPos, yPos;
@@ -360,8 +361,7 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
-    bodyTemp = 37;            // creatures internal body temperature
-
+    bodyTemp = 20;            // creatures internal body temperature
 
     maxMovementForce = baseMaxMovementForce - (2*getWidth());
     if (maxMovementForce < 0) maxMovementForce = 0;
@@ -800,7 +800,8 @@ class creature {
   
       if (energy_locomotion > 0) { // If there's energy left apply force
         body.applyForce(new Vec2(environInfluence * f * cos(a - (PI*1.5)), environInfluence * f * sin(a - (PI*1.5))), body.getWorldCenter());
-        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
+        
+        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005)) - (10 - (1 / environ.temperature));   // moving uses locomotion energy
         energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
   
         // data collection

@@ -39,6 +39,7 @@ boolean autofire = true;
 boolean mistermoneybagsmode = false;
 boolean invinciblestructures = false;
 
+environment environ;           // the environment object
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
@@ -48,7 +49,6 @@ ArrayList<Panel> panels;
 ArrayList<Animation> animations;
 
 Box2DProcessing box2d;         // the box2d world object
-environment environ;           // the environment object
 
 Minim minim;
 
@@ -110,13 +110,16 @@ void setup() {
   rectMode(CENTER);              // drawing mode fore rectangles,
   
   environ = new environment();   // must occur after creatures, etc. created
+
   lasttime = 0;
   generation = 0;
   
   // Run unit tests
   Genome testGenome = new Genome();
+
   testGenome.testChromosome();
-  testGenome.testMutation();
+  //testGenome.testMutation();
+
 
   // Initialize data tables
   initTables();
