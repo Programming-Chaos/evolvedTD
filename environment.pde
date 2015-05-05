@@ -61,7 +61,6 @@ class tile {
   int coloring;      // 0 to 255 value that describes tile visually
   int opacity;
   color colors;
-  int weathering;    // 0 to 255 value that describes tile weathering visually
 
   // 0 (solid) to 255 (water) value that describes the viscosity of a
   // tile and determines whether the tile can be considered liquid
@@ -93,9 +92,7 @@ class tile {
     coloring = 0;
     opacity = 1;
     colors = color(0, 200 + (int)random(25), 0);
-    weathering = 0;
     viscosity = 10;
-    weathering = 0;
     scent = 0;
     creatureScent = 0;
     creatureScentColor = 0;
@@ -107,14 +104,12 @@ class tile {
     hasCreatureScent = false;
 
     DEBUG_sensing = false;
-
   }
 
   // GET
   int[] getTaste()         { return taste; }
   float getAlt()           { return altitude; }
   int getColor()           { return coloring; }
-  int getWeather()         { return weathering; }
   int getViscosity()       { return viscosity; }
   float getScent()         { return scent; }
   boolean hasFood()        { return hasFood; }
@@ -131,7 +126,6 @@ class tile {
 
   void setAlt(float a)           { altitude = a; }
   void setColor(int c)           { coloring = c; }
-  void setWeather(int w)         { weathering = w; }
   void setViscosity(int v)       { viscosity = v; }
   void setScent(float s)         { scent = s; }
   void hasFood(boolean f)        { hasFood = f; }
@@ -636,33 +630,33 @@ class environment {
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
     if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
     if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
-    return tileMap[x][y].getTaste();
+    return tileMap[y][x].getTaste();
   }
 
+  boolean checkForLiquid(float x1, float y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+        
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
 
+    if (tileMap[y][x].biome == WATER) {
+      return true;
+    }
+    return false;
+  }
 
-  int checkForLiquid(double x1, double y1) {
+  boolean checkForMountain(float x1, float y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
     if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
     if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
-    if (tileMap[x][y].biome == WATER) {
-      return 1;
+    if (tileMap[y][x].biome == MOUNTAIN) {
+      return true;
     }
-    return 0;
-  }
-
-  int checkForMountain(double x1, double y1) {
-    int x, y;
-    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
-    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
-    if (tileMap[x][y].biome == MOUNTAIN) {
-      return 1;
-    }
-    return 0;
+    return false;
   }
 
   void display() {
@@ -1008,16 +1002,16 @@ class environment {
         
       case 5:
         // lava
-        temp = int(random(300, 320));
-        liquid = color(225, 0, 0);
-        rock = color(50, 50, 50);
-        land = color(100, 50, 0);
+        temp = int(random(20, 40));
+        liquid = color(0, 0, 225);
+        rock = color(150, 150, 150);
+        land = color(0, 150, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
         break;
 
       /*
-      case 6:
+      case 5:
         // radiation - ??
         temp = int(random(20, 40));
         liquid = color(0, 0, 225);

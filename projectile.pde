@@ -3,6 +3,7 @@ class projectile {
   int radius;
   float angle;
   float xpos, ypos;
+  
   boolean remove = false;
   int damage; // how much damge the projectile does
   PImage bullet;    // declare image for gun
@@ -62,6 +63,9 @@ class projectile {
   }
   
   void update(){
+    if(environ.checkForMountain(box2d.getBodyPixelCoord(the_projectile).x, box2d.getBodyPixelCoord(the_projectile).y)) {
+      killBody();
+    }
     if (box2d.getBodyPixelCoord(the_projectile).x < (-1*(worldWidth/2)) || box2d.getBodyPixelCoord(the_projectile).x > (worldWidth/2))remove = true;
     if (box2d.getBodyPixelCoord(the_projectile).y < (-1*(worldHeight/2)) || box2d.getBodyPixelCoord(the_projectile).y > (worldHeight/2))remove = true;
     if (type == 'g') { // electron clouds don't get removed for being slow but they do have some electrifying interactions with creatures
