@@ -33,6 +33,7 @@ int cellWidth = 20;
 int cellHeight = 20;
 int maxscent = 255;
 
+boolean isLavaPlanet = false;  // is it the lave planet?
 boolean isRaining;     // returns whether or not it is raining
 
 int waitRainOff, waitRainOn; // will wait 1 minute before raining again after stopping
@@ -523,6 +524,21 @@ class environment {
     }
     update_scent();
     update_creature_scent();
+    /*
+    if(isLavaPlanet == true) {
+      for(int i = 0; i < environWidth; i++) {
+        for(int j = 0; j < environHeight; j++) {
+          if(tileMap[i][j].hasCreature() != null) { 
+            println("there is a creature here");
+            if(tileMap[i][j].isLiquid == true) {
+              println("this creature is touching water");
+              creature c = tileMap[i][j].hasCreature();
+              c.changeHealth(-1000);
+            }
+          }
+        }
+      }
+    }*/      
   }
 
   int checkForFood(double x1, double y1) {
@@ -857,18 +873,29 @@ class environment {
   // Draws rain animation
   void rainfall() {
     float x, y;
-    
-    // rainy blue overlay
-    fill(0, 0, 255, 45);
-    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
-    
-    for(int i = 0; i < 800; i++) {
-      x = random((-worldWidth / 2), (worldWidth / 2));
-      y = random((-worldHeight / 2), (worldHeight / 2));
-      stroke(0, 0, 200, 120);
-      line(x, y, x, y+30);
+    if(isLavaPlanet == true) {
+      fill(255, 0, 0, 30);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));      
+      for(int i = 0; i < 200; i++) {
+        x = random((-worldWidth / 2), (worldWidth / 2));
+        y = random((-worldHeight / 2), (worldHeight / 2));
+        stroke(147, 125, 125, 100);
+        line(x, y, x, y+30);
+      }
+      chanceOfLightning();
+    } else {
+      // rainy blue overlay
+      fill(0, 0, 255, 45);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
+      
+      for(int i = 0; i < 800; i++) {
+        x = random((-worldWidth / 2), (worldWidth / 2));
+        y = random((-worldHeight / 2), (worldHeight / 2));
+        stroke(0, 0, 200, 120);
+        line(x, y, x, y+30);
+      }
+      chanceOfLightning();
     }
-    chanceOfLightning();
   }
 
   void findTheBugs() {
@@ -911,12 +938,20 @@ class environment {
     int yOffset = -worldHeight;
     int yFinal = randY;
 
-    fill(225, 225, 225, 125);
-    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
-
+    if(isLavaPlanet == true) {
+      fill(225, 200, 200, 125);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
+    } else {
+      fill(225, 225, 225, 125);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));      
+    }
     noFill();
     strokeWeight(5);
-    stroke(255, 255, 200);
+    
+    if(isLavaPlanet == true) 
+      stroke(255, 125, 60);
+    else 
+      stroke(255, 255, 200);
 
     beginShape();
     curveVertex(xOffset, yOffset);
@@ -939,7 +974,6 @@ class environment {
     if(tileMap[tileX][tileY].hasCreature() != null) {
       creature c = tileMap[tileX][tileY].hasCreature();
       c.changeHealth(-1000);
-      println("Killed it!");
       
       // data collection
       rKills++;
@@ -1006,12 +1040,14 @@ class environment {
         
       case 5:
         // lava
+        isLavaPlanet = true;
+        isRaining = true;
         temperature = int(random(300, 320));
         radiation = 1.0;
         liquid = color(225, 0, 0);
         rock = color(50, 50, 50);
         land = color(100, 50, 0);
-        waterALT = 0.35f;
+        waterALT = 0.26f;
         rockALT = 0.60f;
         break;
     }
