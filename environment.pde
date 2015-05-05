@@ -20,7 +20,7 @@
                1. increase metabolic rate (spend energy faster)
                2. huddle together
            - IF bodyTemp < temperature:
-               1. seek bodies of water to cool off in
+               1. increase metabolic rate (spend energy fast)
                2. lighter colored creatures will lose energy slower than darker ones
                
  *    - Create Radiation
@@ -185,7 +185,8 @@ class environment {
   int environAltitude;
   int rockFrequency;
   float liquidReservior; // Amount of water the environment is holding to expened into rain
-  float temp; // celsius
+  float temp;       // celsius
+  float radiation;  // scaled from 1-10
   PGraphics image;
   
   // Coloring for the different terrain types.
@@ -806,7 +807,7 @@ class environment {
     image.endDraw();
   }
 
-  /**** WEATHER ****/
+  /**** CLIMATE ****/
 
   // updates the amount of water in the water reserve
   /*
@@ -950,8 +951,6 @@ class environment {
     }
     strokeWeight(1);
     if( random(-4, 1) < 0 ) PlaySounds( "Thunder_01" ); //thunder
-    //thunder.rewind();
-    //thunder.play();
   }
   
   // decides on the world type by choosing random number between 1 and 4
@@ -964,6 +963,7 @@ class environment {
       case 1:
         // temperate
         temp = int(random(20, 25));
+        radiation = 5;
         liquid = color(0, 0, 175);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
@@ -973,8 +973,9 @@ class environment {
         break;
       
       case 2:
-        // dry - desert, minimal water
+        // desert
         temp = int(random(40, 45));
+        radiation = 8;        
         liquid = color(0, 170, 170);
         rock = color(165, 103, 41);
         land = color(239, 233, 125); // 240 231 100
@@ -984,9 +985,10 @@ class environment {
         break;
         
       case 3:
-        // rainy - lots of water, always raining
+        // rainy
         isRaining = true;
         temp = int(random(15, 20));
+        radiation = 3
         liquid = color(7, 37, 75);
         rock = color(125, 125, 75);
         land = color(10, 125, 10);
@@ -996,8 +998,9 @@ class environment {
         break;
         
       case 4:
-        // cold - snowy
+        // snowy
         temp = int(random(-5, 0));
+        radiation = 2;
         liquid = color(153, 204, 255);
         rock = color(150, 150, 150);
         land = color(245, 245, 245); 
@@ -1009,24 +1012,13 @@ class environment {
       case 5:
         // lava
         temp = int(random(300, 320));
+        radiation = 20;
         liquid = color(225, 0, 0);
         rock = color(50, 50, 50);
         land = color(100, 50, 0);
         waterALT = 0.35f;
         rockALT = 0.60f;
         break;
-
-      /*
-      case 6:
-        // radiation - ??
-        temp = int(random(20, 40));
-        liquid = color(0, 0, 225);
-        rock = color(150, 150, 150);
-        land = color(0, 150, 0);
-        waterALT = 0.35f;
-        rockALT = 0.60f;
-        break;
-      */
     }
     
     r = (land >> 16) & 255;
