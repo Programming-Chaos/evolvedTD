@@ -982,7 +982,7 @@ class environment {
         // rainy
         isRaining = true;
         temp = int(random(15, 20));
-        radiation = 3
+        radiation = 3;
         liquid = color(7, 37, 75);
         rock = color(125, 125, 75);
         land = color(10, 125, 10);
