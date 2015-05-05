@@ -7,7 +7,7 @@ class Gamete {
   int time;
   int energy;
   creature parent;
-
+  
   Gamete(int x, int y, int e, creature p){
     xPos = x;
     yPos = y;
@@ -27,6 +27,10 @@ class Gamete {
 class creature {
   // stats
   int num;               // unique creature identifier
+  int[] parents = new int[2];
+  int[] grandparents = new int[4];
+ 
+  
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   int munchtimer = 0;
   int munchstrength = 50;// should be evolved
@@ -322,6 +326,15 @@ class creature {
   }
 
   void construct(float e, Vec2 pos) { // this function contains all the overlap of the constructors
+  
+    parents[0] = -1;
+    parents[1] = -1;
+    grandparents[0] =-1;
+    grandparents[1] =-1;
+    grandparents[2] =-1;
+    grandparents[3] =-1;
+    
+    
     num = creature_count++;
     senses = new Sensory_Systems(genome);
     brain = new Brain(genome);

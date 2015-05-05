@@ -1,0 +1,13 @@
+Hey everyone, to run this script you will need RStudios on.
+
+Once R studio is open - open up this .Rnw (Sweave) document.
+
+run the command in R
+> setwd("<CURRENT DIRECTORY WITH SWEAVE DOCUMENT>")
+
+This sets the working directory to have the correct location of the data folders.
+
+After that just click compile near the top of the sweave document. 
+
+Most common form of mistake is no data folder or data folder does not have data in it.
+
