@@ -3,4 +3,5 @@ public enum State {
   PAUSED,  // user paused
   RUNNING, // in a wave
   STAGED,  // between waves
+  MENU,    // menu before game starts
 }

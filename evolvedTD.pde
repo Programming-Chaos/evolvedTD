@@ -126,16 +126,22 @@ void setup() {
 
 void draw() {
 
-  
-  if (mistermoneybagsmode) the_player.money = 1000000000;
   // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
   lasttime = millis();
   mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
   mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
   //these variables represent where the mouse is on the surface of the planet
   //If you zoom in on the top left and move the mouse to the lower right the coordinates will be very negative
+  
+  if (state != State.MENU){
+    doDraw();
+  }
 
-  if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
+}  // end of draw loop
+
+void doDraw(){
+   if (mistermoneybagsmode) the_player.money = 1000000000;
+   if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
     timesteps++;
   }
   if (timesteps > timepergeneration) { // end of a wave/generation
@@ -206,8 +212,8 @@ void draw() {
   // If state is running then step through time!
   if (state == State.RUNNING) {
     box2d.step();
-  }
-}  // end of draw loop
+  } 
+}
 
 void keyPressed() { // if a key is pressed this function is called
   int scale = 100;
