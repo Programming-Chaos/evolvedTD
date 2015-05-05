@@ -735,6 +735,7 @@ void initTables() {
   c_traits.addColumn("   Wing Size   ");
   c_traits.addColumn("   Antennae #   ");
   c_traits.addColumn("   Color   ");
+  c_traits.addColumn("   Alpha   ");
   c_traits.addColumn("   Velocity   ");
   c_traits.addColumn("   Acceleration   ");
   c_traits.addColumn("   Max HP   ");
@@ -750,6 +751,7 @@ void initTables() {
   c_avgs.addColumn("   Avg Wing Size   ");
   c_avgs.addColumn("   Avg Antennae #   ");
   c_avgs.addColumn("   Avg Color   ");
+  c_avgs.addColumn("   Avg Alpha   ");
   c_avgs.addColumn("   Avg Velocity   ");
   c_avgs.addColumn("   Avg Acceleration   ");
   c_avgs.addColumn("   Avg Max HP   ");

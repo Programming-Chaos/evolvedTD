@@ -516,7 +516,7 @@ class creature {
 
     /*I turned off alpha value here so I could not draw segmentations on creatures
     The creatures weren't easily visible with a low alpha*/
-    return color(r, g, b, 255);
+    return color(r, g, b, a);
   }
 
   // Calculate and return the width of the creature

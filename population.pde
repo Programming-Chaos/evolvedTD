@@ -81,7 +81,7 @@ class population {
         }
         else {
           temp = c.genome.sum(alphaTrait);
-          if (temp < minAlpha ) {
+          if (temp > minAlpha ) {
              minAlpha = temp;
              ret = c.getPos();
           }  
@@ -328,7 +328,7 @@ class population {
     //average variables
     float massAvg = 0, widthAvg = 0, denseAvg = 0, armorAvg = 0, 
           wingAvg = 0, wingSizeAvg = 0, antennaeAvg = 0, colorAvg = 0, 
-          velAvg = 0, acclAvg = 0, hpAvg = 0;
+          velAvg = 0, acclAvg = 0, hpAvg = 0, alphaAvg = 0;
     int count = 0;
     
     for(creature c : swarm) {
@@ -344,6 +344,7 @@ class population {
       //c_traitsRow.setFloat("   Wing Size   ", );
       //c_traitsRow.setFloat("   Antennae #   ", );
       //c_traitsRow.setFloat("   Color   ", );
+      c_traitsRow.setFloat("   Alpha   ",c.genome.sum(alphaTrait));      
       c_traitsRow.setFloat("   Velocity   " , c.maxMovementForce);
       //c_traitsRow.setFloat("   Acceleration   ", );
       c_traitsRow.setFloat("   Max HP   "   , c.maxHealth); 
@@ -355,6 +356,7 @@ class population {
       armorAvg += c.getArmorAvg();
       velAvg   += c.maxMovementForce;
       hpAvg    += c.maxHealth;
+      alphaAvg += c.genome.sum(alphaTrait);
       
       // Update creature reproduction data
       TableRow repRow = reproduction.addRow();
@@ -424,6 +426,7 @@ class population {
     c_avgsRow.setFloat("   Avg Wing Size   ", wingSizeAvg/count);
     c_avgsRow.setFloat("   Avg Antennae #   ", antennaeAvg/count);
     c_avgsRow.setFloat("   Avg Color   ", colorAvg/count);
+    c_avgsRow.setFloat("   Avg Alpha   ", alphaAvg/count);
     c_avgsRow.setFloat("   Avg Velocity   ", velAvg/count);
     c_avgsRow.setFloat("   Avg Acceleration   ", acclAvg/count);
     c_avgsRow.setFloat("   Avg Max HP   ", hpAvg/count);
