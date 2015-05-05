@@ -406,6 +406,9 @@ class tower {
     for (int i = projectiles.size() - 1; i >= 0; i--) {  // walk through particles to avoid missing one
       projectile p = projectiles.get(i);
       p.update();
+      if(environ.checkForMountain(box2d.getBodyPixelCoord(p.the_projectile).x, box2d.getBodyPixelCoord(p.the_projectile).y)) {
+        p.remove = true;
+      }
       if(p.remove){
         p.killBody();  // remove the box2d body
         projectiles.remove(i);  // remove the projectile from the list
