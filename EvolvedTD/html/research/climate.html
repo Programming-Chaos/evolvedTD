@@ -48,22 +48,24 @@ Another important component of the climate is the environment's weather patterns
         <h2>Computational Model of Climate</h2>
         <h4>Rain</h4>
         <span>
-            <p>Information about rain goes here</p>
+            <p>Rain in EvolveTD is displayed by drawing small blue lines to the screen and moving them down.  We also darken the screen by drawing a transparent blue square over the game map.<br/>
+                <br/>Creatures are affected by the rain when the rain effects the terrain.  In future updates to EvolveTD this could involve growing water masses and even the creation of streams.  Each game has a certain pool of rain available.  While the pool is full, the chance of rain is greatly increased.  As it rains, the pool empties and the chance of rain continueing lessens.  Similarly when the game is not raining, the rain pool regenerates to simulate evaporation.  Currently the only effect rain has is that it allows for the chance of lightning.</p>
         </span>
         
         <h4>Lightning</h4>
         <span>
-            <p>Information about lightning goes here</p>
+            <p>Lightning is drawn using a flash followed quickly by drawing spline curves.  Spline curves are a number of vertices connected by arcs and when implemented correctly can look like a jagged lightning bolt.<br/>
+                <br/>Lightning can only strike while it is raining.  It will randomly strike a single game tile, unleashing its devestating power.  If a creature occupies the same tile it will recieve a large amount of damage, possibly killing it.</p>
         </span>
         
         <h4>Wind</h4>
         <span>
-            <p>Information about wind goes here</p>
+            <p>Wind consists of randomly generated force vectors.  A direction and magnitude will be randomly chosen and applied over a certain area.  In the future we could add to this to simulate storms of sorts.</p>
         </span>
         
         <h4>Temperature</h4>
         <span>
-            <p>Information about temperature goes here</p>
+            <p>Temperature is a randomly generated value within a threshold that depends on the climate and season of the game map.  Currently this has no effect on the creatures, but eventually could be used to slow them down or many other things.</p>
         </span>
     </article>
     <article>

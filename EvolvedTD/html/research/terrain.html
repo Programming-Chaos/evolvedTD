@@ -80,12 +80,14 @@
         <h2>Computational Model of Terrain</h2>
         <h4>Simulating Terrain</h4>
         <span>
-            <p>Information about simulating terrain goes here</p>
+            <p>Our model for randomly generating terrain uses an algorithm known as Perlin noise generation.  This allows us to create a single, random function wave.  We then apply this function wave to three directions; up/down, left/right, forward/backward, also known as x, y, and z.  Once applied we can extract a 3D "map".  With this 3D map applied to our terrain we can use altitude ranges to determine where to draw land, water and mountains.<br/>
+                <br/>To visually represent our 3D map we apply a corresponding height value to each tile on our map in the range of 0 to 1.  i.e. our lowest tiles will be closer to 0 and the highest tiles will be closer to 1.  From these values we can decide that a tile below a certain height is water and therefore drawn as blue.  We can even say that the further below that threshold a tile is, the darker the color of blue.  The same can be applied to land and mountains.  Currently the height thresholds in the game consist of water at the lower heights, mountains at the heigher altitudes and land somewhere in between.</p>
         </span>
         
         <h4>Simulating the Water Cycle</h4>
         <span>
-            <p>Information about simulating the water cycle goes here</p>
+            <p>In future versions of the game we would like to add some form of water cycle.  This would simulate plant absortion and evaporation as well as growing and shrinking bodies of water.<br/>
+                <br/>To implement this we would keep track of how much water is on the ground vs absorbed or evaporated.  Then we could increase or decrease the threshold height for water appropriately then re-calculate and redraw the map.  Hotter temperatures would increase evaporation rate and rain would increase the amount of water on the ground.</p>
         </span>
     </article>
     <article>

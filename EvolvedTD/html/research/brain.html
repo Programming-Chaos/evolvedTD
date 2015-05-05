@@ -51,14 +51,22 @@
     </article>
     <article>
         <h2>Computational Model of Brain and Behavior</h2>
-        <h4>Section 1 Needs name</h4>
+        <h4>Implementation</h4>
         <span>
-            <p>Information about section 1 goes here</p>
+            <img src="images/Basic_Network.jpg" align="right" style="width:11.5em"/>
+            <p>The brain is a separate class that is a component of the creature. behavior will be a function of the creature. When behavior is called it will access the senses and brain objects to produce the creature's actions. The brain is a single layer artificial neural network and is represented by a 2D array of integers known as weights.<br/>
+                <br/>Weights indicate the strength of connections between neurons and (in our model) is the variation from one brain to the next. For each creature of each wave, the brain object will get genes from the genome.  These genes will determine the value of weights.<br/>
+                <br/><img src="images/Perceptron_with_Weights.jpg" align="right" style="width:15.5em; margin-top:0.5em"/>For each time unit of each wave, behavior is calculated for each creature using basic vector and matrix multiplication. The input vector will be provided by sensory systems, the matrix is the brain, and the output is another vector which represents actions the creature can perform.</p>
         </span>
         
-        <h4>Section 2 Needs name</h4>
+        <h4>Actions</h4>
         <span>
-            <p>Information about section 2 goes here</p>
+            <li><b>torque:</b> positive for negative change in angle</li>
+            <li><b>force:</b> negative for backward, zero for stand still, positive for forward</li>
+            <li><b>consume food:</b> positive to activate</li>
+            <li><b>spawn gametes:</b> positive to activate</li>
+            <li><b>encode meep:</b> positive to activate (current assumption: broadcasting is automatic after encoding)</li>
+            <li><b>decode meep:</b> positive to activate</li>
         </span>
     </article>
     <article>

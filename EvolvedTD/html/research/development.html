@@ -46,17 +46,18 @@ Phenotypic plasticity is the ability of an organism to produce multiple phenotyp
         <h2>Computational Model of Development and Morphology</h2>
         <h4>Creature Age</h4>
         <span>
-            <p>Information goes here</p>
+            <p>The age of the creature is tracked through a timestep counter.  The timestep counter increases with each timestep, which in simpler terms is every time a screen update is made.  This value is used in calculating creature color, fitness and health regeneration.</p>
         </span>
         
         <h4>Health Regeneration</h4>
         <span>
-            <p>Information goes here</p>
+            <p>When a creature picks up food it gains energy from the food.  Some of this energy gets designated to health regen to be used when the creature takes damage.  The creature gradually transforms energy to health over time until it runs out of energy for regeneration.<br/>
+                <br/>To do this, each timestep we first check if the creature has enough regeneration energy stored up and if its current health is less than its maximum health.  If these checks pass then we increase the creature health by the regen value and decrease the energy available by the cost to regen health.</p>
         </span>
         
         <h4>Coloration</h4>
         <span>
-            <p>Information goes here</p>
+            <p>Based on a number of inputs such as fitness, health, energy, etc. the creatures color will change.  To do this we use a network that recieves all the various affecting factors as inputs and calculates a RGB value for each section of the creature.  With this, creatures could evolve to blend in with their environment.</p>
         </span>
     </article>
     <article>
