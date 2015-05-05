@@ -6,7 +6,7 @@ import java.util.Comparator;
 
 class population {
   ArrayList<creature> swarm;
-  static final int POP_SIZE = 35;
+  static final int POP_SIZE = 10;
 
   float baseGameteChance = 0.4; // Base gamete success rate
   int baseGameteRadius = 6; // Base gamete mating range
