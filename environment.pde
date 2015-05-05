@@ -932,7 +932,8 @@ class environment {
   
   // decides on the world type by choosing random number between 1 and 4
   int decideWorldType() {
-    int decision = int(random(1, 4.999999));
+    //    int decision = int(random(1, 4.999999));
+    int decision = 4; // force snowy world
     int altShift = 0;
     int r = 0, b = 0, g = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;

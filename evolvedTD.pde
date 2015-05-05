@@ -36,8 +36,8 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
-boolean mistermoneybagsmode = false;
-boolean invinciblestructures = false;
+boolean mistermoneybagsmode = true;
+boolean invinciblestructures = true;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object

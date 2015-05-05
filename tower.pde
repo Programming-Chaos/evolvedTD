@@ -137,7 +137,7 @@ class tower {
     xpos = round(mouse_x);
     ypos = round(mouse_y);
 
-    baseMaxShield = 50;
+    baseMaxShield = 500000;
     baseShieldRegen = 1;
     button4text = "Shield Strength";
     button5text = "Shield Regen";
@@ -149,7 +149,7 @@ class tower {
     switch (type) {
       case 'r': // railgun
         parent.moneyinvested += the_player.rcost;
-        baseDamage = 20;
+        baseDamage = 80;
         baseFirerate = 25;
         baseProjectileSpeed = 100;
         gunbase = loadImage("assets/Turret-Railgun/Turbase03256.png");
