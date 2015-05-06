@@ -41,7 +41,7 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  float baseMaxMovementForce = 4000; //maximum speed without factoring in width and appendages
+  float baseMaxMovementForce = 8000; //maximum speed without factoring in width and appendages
   float maxMovementForce;
   float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
@@ -320,7 +320,14 @@ class creature {
 
   // construct a new creature with the given genome, energy and position
   creature(Genome g, float e, Vec2 pos) {
-    angle = random(0, 2 * PI); // start at a random angle
+    //angle = random(0, 2 * PI); // start at a random angle
+    // point each creature at the center
+    angle = atan2(pos.x,pos.y);
+    // push them away from the center
+    if(mag(pos.x,pos.y) < worldWidth*0.2){
+      pos = new Vec2(random(0.2,0.5) * worldWidth * sin(angle),
+                 random(0.2,0.5) * worldWidth * cos(angle));
+    }
     genome = g;
     construct(e, pos);
   }
@@ -526,10 +533,14 @@ class creature {
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
     a = a*(1 + (int)outputs[3]);
+    r = (int)(255*1.0/(1.0 + pow(2.7, (-1*(r-155)/10))));
+    g = (int)(255*1.0/(1.0 + pow(2.7, (-1*(g-155)/10))));
+    b = (int)(255*1.0/(1.0 + pow(2.7, (-1*(b-155)/10))));
+    
 
     /*I turned off alpha value here so I could not draw segmentations on creatures
     The creatures weren't easily visible with a low alpha*/
-    return color(r, g, b, 255);
+    return color(r, g, b, a);
   }
 
   // Calculate and return the width of the creature
@@ -799,7 +810,7 @@ class creature {
       if (energy_locomotion > 0) { // If there's energy left apply force
         body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
         energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
-        energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
+        energy_locomotion = (energy_locomotion - abs((float)(torque * 0.005)));
   
         // data collection
         locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
@@ -889,6 +900,7 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
+    
     //float sw = 1;
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
@@ -909,7 +921,7 @@ class creature {
     pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    
+    drawLegs();
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
@@ -920,8 +932,8 @@ class creature {
 
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
-      //strokeWeight(.1);
-     // noStroke();
+      strokeWeight(0.8);
+      //noStroke();
       Vec2 v;
       for (int i = 0; i < 3; i++) {
         v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
@@ -936,6 +948,7 @@ class creature {
     // Add some eyespots
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
+
 
     popMatrix();
     
@@ -964,13 +977,14 @@ class creature {
     //stroke(0);
     // get the largest dimension of the creature
     int offset = (int)max(getWidth(), getLength());
-    rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it
+    strokeWeight(0.5);
+    rect(0, -1 * offset, 0.5 * maxHealth, 5); // draw the health bar that much above it
     fill(0, 0, 255);
-    rect(0, -1 * offset, 0.1 * health, 3);
+    rect(0, -1 * offset, 0.5 * health, 5);
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
-    
+    /*
     pushMatrix(); // Draws a "energy" bar above the creature
     translate(pos.x, pos.y);
     noFill();
@@ -984,7 +998,24 @@ class creature {
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
+    */
   }
+  
+  void drawLegs(){
+    stroke(0);
+    float lengthScale = 1.2 ;
+    float widthScale = 0.8 ;
+    noFill();
+    strokeWeight(1);
+    bezier(widthScale*getWidth(),lengthScale*getLength(), widthScale*getWidth(),-1*lengthScale*getLength(), -1*widthScale*getWidth(),1*lengthScale*getLength(), -1*widthScale*getWidth(), -1*lengthScale*getLength());
+    bezier(-1*widthScale*getWidth(),lengthScale*getLength(), -1*widthScale*getWidth(),-1*lengthScale*getLength(), 1*widthScale*getWidth(),1*lengthScale*getLength(), 1*widthScale*getWidth(), -1*lengthScale*getLength());
+    lengthScale = 1.4 ;
+    widthScale = 0.5 ;
+    bezier(widthScale*getWidth(),lengthScale*getLength(), widthScale*getWidth(),-1*lengthScale*getLength(), -1*widthScale*getWidth(),1*lengthScale*getLength(), -1*widthScale*getWidth(), -1*lengthScale*getLength());
+    bezier(-1*widthScale*getWidth(),lengthScale*getLength(), -1*widthScale*getWidth(),-1*lengthScale*getLength(), 1*widthScale*getWidth(),1*lengthScale*getLength(), 1*widthScale*getWidth(), -1*lengthScale*getLength());
+   
+  }
+
 
   // This function makes a Box2D body for the creature and adds it to the box2d world
   void makeBody(Vec2 center) {
@@ -992,7 +1023,7 @@ class creature {
     BodyDef bd = new BodyDef();  // Define a new Box2D body object
     bd.type = BodyType.DYNAMIC;  // Make the body dynamic (Box2d bodies can also be static: unmoving)
     bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
-    bd.linearDamping = 0.999;  // Give it some friction, could be evolved
+    bd.linearDamping = 0.99999;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
     body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
 
@@ -1067,5 +1098,7 @@ class creature {
         body.createFixture(fd);  // Create the actual fixture, which adds it to the body
       }
     }
+    // give some initial force to start them moving
+    body.applyLinearImpulse(new Vec2(3000 * cos(angle - (PI*1.5)), 3000 * sin(angle - (PI*1.5))), body.getWorldCenter(), true);
   }
 }

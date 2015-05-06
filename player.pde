@@ -30,7 +30,7 @@ class player {
   int lcost = 2000;
   int gcost = 4000;
   int bcost = 150;
-  int money = 100;
+  int money = 500;
   int currentcost = 0;
   int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active

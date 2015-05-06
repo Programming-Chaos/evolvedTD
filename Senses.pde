@@ -110,20 +110,32 @@ class Sensory_Systems {
       compress = ((int)((num_feelers)*(c.energy_locomotion / c.max_energy_locomotion)))+3;
     }
     
-    fill(color_of_eyes);
-    
-    ellipse(eye.x, eye.y, num_feelers+5, compress);
-    ellipse(-1 * eye.x, eye.y, num_feelers+5, compress);
-    
-    fill(255);
+    //fill(color_of_eyes);
+   // ellipse(eye.x, eye.y, num_feelers+5, compress);
+   // ellipse(-1 * eye.x, eye.y, num_feelers+5, compress); 
+    //fill(255);
+    fill(0);
+    ellipse(eye.x, eye.y, 5*num_feelers+5, 5*num_feelers+5);
+    ellipse(-1 * eye.x, eye.y, 5*num_feelers+5, 5*num_feelers+5); 
+
  
+ // draw pupil
+    int pupilsize = 6;
+    int yoffset = -5;
+    stroke(0);
+        fill(255);
     if (compress < 3) {
-      ellipse(eye.x, eye.y - 1, 2, 2);
-      ellipse(-1 * eye.x, eye.y - 1, 2, 2);
+      ellipse(eye.x, eye.y +yoffset, pupilsize,pupilsize);
+      ellipse(-1 * eye.x, eye.y +yoffset, pupilsize,pupilsize);
     } else {
-      ellipse(eye.x, eye.y - 1, 2, 2);
-      ellipse(-1 * eye.x, eye.y - 1, 2, 2);  
+      ellipse(eye.x, eye.y +yoffset, pupilsize,pupilsize);
+      ellipse(-1 * eye.x, eye.y +yoffset, pupilsize,pupilsize);  
     }
+    
+    strokeWeight(2);
+    line(-1, eye.y, 1.5*eye.x , eye.y + (5*num_feelers+5));
+    line(1, eye.y, -1.5*eye.x , eye.y + (5*num_feelers+5));
+    
   }
  /*Sets taste once creature comes in contact with food*/
 
