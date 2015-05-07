@@ -1,3 +1,4 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
 
 /* This is a simple class included mostly as an example of how to create box2d objects.
    It could be expanded or copied to create other box2d objects to put in the environment:

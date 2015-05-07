@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 class color_network{
   static final int input_size = 9;
   static final int output_size = 4;

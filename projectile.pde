@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 class projectile {
   Body the_projectile;
   int radius;

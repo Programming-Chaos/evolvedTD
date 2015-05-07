@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 class farm {
   int ID;
   int energy;           // gained from bioreactors, used to drill

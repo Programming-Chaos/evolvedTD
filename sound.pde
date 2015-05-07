@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 // this is where sound goes
 
 // object for storing soundfile name and length

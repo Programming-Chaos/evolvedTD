@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 /*  Public Utilities class to put some useful functions 
  *
  */
