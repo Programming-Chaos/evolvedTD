@@ -24,6 +24,7 @@ class player {
   Panel helpPanel;
   Panel towerstatsPanel;
   Panel farmstatsPanel;
+  Panel menuPanel;
   int rcost = 300;
   int pcost = 600;
   int icost = 1000;
@@ -157,6 +158,9 @@ class player {
 
     hudPanel = new Panel(1250,100,-625,-1200,false,100);
     hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
+
+    menuPanel = new Panel(1250,100,-625,-1200,false,100);
+    menuPanel.createButton(300,100,0,100,"Start Game",30,0,0,0,new ButtonPress() { public void pressed() {cameraX = 0; cameraY = 0; cameraZ = zoomOffset; menuPanel.enabled = false; state = State.RUNNING;} });
 
     //pricePanel = new Panel(100,40,0,0,false,150);
     //pricePanel.createTextBox

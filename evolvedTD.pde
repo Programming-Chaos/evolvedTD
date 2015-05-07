@@ -53,6 +53,8 @@ environment environ;           // the environment object
 Minim minim;
 Movie introVideo;
 
+PImage menubg;
+
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
 // transformed location of mouse
@@ -90,10 +92,12 @@ void setup() {
   panels = new ArrayList<Panel>();
   animations = new ArrayList<Animation>();
   the_player = new player();
+  
+  menubg = loadImage("assets/IntroVideo/Teeth with background.png");
 
   minim = new Minim(this);
-//  introVideo = new Movie(this, "");
-//  introVideo.play();
+  //introVideo = new Movie(this, "assets/IntroVideo/Intro-NoMenu.mp4");
+  //introVideo.play();
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -137,6 +141,14 @@ void draw() {
   //If you zoom in on the top left and move the mouse to the lower right the coordinates will be very negative
   
   //image(introVideo, 0, 0);
+  
+  if (state == State.MENU){
+   //image(menubg, 0, 0);
+   //menubg.resize(800, 800);
+   the_player.update();
+   panels.get(9).display();
+   the_player.display();
+  }
   
   if (state != State.MENU){
     doDraw();
@@ -345,6 +357,10 @@ void keyPressed() { // if a key is pressed this function is called
     }// end of else (is not coded)
   } // end of if state != menu
   else{
+   //introVideo.stop();
+   cameraX = 0;
+   cameraY = 0;
+   cameraZ = zoomOffset;
    state = State.RUNNING; 
   }
 }
