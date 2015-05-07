@@ -61,7 +61,7 @@ class creature {
   // encodes the creature's genetic information
   Genome genome;
   Brain brain;
-  float current_actions[];
+//  float brain.outputs[];
 
   // metabolism
   float energy_reproduction;     // energy for gamete produciton
@@ -351,8 +351,7 @@ class creature {
     wiggletimer = 0;
     hit_indicator = 0;
 
-    current_actions = new float[brain.OUTPUTS];
-
+    
     // used for data collection
     sPos = pos.clone();
     total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
@@ -678,12 +677,25 @@ class creature {
   }
 
   void calcBehavior(){
-    for(int i = 0; i<brain.OUTPUTS; i++){
-      current_actions[i] = 0;
-      for(int j = 0; j<brain.INPUTS; j++){
-        current_actions[i] += (senses.brain_array[j]*brain.weights[i][j]);
+    brain.calc_inputs(senses.brain_array[0], senses.brain_array[1]);
+    for(int i = 0; i < brain.OUTPUTS; i++) {
+      if(brain.activate(i) == true) {
+        brain.outputs[i] = brain.get_output(i);    // apply some function to the input value and 
+                                        // place the result in output vector
+      }else{
+        brain.outputs[i] = 0;
       }
-    }
+   }
+  
+    /* calc_inputs();
+    
+    
+    /*for(int i = 0; i<brain.OUTPUTS; i++){
+      brain.outputs[i] = 0;
+      for(int j = 0; j<brain.INPUTS; j++){
+        brain.outputs[i] += (senses.brain_array[j]*brain.weights[i][j]);
+      }
+   }*/
   }
 
   // The update function is called every timestep
@@ -708,7 +720,7 @@ class creature {
     munching = munchnext;
     if (munching != null) {
       if (munchtimer == 50) {
-        if(current_actions[2] > 0.0) { // if the creature is hungry
+        if(brain.outputs[2] > 0.0) { // if the creature is hungry
           if (!invinciblestructures) {
             if (munching.type == 'b') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
@@ -760,15 +772,15 @@ class creature {
       //if (!body.isActive())body.setActive(true);
       //if (body.getType() == BodyType.STATIC)body.setType(BodyType.DYNAMIC);
 
-      torque = current_actions[0];
+      torque = brain.outputs[0];
 
-      //torque = current_actions[0]*baseMaxTorque;
+      //torque = outputs[0]*baseMaxTorque;
 
       // force is a percentage of max movement speed from 10% to 100%
-      // depending on the output of the neural network in current_actions[1], the movement force may be backwards
+      // depending on the output of the neural network in outputs[1], the movement force may be backwards
       // as of now the creatures never completely stop moving
 
-      f = (maxMovementForce * Utilities.MovementForceSigmoid(current_actions[1]));
+      f = (maxMovementForce * Utilities.MovementForceSigmoid(brain.outputs[1]));
 
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)

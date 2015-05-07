@@ -28,7 +28,7 @@ Trait gameteTime = new Trait(10);
 Trait gameteChance = new Trait(10);
 Trait gameteEnergy = new Trait(10);
 
-ArrayList<Trait> brainTraits = new ArrayList<Trait>(Brain.WEIGHTS);
+ArrayList<Trait> brainTraits = new ArrayList<Trait>(Brain.OUTPUTS);
 
 // Speciation
 Trait compatibility = new Trait(10);
@@ -157,7 +157,7 @@ class FeelerTrait {
     }
 
     // initialize the brain weights
-    for (int i = 0; i < Brain.WEIGHTS; i++) {
+    for (int i = 0; i < Brain.OUTPUTS; i++) {
       brainTraits.add(new Trait(10));
     }
 

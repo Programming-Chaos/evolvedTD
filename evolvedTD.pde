@@ -349,7 +349,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     food p2 = (food)o2;
-    if(p1.current_actions[2] > 0.0) {
+    if(p1.brain.outputs[2] == 0.0) {
       if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
@@ -363,7 +363,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o2;
     food p2 = (food)o1;
-    if(p1.current_actions[2] > 0.0) {
+    if(p1.brain.outputs[2] == 0.0) {
       if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
