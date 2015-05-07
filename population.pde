@@ -5,7 +5,7 @@ import java.util.Collections;
 
 class population {
   ArrayList<creature> swarm;
-  static final int POP_SIZE = 35;
+  static final int POP_SIZE = 50;
 
   float baseGameteChance = 0.4; // Base gamete success rate
   int baseGameteRadius = 6; // Base gamete mating range
@@ -85,6 +85,52 @@ class population {
              minAlpha = temp;
              ret = c.getPos();
           }  
+        }
+      }
+    }
+    return ret;
+  }
+  
+    Vec2 highestWidth() {
+    Vec2 ret = new Vec2(0,0);
+    float temp, maxWidth = 0;
+    boolean first = true;
+    for (creature c: swarm) {
+      if (c.alive) {
+        if (first) {
+          maxWidth = c.getWidth();
+          ret = c.getPos();
+          first = false;
+        }
+        else {
+          temp = c.getWidth();
+          if (temp > maxWidth) {
+            maxWidth = temp;
+            ret = c.getPos();
+          }
+        }
+      }
+    }
+    return ret;
+  }
+  
+    Vec2 lowestWidth() {
+    Vec2 ret = new Vec2(0,0);
+    float temp, minWidth = 0;
+    boolean first = true;
+    for (creature c: swarm) {
+      if (c.alive) {
+        if (first) {
+          minWidth = c.getWidth();
+          ret = c.getPos();
+          first = false;
+        }
+        else {
+          temp = c.getWidth();
+          if (temp < minWidth) {
+            minWidth = temp;
+            ret = c.getPos();
+          }
         }
       }
     }
@@ -228,9 +274,17 @@ class population {
 
           pos.x *= cellWidth;
           pos.y *= cellHeight;
-
-          generation.add(new creature(new Genome(g1.getGamete(), g2.getGamete()),
-                                      10000 + g1.energy + g2.energy, pos));
+          creature c = new creature(new Genome(g1.getGamete(), g2.getGamete()),
+                                      10000 + g1.energy + g2.energy, pos);
+          c.parents[0] = g1.parent.num;
+          c.parents[1] = g2.parent.num;
+          
+          c.grandparents[0] = g1.parent.parents[0];
+          c.grandparents[1] = g1.parent.parents[1];
+          c.grandparents[2] = g2.parent.parents[0];
+          c.grandparents[3] = g2.parent.parents[1]; 
+          
+          generation.add(c);
         }
       }
       swarm = generation;

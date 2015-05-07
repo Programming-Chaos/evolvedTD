@@ -39,6 +39,7 @@ boolean autofire = true;
 boolean mistermoneybagsmode = false;
 boolean invinciblestructures = false;
 
+environment environ;           // the environment object
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
@@ -48,7 +49,6 @@ ArrayList<Panel> panels;
 ArrayList<Animation> animations;
 
 Box2DProcessing box2d;         // the box2d world object
-environment environ;           // the environment object
 
 Minim minim;
 
@@ -110,13 +110,16 @@ void setup() {
   rectMode(CENTER);              // drawing mode fore rectangles,
   
   environ = new environment();   // must occur after creatures, etc. created
+
   lasttime = 0;
   generation = 0;
   
   // Run unit tests
   Genome testGenome = new Genome();
+
   testGenome.testChromosome();
-  testGenome.testMutation();
+  //testGenome.testMutation();
+
 
   // Initialize data tables
   initTables();
@@ -125,11 +128,7 @@ void setup() {
 }
 
 void draw() {
-
-  
   if (mistermoneybagsmode) the_player.money = 1000000000;
-  // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
-  lasttime = millis();
   mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
   mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
   //these variables represent where the mouse is on the surface of the planet
@@ -186,6 +185,7 @@ void draw() {
   if (display) {
     the_player.display(); // display the interface for the player
   }
+  else panels.get(8).display();
 
   if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures
@@ -319,6 +319,8 @@ void keyPressed() { // if a key is pressed this function is called
     case '4':
     case '5':
     case '6':
+    case '7':
+    case '8':
       the_player.targetMode = (key-'2');
       break;
     default:
@@ -635,6 +637,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
       if (!upgrading) {
         // find a creature
         the_player.selectedCreature = null;
+        follow_selected= true;
         for (creature c : the_pop.swarm) {
           Vec2 location = c.getPos();
           float crad = (c.getWidth()/2);
@@ -651,6 +654,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
       
       if (the_player.selectedCreature == null) {
         // find a structure
+        selected_creature = "No Creature Selected";
         boolean structureclick = false;
         for (structure s : the_player.structures) {
           if (s.type == 'b') {
@@ -671,6 +675,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
             }
           }
           else {
+            selected_creature = "Creature Selected";
             if (sqrt(((mouse_x-s.t.xpos)*(mouse_x-s.t.xpos))+((mouse_y-s.t.ypos)*(mouse_y-s.t.ypos))) < s.t.radius) {
               structureclick = true;
               if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure

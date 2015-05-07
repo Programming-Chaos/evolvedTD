@@ -1,6 +1,11 @@
 // standard deviation of mutation added to each gene in meiosis
 static float MUTATION_DEVIATION = 0.03;
-static float MUTATION_RATE = 0.2;
+
+//static float MUTATION_RATE = 0.2;
+float mutationRate;  // I have changed the mutation rate for the bugs
+                     // It is now based off of the biome's radiation variable
+//float MUTATION_RATE = environ.radiation;
+
 // standard deviation of initial gene values
 static float INITIAL_DEVIATION = 0.03;
 // multiplier for number of genes given to each trait
@@ -192,8 +197,10 @@ class Genome {
 
   // assembles two chromosomes
   Genome(Chromosome x, Chromosome y) {
+    
     xChromosome = x;
     yChromosome = y;
+     
   }
 
   // Returns a list of genes from the X chromosome
@@ -236,13 +243,13 @@ class Genome {
   //. between each creature uniqie id between .
   void inheritance(int num) {
     if (xChromosome.inherit != "") {
-      xChromosome.inherit += "." + str(num);
+      xChromosome.inherit += " " + str(num);
     } else {
       xChromosome.inherit = str(num);
     }
 
     if (yChromosome.inherit != "") {
-      yChromosome.inherit += "." + str(num);
+      yChromosome.inherit += " " + str(num);
     } else {
       yChromosome.inherit = str(num);
     }
@@ -292,8 +299,8 @@ class Genome {
   }
 
   void testMutation() {
-    if (MUTATION_RATE != 0.2)
-      testFailed("mutation rate is no longer 5 percent");
+    //if (MUTATION_RATE != 0.2)
+    //  testFailed("mutation rate is no longer 5 percent");
   }
 
   void testChromosome() {
@@ -327,7 +334,12 @@ class Genome {
 class Chromosome {
   FloatList genes;
   String inherit = "";
-
+  
+  /*Though this would be collected in inheritance - I don't want to split the string
+  to draw every single time - since it would add to much overhead */
+  
+  
+  
   Chromosome(int n) {
     genes = new FloatList(n);
     for (int i = 0; i < n; i++) {
@@ -355,7 +367,9 @@ class Chromosome {
   void mutate() {
     for (int i = 0; i < genes.size(); i++) {
       // mutate only a select number of random genes
-      if (random(1) < MUTATION_RATE) {
+      mutationRate = environ.radiation;
+      //if (random(1) < MUTATION_RATE) {
+      if (random(1) < mutationRate) { 
         genes.add(i, randomGaussian() * MUTATION_DEVIATION);
       }
     }
