@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Research: Metabolism</title>
+</head>
+    
+<body>
+    <article>
+        <h2>Overview of Metabolism</h2>
+        <span>
+            <p>All organisms use energy.  This energy is usually gained by consuming complex molecules (food, in our case) and digesting them.  The process of converting these complex molecules into energy, and using this energy to perform basic functions, is called metabolism.  The word Metabolism is derived from a greek root that means change.  Metabolism[http://en.wikipedia.org/wiki/Metabolism] describes the chemical changes that sustain the functions in organisms and cells. <br/>
+                <br/>Imagine, for example, that you just finished a meal.  Your body needs to convert the food you ate into a useable form of energy that can power its various functions.  This conversion process is the first part of your metabolism.  The food you consumed is essentially a bunch of complex molecules that can be simply categorized into carbohydrates, fat, and proteins.  Let's assume your meal was full of carbohydrates (something like pancakes would be a good example).  These molecules are essentially a series of sugar molecules connected together.  Your body can't convert these large molecules directly to energy - you first have to break them up into smaller parts (called simple sugars) that your metabolic enzymes can work with.  This process is called digestion. <br/>
+                <br/>Once you have digested the complex carbohydrates into simple sugars, these sugars can be metabolized - converted into other chemical forms.  Some of these chemical structures are waste, but others are used as easily accessible energy.  This energy is then either stored or used by your body to power its functions or build other molecules.  Thus, those pancakes you ate would be converted into chemical energy, some of which could be stored in your muscles to power your afternoon workout, some of which could be used to fuel the basic functions of your cells (replicating, making proteins, etc), and some of which could be reserved for later.  This process isn't perfect - some of the chemical energy stored in those pancakes is lost as heat. <br/>
+            <br/>We usually separate metabolism into two components: Catabolism, in which nutrients are converted into chemical energy, and Anabolism, in which the cell uses energy to build complex molecules and structures.  In our example above, catabolism is the process used to convert the complex carbohydrates in those pancakes into a form of chemical energy your body can use.  Anabolism is the process that uses the chemical energy to perform functions and build more complex molecules.</p>
+        </span>
+            
+        <h4>Catabolism</h4>
+        <span>
+            <p><img src="images/Catabolism.jpg" align="right" style="width:18.5em"/>Catabolism is the process of converting organic molecules, such as nutrients, into energy.  This is usually done by breaking larger molecules into smaller component parts, and releasing energy.  In cells, this energy is usually stored as chemical energy in the form of ATP, which is used to power anabolic building processes of the cell.  Catabolism also creates heat, and waste products that must be scavenged, processed, and discarded.  </p>
+        </span>
+        
+        <h4>Anabolism</h4>
+        <span>
+            <p>Anabolism is the process of building cellular structures by building complex molecules such as proteins and carbohydrates.  Anabolism requires energy, usually in the form of this chemical energy is usually in the form of ATP.  Anabolic processes include growth and development.  </p>
+        </span>
+        
+        <h4>Metabolic Networks and Pathways</h4>
+        <span>
+            <p>The chemical changes that occur during metabolism are catalyzed by enzymes. These enzymes, their substrates, and their products interact together in a metabolic pathway. Metabolic Pathways are networks, and can be extremely complex.  For example, here is a diagram of the metabolic pathway that converts glucose into energy: <img src="images/Glycolysis.png" style="width:38em"/>
+<br/><br/>Each of the names in yellow italic text represent enzymes - proteins that catalyze chemical reactions. These enzymes work to gather in a metabolic pathway to perform a function in a cell - in this case breaking down glucose. These enzymes are encoded by genes in the genome, and the efficiency with which they perform their function can evolve through mutation and natural selection.</p>
+        </span>
+    </article>
+    <article>
+        <h2>Biological Model of Metabolism</h2>
+        <h4>Overview</h4>
+        <span>
+            <p>Imagine a member of the Protean Swarm.  In the game, this organism must reproduce.  In order to do this, it must build gametes.  Nothing in biology is free, which means the gametes cost energy to build.  Thus, in order to achieve its purpose, the organism requires energy.  It usually gathers this energy by consuming food (in this case in the form of our very important bioreactor).  The thing is, the organism must move around the environment to find and consume the food, and this movement requires energy.  While it is searching for food, it might be taking damage from the player as well - damage it might want to repair using some of its energy stores.  Once it has enough energy, it can also use some or all of its energy to reproduce by creating gametes.  Thus, a diagram of our biological model of metabolism might look like this:
+<br/><br/><img src="images/Basicmodel.jpg" style="width:30em"/><br/>
+            <br/>The round orange object to the left represents a generic piece of our bioreactor.  The chemical energy available in this object is 20,000 joules (or 20kJ).  When our member of the Protean Swarm eats the resource, it must catabolize it into a useable form of energy.  The organism must then partition this energy.  In EvolveTD, we assume that there are three types of stores - Reproduction, Locomotion, and Repair.  These stores are represented by the reddish rectangles in the diagram.  The sum of the capacities of the three energy stores scales with body size, but the relative sizes of the energy stores can evolve.  The coefficients in red (dR, dL, dH) represent the diversion rate of the 20kJ into these three stores. Anabolic processes occur when energy is extracted from these stores and used to perform a function (e.g. create a gamete, apply a force to move, or replenish health). </p>
+        </span>
+    </article>
+    <article>
+        <h2>Simplifying Assumptions</h2>
+        <span>
+            <p>The biological model of metabolism in EvolveTD is very simple, and does not account for many key variables that are present in real biological systems.  Some of our simplifying assumptions include:<br/><br/></p>    
+            <li class="list">Closed system with no wasted energy. We know that metabolism loses energy via heat. </li>
+            <li class="list">No metabolites or waste products.  We know that metabolism produces waste molecules, which are excreted. </li>
+            <li class="list">Only one type of nutrient.  We know that nutrients are generally comprised of different macromolecules (polysaccharides, proteins, fats) that require different catabolic pathways to break them down. </li>
+            <li class="list">Separate stores for Reproduction, Locomotion, and Health.  We abstract energy storage into three different "containers" - a somewhat unrealistic model. </li>
+            <li class="list">Anabolic processes are abstracted as simple energy costs.  Anabolic (constructive) processes are complex and could be modeled with their own networks.</li>
+        </span>
+    </article>
+    <article>
+        <h2>Computational Model of Metabolism</h2>
+        <h4>Energy Stores</h4>
+        <span>
+            <p>Currently in EvolveTD, a simple model of three energy stores is used for metabolism.  These energy stores hold energy that's designated for locomotion, reproduction and health regeneration.  Creatures start their lives with a certain amount of energy in the locomotion store.  If the creature depleets all their locomotion energy then they can no longer move and begin to starve to death.  Similarly, a creature needs a certain amount of energy in their reproduction and health regeneration stores in order to produce gametes or regen health respectively.  In order for a creature to regain energy in its stores it must first consume food.<br/>
+                <br/>When a creature captures food it needs to decide how it's going to split the energy provided by the food among its energy stores.  More energy in locomotion means that the creature can move further, but energy in health would help it repair damage if it was injured by the tower, and energy in reproduction is necessary for it to create offspring. Thus, deciding how to divide up the energy is a critical task.</p>
+        </span>
+        
+        <h4>Energy Dispersion</h4>
+        <span>
+            <p>The decision of how to divide the energy is handled by a metabolic network.  This network looks at how full each energy store is and how old the creature is.  From this it decides how much energy to place into each store.  The network is a "perceptron" network, which means that each output is determined by a weighted sum of the inputs.</p>
+        </span>
+    </article>
+    <article>
+        <h2>Learn More</h2>
+        <h4>EvolveTD Wiki</h4>
+        <span>
+            <p>For more detailed information about metabolism in EvolveTD please read our public wiki on <a href="http://course.cs.uidaho.edu/wiki404/index.php/Metabolism">Metabolism</a>.</p>
+        </span>
+        <h4>Resources</h4>
+        <span>
+            <li><a href="http://en.wikipedia.org/wiki/Biochemistry">Biochemistry</a></li>
+        </span>
+    </article>
+</body>
+</html>

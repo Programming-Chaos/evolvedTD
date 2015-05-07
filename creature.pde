@@ -901,6 +901,10 @@ class creature {
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
     }
     
+    PGraphics pg;
+    pg = createGraphics(100, 100);
+    
+    pg.beginDraw();
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);

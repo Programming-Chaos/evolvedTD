@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Research: Climate</title>
+</head>
+    
+<body>
+    <article>
+        <h2>Overview of Climate</h2>
+        <span>
+            <p>Wherever you're sitting at this moment, you're experiencing a specific climate and microclimate.  While many components of the environment surrounding you are tangible, such as aspects of the terrain, there are many other parts of the environment that are less tangible but still very important.  For instance, you probably can't see the temperature, humidity, or atmospheric pressure of the area that you live in, but these factors all have an impact on how you live your life and how the ecosystem around you functions.  The long-term patterns of these factors, in addition to weather conditions, contribute to an area's climate. <br/>
+            <br/>Climate has a very high impact on the evolution of all organisms because most creatures evolve to only survive in a particular habitat, and it takes most species thousands, or even millions of years to adapt to a new climate.  During this time, organisms evolve mechanisms, such as sweating to cool themselves, and behaviors such as sleeping during the day to avoid heat, that allow them to deal with the climate that surrounds them.
+</p>
+        </span>
+    </article>
+    <article>
+        <h2>Biological Model of Climate</h2>
+        <h4>Thermal Environment</h4>
+        <span>
+            <p>One of the components of the environment that every organism has to adapt to is the thermal environment.  Whether an organism lives in a hot tropical ecosystem or a cold arctic ecosystem, it will have to find ways to adapt to its thermal environment in order to survive and thrive. Generally, organisms adapt to their thermal environment by: 1) developing behaviors that allow them to avoid losing or gaining too much heat from their environment, and/or 2) undergoing evolution until their bodies can handle gaining or losing heat, or deal with the heat loss or gain with physiological mechanisms such as shivering. We can see that humans have adapted in both of these ways: </p><br/>
+            <li class="list">Humans seek shade to avoid heat and put on extra clothing to keep from becoming too cold.</li>
+            <li class="list">Humans sweat to get rid of extra heat and shiver to generate more heat when they are cold.</li><br/>
+<p>Although it is common to only think of air temperature when we think of our thermal environment, there are actually several components of the thermal environment.  Currently, the thermal environment in EvolveTD is very simple and we only control temperature, but the most significant of these components are:</p><br/>
+            <img src="images/Rhino_heat_exchange.jpg" style="width:18.5em; margin-top:0.7em;" align="right"/>
+            <li class="list"><b>Solar radiation:</b> the shortwave radiation that comes from the sun.  This radiation is what makes you feel hot when you're standing outside on a sunny day.</li>
+            <li class="list"><b>Infra-red radiation:</b> this radiation comes off of everything surrounding you, including air particles, the Earth's surface, and other organisms.  This type of radiation contains less heat than solar radiation.</li>
+            <li class="list"><b>Air temperature:</b> the temperature of the air surrounding you.</li>
+            <li class="list"><b>Wind:</b> when the air surrounding you is still, it becomes the same temperature as your body through heat exchange.  When it is windy, the air surrounding you gets blown away as soon as it starts getting close to your body temperature, and new air replaces it.  This is why you get cold faster on a windy day. This phenomenon is also known as convection. </li>
+        </span>
+        
+        <h4>Weather Events</h4>
+        <span>
+            <p>Another important component of the climate is the environment's weather patterns.  Every environment has a lot of factors affecting it including elevation, temperature, precipitation type and amount, wind speed, solar radiation, atmospheric composition, and terrain type, meaning a lot of unpredictable types of weather phenomena can occur.  Some of these include:</p><br/>
+            <li class="list">Thunder and lightning storms</li>
+            <li class="list">Windstorms</li>
+            <li class="list">Blizzards</li>
+            <li class="list">Floods</li>
+            <li class="list">Tornadoes</li>
+            <li class="list">Rain</li>
+            <li class="list">Hail storms</li><br/>
+            <p>Because these severe weather events act as disturbances, they impact the environment in which they occur in various ways. For example, lightning contains a lot of energy and can start fires if it strikes something flammable.  Currently, we are implementing or have implemented windstorms, lightning and rain.  At this point, lightning has aesthetic effects, as well as can damage or kill creatures that it strikes, but it will be able to start fires in the future.  Windstorms will move food around, cause creatures to expend more energy for movement and temperature regulation, and possibly also affect weapons.</p>
+        </span>
+    </article>
+    <article>
+        <h2>Computational Model of Climate</h2>
+        <h4>Rain</h4>
+        <span>
+            <p>Rain in EvolveTD is displayed by drawing small blue lines to the screen and moving them down.  We also darken the screen by drawing a transparent blue square over the game map.<br/>
+                <br/>Creatures are affected by the rain when the rain effects the terrain.  In future updates to EvolveTD this could involve growing water masses and even the creation of streams.  Each game has a certain pool of rain available.  While the pool is full, the chance of rain is greatly increased.  As it rains, the pool empties and the chance of rain continueing lessens.  Similarly when the game is not raining, the rain pool regenerates to simulate evaporation.  Currently the only effect rain has is that it allows for the chance of lightning.</p>
+        </span>
+        
+        <h4>Lightning</h4>
+        <span>
+            <p>Lightning is drawn using a flash followed quickly by drawing spline curves.  Spline curves are a number of vertices connected by arcs and when implemented correctly can look like a jagged lightning bolt.<br/>
+                <br/>Lightning can only strike while it is raining.  It will randomly strike a single game tile, unleashing its devestating power.  If a creature occupies the same tile it will recieve a large amount of damage, possibly killing it.</p>
+        </span>
+        
+        <h4>Wind</h4>
+        <span>
+            <p>Wind consists of randomly generated force vectors.  A direction and magnitude will be randomly chosen and applied over a certain area.  In the future we could add to this to simulate storms of sorts.</p>
+        </span>
+        
+        <h4>Temperature</h4>
+        <span>
+            <p>Temperature is a randomly generated value within a threshold that depends on the climate and season of the game map.  Currently this has no effect on the creatures, but eventually could be used to slow them down or many other things.</p>
+        </span>
+    </article>
+    <article>
+        <h2>Learn More</h2>
+        <h4>EvolveTD Wiki</h4>
+        <span>
+            <p>For more detailed information about the climate in EvolveTD please read our public wiki on <a href="http://course.cs.uidaho.edu/wiki404/index.php/The_Environment">Climate</a>.</p>
+        </span>
+        <h4>Resources</h4>
+        <span>
+            <li><a href="http://ppg.sagepub.com/content/23/3/329.full.pdf">The Weather Generation Game: A Review of Stochastic Weather Models</a></li>
+            <li><a href="ftp://ftp.sfos.uaf.edu/msl692/1292.pdf">Ecological Effects of Climate Fluctuations</a><br/></li>
+            <li><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1038191/pdf/brjindmed00199-0001.pdf">The Assessment of the Thermal Environment</a></li>
+        </span>
+    </article>
+</body>
+</html>

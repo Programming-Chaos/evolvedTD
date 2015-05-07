@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Research: Brain</title>
+   
+</head>
+    
+<body>
+    <article>
+        <h2>Overview of Brain and Behavior</h2>
+        <span>
+            <p>When we think about an organism interacting with its environment or behaving a certain way, typically we think about organisms that have a brain. However, a brain is not required in order to sense and react to the environment. Every living thing, from a single celled organism all the way up to a giant tree has some means to respond to its environment. Plants can tell when they are being eaten by caterpillars, but not having a brain keeps them from doing much more than releasing chemicals to discourage the tiny diner. They can't figure out which leaf the caterpillar is munching on, and they can't wildly flail a branch in the hopes of shaking the caterpillar off. <br/>
+                <br/>Having a brain will usually allow an organism to react to its environment in interesting or sophisticated ways. Because the caterpillar has a brain, if the plant it has been happily feasting on releases nasty chemicals, the caterpillar can choose to eat somewhere else until the plant stops releasing those chemicals. Similarly, because the individual members of the Protean Swarm will each have a brain, as the game progresses and the Swarm population evolves, they will be exhibiting more complex behaviors than just eating and reproducing.</p>                
+        </span>
+    </article>
+    <article>
+        <h2>Biological Model of Brain and Behavior</h2>
+        <span>
+            <p>Your brain is made up of a bunch of cells called neurons. The outside "skin," or cell membrane, of these and other cells are made up of fat molecules. The three main parts of neurons are the cell body (<b>soma</b>), the information receiving end (<b>dendrite</b>), and the information transmission end (<b>axon</b>). At the end of the axon there is a structure called the <b>terminal button</b>. Within the terminal button there are a bunch of little bubbles made of the same fat molecules that make up the cell membrane. Each bubble, called a <b>vesicle</b>, can be thought of as a flexible, fluid-filled envelope containing different chemical messengers (<b>neurotransmitters</b>) that get released into the fantastically tiny space between two neurons (<b>synapse</b>), or into the next neuron itself. There are several different neurotransmitters, but they all either encourage a neuron to <b>fire</b>, or pass an electrical charge to other neurons (<b>excitatory</b>), or discourage the neuron from firing (<b>inhibitory</b>), thus keeping it from directly transmitting information.<br/>
+                <br/>This is how the individual parts of the brain talk to themselves and each other in order to determine what information it is receiving and how it relates together so it can figure out how to react to the sticky situation you've gotten yourself into. However, in order for your reaction to be appropriate to the circumstances, the brain has to have some way to take in information from the environment so it can decide what the appropriate reaction is. It does this through the organism's sensory systems, like smell, touch, taste, hearing, and vision. The brain listens to every part of the body it belongs to in order to figure out how to react without making you trip over a tree root or get caught in a rosebush. The brain also talks to every part of the body in order to give the body instructions about what changes need to be made in order to react.<br/>
+                <br/>Your eyes tell your brain what light they detect. Your sense of touch tells your brain when your body has bumped into something and what it feels like. Your ears tell your brain what sound frequencies are present, and help locate where the sound came from. If you lick something, your tongue will tell your brain what chemical compounds it has picked up. Your nose will tell your brain what chemical compounds are in the air, and how many of them are in a certain area. This all happens at once, and combines to create a distinct recognition of something from your environment such as a food item or another organism. <br/>
+                <br/><img src="images/Frontal_lobe_comparisons.jpg" align="right" style="width:11.9em; padding-left:0.5em"/>Each kind of creature has developed differently over time, which is why your sense of smell is not the same as a dog's sense of smell. Vision is more important to humans than it is to most animals, which is why we can see our environment with more detail and in more colors than dogs can, but dogs have a better sense of smell than we do.  Each kind of organism, over many, many generations spanning millions of years, has evolved their own distinct combination of senses and sense strengths, and their brains reflect this.  Humans and their evolutionary relatives have evolved a bigger frontal lobe than other animals.  The frontal lobe contributes to our ability to use tools, problem-solve, and come up with novel ways of interacting with our environment. The way your brain works is also influenced by what you do frequently. If you text frequently, you will have more connections in the portion of your brain that deals with thumb movement, and those connections will be stronger than they would be in someone who has never texted in their life. </p>
+        </span>
+    </article>
+    <article>
+        <h2>Simplifying Assumptions</h2>
+        <span>
+            <p>We have made the brain model within EvolveTD very simple, making sure the maximum number of neurons is very limited. The members of the Protean Swarm have 100 neurons each, which is a fraction of a fraction of the number of neurons in biological brains.  There are also currently three outputs from the brain.<br/>
+                <br/>Additionally, because we are using a feedforward artificial neural network, information can only move from the inputs to the outputs. There is no way for the creatures to modify their behavior based on previous experiences. In other words, the individual creatures do not learn. Instead, as the population evolves, those that survive to reproduce pass along slightly different versions of their behaviors to their offspring. </p>
+        </span>
+    </article>
+    <article>
+        <h2>Computational Model of Brain and Behavior</h2>
+        <h4>Implementation</h4>
+        <span>
+            <img src="images/Basic_Network.jpg" align="right" style="width:11.5em"/>
+            <p>The brain is a separate class that is a component of the creature. behavior will be a function of the creature. When behavior is called it will access the senses and brain objects to produce the creature's actions. The brain is a single layer artificial neural network and is represented by a 2D array of integers known as weights.<br/>
+                <br/>Weights indicate the strength of connections between neurons and (in our model) is the variation from one brain to the next. For each creature of each wave, the brain object will get genes from the genome.  These genes will determine the value of weights.<br/>
+                <br/><img src="images/Perceptron_with_Weights.jpg" align="right" style="width:15.5em; margin-top:0.5em"/>For each time unit of each wave, behavior is calculated for each creature using basic vector and matrix multiplication. The input vector will be provided by sensory systems, the matrix is the brain, and the output is another vector which represents actions the creature can perform.</p>
+        </span>
+        
+        <h4>Actions</h4>
+        <span>
+            <li><b>torque:</b> positive for negative change in angle</li>
+            <li><b>force:</b> negative for backward, zero for stand still, positive for forward</li>
+            <li><b>consume food:</b> positive to activate</li>
+            <li><b>spawn gametes:</b> positive to activate</li>
+            <li><b>encode meep:</b> positive to activate (current assumption: broadcasting is automatic after encoding)</li>
+            <li><b>decode meep:</b> positive to activate</li>
+        </span>
+    </article>
+    <article>
+        <h2>Learn More</h2>
+        <h4>EvolveTD Wiki</h4>
+        <span>
+            <p>For more detailed information about the creature's brain and behavior in EvolveTD please read our public wiki on <a href="http://course.cs.uidaho.edu/wiki404/index.php/Brain_and_Behavior">Brain and Behavior</a>.</p>
+        </span>
+        <h4>Resources</h4>
+        <span>
+            <li><a href="http://link.springer.com/article/10.1007%2Fs00442-014-2995-6"> Plants Respond to Leaf Vibrations Caused by Insect Herbivore Chewing</a></li>
+            <li><a href="http://link.springer.com/article/10.1023/A:1024190429920">Frontal Lobe and Cognitive Development</a></li>
+            <li><a href="http://www.sciencedirect.com/science/article/pii/S0304389407002397">Sensors: An Effective Approach for the Detection of Explosives</a></li>
+            <li><a href="https://cosmosmagazine.com/life-sciences/mind-michio-kaku">The Mind of Michio Kaku</a></li>
+            <li><a href="http://www.forbes.com/sites/christopherhelman/2013/09/07/how-much-energy-does-your-iphone-and-other-devices-use-and-what-to-do-about-it/">How Much Electricity Do Your Gadgets Really Use?</a></li>
+        </span>
+    </article>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Research: Reproduction</title>
+</head>
+    
+<body>
+    <article>
+        <h2>Overview of Reproduction</h2>
+        <span>
+            <p>Reproduction is one of the most vital systems for survival of a species over long periods of time and over multiple generations, but can also impact factors in whether or not a population size can increase or decrease and the genetic diversity. Our model of the game is very simple and we can start by defining a population.<br/>
+                <br/>According to Wikipedia, a population is "a summation of all the organisms of the same group or species which live in a particular geographical area and have the capability of interbreeding". In this sense, the Protean Swarm we discover on the newly discovered planet, is a population, and within this population is the ability for reproduction.  This is important to fuel the process of evolution and adaptation by the mixing of and passing down of genetic traits that may be more favorable for an organism in that specific environment. <br/>
+                <br/>Genetic diversity refers to the total number of genetic characteristics within a population. This means that the higher the genetic diversity, the more unique the traits expressed within that population, and this allows for a faster, more efficient method of evolution, the primary basis of this game. Without the genetic diversity offered from sexual reproduction, organisms may have to rely solely on methods such as conjugation, transformation or transduction, which may be a slower and more tedious process in the real-world.<br/>
+                <br/>We want to ensure that the genetic diversity within our population is large enough that we are able to effectively simulate the evolution of a species of organism. With this said, it is important to note that although the sexual reproduction in our model contributes to the general genetic diversity within our population of protean swarm, the mutation rates have been pushed up for simulation purposes. This allows for an extremely fast rate of evolution, as well as sufficient genetic diversity within the population to make widespread changes and manipulations of characteristics expressed. <br/>
+                <br/>Within the EvolveTD, we have simulated the function of 2 gametes, each contributing to the overall genetic trait characteristics that a creature will develop.  This simulates the current model of Meiosis which is the primary method of splitting and rearranging genetic material into gametes that can be used in sexual genetic recombination, or the “process of offspring with combinations of traits that differ from those found in either parent.   It is important to note that this can also happens in asexual reproduction. </p>
+
+            
+        </span>
+    </article>
+    <article>
+        <h2>Biological Model of Reproduction</h2>
+        <h4>Sexual Reproduction</h4>
+        <span>
+            <p>Sexual reproduction is defined as a "biological process that creates a new organism by combining the genetic material of two organisms ... with Meiosis". This type of reproduction is important for the evolution of an organism by contributing to the genetic variation that the offspring inherit. In the case of the protean swarm, it can contribute to how fast they adapt to an environment by allowing more genetic variance from parent to offspring. This may just give a protean that edge it needs to grab food that other proteans are trying to get. Within sexual reproduction, it is important to note how exactly genetic material is combined and split. <br/>
+                <br/><img src="images/fertilization.png" align="right"/>Sexual reproduction is marked by 2 gametes which combine to create a zygote, or fertilized organism that is undergoing development. Within our model of sexual reproduction, each of the gametes are referred to as being haploid, or having half of a complete set of genetic material from a parent. This means that 2 gametes can combine to create a diploid organism, or an organism that has a complete set of genetic information from 2 unique organisms.<br/>
+                <br/>This type of genetic separation is referred to as Ploidy and results in a higher rates of genetic diversity within a population, such as the protean swarm, by allowing unique combinations of genetic information to be contributed by both parents. </p>
+
+        </span>
+        
+        <h4>Simultaneous Hermaphroditism</h4>
+        <span>
+            <p>Simultaneous Hermaphroditism is a type of sexual reproduction in which an organism can effectively mate with itself.  This refers to an organism’s ability to have both male and female organs at one time, allowing it to effectively produce gametes that will fertilize and develop into offspring.  The EvolveTD game will be using the simultaneous hermaphroditism model of sexual reproduction, which may eventually evolve to have gender-specific roles, to simulate a rapidly adapting population of organisms.<br/>
+                <br/>This model of sexual reproduction, although beneficial if unique organisms are not available for mating, has limits when it come to the genetic diversity of that population, however.  Since the genetic material in each gamete was obtained from a single parent rather than two parents, there may be a lower number of novel genes in the offspring.  This does not mean that genetic diversity does not exist, though, since the splitting of genetic material through the process of meiosis may still recombine in unique or novel ways.</p>
+        </span>
+        
+        <h4>Meiosis</h4>
+        <span>
+            <p>Meiosis  is the primary method of gamete production in which an organism can create multiple gametes, each with a mix-match of genetic material from the parent. In this specific case, a gamete describes a "cell that fuses with another cell during fertilization" and is referred to as haploid, meaning that it contains half of the number of chromosomes of it's total parent genome.<br/>
+                <br/>To obtain the full spectrum of genetic material that an organism needs to successfully develop and operate, it must find another haploid gamete to fuse with. When these 2 gametes fuse, they combine the genetic material from both gamete and effectively both parents.<br/>
+                <br/><img src="images/Meiosis.png" align="right" style="width:15em;"/>It is important to note that because each gamete only contains half the original genetic material of the parent, each gamete has a unique set of traits from that parent's genetic pool. For example, if a tiger is albino and mates with another tiger who is not albino, its offspring have a possibility of being developed from a gamete which contained an albino trait, but also has the possibility of not having that trait within its gene pool.</p>
+
+        </span>
+    </article>
+    <article>
+        <h2>Simplifying Assumptions</h2>
+        <span>
+            <p>The reproductive model of EvolveTD is quite simple and efficient, allowing for a very stable population number, as well as sufficient genetic diversity.  Some of the assumptions that we have made for this game to operate correctly include:
+
+            <li class="list">A stable population size that does not vary from the original number much.  This allows for consistent gameplay and sufficient genetic diversity. </li>
+            <li class="list">The creatures start out as hermaphroditic, meaning that they are both male and female.  This also allows for self-fertilization through the fusion of gametes created by one organism.  NOTE:  This does not mean that sexes cannot be evolved traits!!! </li>
+            <li class="list">The mutation rate is extremely high compared to earth organisms.  It normally is an extremely long process to get significant genetic diversity.  It is likely that the extreme environment the protean swarm live in requires extreme mutation rates in order for the protean swarm to become successful.</li>
+            <li class="list">Additive genetics. </li>
+            <li class="list">Each gamete will cost "X" amount of energy to produce, and these gametes will be placed, or "broadcasted" into the algae medium.  This allows for proteans not having to come into direct contact with other proteans in order to fertilize.
+</li>
+        </span>
+    </article>
+    <article>
+        <h2>Computational Model of Metabolism</h2>
+        <h4>Creating Gametes</h4>
+        <span>
+            <p>In the current state of EvolveTD gametes are created when a creature has gained enough energy in its reproduction store and spent enough time to do so.  Once conditions have been met, a gamete object is added to the creatures gamete stack which holds all the gametes that the creature has produced.<br/>
+                <br/>A gamete object holds several data fields that are accessed when combining gametes.  These include the gametes tile position in the environment, extra energy passed to it from the parent and a reference to the parent's creature object.  Gametes do not visually display on the map and therefore are not targetable by the turrets.  There is also no limit to how many gametes a creature can produce except for what time and energy will allow.</p>
+        </span>
+        
+        <h4>Combining Gametes</h4>
+        <span>
+            <p>At the end of each round we combine the gamete stacks of every creature, dead or alive, into a single list of gametes.  From this list we select a single gamete at random and check if there are any gametes within a certain range.  If none are found then we toss the gamete back and randomly select a new gamete.  This process is repeated a specific number of times at which point we will increase the range and continue the search.<br/>
+                <br/>If another gamete is found within range of our selected gamete, it is added to a list of possible mates.  From this list we randomly select another gamete to be our second haploid.  Once both are selected we take a mutated version of the genome from each gametes parent and combine it to create the genome for the new creature.  We then calculate the position of the new creature by selecting the point between the two gametes.<br/>
+                <br/>Since creatures can produce an unlimited number of gametes it is important to loosly control the number of creatures that can be created at the end of each round.  To do this we have a minimum population size.  While this population size is not reached by the new generation we will continue to select gametes.  Once selecting gametes we do not check the population size again till a range increase is in order, thus allowing for more than the minimum population.<br/>
+                <br/>It is also important to note that when calculating the position of our new creature, we need to be sure that it is not overlapping any other collidables such as creatures or rocks.  Box2d does not like it when collidable object are overlapping.</p>
+        </span>
+    </article>
+    <article>
+        <h2>Learn More</h2>
+        <h4>EvolveTD Wiki</h4>
+        <span>
+            <p>For more detailed information about reproduction in EvolveTD please read our public wiki on <a href="http://course.cs.uidaho.edu/wiki404/index.php/Reproduction">Reproduction</a>.</p>
+        </span>
+        <h4>Resources</h4>
+        <span>
+            <li><a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0016557">Energy Expenditure for Healthy Gamete Release</a></li>
+            <li><a href="http://www.ecologicalprocesses.com/content/1/1/4">Nesting: Eggs and Nest Survival</a></li>
+            <li><a href="http://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1001899">Hermaphroditism and Sexual Preference</a></li>
+        </span>
+    </article>
+</body>
+</html>

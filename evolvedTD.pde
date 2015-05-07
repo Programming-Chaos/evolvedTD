@@ -319,6 +319,8 @@ void keyPressed() { // if a key is pressed this function is called
     case '4':
     case '5':
     case '6':
+    case '7':
+    case '8':
       the_player.targetMode = (key-'2');
       break;
     default:
