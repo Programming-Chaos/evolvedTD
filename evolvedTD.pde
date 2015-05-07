@@ -125,11 +125,7 @@ void setup() {
 }
 
 void draw() {
-
-  
   if (mistermoneybagsmode) the_player.money = 1000000000;
-  // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
-  lasttime = millis();
   mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
   mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
   //these variables represent where the mouse is on the surface of the planet
@@ -186,6 +182,7 @@ void draw() {
   if (display) {
     the_player.display(); // display the interface for the player
   }
+  else panels.get(8).display();
 
   if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures

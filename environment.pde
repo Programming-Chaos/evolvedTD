@@ -502,7 +502,7 @@ class environment {
       }
     }
     update_scent();
-    update_creature_scent();
+    //update_creature_scent();
   }
 
   int checkForFood(double x1, double y1) {
