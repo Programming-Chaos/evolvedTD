@@ -384,6 +384,12 @@ class tower {
               case 4:
                 target = the_pop.highestAlpha();
                 break;
+              case 5:
+                target = the_pop.highestWidth();
+                break;
+              case 6:
+                target = the_pop.lowestWidth();
+                break;
               default:
                 target = the_pop.vec_to_random_creature();
             }
