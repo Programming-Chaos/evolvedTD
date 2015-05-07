@@ -12,7 +12,7 @@ import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.dynamics.contacts.*;
 
-
+import processing.video.*;
 
 int cameraX, cameraY, cameraZ; // location of the camera
 static int worldWidth = 2500;  // world size
@@ -21,7 +21,7 @@ static int zoomOffset = 2163;  // (translate(cameraX, cameraY, cameraZ - zoomOff
 float worldRatioX, worldRatioY;
 
 // see
-State state = State.RUNNING;
+State state = State.MENU;
 State stateSaved = state;
 
 int timesteps = 0;
@@ -51,6 +51,7 @@ Box2DProcessing box2d;         // the box2d world object
 environment environ;           // the environment object
 
 Minim minim;
+Movie introVideo;
 
 int lasttime;                  // used to track the time between iterations to measure the true framerate
 
@@ -91,6 +92,8 @@ void setup() {
   the_player = new player();
 
   minim = new Minim(this);
+//  introVideo = new Movie(this, "");
+//  introVideo.play();
 
   box2d.setGravity(0, 0);        // no gravity - it would pull creatures towards one edge of the screen
   box2d.listenForCollisions();   // set the world to listen for collisions, calls beginContact and endContact() functions defined below
@@ -133,12 +136,16 @@ void draw() {
   //these variables represent where the mouse is on the surface of the planet
   //If you zoom in on the top left and move the mouse to the lower right the coordinates will be very negative
   
+  //image(introVideo, 0, 0);
+  
   if (state != State.MENU){
     doDraw();
   }
 
 }  // end of draw loop
 
+// This is the initial draw loop, it's now in a funtion to be called whenever the game is not in the main menu state
+// This is done because the main menu state is a unique state in which normal game controls are ignored until the game has started
 void doDraw(){
    if (mistermoneybagsmode) the_player.money = 1000000000;
    if (state == State.RUNNING) { // if running, increment the number of timesteps, at some max the wave/generation ends
@@ -213,126 +220,132 @@ void doDraw(){
   if (state == State.RUNNING) {
     box2d.step();
   } 
-}
+} // end of doDraw
 
 void keyPressed() { // if a key is pressed this function is called
   int scale = 100;
-  if (key == CODED) { // if its a coded key, e.g. and arrow key
-    switch(keyCode) {
-    case UP:
-      cameraY-= (4 + int(cameraZ/scale));
-      break;
-    case DOWN:
-      cameraY+= (4 + int(cameraZ/scale));
-      break;
-    case LEFT:
-      cameraX-= (4 + int(cameraZ/scale));
-      break;
-    case RIGHT:
-      cameraX+= (4 + int(cameraZ/scale));
-      break;
+  
+  if (state != State.MENU){
+    if (key == CODED) { // if its a coded key, e.g. and arrow key
+      switch(keyCode) {
+      case UP:
+        cameraY-= (4 + int(cameraZ/scale));
+        break;
+      case DOWN:
+        cameraY+= (4 + int(cameraZ/scale));
+        break;
+      case LEFT:
+        cameraX-= (4 + int(cameraZ/scale));
+        break;
+      case RIGHT:
+        cameraX+= (4 + int(cameraZ/scale));
+        break;
+      }
     }
-  }
-  else {
-    switch(key) { // else its a regular character
-    case 'a':
-      autofire = !autofire;
-      break;
-    case 'z':
-      // center camera and zoom all the way out
-      cameraX = 0;
-      cameraY = 0;
-      cameraZ = zoomOffset;
-      break;
-    case 'w':
-      cameraZ -= (12 + int(cameraZ / scale)); // zoom in a little
-      break;
-    case 's':
-      cameraZ += (12 + int(cameraZ / scale)); // zoom out a little
-      break;
-    case 'c':   // center the camera
-      cameraX = 0;
-      cameraY = 0;
-      break;
-    case 'p':  // toggle paused state
-      if (state == State.STAGED)
-        state = State.RUNNING;
-      else if (state != State.PAUSED)
-        state = State.PAUSED;
-      else
-        state = State.RUNNING;
-      break;
-    case 'u':  // toggle upgrade window
-      boolean temp = false;
-      for (Panel u : the_player.upgradepanels) {
-        if (u.enabled == true) {
-          u.enabled = false;
-          temp = true;
-        }
-      }
-      if (temp && state == State.STAGED)state = State.RUNNING;
-      if (!temp) {
-        for (structure s : the_player.structures) {
-          if (s.type == 'b') {
-            if (mouse_x < s.f.xpos + s.f.radius && mouse_x > s.f.xpos - s.f.radius
-             && mouse_y < s.f.ypos + s.f.radius && mouse_y > s.f.ypos - s.f.radius) {
-              the_player.selectedStructure = s;
-              s.f.upgradePanel.enabled = true;
-              break;
-            }
-          }
-          else {
-            if (mouse_x < s.t.xpos + s.t.radius && mouse_x > s.t.xpos - s.t.radius
-             && mouse_y < s.t.ypos + s.t.radius && mouse_y > s.t.ypos - s.t.radius) {
-              the_player.selectedStructure = s;
-              s.t.upgradePanel.enabled = true;
-              break;
-            }
+    else {
+      switch(key) { // else its a regular character
+      case 'a':
+        autofire = !autofire;
+        break;
+      case 'z':
+        // center camera and zoom all the way out
+        cameraX = 0;
+        cameraY = 0;
+        cameraZ = zoomOffset;
+        break;
+      case 'w':
+        cameraZ -= (12 + int(cameraZ / scale)); // zoom in a little
+        break;
+      case 's':
+        cameraZ += (12 + int(cameraZ / scale)); // zoom out a little
+        break;
+      case 'c':   // center the camera
+        cameraX = 0;
+        cameraY = 0;
+        break;
+      case 'p':  // toggle paused state
+        if (state == State.STAGED)
+          state = State.RUNNING;
+        else if (state != State.PAUSED)
+          state = State.PAUSED;
+        else
+          state = State.RUNNING;
+        break;
+      case 'u':  // toggle upgrade window
+        boolean temp = false;
+        for (Panel u : the_player.upgradepanels) {
+          if (u.enabled == true) {
+            u.enabled = false;
+            temp = true;
           }
         }
-      }
-      break;
-    case 'm':
-      playSound = !playSound;
-      break;
-    case 'v':
-      display = !display;
-      // mute on hide
-      if (!display) {
-        playSoundSave = playSound;
-        playSound = false;
-      } else {
-        playSound = playSoundSave;
-      }
-      break;
-    case 'q':
-      displayFood = !displayFood;
-      break;
-    case 'n':
-      displayScent = !displayScent;
-      break;
-    case 'e':
-      displayFeelers = !displayFeelers;
-      break;
-    case '?':
-      the_player.helpPanel.enabled = !the_player.helpPanel.enabled;
-      break;
-    case '1':
-    case '2':
-      the_player.activeweapon = (key-'0');
-      break;
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-      the_player.targetMode = (key-'2');
-      break;
-    default:
+        if (temp && state == State.STAGED)state = State.RUNNING;
+        if (!temp) {
+          for (structure s : the_player.structures) {
+            if (s.type == 'b') {
+              if (mouse_x < s.f.xpos + s.f.radius && mouse_x > s.f.xpos - s.f.radius
+               && mouse_y < s.f.ypos + s.f.radius && mouse_y > s.f.ypos - s.f.radius) {
+                the_player.selectedStructure = s;
+                s.f.upgradePanel.enabled = true;
+                break;
+              }
+            }
+            else {
+              if (mouse_x < s.t.xpos + s.t.radius && mouse_x > s.t.xpos - s.t.radius
+               && mouse_y < s.t.ypos + s.t.radius && mouse_y > s.t.ypos - s.t.radius) {
+                the_player.selectedStructure = s;
+                s.t.upgradePanel.enabled = true;
+                break;
+              }
+            }
+          }
+        }
+        break;
+      case 'm':
+        playSound = !playSound;
+        break;
+      case 'v':
+        display = !display;
+        // mute on hide
+        if (!display) {
+          playSoundSave = playSound;
+          playSound = false;
+        } else {
+          playSound = playSoundSave;
+        }
+        break;
+      case 'q':
+        displayFood = !displayFood;
+        break;
+      case 'n':
+        displayScent = !displayScent;
+        break;
+      case 'e':
+        displayFeelers = !displayFeelers;
+        break;
+      case '?':
+        the_player.helpPanel.enabled = !the_player.helpPanel.enabled;
+        break;
+      case '1':
+      case '2':
+        the_player.activeweapon = (key-'0');
+        break;
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+        the_player.targetMode = (key-'2');
+        break;
+      default:
 
-    }
-    if (cameraZ < 100) { // much closer than this and the screen goes blank
-      cameraZ = 100;
-    }
+      }
+      if (cameraZ < 100) { // much closer than this and the screen goes blank
+        cameraZ = 100;
+      }
+    }// end of else (is not coded)
+  } // end of if state != menu
+  else{
+   state = State.RUNNING; 
   }
 }
 
@@ -729,6 +742,10 @@ void mouseDragged() {
   if (mouseButton != LEFT) return;
   cameraX += round(mouse_x_p - mouse_x);
   cameraY += round(mouse_y_p - mouse_y);
+}
+
+void movieEvent(Movie m) {
+  m.read();
 }
 
 void initTables() {
