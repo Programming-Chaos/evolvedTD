@@ -523,7 +523,8 @@ class environment {
       }
     }
     update_scent();
-    update_creature_scent();
+
+    //update_creature_scent();
     /*
     if(isLavaPlanet == true) {
       for(int i = 0; i < environWidth; i++) {
@@ -539,6 +540,7 @@ class environment {
         }
       }
     }*/      
+
   }
 
   int checkForFood(double x1, double y1) {

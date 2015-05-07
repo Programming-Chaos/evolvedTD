@@ -197,8 +197,10 @@ class Genome {
 
   // assembles two chromosomes
   Genome(Chromosome x, Chromosome y) {
+    
     xChromosome = x;
     yChromosome = y;
+     
   }
 
   // Returns a list of genes from the X chromosome
@@ -241,13 +243,13 @@ class Genome {
   //. between each creature uniqie id between .
   void inheritance(int num) {
     if (xChromosome.inherit != "") {
-      xChromosome.inherit += "." + str(num);
+      xChromosome.inherit += " " + str(num);
     } else {
       xChromosome.inherit = str(num);
     }
 
     if (yChromosome.inherit != "") {
-      yChromosome.inherit += "." + str(num);
+      yChromosome.inherit += " " + str(num);
     } else {
       yChromosome.inherit = str(num);
     }
@@ -332,7 +334,12 @@ class Genome {
 class Chromosome {
   FloatList genes;
   String inherit = "";
-
+  
+  /*Though this would be collected in inheritance - I don't want to split the string
+  to draw every single time - since it would add to much overhead */
+  
+  
+  
   Chromosome(int n) {
     genes = new FloatList(n);
     for (int i = 0; i < n; i++) {

@@ -1,3 +1,19 @@
+boolean follow_selected = true;
+boolean show_siblings = false;
+boolean show_cousins = false;
+
+color on = color(100, 200, 50);
+color off = color(200, 10, 10);
+
+color clr_follow = on;
+color clr_siblings = on;
+color clr_cousins = on;
+
+String cousins = "Not showing cousins";
+String siblings = "Not showing siblings";
+String following = "Not following a Creature";
+String selected_creature = "No Creature Selected";
+
 class player {
   ArrayList<structure> structures;
   ArrayList<Panel> upgradepanels;
@@ -21,6 +37,8 @@ class player {
   boolean placing = false;
   int numStructuresCreated = 0;
   int targetMode = 1;
+  float framerate;
+  int frameraterefreshtimer = 0;
   structure pickedup;
   
   Panel testpanel;
@@ -30,8 +48,11 @@ class player {
   float resourceGain;     // gain per timestep
   creature selectedCreature;
   structure selectedStructure;
-
+  Panel test;
+  
   player() {
+    framerate = 0;
+    lasttime = millis();
     structures = new ArrayList<structure>();
     upgradepanels = new ArrayList<Panel>();
     activeweapon = 1;
@@ -92,6 +113,21 @@ class player {
     structurePanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
     structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
 
+    test =  new Panel(540,600,-960,980-1800,true);// -140 so it's not cut off the bottom of some people's screens
+
+    
+    test.createTextBox(500,100, 0,-150,new StringPass() { public String passed() { return (following); } },40);
+    test.createTextBox(500,100, 0,0,new StringPass() { public String passed() { return (siblings); } },40);
+    test.createTextBox(500,100, 0,150,new StringPass() { public String passed() { return (cousins); } },40);
+    
+    test.createButton(500, 100, 0, -150, "", 45, (int)red(clr_follow), (int)green(clr_follow), (int)blue(clr_follow), new ButtonPress() {public void pressed() { follow_selected = !follow_selected; } });
+    test.createButton(500, 100, 0, 0, "", 45, (int)red(clr_siblings), (int)green(clr_siblings), (int)blue(clr_siblings), new ButtonPress() {public void pressed() { show_siblings = !show_siblings; } });
+    test.createButton(500, 100, 0, 150, "", 45, (int)red(clr_cousins), (int)green(clr_cousins), (int)blue(clr_cousins), new ButtonPress() {public void pressed() { show_cousins = !show_cousins; } });
+    
+    
+    //test.buttons.get(structurePanel.buttons.size()-1).enabled = false;
+
+
     helpPanel = new Panel(1000,1900,0,0,false,255);
     helpPanel.enabled = false;
     helpPanel.createTextBox(30,20,"Controls",60);
@@ -123,8 +159,8 @@ class player {
                          +"If you're holding a tower you can delete it\n"
                          +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
-    hudPanel = new Panel(1250,100,-625,-1200,false,100);
-    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
+    hudPanel = new Panel(2500,100,0,-1200,false,100);
+    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF") + "\t\t\t\tFramerate: " + framerate); } }, 50);
 
     //pricePanel = new Panel(100,40,0,0,false,150);
     //pricePanel.createTextBox
@@ -137,14 +173,90 @@ class player {
 
   void display() {
     if (selectedCreature != null) {
+      
+
       // only follow if alive
       if (selectedCreature.alive) {
+
+          if (follow_selected) {
+            clr_follow = on;
+            following = "Following a Creature";
+          } else {
+            clr_follow = off;
+            following = "Not following a Creature";
+          }
+          
+          
+          if (show_siblings) {
+            clr_siblings = on;
+            siblings = "Showing siblings";
+
+          } else {
+            clr_siblings = off;
+             siblings = "Not showing siblings";  
+          }
+          
+          if (show_cousins) {
+            clr_cousins = on;
+            cousins = "Showing cousins";
+          } else {
+            clr_cousins = off;
+            cousins = "Not showing cousins";
+          }
+
         Vec2 pos = box2d.getBodyPixelCoord(selectedCreature.body);
-        cameraX = int(pos.x);
-        cameraY = int(pos.y);
+        if (follow_selected) {
+          cameraX = int(pos.x);
+          cameraY = int(pos.y);
+        }
+        
+        pushMatrix();
+        for (creature c : the_pop.swarm) {
+          if (c.alive) {
+            Vec2 pos_tmp = box2d.getBodyPixelCoord(c.body);
+            if(show_siblings) {
+              if (selectedCreature.parents[0] != -1 && (c.parents[0] == selectedCreature.parents[0] || c.parents[0] == selectedCreature.parents[1])) { 
+                fill( 253, 246, 250);
+                arc(pos_tmp.x, pos_tmp.y, 100, 100,  HALF_PI, 3*HALF_PI);
+              }
+              
+              if (selectedCreature.parents[0] != -1 && (c.parents[1] == selectedCreature.parents[0] || c.parents[1] == selectedCreature.parents[1])) { 
+                fill(25, 45, 200);
+                arc(pos_tmp.x, pos_tmp.y, 100, 100,  -HALF_PI, HALF_PI);
+              }
+            }
+            if (show_cousins) {
+              for (int selected_i = 0; selected_i < 4; selected_i++) {
+                for (int test_i = 0; test_i < 4; test_i++) {
+                   if (selectedCreature.grandparents[selected_i] != -1 && c.grandparents[test_i] == selectedCreature.grandparents[selected_i]) {
+                      if (test_i == 0) {
+                        fill(100, 0, 100);
+                        triangle(pos_tmp.x, pos_tmp.y, pos_tmp.x+50, pos_tmp.y, pos_tmp.x, pos_tmp.y+50);
+                      } else if (test_i == 1) {
+                        fill(100, 100, 100);
+                        triangle(pos_tmp.x, pos_tmp.y, pos_tmp.x-50, pos_tmp.y, pos_tmp.x, pos_tmp.y+50);
+                      } else if (test_i == 2) {
+                        fill(150, 20, 20);
+                        triangle(pos_tmp.x, pos_tmp.y, pos_tmp.x+50, pos_tmp.y, pos_tmp.x, pos_tmp.y-50);
+                      } else if (test_i == 3) {
+                        fill(200, 200, 100);
+                        triangle(pos_tmp.x, pos_tmp.y, pos_tmp.x-50, pos_tmp.y, pos_tmp.x, pos_tmp.y-50);
+                      }
+                      
+                      
+                   }
+                }
+              }  
+              }
+          }
+        }
+        popMatrix();
       }
+      selected_creature = "Creature Selected";
       statsPanel.enabled = true;
     } else {
+      selected_creature = "No Creature Selected";
+      follow_selected = true;
       statsPanel.enabled = false;
     }
     
@@ -176,6 +288,12 @@ class player {
   void update() {
     if (state == State.RUNNING) {
       resources += resourceGain;
+    }
+    frameraterefreshtimer++;
+    if (frameraterefreshtimer == 20) {
+      framerate = (20000.0 / (millis() - lasttime));
+      lasttime = millis();
+      frameraterefreshtimer = 0;
     }
     // walk through the structures
     for (int i = structures.size() - 1; i >= 0; i--) {
