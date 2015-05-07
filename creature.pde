@@ -1,6 +1,7 @@
 import java.util.Comparator;
 
 static int creature_count = 0;
+int temp = 0;
 
 class Gamete {
   int xPos, yPos;
@@ -45,6 +46,8 @@ class creature {
   float maxMovementForce;
   float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
+  int bodyTemp;        // determining factor in how creature responds to air temp
+
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -377,6 +380,7 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    bodyTemp = 20;            // creatures internal body temperature
 
     maxMovementForce = baseMaxMovementForce;// - (2*getWidth());
     //if (maxMovementForce < 0) maxMovementForce = 0;
@@ -769,14 +773,25 @@ class creature {
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
 
+      float environInfluence = 1; // A value of influence between 0 and 1 that abstracts the modified speed of a specific environment.
       int switchnum;
-      if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
+      if (environ.checkForLiquid(pos2.x, pos2.y)) {
         time_in_water++;
         switchnum = 0;
+        environInfluence = (1 / (getWidth() * getMass())) * 1000;
+      } else if (environ.checkForMountain(pos2.x, pos2.y)) {
+        switchnum = 1;
+        environInfluence = 1 - (getCreatureDensity()) + 0.2;
+      } else {
+        switchnum = 2;
       }
-      else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
-      else switchnum = 2;
-
+      if(environInfluence < 0) environInfluence = 0;
+      if(environInfluence > 1) environInfluence = 1;
+      
+      //println(getWidth() + " " + getMass() + " : " + (1 / ((getWidth() - 20) * getMass())) * 1000 + " ; " + (1 / (getWidth() * getMass())) * 1000); // water
+      //println(1 - (getCreatureDensity() - 0.1) + " " + (1 - (getCreatureDensity())) // rock
+      
+      
       float base = f;
 
       // appendages will change the force depending on the environment
@@ -804,8 +819,9 @@ class creature {
       body.applyTorque((float)torque);
   
       if (energy_locomotion > 0) { // If there's energy left apply force
-        body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
-        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
+        body.applyForce(new Vec2(environInfluence * f * cos(a - (PI*1.5)), environInfluence * f * sin(a - (PI*1.5))), body.getWorldCenter());
+        
+        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005)) - (10 - (1 / environ.temperature));   // moving uses locomotion energy
         energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
   
         // data collection
