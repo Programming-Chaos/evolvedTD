@@ -48,5 +48,5 @@ window.onhashchange = function() {
         else if (leftH > rightH) {
             $('#main-body').height(leftH);
         }
-    }, 530);
+    }, 570);
 }
