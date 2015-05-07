@@ -22,10 +22,10 @@ function checkReload() {
     }
     else {
         var page = location.hash;
+        page = page.replace('#','');
+        location.hash = '';
+        location.hash = page; //initial hash
         refresh = true;
-        page = page.replace('#~','');
-        page = page.split('&');
-        changePage(page[0]);
     }
 }
 
