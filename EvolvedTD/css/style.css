@@ -40,6 +40,14 @@ li.numbered {
     list-style-type: decimal;
     margin-left: 1em;
 }
+li.contributor {
+    position: relative;
+    display: block;
+    list-style: none;
+    text-align: center;
+    font-size: 1.5em;
+    line-height: 1.5em;
+}
 
 menu {
     position: relative;
@@ -51,7 +59,7 @@ menu {
 menu li.tab {
     position: relative;
     display: inline-block;
-    width: 8.905em;
+    width: 8.9em;
     height: 100%;
     overflow: hidden;
 }
