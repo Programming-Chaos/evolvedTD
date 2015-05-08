@@ -3,6 +3,7 @@ class projectile {
   int radius;
   float angle;
   float xpos, ypos;
+  
   boolean remove = false;
   int damage; // how much damge the projectile does
   PImage bullet;    // declare image for gun

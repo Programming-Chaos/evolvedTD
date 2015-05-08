@@ -1,6 +1,7 @@
 import java.util.Comparator;
 
 static int creature_count = 0;
+int temp = 0;
 
 class Gamete {
   int xPos, yPos;
@@ -45,6 +46,8 @@ class creature {
   float maxMovementForce;
   float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
+  int bodyTemp;        // determining factor in how creature responds to air temp
+
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
@@ -58,7 +61,7 @@ class creature {
   // encodes the creature's genetic information
   Genome genome;
   Brain brain;
-  float current_actions[];
+//  float brain.outputs[];
 
   // metabolism
   float energy_reproduction;     // energy for gamete produciton
@@ -348,8 +351,7 @@ class creature {
     wiggletimer = 0;
     hit_indicator = 0;
 
-    current_actions = new float[brain.OUTPUTS];
-
+    
     // used for data collection
     sPos = pos.clone();
     total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
@@ -377,6 +379,7 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    bodyTemp = 20;            // creatures internal body temperature
 
     maxMovementForce = baseMaxMovementForce;// - (2*getWidth());
     //if (maxMovementForce < 0) maxMovementForce = 0;
@@ -674,12 +677,25 @@ class creature {
   }
 
   void calcBehavior(){
-    for(int i = 0; i<brain.OUTPUTS; i++){
-      current_actions[i] = 0;
-      for(int j = 0; j<brain.INPUTS; j++){
-        current_actions[i] += (senses.brain_array[j]*brain.weights[i][j]);
+    brain.calc_inputs(senses.brain_array[0], senses.brain_array[1]);
+    for(int i = 0; i < brain.OUTPUTS; i++) {
+      if(brain.activate(i) == true) {
+        brain.outputs[i] = brain.get_output(i);    // apply some function to the input value and 
+                                        // place the result in output vector
+      }else{
+        brain.outputs[i] = 0;
       }
-    }
+   }
+  
+    /* calc_inputs();
+    
+    
+    /*for(int i = 0; i<brain.OUTPUTS; i++){
+      brain.outputs[i] = 0;
+      for(int j = 0; j<brain.INPUTS; j++){
+        brain.outputs[i] += (senses.brain_array[j]*brain.weights[i][j]);
+      }
+   }*/
   }
 
   // The update function is called every timestep
@@ -704,7 +720,7 @@ class creature {
     munching = munchnext;
     if (munching != null) {
       if (munchtimer == 50) {
-        if(current_actions[2] > 0.0) { // if the creature is hungry
+        if(brain.outputs[2] > 0.0) { // if the creature is hungry
           if (!invinciblestructures) {
             if (munching.type == 'f') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
@@ -756,27 +772,38 @@ class creature {
       //if (!body.isActive())body.setActive(true);
       //if (body.getType() == BodyType.STATIC)body.setType(BodyType.DYNAMIC);
 
-      torque = current_actions[0];
+      torque = brain.outputs[0];
 
-      //torque = current_actions[0]*baseMaxTorque;
+      //torque = outputs[0]*baseMaxTorque;
 
       // force is a percentage of max movement speed from 10% to 100%
-      // depending on the output of the neural network in current_actions[1], the movement force may be backwards
+      // depending on the output of the neural network in outputs[1], the movement force may be backwards
       // as of now the creatures never completely stop moving
 
-      f = (maxMovementForce * Utilities.MovementForceSigmoid(current_actions[1]));
+      f = (maxMovementForce * Utilities.MovementForceSigmoid(brain.outputs[1]));
 
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
 
+      float environInfluence = 1; // A value of influence between 0 and 1 that abstracts the modified speed of a specific environment.
       int switchnum;
-      if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
+      if (environ.checkForLiquid(pos2.x, pos2.y)) {
         time_in_water++;
         switchnum = 0;
+        environInfluence = (1 / (getWidth() * getMass())) * 1000;
+      } else if (environ.checkForMountain(pos2.x, pos2.y)) {
+        switchnum = 1;
+        environInfluence = 1 - (getCreatureDensity()) + 0.2;
+      } else {
+        switchnum = 2;
       }
-      else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
-      else switchnum = 2;
-
+      if(environInfluence < 0) environInfluence = 0;
+      if(environInfluence > 1) environInfluence = 1;
+      
+      //println(getWidth() + " " + getMass() + " : " + (1 / ((getWidth() - 20) * getMass())) * 1000 + " ; " + (1 / (getWidth() * getMass())) * 1000); // water
+      //println(1 - (getCreatureDensity() - 0.1) + " " + (1 - (getCreatureDensity())) // rock
+      
+      
       float base = f;
 
       // appendages will change the force depending on the environment
@@ -804,8 +831,9 @@ class creature {
       body.applyTorque((float)torque);
   
       if (energy_locomotion > 0) { // If there's energy left apply force
-        body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
-        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
+        body.applyForce(new Vec2(environInfluence * f * cos(a - (PI*1.5)), environInfluence * f * sin(a - (PI*1.5))), body.getWorldCenter());
+        
+        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005)) - (10 - (1 / environ.temperature));   // moving uses locomotion energy
         energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
   
         // data collection
@@ -908,6 +936,10 @@ class creature {
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
     }
     
+    PGraphics pg;
+    pg = createGraphics(100, 100);
+    
+    pg.beginDraw();
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
