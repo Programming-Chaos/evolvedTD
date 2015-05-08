@@ -345,7 +345,7 @@ class tower {
       conflict = false;
       for (structure s : the_player.structures) { //check for overlap with existing structures
         if (s.ID != the_player.pickedup.ID) {
-          if (s.type == 'b') {
+          if (s.type == 'f') {
             if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
               conflict = true;
           }
@@ -491,7 +491,7 @@ class tower {
       for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
         if (s != the_player.pickedup) {
           pushMatrix();
-          if (s.type == 'b') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
+          if (s.type == 'f') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
           else translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
           fill(0, 0, 0, 0);
           stroke(0);

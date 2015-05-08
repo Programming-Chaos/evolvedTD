@@ -706,7 +706,7 @@ class creature {
       if (munchtimer == 50) {
         if(current_actions[2] > 0.0) { // if the creature is hungry
           if (!invinciblestructures) {
-            if (munching.type == 'b') {
+            if (munching.type == 'f') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
                 if (munching.f.health < munchstrength) { // this bite will kill the structure
                   addEnergy(200*round(munching.f.health));

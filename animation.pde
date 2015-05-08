@@ -8,11 +8,13 @@ class Animation {
   int duration; // in ticks
   int timer;
   boolean setduration;
+  boolean looping;
   int tempduration;
   
   Animation () {
     frames = new ArrayList<PImage>();
     setduration = false;
+    looping = false;
     duration = 1;
     timer = 0;
     animations.add(this);
@@ -22,15 +24,28 @@ class Animation {
     if (timer < duration-1) timer++;
     else if (setduration) {
       duration = tempduration;
-      timer = duration-1; // this is to make sure the duration is never <= the timer, which would cause a out of bounds exception in the arraylist in currentFrame()
+      if (looping) timer = 0;
+      else timer = duration-1; // this is to make sure the duration is never <= the timer, which would cause a out of bounds exception in the arraylist in currentFrame()
       setduration = false;
     }
+    else if (looping) timer = 0;
   }
   
   void addFrame(PImage in) {
     frames.add(in);
     duration = (3*frames.size()); // at most 3 ticks per frame
+    reset();
+  }
+  
+  void reset() {
+    looping = false;
     timer = duration-1;
+  }
+  
+  void beginLooping() {
+    reset();
+    timer = 0;
+    looping = true;
   }
   
   void play() {
@@ -39,6 +54,11 @@ class Animation {
   
   void setDuration(int d) {
     tempduration = d;
+    setduration = true;
+  }
+  
+  void setDuration(int d, boolean ticksperframe) {
+    tempduration = (d*frames.size());
     setduration = true;
   }
   

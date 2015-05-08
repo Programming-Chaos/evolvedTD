@@ -29,7 +29,8 @@ class player {
   int icost = 1000;
   int lcost = 2000;
   int gcost = 4000;
-  int bcost = 150;
+  int bcost = 100;
+  int dcost = 100;
   int money = 100;
   int currentcost = 0;
   int moneytimer = 0;
@@ -96,12 +97,12 @@ class player {
     farmstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
     farmstatsPanel.enabled = false;
     farmstatsPanel.setupTextBoxList(40,50,50,40);
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Farm type: " + selectedStructure.f.nametext) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("ID# " + selectedStructure.ID) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)) : ""); } });
-    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'b') selectedStructure.f.upgradePanel.enabled = true; } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Farm type: " + selectedStructure.f.nametext) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("ID# " + selectedStructure.ID) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)) : ""); } });
+    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'f') selectedStructure.f.upgradePanel.enabled = true; } });
 
     structurePanel = new Panel(2500, 300, 0, 1100-140, true); // -140 so it's not cut off the bottom of some people's screens
     structurePanel.createButton(300, 300, -1100, 0, rcost + "$\nRailgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
@@ -110,6 +111,7 @@ class player {
     structurePanel.createButton(300, 300, -200, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
     structurePanel.createButton(300, 300, 100, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
     structurePanel.createButton(300, 300, 800, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
+    structurePanel.createButton(300, 300, 500, 0, bcost + "$\nDrill", 45, 50, 50, 50, new ButtonPress() {public void pressed() { placeStructure('d'); } });
     structurePanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
     structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
 
@@ -157,7 +159,7 @@ class player {
                          +"If you've selected an existing tower\nand you right click it again,\n"
                          +"you'll pick it up and can move it around\nand place it back down.\n"
                          +"If you're holding a tower you can delete it\n"
-                         +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
+                         +"by moving it to the X button on the right side\nof the structure management panel and clicking it.");
 
     hudPanel = new Panel(2500,100,0,-1200,false,100);
     hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF") + "\t\t\t\tFramerate: " + framerate); } }, 50);
@@ -261,7 +263,7 @@ class player {
     }
     
     if (selectedStructure != null) {
-      if (selectedStructure.type == 'b') {
+      if (selectedStructure.type == 'f') {
         towerstatsPanel.enabled = false;
         farmstatsPanel.enabled = true;
       }
@@ -277,7 +279,7 @@ class player {
 
     rectMode(CENTER);
     for (structure s : structures) { // walk through the structures
-      if (s.type == 'b') s.f.display();  // display them all
+      if (s.type == 'f') s.f.display();  // display them all
       else s.t.display();
       
     }
@@ -297,7 +299,7 @@ class player {
     }
     // walk through the structures
     for (int i = structures.size() - 1; i >= 0; i--) {
-      if (structures.get(i).type == 'b') {
+      if (structures.get(i).type == 'f') {
         structures.get(i).f.update(); // update them
         if (structures.get(i).f.remove) { // delete if it's dead
           structures.get(i).f.farm_body.setUserData(null);
@@ -358,7 +360,7 @@ class player {
   
   void placeStructure(char type) {
     if (placing) {
-      if (type == (pickedup.type == 'b' ? 'b' : pickedup.t.type))
+      if (type == (pickedup.type == 'f' ? 'b' : pickedup.t.type))
         deleteStructure();
       else switchStructure(type);
     }

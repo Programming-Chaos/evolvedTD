@@ -10,8 +10,9 @@ class structure {
     ID = id;
     switch (tp) {
       case 'b':
-        type = 'b';
-        f = new farm(ID, this);
+      case 'd':
+        type = 'f';
+        f = new farm(tp, ID, this);
         break;
       case 'r':
       case 'p':
@@ -30,6 +31,7 @@ class farm {
   float angle; // angle of farm's production rotation platform
   PImage base; // farm base
   PImage rotator; // farm rotation platform
+  Animation mining;
   float radius = 50;
   int xpos; // x position of center of farm
   int ypos; // y position of center of farm
@@ -57,6 +59,7 @@ class farm {
   boolean wasInTransit = true;
   boolean conflict = false;
   boolean remove = false;
+  char type;
   int[] taste;
   Panel upgradePanel;
   structure parent;
@@ -68,9 +71,11 @@ class farm {
   Body farm_body;
 
   // constructor function, initializes the tower
-  farm(int id, structure prnt) {
+  farm(char t, int id, structure prnt) {
+    type = t;
     parent = prnt;
     ID = id;
+    mining = new Animation();
     angle = 0;
     taste = new int[5]; // bioreactors taste like food (for now)
     taste[0] = 100;
@@ -82,21 +87,52 @@ class farm {
     xpos = round(mouse_x);
     ypos = round(mouse_y);
 
-    parent.moneyinvested += the_player.bcost;
-    baseProductionSpeed = 1;
-    baseMaxShield = 50;
-    baseShieldRegen = 1;
-    base = loadImage("assets/bioreactor/BioGen Base-01.png");
-    rotator = loadImage("assets/bioreactor/BioGen Top-01.png");
-    nametext = "Bioreactor";
-    button1text = "Production Speed";
-    button2text = "Shield Strength";
-    button3text = "Shield Regeneration";
-    maxShield = baseMaxShield*(shieldUpgrades+1);
-    shield = maxShield;
-    health = maxHealth;
-    productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
-    shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
+    switch (type) {
+      case 'b':
+        parent.moneyinvested += the_player.bcost;
+        baseProductionSpeed = 1;
+        baseMaxShield = 50;
+        baseShieldRegen = 1;
+        base = loadImage("assets/bioreactor/BioGen Base-01.png");
+        rotator = loadImage("assets/bioreactor/BioGen Top-01.png");
+        nametext = "Bioreactor";
+        button1text = "Production Speed";
+        button2text = "Shield Strength";
+        button3text = "Shield Regeneration";
+        maxShield = baseMaxShield*(shieldUpgrades+1);
+        shield = maxShield;
+        health = maxHealth;
+        productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
+        shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
+        break;
+      case 'd':
+        parent.moneyinvested += the_player.dcost;
+        baseProductionSpeed = 1;
+        baseMaxShield = 50;
+        baseShieldRegen = 1;
+        mining.addFrame(loadImage("assets/Drill/Drill_01.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_02.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_03.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_04.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_05.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_06.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_07.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_08.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_09.png"));
+        mining.addFrame(loadImage("assets/Drill/Drill_10.png"));
+        mining.setDuration(6-productionSpeedUpgrades, true);
+        nametext = "Drill";
+        button1text = "Mining Speed";
+        button2text = "Shield Strength";
+        button3text = "Shield Regeneration";
+        maxShield = baseMaxShield*(shieldUpgrades+1);
+        shield = maxShield;
+        health = maxHealth;
+        productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
+        shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
+        break;
+    }
+    
     upgradePanel = new Panel(2000,1800,0,0,false, 200);
     upgradePanel.enabled = false;
     upgradePanel.createTextBox(2000,200,100,-800,new StringPass() { public String passed() { return ("Upgrade your " + nametext + " ID# " + the_player.selectedStructure.f.ID); } },80, false);
@@ -126,6 +162,7 @@ class farm {
   void update() {
     if (health <= 0) remove = true;
     if (!inTransit && wasInTransit) { // create a body for a just-placed farm
+      if (type == 'd') if (!mining.looping) mining.beginLooping();
       BodyDef bd = new BodyDef();
       bd.position.set(box2d.coordPixelsToWorld(new Vec2(xpos,ypos)));
       bd.type = BodyType.STATIC;
@@ -143,6 +180,7 @@ class farm {
       wasInTransit = false;
     }
     if (inTransit) {
+      if (type == 'd') if (mining.looping) mining.reset();
       if (!wasInTransit) {
         farm_body.setUserData(null);
         for (Fixture f = farm_body.getFixtureList(); f != null; f = f.getNext())
@@ -155,7 +193,7 @@ class farm {
       conflict = false;
       for (structure s : the_player.structures) { //check for overlap with existing structures
         if (s != the_player.pickedup) {
-          if (s.type == 'b') {
+          if (s.type == 'f') {
             if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
               conflict = true;
           }
@@ -180,12 +218,13 @@ class farm {
   }
 
   void display() {
-    image(base,xpos-((float)radius*1.15),ypos-((float)radius*1.15),((float)radius*1.15)*2,((float)radius*1.15)*2);
+    if (type == 'd') image(mining.currentFrame(),xpos-((float)radius*1.15),ypos-((float)radius*1.15),((float)radius*1.15)*2,((float)radius*1.15)*2);
+    else image(base,xpos-((float)radius*1.15),ypos-((float)radius*1.15),((float)radius*1.15)*2,((float)radius*1.15)*2);
 
     pushMatrix();
     translate(xpos, ypos);
     rotate(angle);
-    image(rotator,-1*((float)radius*1.15),-1*((float)radius*1.15), ((float)radius*1.15)*2, ((float)radius*1.15)*2);
+    if (type != 'd') image(rotator,-1*((float)radius*1.15),-1*((float)radius*1.15), ((float)radius*1.15)*2, ((float)radius*1.15)*2);
     popMatrix();
 
     // draw farm health bar
@@ -217,7 +256,7 @@ class farm {
       for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
         if (s != the_player.pickedup) {
           pushMatrix();
-          if (s.type == 'b') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
+          if (s.type == 'f') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
           else translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
           fill(0, 0, 0, 0);
           stroke(0);
@@ -257,6 +296,7 @@ class farm {
     
     productionSpeedUpgrades++;
     
+    if (type == 'd') mining.setDuration(6-productionSpeedUpgrades, true);
     productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
   }
   

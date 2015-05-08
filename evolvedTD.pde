@@ -36,8 +36,8 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
-boolean mistermoneybagsmode = false;
-boolean invinciblestructures = false;
+boolean mistermoneybagsmode = true;
+boolean invinciblestructures = true;
 
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
@@ -264,7 +264,7 @@ void keyPressed() { // if a key is pressed this function is called
       if (temp && state == State.STAGED)state = State.RUNNING;
       if (!temp) {
         for (structure s : the_player.structures) {
-          if (s.type == 'b') {
+          if (s.type == 'f') {
             if (mouse_x < s.f.xpos + s.f.radius && mouse_x > s.f.xpos - s.f.radius
              && mouse_y < s.f.ypos + s.f.radius && mouse_y > s.f.ypos - s.f.radius) {
               the_player.selectedStructure = s;
@@ -546,7 +546,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
     if (!buttonpressed) {
       if (state == State.RUNNING) {
         if (the_player.placing) {
-          if (the_player.pickedup.type == 'b') {
+          if (the_player.pickedup.type == 'f') {
             if (!the_player.pickedup.f.conflict) {
               the_player.pickedup.f.inTransit = false;
               the_player.pickedup = null;
@@ -600,7 +600,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
   
   if (mouseButton == RIGHT) {
     if (the_player.placing) {
-      if (the_player.pickedup.type == 'b') {
+      if (the_player.pickedup.type == 'f') {
         if (!the_player.pickedup.f.conflict) {
           the_player.pickedup.f.inTransit = false;
           the_player.pickedup = null;
@@ -624,7 +624,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
     else { // select a creature or tower
       boolean upgrading = false;
       for (structure s : the_player.structures) {
-        if (s.type == 'b') {
+        if (s.type == 'f') {
           if (s.f.upgradePanel.enabled) upgrading = true;
         }
         else if (s.t.upgradePanel.enabled) upgrading = true;
@@ -652,7 +652,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
         selected_creature = "No Creature Selected";
         boolean structureclick = false;
         for (structure s : the_player.structures) {
-          if (s.type == 'b') {
+          if (s.type == 'f') {
             if (sqrt(((mouse_x-s.f.xpos)*(mouse_x-s.f.xpos))+((mouse_y-s.f.ypos)*(mouse_y-s.f.ypos))) < s.f.radius) {
               structureclick = true;
               if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
