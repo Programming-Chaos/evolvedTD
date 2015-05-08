@@ -540,7 +540,7 @@ class creature {
 
     /*I turned off alpha value here so I could not draw segmentations on creatures
     The creatures weren't easily visible with a low alpha*/
-    return color(r, g, b, a);
+    return color(r, g, b, 255);
   }
 
   // Calculate and return the width of the creature
@@ -917,11 +917,11 @@ class creature {
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-
+  drawLegs();
     pushMatrix();// Stores the current drawing reference frame
-    translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
+    translate(pos.x, pos.y,1);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    drawLegs();
+  
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
@@ -1003,17 +1003,77 @@ class creature {
   
   void drawLegs(){
     stroke(0);
-    float lengthScale = 1.2 ;
-    float widthScale = 0.8 ;
+    strokeWeight(1.0);
+    Vec2 pos = box2d.getBodyPixelCoord(body);
+    float a = body.getAngle();
+    float d_angle1 = -PI*0.35;
+    float l1 = 0.9*getLength()+0.2*getWidth();
+    float x1,y1 ,x2,y2,x3,y3,x4,y4;
+    int footSize = 6;
+    
+    // first set of  legs
+    x1 = pos.x + l1*cos(-a + d_angle1);
+    y1 = pos.y + l1 * sin(-a + d_angle1);
+    x2 = pos.x + l1*cos(-a - d_angle1);
+    y2 = pos.y + l1 * sin(-a - d_angle1);
+    
+    x3 = pos.x + l1*cos(-a + d_angle1 + PI);
+    y3 = pos.y + l1 * sin(-a + d_angle1 +PI);
+    x4 = pos.x + l1*cos(-a - d_angle1 +PI);
+    y4 = pos.y + l1 * sin(-a - d_angle1+PI);
+    x1 = int(x1/cellWidth) * cellWidth;
+    x2 = int(x2/cellWidth) * cellWidth;
+    x3 = int(x3/cellWidth) * cellWidth;
+    x4 = int(x4/cellWidth) * cellWidth;
+    y1 = int(y1/cellHeight) * cellHeight;
+    y2 = int(y2/cellHeight) * cellHeight;
+    y3 = int(y3/cellHeight) * cellHeight;
+    y4 = int(y4/cellHeight) * cellHeight;
+    fill(0);
+    ellipse(x1,y1,footSize,footSize);
+    ellipse(x2,y2,footSize,footSize);
+    ellipse(x3,y3,footSize,footSize);
+    ellipse(x4,y4,footSize,footSize);
     noFill();
-    strokeWeight(1);
-    bezier(widthScale*getWidth(),lengthScale*getLength(), widthScale*getWidth(),-1*lengthScale*getLength(), -1*widthScale*getWidth(),1*lengthScale*getLength(), -1*widthScale*getWidth(), -1*lengthScale*getLength());
-    bezier(-1*widthScale*getWidth(),lengthScale*getLength(), -1*widthScale*getWidth(),-1*lengthScale*getLength(), 1*widthScale*getWidth(),1*lengthScale*getLength(), 1*widthScale*getWidth(), -1*lengthScale*getLength());
-    lengthScale = 1.4 ;
-    widthScale = 0.5 ;
-    bezier(widthScale*getWidth(),lengthScale*getLength(), widthScale*getWidth(),-1*lengthScale*getLength(), -1*widthScale*getWidth(),1*lengthScale*getLength(), -1*widthScale*getWidth(), -1*lengthScale*getLength());
-    bezier(-1*widthScale*getWidth(),lengthScale*getLength(), -1*widthScale*getWidth(),-1*lengthScale*getLength(), 1*widthScale*getWidth(),1*lengthScale*getLength(), 1*widthScale*getWidth(), -1*lengthScale*getLength());
-   
+    
+    bezier(x1,y1, x2,y2, x4,y4, x3,y3);
+   bezier(x2,y2,x1,y1, x3,y3,x4,y4);
+//    bezier(x1,y1, x2,y2, pos.x+l1*0.25*cos(-a - PI*0.5),pos.y+l1*0.25*sin(-a - PI*0.5), pos.x, pos.y);
+//    bezier(x2,y2, x1,y1, pos.x+l1*0.25*cos(-a + PI*0.5),pos.y+l1*0.25*sin(-a + PI*0.5), pos.x, pos.y);
+    
+//    bezier(x4,y4, x3,y3, pos.x+l1*0.25*cos(-a - PI*0.5),pos.y+l1*0.25*sin(-a - PI*0.5), pos.x, pos.y);
+ //   bezier(x3,y3, x4,y4, pos.x+l1*0.25*cos(-a + PI*0.5),pos.y+l1*0.25*sin(-a + PI*0.5), pos.x, pos.y);
+//    bezier(x4,y4, x3,y3,  pos.x+l1*cos(-a + PI*0.5),pos.y+l1*sin(-a + PI*0.5), pos.x, pos.y);
+//ellipse(pos.x+l1*cos(-a - PI*0.5),pos.y+l1*sin(-a - PI*0.5),10,10);
+    // second set of legs
+    l1 =  0.7*getLength()+0.4*getWidth();
+    d_angle1 = -PI*0.3;
+    x1 = pos.x + l1*cos(-a + d_angle1);
+    y1 = pos.y + l1 * sin(-a + d_angle1);
+    x2 = pos.x + l1*cos(-a - d_angle1);
+    y2 = pos.y + l1 * sin(-a - d_angle1);
+    
+    x3 = pos.x + l1*cos(-a + d_angle1 + PI);
+    y3 = pos.y + l1 * sin(-a + d_angle1 +PI);
+    x4 = pos.x + l1*cos(-a - d_angle1 +PI);
+    y4 = pos.y + l1 * sin(-a - d_angle1+PI);
+    x1 = int(x1/cellWidth) * cellWidth;
+    x2 = int(x2/cellWidth) * cellWidth;
+    x3 = int(x3/cellWidth) * cellWidth;
+    x4 = int(x4/cellWidth) * cellWidth;
+    y1 = int(y1/cellHeight) * cellHeight;
+    y2 = int(y2/cellHeight) * cellHeight;
+    y3 = int(y3/cellHeight) * cellHeight;
+    y4 = int(y4/cellHeight) * cellHeight;
+    fill(0);
+    ellipse(x1,y1,footSize,footSize);
+    ellipse(x2,y2,footSize,footSize);
+    ellipse(x3,y3,footSize,footSize);
+    ellipse(x4,y4,footSize,footSize);
+    noFill();
+    bezier(x1,y1,x2,y2, x4,y4,x3,y3);
+    bezier(x2,y2,x1,y1, x3,y3,x4,y4);
+
   }
 
 
