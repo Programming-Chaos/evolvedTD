@@ -19,6 +19,7 @@ class structure {
       case 'i':
       case 'l':
       case 'g':
+        the_player.numTowers++;
         type = 't';
         t = new tower(tp, ID, this);
         break;
@@ -28,6 +29,8 @@ class structure {
 
 class farm {
   int ID;
+  int energy;           // gained from bioreactors, used to drill
+  int maxEnergy = 1000; // max energy the drill can have
   float angle; // angle of farm's production rotation platform
   PImage base; // farm base
   PImage rotator; // farm rotation platform
@@ -51,6 +54,8 @@ class farm {
   float baseShieldRegen;
   int shieldRegenUpgrades = 0;
   int shieldRegenButtons[] = new int[5];
+  int range = 200;
+  int energyGathering;
   String button1text;
   String button2text;
   String button3text;
@@ -60,6 +65,7 @@ class farm {
   boolean conflict = false;
   boolean remove = false;
   char type;
+  ArrayList<food> energySources;
   int[] taste;
   Panel upgradePanel;
   structure parent;
@@ -93,6 +99,8 @@ class farm {
         baseProductionSpeed = 1;
         baseMaxShield = 50;
         baseShieldRegen = 1;
+        energySources = new ArrayList<food>();
+        energyGathering = 0;
         base = loadImage("assets/bioreactor/BioGen Base-01.png");
         rotator = loadImage("assets/bioreactor/BioGen Top-01.png");
         nametext = "Bioreactor";
@@ -106,6 +114,8 @@ class farm {
         shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
         break;
       case 'd':
+        the_player.numTowers++;
+        energy = 0;
         parent.moneyinvested += the_player.dcost;
         baseProductionSpeed = 1;
         baseMaxShield = 50;
@@ -205,16 +215,87 @@ class farm {
         conflict = true;
     }
     else if (state == State.RUNNING) { // farm is placed and running
-      if (productiontimer == 5) {
-        productiontimer = 0;
-        the_player.money += (productionSpeed*(generation+1)); // this is the point of farms, right now
-        if (shield < maxShield) shield += shieldRegen;
-        if (shield > maxShield) shield = maxShield;
+      switch (type) {
+        case 'b':
+          updateEnergySources();
+          if (display) displayElectricalArcs();
+          if (productiontimer == 100) {
+            productiontimer = 0;
+            if (energySources.size() < (10*(productionSpeedUpgrades+1))) generateBiomat();
+          }
+          if (productiontimer == 0 || productiontimer == 50) the_player.addEnergy(energyGathering);
+          productiontimer++;
+          angle += (productionSpeed*PI/32);
+          if (angle > 2*PI) angle -= 2*PI;
+          break;
+        case 'd':
+          if (productiontimer == 5) {
+            productiontimer = 0;
+            if (energy > 10) {
+              if (!mining.looping) mining.beginLooping();
+              the_player.money += (productionSpeed*(generation+1)); // this is the point of drills, right now
+              energy -= 10;
+            }
+            else if (mining.looping) mining.reset();
+            if (shield < maxShield) shield += shieldRegen;
+            if (shield > maxShield) shield = maxShield;
+          }
+          productiontimer++;
+          break;
       }
-      productiontimer++;
-      angle += (productionSpeed*PI/32);
-      if (angle > 2*PI) angle -= 2*PI;
     }
+  }
+  
+  void displayElectricalArcs() {
+    Vec2 pos;
+    int loopfor;
+    float distance;
+    for (food f : energySources) {
+      pos = box2d.getBodyPixelCoord(f.the_food);
+      distance = sqrt(((xpos-pos.x)*(xpos-pos.x))+((ypos-pos.y)*(ypos-pos.y)));
+      beginShape();
+      noFill();
+      stroke(100,255,255,255);
+      if (f.biomat) strokeWeight(f.single?0.5:1.5);
+      else strokeWeight(0.1);
+      vertex(pos.x,pos.y);
+      loopfor = round(random(2,8));
+      for (int i = 1; i < loopfor; i++)
+        vertex(pos.x+((float)(xpos-pos.x)*i/loopfor)+random(-0.2*distance/loopfor,0.2*range/loopfor),pos.y+((float)(ypos-pos.y)*i/loopfor)+random(-0.2*range/loopfor,0.2*range/loopfor));
+      vertex(xpos,ypos);
+      endShape();
+    }
+  }
+  
+  void updateEnergySources() {
+    Vec2 pos;
+    energySources.clear();
+    energyGathering = 0;
+    for (food f : foods) {
+      pos = box2d.getBodyPixelCoord(f.the_food);
+      if ((sqrt(((xpos-pos.x)*(xpos-pos.x))+((ypos-pos.y)*(ypos-pos.y)))) <= range) {
+        energySources.add(f);
+        energyGathering++;
+      }
+    }
+    for (food f : biomats) {
+      pos = box2d.getBodyPixelCoord(f.the_food);
+      if ((sqrt(((xpos-pos.x)*(xpos-pos.x))+((ypos-pos.y)*(ypos-pos.y)))) <= range) {
+        energySources.add(f);
+        energyGathering += (f.single?5:15);
+      }
+    }
+  }
+  
+  void generateBiomat() {
+    float biomatrotation = random(2*PI);
+    float biomatdistance = random(radius, range);
+    while ((xpos+(biomatdistance*sin(biomatrotation))) < (-1*worldWidth/2) || (xpos+(biomatdistance*sin(biomatrotation))) > (worldWidth/2) || 
+           (ypos+(biomatdistance*cos(biomatrotation))) < (-1*worldHeight/2) || (ypos+(biomatdistance*cos(biomatrotation))) > (worldHeight/2)) {
+      biomatrotation = random(2*PI);
+      biomatdistance = random(radius, range);
+    }
+    biomats.add(new food(xpos+(biomatdistance*sin(biomatrotation)),ypos+(biomatdistance*cos(biomatrotation)),((random(10)<5)?true:false)));
   }
 
   void display() {
@@ -226,6 +307,16 @@ class farm {
     rotate(angle);
     if (type != 'd') image(rotator,-1*((float)radius*1.15),-1*((float)radius*1.15), ((float)radius*1.15)*2, ((float)radius*1.15)*2);
     popMatrix();
+
+    if (type == 'd') {
+      // draw drill energy bar
+      noFill();
+      stroke(0);
+      rect(xpos, ypos-62, 0.1*maxEnergy, 6);
+      noStroke();
+      fill(0, 0, 255);
+      rect(xpos, ypos-62, 0.1*energy, 6);
+    }
 
     // draw farm health bar
     noFill();

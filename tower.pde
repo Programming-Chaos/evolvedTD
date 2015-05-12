@@ -18,40 +18,42 @@ class BurntCreature {
   }
   
   void display() {
-    pushMatrix();
-    translate(center.x,center.y);
-    rotate(-1*angle);
-    noStroke();
-    if (timer > 36)
-      fill(255,(255-((timer-35)*63)),(255-((timer-35)*63)),255);
-    else if (timer <= 36 && timer > 34)
-      fill(255,255,255,255);
-    else if (timer <= 34 && timer > 30)
-      fill (((timer-31)*85),((timer-31)*85),((timer-31)*85),255);
-    else if (timer <= 30 && timer > 20)
-      fill (0,0,0,255);
-    else if (timer <= 20)
-      fill (0,0,0,(timer*12));
-    beginShape();
-    for (Vec2 v : coords)
-      vertex(v.x,v.y);
-    /*vertex(20, 20);
-    vertex(40, 20);
-    vertex(40, 40);
-    vertex(60, 40);
-    vertex(60, 60);
-    vertex(20, 60);*/
-    endShape(CLOSE);
-    stroke(0);
-    popMatrix();
+    if (display) {
+      pushMatrix();
+      translate(center.x,center.y);
+      rotate(-1*angle);
+      noStroke();
+      if (timer > 36)
+        fill(255,(255-((timer-35)*63)),(255-((timer-35)*63)),255);
+      else if (timer <= 36 && timer > 34)
+        fill(255,255,255,255);
+      else if (timer <= 34 && timer > 30)
+        fill (((timer-31)*85),((timer-31)*85),((timer-31)*85),255);
+      else if (timer <= 30 && timer > 20)
+        fill (0,0,0,255);
+      else if (timer <= 20)
+        fill (0,0,0,(timer*12));
+      beginShape();
+      for (Vec2 v : coords)
+        vertex(v.x,v.y);
+      /*vertex(20, 20);
+      vertex(40, 20);
+      vertex(40, 40);
+      vertex(60, 40);
+      vertex(60, 60);
+      vertex(20, 60);*/
+      endShape(CLOSE);
+      stroke(0);
+      popMatrix();
+    }
+    if (timer == 0) remove = true;
     timer--;
   }
 }
 
 class tower {
   int ID;
-  int energy;           // regained by keeping resources, used to defend (fire weapons, etc.)
-  int energyGain;       // energy gain per timestep
+  int energy;           // gained from bioreactors, used to defend (fire weapons, etc.)
   int maxEnergy = 1000; // max energy the tower can have
   ArrayList<projectile> projectiles;  // list of active projectiles
   ArrayList<BurntCreature> burntcreatures;
@@ -118,8 +120,7 @@ class tower {
     parent = prnt;
     ID = id;
     type = t;
-    energy = maxEnergy;
-    energyGain = 0;  // should be determined by upgrades, can start at 0
+    energy = 0;
     projectiles = new ArrayList<projectile>();
     burntcreatures = new ArrayList<BurntCreature>();
     firing = new Animation();
@@ -364,7 +365,6 @@ class tower {
       }
       shieldregentimer++;
       if (laserfiretimer > 0) laserfiretimer--;
-      energy += energyGain;  // gain energy
       if (targeting.timer >= (((float)14/18)*targeting.duration) && poweringup) {
         poweringup = false;
         fire_projectile();
@@ -522,7 +522,6 @@ class tower {
   }
 
   void next_generation() { // update the tower
-    energy = maxEnergy; // reset energy (could/should depend on remaining resources)
     for (projectile p: projectiles)
       if (p != null)
         p.killBody();

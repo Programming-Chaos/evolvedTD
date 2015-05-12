@@ -97,16 +97,18 @@ class projectile {
           distance = sqrt(((cpos.x-pos.x)*(cpos.x-pos.x))+((cpos.y-pos.y)*(cpos.y-pos.y)))-40;
           maxRange = (damage*50);
           if (distance < maxRange && c.alive) {
-            beginShape();
-            noFill();
-            stroke(255,255,100,255);
-            strokeWeight(1);
-            vertex(pos.x,pos.y);
-            loopfor = round(random(2,8));
-            for (int i = 1; i < loopfor; i++)
-              vertex(pos.x+((float)(cpos.x-pos.x)*i/loopfor)+random(-1*distance/loopfor,damage/loopfor),pos.y+((float)(cpos.y-pos.y)*i/loopfor)+random(-1*damage/loopfor,damage/loopfor));
-            vertex(cpos.x,cpos.y);
-            endShape();
+            if (display) {
+              beginShape();
+              noFill();
+              stroke(255,255,100,255);
+              strokeWeight(0.5);
+              vertex(pos.x,pos.y);
+              loopfor = round(random(2,8));
+              for (int i = 1; i < loopfor; i++)
+                vertex(pos.x+((float)(cpos.x-pos.x)*i/loopfor)+random(-1*distance/loopfor,damage/loopfor),pos.y+((float)(cpos.y-pos.y)*i/loopfor)+random(-1*damage/loopfor,damage/loopfor));
+              vertex(cpos.x,cpos.y);
+              endShape();
+            }
             
             c.health += (-1*damage*((maxRange-distance)/maxRange));
             // increase or decrease this number to lengthen or shorten the

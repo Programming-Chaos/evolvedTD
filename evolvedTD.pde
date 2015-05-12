@@ -36,14 +36,15 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
-boolean mistermoneybagsmode = true;
-boolean invinciblestructures = true;
+boolean mistermoneybagsmode = false;
+boolean invinciblestructures = false;
 
 environment environ;           // the environment object
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
 ArrayList<food> foods;         // list of food objects in the world
+ArrayList<food> biomats;       // list of biomat objects in the world
 ArrayList<rock> rocks;         // list of rock objects in the world
 ArrayList<Panel> panels;
 ArrayList<Animation> animations;
@@ -155,9 +156,20 @@ void draw() {
       }
     }
   }
+  for (int i = 0; i < biomats.size(); i++) { // go through the list of biomat and if any was collided into by a creature, remove it.
+    food f = biomats.get(i);
+    if (f != null) {
+      if (f.update() == 1) {
+        biomats.remove(i); // if a biomat was eaten remove it from the list
+      }
+    }
+  }
 
   if (display && displayFood) {
     for (food f: foods) { // go through the array list of food and display them
+      f.display();
+    }
+    for (food f: biomats) { // go through the array list of food and display them
       f.display();
     }
   }
@@ -447,7 +459,6 @@ void beginContact(Contact cp) { // called when two box2d objects collide
   }
 }
 
-
 void endContact(Contact cp) {
   if (state != State.RUNNING) { // probably not necessary?
     return;
@@ -503,6 +514,7 @@ void endContact(Contact cp) {
 
 void place_food() { // done once at the beginning of the game
   foods = new ArrayList<food>();
+  biomats = new ArrayList<food>();
   for (int i = 0; i < 50; i++) {
     food f = new food((int)random(-0.2 * worldWidth, 0.2 * worldWidth),
                       (int)random(-0.2 * worldHeight, 0.2 * worldHeight)); // places food randomly near the tower
@@ -575,7 +587,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
         else {
           boolean towersBuilt = false;
           for (structure s : the_player.structures) {
-            if (s.type != 'b') {
+            if (s.type != 'f') {
               towersBuilt = true;
               break;
             }
@@ -584,7 +596,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
             switch (the_player.activeweapon) {
               case 1:
                 for (structure s : the_player.structures) {
-                  if (s.type != 'b') {
+                  if (s.type != 'f') {
                     if (!s.t.firing.active() && !s.t.targeting.active()) {
                       s.t.target = new Vec2(mouse_x,mouse_y);
                       s.t.fire(); // have the tower fire its active weapon if unpaused
