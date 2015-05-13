@@ -172,7 +172,7 @@ void draw() {
     for (food f: biomats) { // go through the array list of food and display them
       f.display();
     }
-  }
+  } //<>//
   
   for (int i = 0; i < rocks.size(); i++) { // go through the list of rocks and if any was pushed outside map, remove it.
     rock r = rocks.get(i);
@@ -192,7 +192,10 @@ void draw() {
       r.display();
     }
   }
-
+  if (the_player.placing){
+    //println("stuff");
+  }
+  
   the_player.update();
   if (display) {
     the_player.display(); // display the interface for the player
@@ -287,7 +290,7 @@ void keyPressed() { // if a key is pressed this function is called
               break;
             }
           }
-          else {
+          else if (s.type == 't') {
             if (mouse_x < s.t.xpos + s.t.radius && mouse_x > s.t.xpos - s.t.radius
              && mouse_y < s.t.ypos + s.t.radius && mouse_y > s.t.ypos - s.t.radius) {
               the_player.selectedStructure = s;
@@ -573,9 +576,19 @@ void mouseClicked() { // called if either mouse button is pressed and released w
               the_player.structurePanel.shown = false;
             }
           }
-          else {
+          else if (the_player.pickedup.type == 't') {
             if (!the_player.pickedup.t.conflict) {
               the_player.pickedup.t.inTransit = false;
+              the_player.pickedup = null;
+              the_player.placing = false;
+              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+              the_player.structurePanel.hiddenpanel = true;
+              the_player.structurePanel.shown = false;
+            }
+          }
+          else if (the_player.pickedup.type == 'c') {
+            if (!the_player.pickedup.c.conflict) {
+              the_player.pickedup.c.inTransit = false;
               the_player.pickedup = null;
               the_player.placing = false;
               the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
@@ -625,6 +638,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
           the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
           the_player.structurePanel.hiddenpanel = true;
           the_player.structurePanel.shown = false;
+          the_player.updateStructures();
         }
       }
       else {
@@ -635,6 +649,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
           the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
           the_player.structurePanel.hiddenpanel = true;
           the_player.structurePanel.shown = false;
+          the_player.updateStructures();
         }
       }
     }
@@ -681,13 +696,31 @@ void mouseClicked() { // called if either mouse button is pressed and released w
                 the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
                 the_player.structurePanel.hiddenpanel = false;
                 the_player.structurePanel.shown = true;
+                the_player.updateStructures();
+              }
+              else the_player.selectedStructure = s;
+              break;
+            }
+          }
+          else if (s.type == 'c') {
+            if (sqrt(((mouse_x-s.f.xpos)*(mouse_x-s.f.xpos))+((mouse_y-s.f.ypos)*(mouse_y-s.f.ypos))) < s.f.radius) {
+              structureclick = true;//select the endpoint of the cable
+              if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
+                s.f.inTransit = true;
+                s.f.xpos = round(mouse_x);
+                s.f.ypos = round(mouse_y);
+                the_player.pickedup = s;
+                the_player.placing = true;
+                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
+                the_player.structurePanel.hiddenpanel = false;
+                the_player.structurePanel.shown = true;
+                the_player.updateStructures();
               }
               else the_player.selectedStructure = s;
               break;
             }
           }
           else {
-            selected_creature = "Creature Selected";
             if (sqrt(((mouse_x-s.t.xpos)*(mouse_x-s.t.xpos))+((mouse_y-s.t.ypos)*(mouse_y-s.t.ypos))) < s.t.radius) {
               structureclick = true;
               if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
@@ -699,6 +732,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
                 the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
                 the_player.structurePanel.hiddenpanel = false;
                 the_player.structurePanel.shown = true;
+                the_player.updateStructures();
               }
               else the_player.selectedStructure = s;
               break;

@@ -31,6 +31,7 @@ class player {
   int gcost = 4000;
   int bcost = 100;
   int dcost = 100;
+  int ccost = 0;
   int money = 500;
   int currentcost = 0;
   int moneytimer = 0;
@@ -40,7 +41,6 @@ class player {
   int targetMode = 1;
   float framerate;
   int frameraterefreshtimer = 0;
-  int numTowers = 0;
   structure pickedup;
   
   Panel testpanel;
@@ -100,14 +100,15 @@ class player {
     farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'f') selectedStructure.f.upgradePanel.enabled = true; } });
 
     structurePanel = new Panel(2500, 300, 0, 1100-140, true); // -140 so it's not cut off the bottom of some people's screens
-    structurePanel.createButton(300, 300, -1100, 0, rcost + "$\nRailgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
-    structurePanel.createButton(300, 300, -800, 0, pcost + "$\nPlasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
-    structurePanel.createButton(300, 300, -500, 0, icost + "$\nFreeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
-    structurePanel.createButton(300, 300, -200, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
-    structurePanel.createButton(300, 300, 100, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
-    structurePanel.createButton(300, 300, 800, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
-    structurePanel.createButton(300, 300, 500, 0, bcost + "$\nDrill", 45, 50, 50, 50, new ButtonPress() {public void pressed() { placeStructure('d'); } });
-    structurePanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
+    structurePanel.createButton(250, 300, -1125, 0, rcost + "$\nRailgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
+    structurePanel.createButton(250, 300, -875, 0, pcost + "$\nPlasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
+    structurePanel.createButton(250, 300, -625, 0, icost + "$\nFreeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
+    structurePanel.createButton(250, 300, -375, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
+    structurePanel.createButton(250, 300, -125, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
+    structurePanel.createButton(250, 300, 375, 0, ccost + "$\nCable", 45, 100, 100, 100, new ButtonPress() {public void pressed() { placeStructure('c'); } });
+    structurePanel.createButton(250, 300, 625, 0, bcost + "$\nDrill", 45, 50, 50, 50, new ButtonPress() {public void pressed() { placeStructure('d'); } });
+    structurePanel.createButton(250, 300, 875, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
+    structurePanel.createButton(250, 300, 1125, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
     structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
 
     test =  new Panel(540,600,-960,980-1800,true);// -140 so it's not cut off the bottom of some people's screens
@@ -260,7 +261,7 @@ class player {
         towerstatsPanel.enabled = false;
         farmstatsPanel.enabled = true;
       }
-      else {
+      else if (selectedStructure.type == 't') {
         farmstatsPanel.enabled = false;
         towerstatsPanel.enabled = true;
       }
@@ -273,7 +274,8 @@ class player {
     rectMode(CENTER);
     for (structure s : structures) { // walk through the structures
       if (s.type == 'f') s.f.display();  // display them all
-      else s.t.display();
+      else if (s.type == 't') s.t.display();
+      else if (s.type == 'c') s.c.display();
       
     }
     for (Panel p : panels)
@@ -299,16 +301,18 @@ class player {
           structures.remove(i);
         }
       }
-      else {
+      else if (structures.get(i).type == 't') {
         structures.get(i).t.update(); // update them
         if (structures.get(i).t.remove) { // delete if it's dead
-          numTowers--;
           structures.get(i).t.tower_body.setUserData(null);
           for (Fixture f = structures.get(i).t.tower_body.getFixtureList(); f != null; f = f.getNext())
             f.setUserData(null);
           box2d.destroyBody(structures.get(i).t.tower_body); // destroy the body of a dead tower
           structures.remove(i);
         }
+      }
+      else if (structures.get(i).type == 'c') {
+        structures.get(i).c.update(); // update them
       }
     }
     for (int i = panels.size() - 1; i >= 0; i--)
@@ -349,53 +353,46 @@ class player {
     rocks.add(new rock(round(mouse_x), round(mouse_y))); // rocks is a global list
   }
   
-  void addEnergy(int e) { // conservation of energy is important
-    if (numTowers == 0) return; //<>//
-    int portion = e/numTowers;
-    int remainder = (e-(portion*numTowers));
-    for (structure s : structures) { // first all towers get their fair slice of the energy allottment
-      if (s.type == 't') {
-        if ((s.t.maxEnergy-s.t.energy) < portion) {
-          remainder += (portion-(s.t.maxEnergy-s.t.energy));
-          s.t.energy = s.t.maxEnergy;
+  void updateStructures() {
+    for (structure z : structures)
+      if (placing?(z.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+        switch (z.type) {
+          case 'f':
+            if (z.f.type == 'b') {
+              z.f.connectedCables.clear();
+              for (structure s : structures)
+                if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+                  if (s.type == 'c')
+                    if (s.c.xpos == z.f.xpos && s.c.ypos == z.f.ypos)
+                      z.f.connectedCables.add(s.c);
+            }
+            break;
+          case 'c':
+            z.c.connectedStructures.clear();
+            for (structure s : structures)
+              if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+                switch (s.type) {
+                  case 't':
+                    if (s.t.xpos == z.c.xpos && s.t.ypos == z.c.ypos)
+                      z.c.connectedStructures.add(s);
+                    break;
+                  case 'f':
+                    if (s.f.type == 'd')
+                      if (s.f.xpos == z.c.xpos && s.f.ypos == z.c.ypos)
+                        z.c.connectedStructures.add(s);
+                    break;
+                  case 'c':
+                    if (s.c.xpos == z.c.xpos && s.c.ypos == z.c.ypos)
+                      z.c.connectedStructures.add(s);
+                    break;
+                }
+            break;
         }
-        else s.t.energy += portion;
-      }
-      else if (s.f.type == 'd') {
-        if ((s.f.maxEnergy-s.f.energy) < portion) {
-          remainder += (portion-(s.f.maxEnergy-s.f.energy));
-          s.t.energy = s.t.maxEnergy;
-        }
-        else s.f.energy += portion;
-      }
-    }
-    if (remainder > 0) { // then the remainder is used to top off towers in a random order of priority
-      IntList order = new IntList();
-      for (int i = 0; i < structures.size(); i++)
-        order.append(i);
-      order.shuffle();
-      for (int i = 0; i < structures.size(); i++) {
-        if (structures.get(order.get(i)).type == 't') {
-          if ((structures.get(order.get(i)).t.maxEnergy-structures.get(order.get(i)).t.energy) < remainder) {
-            remainder -= (portion-(structures.get(order.get(i)).t.maxEnergy-structures.get(order.get(i)).t.energy));
-            structures.get(order.get(i)).t.energy = structures.get(order.get(i)).t.maxEnergy;
-          }
-          else structures.get(order.get(i)).t.energy += remainder;
-        }
-        else if (structures.get(order.get(i)).f.type == 'd') {
-          if ((structures.get(order.get(i)).f.maxEnergy-structures.get(order.get(i)).f.energy) < remainder) {
-            remainder -= (portion-(structures.get(order.get(i)).f.maxEnergy-structures.get(order.get(i)).f.energy));
-            structures.get(order.get(i)).f.energy = structures.get(order.get(i)).f.maxEnergy;
-          }
-          else structures.get(order.get(i)).f.energy += remainder;
-        }
-      }
-    }
   }
   
   void placeStructure(char type) {
     if (placing) {
-      if (type == (pickedup.type == 'f' ? pickedup.f.type : pickedup.t.type))
+      if (type == (pickedup.type == 'f' ? pickedup.f.type : (pickedup.type == 't' ? pickedup.t.type : pickedup.c.type)))
         deleteStructure();
       else switchStructure(type);
     }
@@ -423,6 +420,9 @@ class player {
         case 'd':
           cost = dcost;
           break;
+        case 'c':
+          cost = 0;
+          break;
       }
       if (money < cost) {
         println("You do not have sufficient funds to purchase this structure...");
@@ -444,14 +444,12 @@ class player {
         for (Fixture f = pickedup.t.tower_body.getFixtureList(); f != null; f = f.getNext())
           f.setUserData(null);
         box2d.destroyBody(pickedup.t.tower_body); // destroy the body of a dead tower
-        numTowers--;
         break;
       case 'f':
         pickedup.f.farm_body.setUserData(null);
         for (Fixture f = pickedup.f.farm_body.getFixtureList(); f != null; f = f.getNext())
           f.setUserData(null);
         box2d.destroyBody(pickedup.f.farm_body); // destroy the body of a dead farm
-        if (pickedup.f.type == 'd')numTowers--;
     }
     money += (pickedup.moneyinvested/2);
     selectedStructure = null;
@@ -478,6 +476,9 @@ class player {
       case 'd':
         cost = dcost;
         break;
+      case 'c':
+        cost = 0;
+        break;
     }
     if (money < cost) {
       println("You do not have sufficient funds to purchase this structure...");
@@ -500,14 +501,12 @@ class player {
         for (Fixture f = pickedup.t.tower_body.getFixtureList(); f != null; f = f.getNext())
           f.setUserData(null);
         box2d.destroyBody(pickedup.t.tower_body); // destroy the body of a dead tower
-        numTowers--;
         break;
       case 'f':
         pickedup.f.farm_body.setUserData(null);
         for (Fixture f = pickedup.f.farm_body.getFixtureList(); f != null; f = f.getNext())
           f.setUserData(null);
         box2d.destroyBody(pickedup.f.farm_body); // destroy the body of a dead farm
-        if (pickedup.f.type == 'd')numTowers--;
     }
     structures.remove(pickedup);
     money += (pickedup.moneyinvested/2);

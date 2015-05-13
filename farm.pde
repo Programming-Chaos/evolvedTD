@@ -1,32 +1,3 @@
-class structure {
-  int ID;
-  char type;
-  tower t;
-  farm f;
-  int moneyinvested;
-  
-  structure(char tp, int id) {
-    moneyinvested = 0;
-    ID = id;
-    switch (tp) {
-      case 'b':
-      case 'd':
-        type = 'f';
-        f = new farm(tp, ID, this);
-        break;
-      case 'r':
-      case 'p':
-      case 'i':
-      case 'l':
-      case 'g':
-        the_player.numTowers++;
-        type = 't';
-        t = new tower(tp, ID, this);
-        break;
-    }
-  }
-}
-
 class farm {
   int ID;
   int energy;           // gained from bioreactors, used to drill
@@ -69,6 +40,7 @@ class farm {
   int[] taste;
   Panel upgradePanel;
   structure parent;
+  ArrayList<cable> connectedCables;
   /* type is the turret type
    * r: default rail gun
    * l: plasmagun
@@ -100,6 +72,7 @@ class farm {
         baseMaxShield = 50;
         baseShieldRegen = 1;
         energySources = new ArrayList<food>();
+        connectedCables = new ArrayList<cable>();
         energyGathering = 0;
         base = loadImage("assets/bioreactor/BioGen Base-01.png");
         rotator = loadImage("assets/bioreactor/BioGen Top-01.png");
@@ -114,7 +87,6 @@ class farm {
         shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
         break;
       case 'd':
-        the_player.numTowers++;
         energy = 0;
         parent.moneyinvested += the_player.dcost;
         baseProductionSpeed = 1;
@@ -207,8 +179,14 @@ class farm {
             if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
               conflict = true;
           }
-          else if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius*2)
-            conflict = true;
+          else if (s.type == 't') {
+            if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius*2)
+              conflict = true;
+          }
+          else if (s.type == 'c') {
+            if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= radius*2)
+              conflict = true;
+          }
         }
       } // and check if the farm is out-of-bounds
       if (xpos < ((-1*(worldWidth/2))+radius) || xpos > ((worldWidth/2)-radius) || ypos < ((-1*(worldHeight/2))+radius) || ypos > ((worldHeight/2)-radius))
@@ -223,7 +201,7 @@ class farm {
             productiontimer = 0;
             if (energySources.size() < (10*(productionSpeedUpgrades+1))) generateBiomat();
           }
-          if (productiontimer == 0 || productiontimer == 50) the_player.addEnergy(energyGathering);
+          if (productiontimer == 0 || productiontimer == 50) new pulse(this,energyGathering);
           productiontimer++;
           angle += (productionSpeed*PI/32);
           if (angle > 2*PI) angle -= 2*PI;
@@ -348,7 +326,8 @@ class farm {
         if (s != the_player.pickedup) {
           pushMatrix();
           if (s.type == 'f') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
-          else translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
+          else if (s.type == 't') translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
+          else if (s.type == 'c') translate(box2d.getBodyPixelCoord(s.c.terminal_body).x, box2d.getBodyPixelCoord(s.c.terminal_body).y);
           fill(0, 0, 0, 0);
           stroke(0);
           ellipse(0, 0, radius*2, radius*2);
