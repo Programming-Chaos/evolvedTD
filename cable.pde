@@ -17,6 +17,18 @@ class cable {
     type = tp;
     ID = id;
     parent = prnt;
+    otherEnd = null;
+    connectedStructures = new ArrayList<structure>();
+
+    xpos = round(mouse_x);
+    ypos = round(mouse_y);
+  }
+  
+  cable(char tp, int id, structure prnt, cable otherend) {
+    type = tp;
+    ID = id;
+    parent = prnt;
+    otherEnd = otherend;
     connectedStructures = new ArrayList<structure>();
 
     xpos = round(mouse_x);
@@ -55,11 +67,11 @@ class cable {
       for (structure s : the_player.structures) { //check for overlap with existing structures
         if (s != the_player.pickedup) {
           if (s.type == 'f') {
-            if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius*2)
+            if (sqrt((s.f.xpos-xpos)*(s.f.xpos-xpos)+(s.f.ypos-ypos)*(s.f.ypos-ypos)) <= radius+s.t.radius)
               conflict = true;
           }
           else if (s.type == 't') {
-            if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius*2)
+            if (sqrt((s.t.xpos-xpos)*(s.t.xpos-xpos)+(s.t.ypos-ypos)*(s.t.ypos-ypos)) <= radius+s.t.radius)
               conflict = true;
           }
           else if (s.type == 'c') {
@@ -87,12 +99,22 @@ class cable {
       for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
         if (s.ID != the_player.pickedup.ID) {
           pushMatrix();
-          if (s.type == 'f') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
-          else if (s.type == 't') translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
-          else if (s.type == 'c') translate(box2d.getBodyPixelCoord(s.c.terminal_body).x, box2d.getBodyPixelCoord(s.c.terminal_body).y);
           fill(0, 0, 0, 0);
           stroke(0);
-          ellipse(0, 0, radius*2, radius*2);
+          switch (s.type) {
+            case 'f':
+              translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
+              ellipse(0, 0, s.f.radius*2, s.f.radius*2);
+              break;
+            case 't':
+              translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
+              ellipse(0, 0, s.t.radius*2, s.t.radius*2);
+              break;
+            case 'c':
+              translate(box2d.getBodyPixelCoord(s.c.terminal_body).x, box2d.getBodyPixelCoord(s.c.terminal_body).y);
+              ellipse(0, 0, s.c.radius*2, s.c.radius*2);
+              break;
+          }
           stroke(0);
           popMatrix();
         }
@@ -109,9 +131,10 @@ class cable {
     }
     pushMatrix();
     stroke(0);
-    strokeWeight(1);
+    strokeWeight(0);
     fill(0,0,0,255);
     ellipse(xpos,ypos,radius*2,radius*2);
+    strokeWeight(1);
     popMatrix();
   }
 }

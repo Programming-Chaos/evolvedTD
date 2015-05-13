@@ -355,7 +355,7 @@ class tower {
               conflict = true;
           }
           else if (s.type == 'c') {
-            if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= radius*2)
+            if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= radius+s.c.radius)
               conflict = true;
           }
         }
@@ -506,12 +506,22 @@ class tower {
       for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
         if (s != the_player.pickedup) {
           pushMatrix();
-          if (s.type == 'f') translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
-          else if (s.type == 't') translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
-          else if (s.type == 'c') translate(box2d.getBodyPixelCoord(s.c.terminal_body).x, box2d.getBodyPixelCoord(s.c.terminal_body).y);
           fill(0, 0, 0, 0);
           stroke(0);
-          ellipse(0, 0, radius*2, radius*2);
+          switch (s.type) {
+            case 'f':
+              translate(box2d.getBodyPixelCoord(s.f.farm_body).x, box2d.getBodyPixelCoord(s.f.farm_body).y);
+              ellipse(0, 0, s.f.radius*2, s.f.radius*2);
+              break;
+            case 't':
+              translate(box2d.getBodyPixelCoord(s.t.tower_body).x, box2d.getBodyPixelCoord(s.t.tower_body).y);
+              ellipse(0, 0, s.t.radius*2, s.t.radius*2);
+              break;
+            case 'c':
+              translate(box2d.getBodyPixelCoord(s.c.terminal_body).x, box2d.getBodyPixelCoord(s.c.terminal_body).y);
+              ellipse(0, 0, s.c.radius*2, s.c.radius*2);
+              break;
+          }
           stroke(0);
           popMatrix();
         }

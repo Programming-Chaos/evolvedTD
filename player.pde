@@ -32,7 +32,7 @@ class player {
   int bcost = 100;
   int dcost = 100;
   int ccost = 0;
-  int money = 500;
+  int money = 5000;
   int currentcost = 0;
   int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active
@@ -313,6 +313,20 @@ class player {
       }
       else if (structures.get(i).type == 'c') {
         structures.get(i).c.update(); // update them
+        if (structures.get(i).c.remove) {
+          if (pickedup.c.otherEnd != null) {
+            pickedup.c.otherEnd.terminal_body.setUserData(null);
+            for (Fixture f = pickedup.c.otherEnd.terminal_body.getFixtureList(); f != null; f = f.getNext())
+              f.setUserData(null);
+            box2d.destroyBody(pickedup.c.otherEnd.terminal_body); // destroy the body of a dead terminal
+            structures.remove(pickedup.c.otherEnd.parent);
+          }
+          pickedup.c.terminal_body.setUserData(null);
+          for (Fixture f = pickedup.c.terminal_body.getFixtureList(); f != null; f = f.getNext())
+            f.setUserData(null);
+          box2d.destroyBody(pickedup.c.terminal_body); // destroy the body of a dead terminal
+          structures.remove(i);
+        }
       }
     }
     for (int i = panels.size() - 1; i >= 0; i--)
@@ -330,7 +344,7 @@ class player {
     // check if the mouse was pressed in the player panel
     int s = panels.size();
     for (int i = 0; i < s; i++)
-      panels.get(i).mouse_pressed();
+      if (panels.get(i).mouse_pressed())break;
   }
 
   void wave_fire(){
@@ -393,10 +407,10 @@ class player {
   void placeStructure(char type) {
     if (placing) {
       if (type == (pickedup.type == 'f' ? pickedup.f.type : (pickedup.type == 't' ? pickedup.t.type : pickedup.c.type)))
-        deleteStructure();
-      else switchStructure(type);
+        deleteStructure(); // if the button pressed is the same as the structure held, sell the held structure
+      else switchStructure(type); // else sell the held structure and pick up a new one
     }
-    else {
+    else { // else try to buy a new structure
       int cost = 0;
       switch (type) {
         case 'r':
@@ -438,19 +452,7 @@ class player {
   }
   
   void switchStructure(char type) {
-    switch (pickedup.type) {
-      case 't':
-        pickedup.t.tower_body.setUserData(null);
-        for (Fixture f = pickedup.t.tower_body.getFixtureList(); f != null; f = f.getNext())
-          f.setUserData(null);
-        box2d.destroyBody(pickedup.t.tower_body); // destroy the body of a dead tower
-        break;
-      case 'f':
-        pickedup.f.farm_body.setUserData(null);
-        for (Fixture f = pickedup.f.farm_body.getFixtureList(); f != null; f = f.getNext())
-          f.setUserData(null);
-        box2d.destroyBody(pickedup.f.farm_body); // destroy the body of a dead farm
-    }
+    structures.remove(pickedup);
     money += (pickedup.moneyinvested/2);
     selectedStructure = null;
     int cost = 0;
@@ -495,19 +497,6 @@ class player {
   
   void deleteStructure() {
     placing = false;
-    switch (pickedup.type) {
-      case 't':
-        pickedup.t.tower_body.setUserData(null);
-        for (Fixture f = pickedup.t.tower_body.getFixtureList(); f != null; f = f.getNext())
-          f.setUserData(null);
-        box2d.destroyBody(pickedup.t.tower_body); // destroy the body of a dead tower
-        break;
-      case 'f':
-        pickedup.f.farm_body.setUserData(null);
-        for (Fixture f = pickedup.f.farm_body.getFixtureList(); f != null; f = f.getNext())
-          f.setUserData(null);
-        box2d.destroyBody(pickedup.f.farm_body); // destroy the body of a dead farm
-    }
     structures.remove(pickedup);
     money += (pickedup.moneyinvested/2);
     pickedup = null;
