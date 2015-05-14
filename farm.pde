@@ -27,6 +27,7 @@ class farm {
   int shieldRegenButtons[] = new int[5];
   int range = 200;
   int energyGathering;
+  int numBiomatsNearby;
   String button1text;
   String button2text;
   String button3text;
@@ -185,7 +186,11 @@ class farm {
           }
           else if (s.type == 'c') {
             if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= radius+s.c.radius)
-              conflict = true;
+              if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= s.c.radius) {
+                xpos = s.c.xpos;
+                ypos = s.c.ypos;
+              }
+              else conflict = true;
           }
         }
       } // and check if the farm is out-of-bounds
@@ -199,9 +204,9 @@ class farm {
           if (display) displayElectricalArcs();
           if (productiontimer == 100) {
             productiontimer = 0;
-            if (energySources.size() < (10*(productionSpeedUpgrades+1))) generateBiomat();
+            if (numBiomatsNearby < (10*(productionSpeedUpgrades+1))) generateBiomat();
           }
-          if (productiontimer == 0 || productiontimer == 50) new pulse(this,energyGathering);
+          if (productiontimer == 25 || productiontimer == 75) new pulse(this,energyGathering);
           productiontimer++;
           angle += (productionSpeed*PI/32);
           if (angle > 2*PI) angle -= 2*PI;
@@ -234,14 +239,15 @@ class farm {
       beginShape();
       noFill();
       stroke(100,255,255,255);
-      if (f.biomat) strokeWeight(f.single?0.5:1.5);
-      else strokeWeight(0.1);
+      if (f.biomat) strokeWeight(f.single?1:2);
+      else strokeWeight(0.4);
       vertex(pos.x,pos.y);
       loopfor = round(random(2,8));
       for (int i = 1; i < loopfor; i++)
         vertex(pos.x+((float)(xpos-pos.x)*i/loopfor)+random(-0.2*distance/loopfor,0.2*range/loopfor),pos.y+((float)(ypos-pos.y)*i/loopfor)+random(-0.2*range/loopfor,0.2*range/loopfor));
       vertex(xpos,ypos);
       endShape();
+      strokeWeight(1);
     }
   }
   
@@ -249,18 +255,20 @@ class farm {
     Vec2 pos;
     energySources.clear();
     energyGathering = 0;
+    numBiomatsNearby = 0;
     for (food f : foods) {
       pos = box2d.getBodyPixelCoord(f.the_food);
       if ((sqrt(((xpos-pos.x)*(xpos-pos.x))+((ypos-pos.y)*(ypos-pos.y)))) <= range) {
         energySources.add(f);
-        energyGathering++;
+        energyGathering += 2;
       }
     }
     for (food f : biomats) {
       pos = box2d.getBodyPixelCoord(f.the_food);
       if ((sqrt(((xpos-pos.x)*(xpos-pos.x))+((ypos-pos.y)*(ypos-pos.y)))) <= range) {
         energySources.add(f);
-        energyGathering += (f.single?5:15);
+        numBiomatsNearby++;
+        energyGathering += (f.single?5:10);
       }
     }
   }

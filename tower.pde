@@ -356,7 +356,11 @@ class tower {
           }
           else if (s.type == 'c') {
             if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= radius+s.c.radius)
-              conflict = true;
+              if (sqrt((s.c.xpos-xpos)*(s.c.xpos-xpos)+(s.c.ypos-ypos)*(s.c.ypos-ypos)) <= s.c.radius) {
+                xpos = s.c.xpos;
+                ypos = s.c.ypos;
+              }
+              else conflict = true;
           }
         }
       } // and check if the tower is out-of-bounds

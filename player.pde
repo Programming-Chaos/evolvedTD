@@ -32,7 +32,7 @@ class player {
   int bcost = 100;
   int dcost = 100;
   int ccost = 0;
-  int money = 5000;
+  int money = 1000;
   int currentcost = 0;
   int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active
@@ -272,11 +272,22 @@ class player {
     }
 
     rectMode(CENTER);
-    for (structure s : structures) { // walk through the structures
-      if (s.type == 'f') s.f.display();  // display them all
-      else if (s.type == 't') s.t.display();
-      else if (s.type == 'c') s.c.display();
-      
+    if (placing) {
+      for (structure s : structures) if (s.type == 'c' && s.ID != pickedup.ID) s.c.display(); // cables get drawn first so they're not covering up structures
+      for (structure s : structures) { // walk through the structures
+        if (s.type == 'f' && s.ID != pickedup.ID) s.f.display();  // display them all
+        else if (s.type == 't' && s.ID != pickedup.ID) s.t.display();
+      }
+      if (pickedup.type == 't') pickedup.t.display();
+      else if (pickedup.type == 'f') pickedup.f.display();
+      else if (pickedup.type == 'c') pickedup.c.display();
+    }
+    else {
+      for (structure s : structures) if (s.type == 'c') s.c.display(); // cables get drawn first so they're not covering up structures
+      for (structure s : structures) { // walk through the structures
+        if (s.type == 'f') s.f.display();  // display them all
+        else if (s.type == 't') s.t.display();
+      }
     }
     for (Panel p : panels)
       p.display();
@@ -334,7 +345,7 @@ class player {
     if (state == State.RUNNING) {
       if (moneytimer == 10) {
         moneytimer = 0;
-        money += (generation+1);
+        money += (generation);
       }
       moneytimer++;
     }

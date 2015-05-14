@@ -46,8 +46,12 @@ class pulse {
   }
   
   void transmit(structure z) {
-    if (visitedStructureIDs.hasValue(z.ID)) return; // this structure has been visited before and shouldn't be visited again
-    visitedStructureIDs.append(z.ID);
+    if (z.type == 'c') {
+      if (visitedStructureIDs.hasValue(z.c.cableID)) return; // this structure has been visited before and shouldn't be visited again
+    }
+    else if (visitedStructureIDs.hasValue(z.ID)) return; // this structure has been visited before and shouldn't be visited again
+    if (z.type == 'c') visitedStructureIDs.append(z.c.cableID);
+    else visitedStructureIDs.append(z.ID);
     switch (z.type) {
       case 't':
         poweredStructures.add(z);
@@ -83,7 +87,7 @@ class pulse {
         }
         else s.t.energy += portion;
       }
-      else if (s.f.type == 'd') {
+      else {
         if ((s.f.maxEnergy-s.f.energy) < portion) {
           remainder += (portion-(s.f.maxEnergy-s.f.energy));
           s.t.energy = s.t.maxEnergy;
@@ -108,7 +112,7 @@ class pulse {
             remainder = 0;
           }
         }
-        else if (poweredStructures.get(order.get(i)).f.type == 'd') {
+        else {
           if ((poweredStructures.get(order.get(i)).f.maxEnergy-poweredStructures.get(order.get(i)).f.energy) < remainder) {
             remainder -= (portion-(poweredStructures.get(order.get(i)).f.maxEnergy-poweredStructures.get(order.get(i)).f.energy));
             poweredStructures.get(order.get(i)).f.energy = poweredStructures.get(order.get(i)).f.maxEnergy;

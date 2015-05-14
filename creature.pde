@@ -741,7 +741,7 @@ class creature {
               //senses.Set_Taste(munching.f);
               if (munching.f.health == 0) munchnext = null;
             }
-            else {
+            else if (munching.type == 't') {
               if (munching.t.shield < munchstrength) { // this bite will deplete the last of the shield
                 if (munching.t.health < munchstrength) { // this bite will kill the structure
                   addEnergy(40*round(munching.t.health));

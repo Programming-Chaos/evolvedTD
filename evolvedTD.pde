@@ -192,9 +192,6 @@ void draw() {
       r.display();
     }
   }
-  if (the_player.placing){
-    //println("stuff");
-  }
   
   the_player.update();
   if (display) {
@@ -574,6 +571,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
               the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
               the_player.structurePanel.hiddenpanel = true;
               the_player.structurePanel.shown = false;
+              the_player.updateStructures();
             }
           }
           else if (the_player.pickedup.type == 't') {
@@ -584,23 +582,38 @@ void mouseClicked() { // called if either mouse button is pressed and released w
               the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
               the_player.structurePanel.hiddenpanel = true;
               the_player.structurePanel.shown = false;
+              the_player.updateStructures();
             }
           }
           else if (the_player.pickedup.type == 'c') {
             if (!the_player.pickedup.c.conflict) {
-              the_player.pickedup.c.inTransit = false;
-              the_player.pickedup = null;
-              the_player.placing = false;
-              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
-              the_player.structurePanel.hiddenpanel = true;
-              the_player.structurePanel.shown = false;
+              if (the_player.pickedup.c.otherEnd == null) {
+                the_player.pickedup.c.inTransit = false;
+                structure tempcable = new structure('c', the_player.pickedup.ID);
+                tempcable.c.cableID = ++the_player.numStructuresCreated;
+                the_player.pickedup.c.otherEnd = tempcable.c;
+                tempcable.c.otherEnd = the_player.pickedup.c;
+                the_player.pickedup = tempcable;
+                the_player.structures.add(the_player.pickedup);
+              }
+              else {
+                the_player.pickedup.c.inTransit = false;
+                the_player.pickedup.c.enabled = true;
+                the_player.pickedup.c.otherEnd.enabled = true;
+                the_player.pickedup = null;
+                the_player.placing = false;
+                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+                the_player.structurePanel.hiddenpanel = true;
+                the_player.structurePanel.shown = false;
+              }
+              the_player.updateStructures();
             }
           }
         }
         else {
           boolean towersBuilt = false;
           for (structure s : the_player.structures) {
-            if (s.type != 'f') {
+            if (s.type == 't') {
               towersBuilt = true;
               break;
             }
@@ -609,7 +622,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
             switch (the_player.activeweapon) {
               case 1:
                 for (structure s : the_player.structures) {
-                  if (s.type != 'f') {
+                  if (s.type == 't') {
                     if (!s.t.firing.active() && !s.t.targeting.active()) {
                       s.t.target = new Vec2(mouse_x,mouse_y);
                       s.t.fire(); // have the tower fire its active weapon if unpaused
@@ -630,21 +643,52 @@ void mouseClicked() { // called if either mouse button is pressed and released w
   
   if (mouseButton == RIGHT) {
     if (the_player.placing) {
-      if (the_player.pickedup.type == 'f')
-        if (!the_player.pickedup.f.conflict)
+      if (the_player.pickedup.type == 'f') {
+        if (!the_player.pickedup.f.conflict) {
           the_player.pickedup.f.inTransit = false;
-      else if (the_player.pickedup.type == 't')
-        if (!the_player.pickedup.t.conflict)
+          the_player.pickedup = null;
+          the_player.placing = false;
+          the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+          the_player.structurePanel.hiddenpanel = true;
+          the_player.structurePanel.shown = false;
+          the_player.updateStructures();
+        }
+      }
+      else if (the_player.pickedup.type == 't') {
+        if (!the_player.pickedup.t.conflict) {
           the_player.pickedup.t.inTransit = false;
-      else if (the_player.pickedup.type == 'c')
-        if (!the_player.pickedup.c.conflict)
-          the_player.pickedup.c.inTransit = false;
-      the_player.pickedup = null;
-      the_player.placing = false;
-      the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
-      the_player.structurePanel.hiddenpanel = true;
-      the_player.structurePanel.shown = false;
-      the_player.updateStructures();
+          the_player.pickedup = null;
+          the_player.placing = false;
+          the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+          the_player.structurePanel.hiddenpanel = true;
+          the_player.structurePanel.shown = false;
+          the_player.updateStructures();
+        }
+      }
+      else if (the_player.pickedup.type == 'c') {
+        if (!the_player.pickedup.c.conflict) {
+          if (the_player.pickedup.c.otherEnd == null) {
+            the_player.pickedup.c.inTransit = false;
+            structure tempcable = new structure('c', the_player.pickedup.ID);
+            tempcable.c.cableID = ++the_player.numStructuresCreated;
+            the_player.pickedup.c.otherEnd = tempcable.c;
+            tempcable.c.otherEnd = the_player.pickedup.c;
+            the_player.pickedup = tempcable;
+            the_player.structures.add(the_player.pickedup);
+          }
+          else {
+            the_player.pickedup.c.inTransit = false;
+            the_player.pickedup.c.enabled = true;
+            the_player.pickedup.c.otherEnd.enabled = true;
+            the_player.pickedup = null;
+            the_player.placing = false;
+            the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+            the_player.structurePanel.hiddenpanel = true;
+            the_player.structurePanel.shown = false;
+          }
+          the_player.updateStructures();
+        }
+      }
     }
     else { // select a creature or tower
       boolean upgrading = false;
@@ -719,10 +763,12 @@ void mouseClicked() { // called if either mouse button is pressed and released w
             if (sqrt(((mouse_x-s.c.xpos)*(mouse_x-s.c.xpos))+((mouse_y-s.c.ypos)*(mouse_y-s.c.ypos))) < s.c.radius) {
               structureclick = true;
               if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
-                s.c.inTransit = true;
-                s.c.xpos = round(mouse_x);
-                s.c.ypos = round(mouse_y);
                 the_player.pickedup = s;
+                the_player.pickedup.c.inTransit = true;
+                the_player.pickedup.c.xpos = round(mouse_x);
+                the_player.pickedup.c.ypos = round(mouse_y);
+                the_player.pickedup.c.enabled = false;
+                the_player.pickedup.c.otherEnd.enabled = false;
                 the_player.placing = true;
                 the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = true;
                 the_player.structurePanel.hiddenpanel = false;
