@@ -733,7 +733,7 @@ class creature {
       if (munchtimer == 50) {
         if(brain.outputs[2] > 0.0) { // if the creature is hungry
           if (!invinciblestructures) {
-            if (munching.type == 'b') {
+            if (munching.type == 'f') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
                 if (munching.f.health < munchstrength) { // this bite will kill the structure
                   addEnergy(200*round(munching.f.health));
@@ -752,7 +752,7 @@ class creature {
               //senses.Set_Taste(munching.f);
               if (munching.f.health == 0) munchnext = null;
             }
-            else {
+            else if (munching.type == 't') {
               if (munching.t.shield < munchstrength) { // this bite will deplete the last of the shield
                 if (munching.t.health < munchstrength) { // this bite will kill the structure
                   addEnergy(40*round(munching.t.health));

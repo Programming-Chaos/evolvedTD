@@ -1,8 +1,11 @@
 class food {
   Body the_food;
   int radius;
-  int colortimer;;
+  int colortimer;
+  PImage p;
   boolean remove = false;
+  boolean single;
+  boolean biomat;
   int nourishment = 20000;
   /*Taste will be 5 types of taste. - sweet, sour, salty, bitter, umami*/
   int []taste;
@@ -10,6 +13,7 @@ class food {
   int[] getTaste() { return taste; };
   
   food(int x, int y) {
+    biomat = false;
     colortimer = ((int)random(0,100)-50);
     radius = int (random(3,25));
     makebody(x, y);
@@ -23,6 +27,7 @@ class food {
   }
   
   food() {
+    biomat = false;
     colortimer = ((int)random(0,100)-50);
     radius = int (random(3,25));
     makebody((int)random(-0.5*worldWidth, 0.5*worldWidth),
@@ -37,8 +42,41 @@ class food {
   }
   
   food(float x, float y) {
+    biomat = false;
     colortimer = ((int)random(0,100)-50);
     radius = int (random(3,25));
+    makebody((int)x, (int)y);
+    the_food.setUserData(this);
+    taste = new int[5];
+    taste[0] = 100;
+    taste[1] = 0;
+    taste[2] = 0;
+    taste[3] = 0;
+    taste[4] = 50;
+  }
+  
+  food(int x, int y, boolean s) {
+    biomat = true;
+    single = s;
+    if (single) p = loadImage("assets/BioMat/Biomat single-01.png");
+    else p = loadImage("assets/BioMat/Biomatby7-01.png");
+    radius = (single?10:30);
+    makebody(x, y);
+    the_food.setUserData(this);
+    taste = new int[5];
+    taste[0] = 100;
+    taste[1] = 0;
+    taste[2] = 0;
+    taste[3] = 0;
+    taste[4] = 50;
+  }
+  
+  food(float x, float y, boolean s) {
+    biomat = true;
+    single = s;
+    if (single) p = loadImage("assets/BioMat/Biomat single-01.png");
+    else p = loadImage("assets/BioMat/Biomatby7-01.png");
+    radius = (single?10:30);
     makebody((int)x, (int)y);
     the_food.setUserData(this);
     taste = new int[5];
@@ -70,18 +108,25 @@ class food {
   }
   
   void display() {
-    colortimer++;
-    if (colortimer == 50)colortimer = -50;
     Vec2 pos = box2d.getBodyPixelCoord(the_food);
-    //   pushMatrix();
-    //   translate(pos.x,pos.y);
-    fill((colortimer<0 ? (((-1*colortimer)*2)+150) : ((colortimer*2)+150)),(colortimer<0 ? ((-1*colortimer)/5) : (colortimer/5)),(colortimer<0 ? ((-1*colortimer)/5) : (colortimer/5)));
-    stroke(0);
-    ellipse(pos.x, pos.y, radius*2, radius*2);
+    if (biomat) {
+      //image(p,pos.x-(radius*((float)128/80)),pos.y-(radius*((float)128/80)), (radius*((float)128/80))*2, (radius*((float)128/80))*2);
+      if (single) image(p,pos.x-(radius),pos.y-(radius),(radius)*2,(radius)*2);
+      else image(p,pos.x-(radius),pos.y-(radius),(radius)*2,(radius)*2);
+      //fill(0,0,0,0);
+      //stroke(0);
+      //ellipse(pos.x, pos.y, radius*2, radius*2);
+    }
+    else {
+      colortimer++;
+      if (colortimer == 50)colortimer = -50;
+      fill((colortimer<0 ? (((-1*colortimer)*2)+150) : ((colortimer*2)+150)),(colortimer<0 ? ((-1*colortimer)/5) : (colortimer/5)),(colortimer<0 ? ((-1*colortimer)/5) : (colortimer/5)));
+      stroke(0);
+      ellipse(pos.x, pos.y, radius*2, radius*2);
+    }
     if (displayScent) {
       drawFoodScent(pos.x, pos.y);
     }
-    //   popMatrix();
   }
 
   void drawFoodScent( float x, float y ) {

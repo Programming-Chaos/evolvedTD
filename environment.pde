@@ -522,6 +522,26 @@ class environment {
         tileMap[x][y].hasFood(true);
       }
     }
+    for (food fd: biomats) {
+      p = fd.getPos();
+      if (fd != null && p != null) {
+        x = (int)((worldWidth*0.5+p.x-1)/cellWidth);
+        y = (int)((worldHeight*0.5+p.y-1)/cellHeight);
+        if (x >= environWidth || x < 0) {
+        // x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+        fd.remove = true; // remove food if off map
+        continue;
+        }
+        if (y >= environHeight || y < 0) 
+        {
+        // y = (y+environWidth)%environHeight;
+        fd.remove = true; // remove food if off map
+        continue;
+        }
+        tileMap[x][y].setTaste(fd.getTaste());
+        tileMap[x][y].hasFood(true);
+      }
+    }
     update_scent();
 
     //update_creature_scent();
@@ -1223,6 +1243,3 @@ class environment {
     }
   }
 }
-
-
-

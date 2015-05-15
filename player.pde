@@ -29,8 +29,15 @@ class player {
   int icost = 1000;
   int lcost = 2000;
   int gcost = 4000;
+<<<<<<< HEAD
   int bcost = 150;
   int money = 500;
+=======
+  int bcost = 100;
+  int dcost = 100;
+  int ccost = 0;
+  int money = 1000;
+>>>>>>> master
   int currentcost = 0;
   int moneytimer = 0;
   int activeweapon;     // value determines which weapon is active
@@ -42,10 +49,6 @@ class player {
   structure pickedup;
   
   Panel testpanel;
-  
-  float resources;        // amount of resources the tower has
-  float maxResources;     // max resources the tower can store, may not use, if used should be upgradable
-  float resourceGain;     // gain per timestep
   creature selectedCreature;
   structure selectedStructure;
   Panel test;
@@ -63,8 +66,6 @@ class player {
     testpanel.enabled = false;
 
     playerPanel = new Panel(500,420,980,-1020,true);
-    playerPanel.createTextBox(480,50,0,-180,new StringPass() { public String passed() { return ("Resources: " + (int)resources); } },40);
-    playerPanel.createTextBox(480,50,0,-100,new StringPass() { public String passed() { return ("Generation: " + generation); } },40);
     playerPanel.createTextBox(480,50,0,-20,new StringPass() { public String passed() { return ("Time left: " + (timepergeneration - timesteps)); } },40);
     playerPanel.createButton(350,100,0,110,"Wave Fire",50,new ButtonPress() { public void pressed() { wave_fire(); } });
 
@@ -96,21 +97,23 @@ class player {
     farmstatsPanel = new Panel(540,600,-960,980-360,false); // -360 so it's not cut off the bottom of some people's screens
     farmstatsPanel.enabled = false;
     farmstatsPanel.setupTextBoxList(40,50,50,40);
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Farm type: " + selectedStructure.f.nametext) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("ID# " + selectedStructure.ID) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)) : ""); } });
-    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'b' ? ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)) : ""); } });
-    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'b') selectedStructure.f.upgradePanel.enabled = true; } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Farm type: " + selectedStructure.f.nametext) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("ID# " + selectedStructure.ID) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Production Speed: X" + (selectedStructure.f.productionSpeedUpgrades+1)) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Shield Strength: X" + (selectedStructure.f.shieldUpgrades+1)) : ""); } });
+    farmstatsPanel.pushTextBox(new StringPass() { String passed() { return (selectedStructure.type == 'f' ? ("Shield Regeneration: X" + (selectedStructure.f.shieldRegenUpgrades+1)) : ""); } });
+    farmstatsPanel.createButton(300,200,0,150,"Upgrade",50,new ButtonPress() { public void pressed() { if (selectedStructure.type == 'f') selectedStructure.f.upgradePanel.enabled = true; } });
 
     structurePanel = new Panel(2500, 300, 0, 1100-140, true); // -140 so it's not cut off the bottom of some people's screens
-    structurePanel.createButton(300, 300, -1100, 0, rcost + "$\nRailgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
-    structurePanel.createButton(300, 300, -800, 0, pcost + "$\nPlasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
-    structurePanel.createButton(300, 300, -500, 0, icost + "$\nFreeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
-    structurePanel.createButton(300, 300, -200, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
-    structurePanel.createButton(300, 300, 100, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
-    structurePanel.createButton(300, 300, 800, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
-    structurePanel.createButton(300, 300, 1100, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
+    structurePanel.createButton(250, 300, -1125, 0, rcost + "$\nRailgun", 45, 0, 0, 0, new ButtonPress() {public void pressed() { placeStructure('r'); } });
+    structurePanel.createButton(250, 300, -875, 0, pcost + "$\nPlasma\nCannon", 45, 200, 0, 100, new ButtonPress() {public void pressed() { placeStructure('p'); } });
+    structurePanel.createButton(250, 300, -625, 0, icost + "$\nFreeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
+    structurePanel.createButton(250, 300, -375, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
+    structurePanel.createButton(250, 300, -125, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
+    structurePanel.createButton(250, 300, 375, 0, ccost + "$\nCable", 45, 100, 100, 100, new ButtonPress() {public void pressed() { placeStructure('c'); } });
+    structurePanel.createButton(250, 300, 625, 0, bcost + "$\nDrill", 45, 50, 50, 50, new ButtonPress() {public void pressed() { placeStructure('d'); } });
+    structurePanel.createButton(250, 300, 875, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
+    structurePanel.createButton(250, 300, 1125, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
     structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
 
     test =  new Panel(540,600,-960,980-1800,true);// -140 so it's not cut off the bottom of some people's screens
@@ -157,7 +160,7 @@ class player {
                          +"If you've selected an existing tower\nand you right click it again,\n"
                          +"you'll pick it up and can move it around\nand place it back down.\n"
                          +"If you're holding a tower you can delete it\n"
-                         +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
+                         +"by moving it to the X button on the right side\nof the structure management panel and clicking it.");
 
     hudPanel = new Panel(2500,100,0,-1200,false,100);
     hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF") + "\t\t\t\tFramerate: " + framerate); } }, 50);
@@ -166,8 +169,6 @@ class player {
     //pricePanel.createTextBox
     //pricePanel.enabled = false;
 
-    resources = 0;
-    resourceGain = 0.1;
     selectedCreature = null;
   }
 
@@ -261,11 +262,11 @@ class player {
     }
     
     if (selectedStructure != null) {
-      if (selectedStructure.type == 'b') {
+      if (selectedStructure.type == 'f') {
         towerstatsPanel.enabled = false;
         farmstatsPanel.enabled = true;
       }
-      else {
+      else if (selectedStructure.type == 't') {
         farmstatsPanel.enabled = false;
         towerstatsPanel.enabled = true;
       }
@@ -276,19 +277,28 @@ class player {
     }
 
     rectMode(CENTER);
-    for (structure s : structures) { // walk through the structures
-      if (s.type == 'b') s.f.display();  // display them all
-      else s.t.display();
-      
+    if (placing) {
+      for (structure s : structures) if (s.type == 'c' && s.ID != pickedup.ID) s.c.display(); // cables get drawn first so they're not covering up structures
+      for (structure s : structures) { // walk through the structures
+        if (s.type == 'f' && s.ID != pickedup.ID) s.f.display();  // display them all
+        else if (s.type == 't' && s.ID != pickedup.ID) s.t.display();
+      }
+      if (pickedup.type == 't') pickedup.t.display();
+      else if (pickedup.type == 'f') pickedup.f.display();
+      else if (pickedup.type == 'c') pickedup.c.display();
+    }
+    else {
+      for (structure s : structures) if (s.type == 'c') s.c.display(); // cables get drawn first so they're not covering up structures
+      for (structure s : structures) { // walk through the structures
+        if (s.type == 'f') s.f.display();  // display them all
+        else if (s.type == 't') s.t.display();
+      }
     }
     for (Panel p : panels)
       p.display();
   }
 
   void update() {
-    if (state == State.RUNNING) {
-      resources += resourceGain;
-    }
     frameraterefreshtimer++;
     if (frameraterefreshtimer == 20) {
       framerate = (20000.0 / (millis() - lasttime));
@@ -297,7 +307,7 @@ class player {
     }
     // walk through the structures
     for (int i = structures.size() - 1; i >= 0; i--) {
-      if (structures.get(i).type == 'b') {
+      if (structures.get(i).type == 'f') {
         structures.get(i).f.update(); // update them
         if (structures.get(i).f.remove) { // delete if it's dead
           structures.get(i).f.farm_body.setUserData(null);
@@ -307,7 +317,7 @@ class player {
           structures.remove(i);
         }
       }
-      else {
+      else if (structures.get(i).type == 't') {
         structures.get(i).t.update(); // update them
         if (structures.get(i).t.remove) { // delete if it's dead
           structures.get(i).t.tower_body.setUserData(null);
@@ -317,13 +327,30 @@ class player {
           structures.remove(i);
         }
       }
+      else if (structures.get(i).type == 'c') {
+        structures.get(i).c.update(); // update them
+        if (structures.get(i).c.remove) {
+          if (pickedup.c.otherEnd != null) {
+            pickedup.c.otherEnd.terminal_body.setUserData(null);
+            for (Fixture f = pickedup.c.otherEnd.terminal_body.getFixtureList(); f != null; f = f.getNext())
+              f.setUserData(null);
+            box2d.destroyBody(pickedup.c.otherEnd.terminal_body); // destroy the body of a dead terminal
+            structures.remove(pickedup.c.otherEnd.parent);
+          }
+          pickedup.c.terminal_body.setUserData(null);
+          for (Fixture f = pickedup.c.terminal_body.getFixtureList(); f != null; f = f.getNext())
+            f.setUserData(null);
+          box2d.destroyBody(pickedup.c.terminal_body); // destroy the body of a dead terminal
+          structures.remove(i);
+        }
+      }
     }
     for (int i = panels.size() - 1; i >= 0; i--)
       panels.get(i).update();
     if (state == State.RUNNING) {
       if (moneytimer == 10) {
         moneytimer = 0;
-        money += (generation+1);
+        money += (generation);
       }
       moneytimer++;
     }
@@ -333,7 +360,7 @@ class player {
     // check if the mouse was pressed in the player panel
     int s = panels.size();
     for (int i = 0; i < s; i++)
-      panels.get(i).mouse_pressed();
+      if (panels.get(i).mouse_pressed())break;
   }
 
   void wave_fire(){
@@ -356,13 +383,50 @@ class player {
     rocks.add(new rock(round(mouse_x), round(mouse_y))); // rocks is a global list
   }
   
+  void updateStructures() {
+    for (structure z : structures)
+      if (placing?(z.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+        switch (z.type) {
+          case 'f':
+            if (z.f.type == 'b') {
+              z.f.connectedCables.clear();
+              for (structure s : structures)
+                if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+                  if (s.type == 'c')
+                    if (s.c.xpos == z.f.xpos && s.c.ypos == z.f.ypos)
+                      z.f.connectedCables.add(s.c);
+            }
+            break;
+          case 'c':
+            z.c.connectedStructures.clear();
+            for (structure s : structures)
+              if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+                switch (s.type) {
+                  case 't':
+                    if (s.t.xpos == z.c.xpos && s.t.ypos == z.c.ypos)
+                      z.c.connectedStructures.add(s);
+                    break;
+                  case 'f':
+                    if (s.f.type == 'd')
+                      if (s.f.xpos == z.c.xpos && s.f.ypos == z.c.ypos)
+                        z.c.connectedStructures.add(s);
+                    break;
+                  case 'c':
+                    if (s.c.xpos == z.c.xpos && s.c.ypos == z.c.ypos)
+                      z.c.connectedStructures.add(s);
+                    break;
+                }
+            break;
+        }
+  }
+  
   void placeStructure(char type) {
     if (placing) {
-      if (type == (pickedup.type == 'b' ? 'b' : pickedup.t.type))
-        deleteStructure();
-      else switchStructure(type);
+      if (type == (pickedup.type == 'f' ? pickedup.f.type : (pickedup.type == 't' ? pickedup.t.type : pickedup.c.type)))
+        deleteStructure(); // if the button pressed is the same as the structure held, sell the held structure
+      else switchStructure(type); // else sell the held structure and pick up a new one
     }
-    else {
+    else { // else try to buy a new structure
       int cost = 0;
       switch (type) {
         case 'r':
@@ -383,6 +447,12 @@ class player {
         case 'b':
           cost = bcost;
           break;
+        case 'd':
+          cost = dcost;
+          break;
+        case 'c':
+          cost = 0;
+          break;
       }
       if (money < cost) {
         println("You do not have sufficient funds to purchase this structure...");
@@ -398,8 +468,8 @@ class player {
   }
   
   void switchStructure(char type) {
-    money += (pickedup.moneyinvested/2);
     structures.remove(pickedup);
+    money += (pickedup.moneyinvested/2);
     selectedStructure = null;
     int cost = 0;
     switch (type) {
@@ -421,6 +491,12 @@ class player {
       case 'b':
         cost = bcost;
         break;
+      case 'd':
+        cost = dcost;
+        break;
+      case 'c':
+        cost = 0;
+        break;
     }
     if (money < cost) {
       println("You do not have sufficient funds to purchase this structure...");
@@ -437,8 +513,8 @@ class player {
   
   void deleteStructure() {
     placing = false;
-    money += (pickedup.moneyinvested/2);
     structures.remove(pickedup);
+    money += (pickedup.moneyinvested/2);
     pickedup = null;
     structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
     structurePanel.hiddenpanel = true;
