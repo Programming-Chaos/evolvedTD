@@ -352,6 +352,11 @@ class Panel {
     textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,LEFT,TOP, false));
     return (textboxes.size() - 1); // return the index of this textbox for later reference
   }
+  //cornered style with executable string code
+  int createTextBox(float tx, float ty, StringPass SP, int ts, boolean b) {//used when the contents of the textbox contains a variable that will change, and therefore must be accesed every time
+    textboxes.add(new TextBox(0,0,(tx-(panel_width/2)),(ty-(panel_height/2)),SP,ts,this,LEFT,TOP, b));
+    return (textboxes.size() - 1); // return the index of this textbox for later reference
+  }
   //boxed style with a straight-up string and text alignment specifications
   int createTextBox(float tw, float th, float tx, float ty, String tt, int ts, int ah, int av) {//used for hardcoded strings
     textboxes.add(new TextBox(tw,th,tx,ty,tt,ts,this,ah,av, false));//specifies a size for the text to wrap within
