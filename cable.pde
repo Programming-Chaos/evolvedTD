@@ -13,6 +13,7 @@ class cable {
   boolean enabled = false;
   int previouscost = 0;
   cable otherEnd;
+  int pulsetimer = 0;
   ArrayList<structure> connectedStructures;
   Body terminal_body = null;
   
@@ -161,7 +162,11 @@ class cable {
       rotate(atan2(otherEnd.ypos-ypos,otherEnd.xpos-xpos)-(PI/2));
       rectMode(CORNER);
       noStroke();
-      fill(0,0,0,255);
+      if (pulsetimer > 0) {
+        fill(0,(pulsetimer*25),(pulsetimer*25),255);
+        pulsetimer--;
+      }
+      else fill(0,0,0,255);
       rect((-1*(5)),0,(2*(5)),cablelength);
       rectMode(CENTER);
       stroke(0);
