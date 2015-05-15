@@ -42,7 +42,7 @@ class creature {
   float maxHealth = 100; // TODO: should be evolved
   int health_regen = 1;  // value to set how much health is regenerated each timestep when energy is spent to regen
   int round_counter;     // counter to track how many rounds/generations the individual creature has been alive
-  float baseMaxMovementForce = 4000; //maximum speed without factoring in width and appendages
+  float baseMaxMovementForce = 8000; //maximum speed without factoring in width and appendages
   float maxMovementForce;
   float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
@@ -328,7 +328,14 @@ class creature {
 
   // construct a new creature with the given genome, energy and position
   creature(Genome g, float e, Vec2 pos) {
-    angle = random(0, 2 * PI); // start at a random angle
+    //angle = random(0, 2 * PI); // start at a random angle
+    // point each creature at the center
+    angle = atan2(pos.x,pos.y);
+    // push them away from the center
+    if(mag(pos.x,pos.y) < worldWidth*0.2){
+      pos = new Vec2(random(0.2,0.5) * worldWidth * sin(angle),
+                 random(0.2,0.5) * worldWidth * cos(angle));
+    }
     genome = g;
     construct(e, pos);
   }
@@ -535,6 +542,10 @@ class creature {
     g = g*(1 + (int)outputs[1]);
     b = b*(1 + (int)outputs[2]);
     a = a*(1 + (int)outputs[3]);
+    r = (int)(255*1.0/(1.0 + pow(2.7, (-1*(r-155)/10))));
+    g = (int)(255*1.0/(1.0 + pow(2.7, (-1*(g-155)/10))));
+    b = (int)(255*1.0/(1.0 + pow(2.7, (-1*(b-155)/10))));
+    
 
     /*I turned off alpha value here so I could not draw segmentations on creatures
     The creatures weren't easily visible with a low alpha*/
@@ -831,10 +842,13 @@ class creature {
       body.applyTorque((float)torque);
   
       if (energy_locomotion > 0) { // If there's energy left apply force
+        body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
+        energy_locomotion = (energy_locomotion - abs((float)(torque * 0.005)));
         body.applyForce(new Vec2(environInfluence * f * cos(a - (PI*1.5)), environInfluence * f * sin(a - (PI*1.5))), body.getWorldCenter());
         
         energy_locomotion = energy_locomotion - abs(2 + (f * 0.005)) - (10 - (1 / environ.temperature));   // moving uses locomotion energy
         energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
+
   
         // data collection
         locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
@@ -924,6 +938,7 @@ class creature {
     if (!alive) { // dead creatures aren't displayed
       return;
     }
+    
     //float sw = 1;
     // We look at each body and get its screen position
     Vec2 pos = box2d.getBodyPixelCoord(body);
@@ -944,11 +959,11 @@ class creature {
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-
+ // drawLegs();
     pushMatrix();// Stores the current drawing reference frame
-    translate(pos.x, pos.y);  // Move the drawing reference frame to the creature's position
+    translate(pos.x, pos.y,1);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
-    
+  
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
@@ -966,9 +981,17 @@ class creature {
         }
         endShape(CLOSE);
       }
+    
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-
+      ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
+      beginShape();   // Begin drawing the shape
+      strokeWeight(0.8);
+      //noStroke();
+      Vec2 v;
+      for (int i = 0; i < 3; i++) {
+        v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+        vertex(v.x, v.y);  // Draw that vertex
         ps = (PolygonShape)f.getShape(); // From the fixture list get the fixture's shape
         //strokeWeight(.1);
         // noStroke();
@@ -991,6 +1014,7 @@ class creature {
         vertex(-1*v2.x,v2.y);
         endShape(CLOSE);
       }
+      }
     }
 
     stroke(10);
@@ -999,6 +1023,7 @@ class creature {
     // Add some eyespots
     Vec2 eye = segments.get(round(numSegments*0.74)).frontPoint;;
     senses.Draw_Eyes(eye, this);
+
 
     popMatrix();
     
@@ -1027,13 +1052,14 @@ class creature {
     //stroke(0);
     // get the largest dimension of the creature
     int offset = (int)max(getWidth(), getLength());
-    rect(0, -1 * offset, 0.1 * maxHealth, 3); // draw the health bar that much above it
+    strokeWeight(0.5);
+    rect(0, -1 * offset, 0.5 * maxHealth, 5); // draw the health bar that much above it
     fill(0, 0, 255);
-    rect(0, -1 * offset, 0.1 * health, 3);
+    rect(0, -1 * offset, 0.5 * health, 5);
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
-    
+    /*
     pushMatrix(); // Draws a "energy" bar above the creature
     translate(pos.x, pos.y);
     noFill();
@@ -1047,7 +1073,84 @@ class creature {
     //Text to display the round counter of each creature for debug purposes
     //text((int)round_counter, 0.2*width,-0.25*height);
     popMatrix();
+    */
   }
+  
+  void drawLegs(){
+    stroke(0);
+    strokeWeight(1.0);
+    Vec2 pos = box2d.getBodyPixelCoord(body);
+    float a = body.getAngle();
+    float d_angle1 = -PI*0.35;
+    float l1 = 0.9*getLength()+0.2*getWidth();
+    float x1,y1 ,x2,y2,x3,y3,x4,y4;
+    int footSize = 6;
+    
+    // first set of  legs
+    x1 = pos.x + l1*cos(-a + d_angle1);
+    y1 = pos.y + l1 * sin(-a + d_angle1);
+    x2 = pos.x + l1*cos(-a - d_angle1);
+    y2 = pos.y + l1 * sin(-a - d_angle1);
+    
+    x3 = pos.x + l1*cos(-a + d_angle1 + PI);
+    y3 = pos.y + l1 * sin(-a + d_angle1 +PI);
+    x4 = pos.x + l1*cos(-a - d_angle1 +PI);
+    y4 = pos.y + l1 * sin(-a - d_angle1+PI);
+    x1 = int(x1/cellWidth) * cellWidth;
+    x2 = int(x2/cellWidth) * cellWidth;
+    x3 = int(x3/cellWidth) * cellWidth;
+    x4 = int(x4/cellWidth) * cellWidth;
+    y1 = int(y1/cellHeight) * cellHeight;
+    y2 = int(y2/cellHeight) * cellHeight;
+    y3 = int(y3/cellHeight) * cellHeight;
+    y4 = int(y4/cellHeight) * cellHeight;
+    fill(0);
+    ellipse(x1,y1,footSize,footSize);
+    ellipse(x2,y2,footSize,footSize);
+    ellipse(x3,y3,footSize,footSize);
+    ellipse(x4,y4,footSize,footSize);
+    noFill();
+    
+    bezier(x1,y1, x2,y2, x4,y4, x3,y3);
+   bezier(x2,y2,x1,y1, x3,y3,x4,y4);
+//    bezier(x1,y1, x2,y2, pos.x+l1*0.25*cos(-a - PI*0.5),pos.y+l1*0.25*sin(-a - PI*0.5), pos.x, pos.y);
+//    bezier(x2,y2, x1,y1, pos.x+l1*0.25*cos(-a + PI*0.5),pos.y+l1*0.25*sin(-a + PI*0.5), pos.x, pos.y);
+    
+//    bezier(x4,y4, x3,y3, pos.x+l1*0.25*cos(-a - PI*0.5),pos.y+l1*0.25*sin(-a - PI*0.5), pos.x, pos.y);
+ //   bezier(x3,y3, x4,y4, pos.x+l1*0.25*cos(-a + PI*0.5),pos.y+l1*0.25*sin(-a + PI*0.5), pos.x, pos.y);
+//    bezier(x4,y4, x3,y3,  pos.x+l1*cos(-a + PI*0.5),pos.y+l1*sin(-a + PI*0.5), pos.x, pos.y);
+//ellipse(pos.x+l1*cos(-a - PI*0.5),pos.y+l1*sin(-a - PI*0.5),10,10);
+    // second set of legs
+    l1 =  0.7*getLength()+0.4*getWidth();
+    d_angle1 = -PI*0.3;
+    x1 = pos.x + l1*cos(-a + d_angle1);
+    y1 = pos.y + l1 * sin(-a + d_angle1);
+    x2 = pos.x + l1*cos(-a - d_angle1);
+    y2 = pos.y + l1 * sin(-a - d_angle1);
+    
+    x3 = pos.x + l1*cos(-a + d_angle1 + PI);
+    y3 = pos.y + l1 * sin(-a + d_angle1 +PI);
+    x4 = pos.x + l1*cos(-a - d_angle1 +PI);
+    y4 = pos.y + l1 * sin(-a - d_angle1+PI);
+    x1 = int(x1/cellWidth) * cellWidth;
+    x2 = int(x2/cellWidth) * cellWidth;
+    x3 = int(x3/cellWidth) * cellWidth;
+    x4 = int(x4/cellWidth) * cellWidth;
+    y1 = int(y1/cellHeight) * cellHeight;
+    y2 = int(y2/cellHeight) * cellHeight;
+    y3 = int(y3/cellHeight) * cellHeight;
+    y4 = int(y4/cellHeight) * cellHeight;
+    fill(0);
+    ellipse(x1,y1,footSize,footSize);
+    ellipse(x2,y2,footSize,footSize);
+    ellipse(x3,y3,footSize,footSize);
+    ellipse(x4,y4,footSize,footSize);
+    noFill();
+    bezier(x1,y1,x2,y2, x4,y4,x3,y3);
+    bezier(x2,y2,x1,y1, x3,y3,x4,y4);
+
+  }
+
 
   // This function makes a Box2D body for the creature and adds it to the box2d world
   void makeBody(Vec2 center) {
@@ -1055,7 +1158,7 @@ class creature {
     BodyDef bd = new BodyDef();  // Define a new Box2D body object
     bd.type = BodyType.DYNAMIC;  // Make the body dynamic (Box2d bodies can also be static: unmoving)
     bd.position.set(box2d.coordPixelsToWorld(center));  // set the postion of the body
-    bd.linearDamping = 0.999;  // Give it some friction, could be evolved
+    bd.linearDamping = 0.99999;  // Give it some friction, could be evolved
     bd.setAngle(angle);      // Set the body angle to be the creature's angle
     body = box2d.createBody(bd);  // Create the body, note that it currently has no shape
 
@@ -1130,5 +1233,7 @@ class creature {
         body.createFixture(fd);  // Create the actual fixture, which adds it to the body
       }
     }
+    // give some initial force to start them moving
+    body.applyLinearImpulse(new Vec2(3000 * cos(angle - (PI*1.5)), 3000 * sin(angle - (PI*1.5))), body.getWorldCenter(), true);
   }
 }
