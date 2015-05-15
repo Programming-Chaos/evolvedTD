@@ -295,10 +295,14 @@ class Panel {
             (mouseY >= (((float)width/worldWidth)*((panel_y+(worldHeight/2))-(panel_height/2)))));
   }
   
-  void mouse_pressed() {
-    if (!enabled)return;
+  boolean mouse_pressed() {
+    if (!enabled)return false;
     for (Button b : buttons)
-      if (b.isMouseOver() && !b.grayed)b.buttonPressed();
+      if (b.isMouseOver() && !b.grayed) {
+        b.buttonPressed();
+        return true;
+      }
+    return false;
   }
   
   int createButton(float bw, float bh, float bx, float by, String bt, int ts, ButtonPress BP) {
