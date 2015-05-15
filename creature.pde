@@ -1034,6 +1034,7 @@ class creature {
       translate(pos.x, pos.y);
       rotate(-a);
       fill (0,200,255,150);
+      noStroke();
       beginShape();
       for (int i = segments.size()-1; i >= 0; i--) {
         vertex((segments.get(i).frontPoint.x)*1.2, (segments.get(i).frontPoint.y)*1.2);
@@ -1042,6 +1043,8 @@ class creature {
         vertex((-1*segments.get(i).backPoint.x)*1.2, (segments.get(i).backPoint.y)*1.2);
       }
       endShape(CLOSE);
+      strokeWeight(1);
+      stroke(0);
       hint(ENABLE_DEPTH_TEST);
       popMatrix();
     }

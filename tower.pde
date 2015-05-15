@@ -479,7 +479,7 @@ class tower {
     rect(xpos, ypos-62, 0.1*maxEnergy, 6);
     noStroke();
     fill(0, 0, 255);
-    rect(xpos, ypos-62, 0.1*energy, 6);
+    rect(xpos, ypos-62, 0.1*(unlimitedpower?maxEnergy:energy), 6);
 
     // draw tower health bar
     noFill();
@@ -552,7 +552,7 @@ class tower {
   /* Firing, dropping rocks, etc. uses up some of the tower's energy */
   
   void fire() {
-    if (energy < ecost) return;
+    if (unlimitedpower ? true : energy < ecost) return;
     if (type == 'l') {
       targeting.play();
       poweringup = true;
@@ -567,7 +567,7 @@ class tower {
     else {
       if (type == 'g') projectiles.add(new projectile(xpos+(40*cos(angle)), ypos+(40*sin(angle)), angle, dmg, type, projectileSpeed));
       else projectiles.add(new projectile(xpos, ypos, angle, dmg, type, projectileSpeed));
-      energy -= ecost;
+      if (!unlimitedpower) energy -= ecost;
       firing.play();
       if (playSound) {
         switch (type) {
@@ -599,7 +599,7 @@ class tower {
   }
   
   void fire_laser() {
-    energy -= ecost;
+    if (!unlimitedpower) energy -= ecost;
     laserfiretimer = projectileSpeed/5;
     if (laserfiretimer > 5) laserfiretimer = 5;
     if (laserfiretimer < 1) laserfiretimer = 1;
@@ -618,10 +618,10 @@ class tower {
   void wave_fire() {
     if (type == 'l') return; // Laserguns can't wavefire. This is so much simpler.
     if (type == 'g') return; // electron guns also can't wavefire
-    if (energy < 5) return;
+    if (unlimitedpower ? false : energy < 5) return;
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
       projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
-    energy -= 5;
+    if (!unlimitedpower) energy -= 5;
     firing.play();
     if (playSound) {
       switch (type) {

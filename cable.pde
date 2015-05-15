@@ -155,7 +155,7 @@ class cable {
     if (otherEnd != null) {
       float cablelength = sqrt(((xpos-otherEnd.xpos)*(xpos-otherEnd.xpos))+((ypos-otherEnd.ypos)*(ypos-otherEnd.ypos)))/2;
       if (the_player.pickedup != null ? (the_player.pickedup.ID == ID ? the_player.pickedup.c.cableID == cableID : false) : false)
-        the_player.currentcost = (cablelength*5 >= previouscost ? round(cablelength*5-previouscost) : round((cablelength*5-previouscost)/2));
+        the_player.currentcost = (cablelength*2 >= previouscost ? round(cablelength*2-previouscost) : round((cablelength*2-previouscost)/2));
       pushMatrix();
       translate(xpos,ypos,0);
       rotate(atan2(otherEnd.ypos-ypos,otherEnd.xpos-xpos)-(PI/2));

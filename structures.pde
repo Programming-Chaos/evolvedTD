@@ -46,12 +46,15 @@ class pulse {
   }
   
   void transmit(structure z) {
+    println("1");
     if (z.type == 'c') {
       if (visitedStructureIDs.hasValue(z.c.cableID)) return; // this structure has been visited before and shouldn't be visited again
     }
     else if (visitedStructureIDs.hasValue(z.ID)) return; // this structure has been visited before and shouldn't be visited again
+    println("2");
     if (z.type == 'c') visitedStructureIDs.append(z.c.cableID);
     else visitedStructureIDs.append(z.ID);
+    println("3");
     switch (z.type) {
       case 't':
         poweredStructures.add(z);
@@ -73,12 +76,17 @@ class pulse {
         transmit(z.c.otherEnd.parent);
         break;
     }
+    println("4");
   }
   
   void addEnergy() { // conservation of energy is important
+    println("A");
     if (poweredStructures.size() == 0) return;
+    println("B");
     int portion = e/poweredStructures.size();
+    println("C");
     int remainder = (e-(portion*poweredStructures.size()));
+    println("D");
     for (structure s : poweredStructures) { // first all towers get their fair slice of the energy allottment
       if (s.type == 't') {
         if ((s.t.maxEnergy-s.t.energy) < portion) {
@@ -87,14 +95,15 @@ class pulse {
         }
         else s.t.energy += portion;
       }
-      else {
+      else if (s.type == 'f') {
         if ((s.f.maxEnergy-s.f.energy) < portion) {
           remainder += (portion-(s.f.maxEnergy-s.f.energy));
-          s.t.energy = s.t.maxEnergy;
+          s.f.energy = s.f.maxEnergy;
         }
         else s.f.energy += portion;
       }
     }
+    println("E");
     if (remainder > 0) { // then the remainder is used to top off towers in a random order of priority
       IntList order = new IntList();
       for (int i = 0; i < poweredStructures.size(); i++)
@@ -124,5 +133,6 @@ class pulse {
         }
       }
     }
+    println("F");
   }
 }

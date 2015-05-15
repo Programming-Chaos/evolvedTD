@@ -214,10 +214,10 @@ class farm {
         case 'd':
           if (productiontimer == 5) {
             productiontimer = 0;
-            if (energy > 10) {
+            if (unlimitedpower ? true : energy > 10) {
               if (!mining.looping) mining.beginLooping();
               the_player.money += (productionSpeed*(generation+1)); // this is the point of drills, right now
-              energy -= 10;
+              if (!unlimitedpower) energy -= 10;
             }
             else if (mining.looping) mining.reset();
             if (shield < maxShield) shield += shieldRegen;
@@ -301,7 +301,7 @@ class farm {
       rect(xpos, ypos-62, 0.1*maxEnergy, 6);
       noStroke();
       fill(0, 0, 255);
-      rect(xpos, ypos-62, 0.1*energy, 6);
+      rect(xpos, ypos-62, 0.1*(unlimitedpower ? maxEnergy : energy), 6);
     }
 
     // draw farm health bar

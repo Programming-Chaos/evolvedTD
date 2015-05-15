@@ -38,6 +38,7 @@ boolean buttonpressed = false;
 boolean autofire = true;
 boolean mistermoneybagsmode = false;
 boolean invinciblestructures = false;
+boolean unlimitedpower = false;
 
 environment environ;           // the environment object
 population the_pop;            // the population of creatures
