@@ -10,7 +10,7 @@ class farm {
   int xpos; // x position of center of farm
   int ypos; // y position of center of farm
   float health;
-  float maxHealth = 100;
+  float maxHealth = 300;
   int productionSpeed;
   int baseProductionSpeed;
   int productionSpeedUpgrades = 0;
@@ -380,7 +380,7 @@ class farm {
       upgradePanel.buttons.get(productionSpeedButtons[productionSpeedUpgrades+1]).button_text = button1text + "\nX"+ (productionSpeedUpgrades+3) + "\n" + (((byte)1)<<((productionSpeedUpgrades+1)*3)) + "00$";
     }
     
-    if (playSound) PlaySounds( "Upgrade_01" );
+    PlaySounds( "Upgrade_01" );
     
     productionSpeedUpgrades++;
     
@@ -403,7 +403,7 @@ class farm {
       upgradePanel.buttons.get(shieldButtons[shieldUpgrades+1]).button_text = button2text + "\nX"+ (shieldUpgrades+3) + "\n" + (((byte)1)<<((shieldUpgrades+1)*3)) + "00$";
     }
     
-    if (playSound) PlaySounds("Upgrade_01");
+    PlaySounds("Upgrade_01");
     
     shieldUpgrades++;
     
@@ -428,7 +428,7 @@ class farm {
       upgradePanel.buttons.get(shieldRegenButtons[shieldRegenUpgrades+1]).button_text = button3text + "\nX"+ (shieldRegenUpgrades+3) + "\n" + (((byte)1)<<((shieldRegenUpgrades+1)*3)) + "00$";
     }
     
-    if (playSound) PlaySounds( "Upgrade_01" );
+    PlaySounds( "Upgrade_01" );
     
     shieldRegenUpgrades++;
     

@@ -772,7 +772,7 @@ class creature {
               if (munching.t.health == 0) munchnext = null;
             }
           }
-          if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+          PlaySounds( "Munch_0" + int(random(1,4)) );
         }
         munchtimer = 0;
       }

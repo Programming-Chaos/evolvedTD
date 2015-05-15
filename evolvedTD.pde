@@ -36,9 +36,9 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
-boolean mistermoneybagsmode = false;
-boolean invinciblestructures = false;
-boolean unlimitedpower = false;
+boolean mistermoneybagsmode = true;
+boolean invinciblestructures = true;
+boolean unlimitedpower = true;
 
 environment environ;           // the environment object
 population the_pop;            // the population of creatures
@@ -363,7 +363,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     food p2 = (food)o2;
     if(p1.brain.outputs[2] == 0.0) {
-      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+      PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -377,7 +377,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     food p2 = (food)o1;
     if(p1.brain.outputs[2] == 0.0) {
-      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+      PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)

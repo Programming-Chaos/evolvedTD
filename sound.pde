@@ -32,6 +32,7 @@ public class Sounds extends Thread {
 }
 
 void PlaySounds (String s) {
+  if (!playSound) return;
   AudioPlayer a;
   TableRow sound = soundfiles.findRow(s, "Key");
   
