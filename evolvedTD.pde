@@ -39,6 +39,7 @@ boolean autofire = true;
 boolean mistermoneybagsmode = false;
 boolean invinciblestructures = false;
 
+environment environ;           // the environment object
 population the_pop;            // the population of creatures
 tower the_tower;               // a tower object
 player the_player;             // the player!
@@ -48,7 +49,6 @@ ArrayList<Panel> panels;
 ArrayList<Animation> animations;
 
 Box2DProcessing box2d;         // the box2d world object
-environment environ;           // the environment object
 
 Minim minim;
 
@@ -110,13 +110,16 @@ void setup() {
   rectMode(CENTER);              // drawing mode fore rectangles,
   
   environ = new environment();   // must occur after creatures, etc. created
+
   lasttime = 0;
   generation = 0;
   
   // Run unit tests
   Genome testGenome = new Genome();
+
   testGenome.testChromosome();
-  testGenome.testMutation();
+  //testGenome.testMutation();
+
 
   // Initialize data tables
   initTables();
@@ -125,11 +128,7 @@ void setup() {
 }
 
 void draw() {
-
-  
   if (mistermoneybagsmode) the_player.money = 1000000000;
-  // println("fps: " + 1000.0 / (millis() - lasttime)); // used to print the framerate for debugging
-  lasttime = millis();
   mouse_x = ((((mouseX-(width/2))*worldRatioX)/((float)zoomOffset/cameraZ))+cameraX);
   mouse_y = ((((mouseY-(height/2))*worldRatioY)/((float)zoomOffset/cameraZ))+cameraY);
   //these variables represent where the mouse is on the surface of the planet
@@ -186,6 +185,7 @@ void draw() {
   if (display) {
     the_player.display(); // display the interface for the player
   }
+  else panels.get(8).display();
 
   if (state == State.RUNNING) {
     the_pop.update(); // update the population, i.e. move the creatures
@@ -319,6 +319,8 @@ void keyPressed() { // if a key is pressed this function is called
     case '4':
     case '5':
     case '6':
+    case '7':
+    case '8':
       the_player.targetMode = (key-'2');
       break;
     default:
@@ -347,7 +349,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     food p2 = (food)o2;
-    if(p1.current_actions[2] > 0.0) {
+    if(p1.brain.outputs[2] == 0.0) {
       if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
@@ -361,7 +363,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o2;
     food p2 = (food)o1;
-    if(p1.current_actions[2] > 0.0) {
+    if(p1.brain.outputs[2] == 0.0) {
       if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {

@@ -1,6 +1,7 @@
 import java.util.Comparator;
 
 static int creature_count = 0;
+int temp = 0;
 
 class Gamete {
   int xPos, yPos;
@@ -45,17 +46,22 @@ class creature {
   float maxMovementForce;
   float baseMaxTorque = 10;
   int hit_indicator = 0; //to create animations on creature impacts
+  int bodyTemp;        // determining factor in how creature responds to air temp
+
 
   // timers
   int timestep_counter;  // counter to track how many timesteps a creature has been alive
   int time_in_water;     // tracks how much time the creature spends in water
   int time_on_land;      // tracks how much time the creature spends on land
   int freezeTimer;
+  int wiggletimer;
+  int wigglelength = 40;
+  float wigglestrength = (PI/12);
 
   // encodes the creature's genetic information
   Genome genome;
   Brain brain;
-  float current_actions[];
+//  float brain.outputs[];
 
   // metabolism
   float energy_reproduction;     // energy for gamete produciton
@@ -198,11 +204,10 @@ class creature {
     float waterForce;
     float grassForce;
     float mountainForce;
-    float waterForcePercent;
-    float grassForcePercent;
-    float mountainForcePercent;
     float angle;
     float spread;
+    float frontlength;
+    float backlength;
     Vec2 originPoint;
     Vec2 frontPoint;
     Vec2 backPoint;
@@ -216,6 +221,7 @@ class creature {
         density = getAppendageDensity();
         density *= armor;
         getForces();
+        getLengths();
         angle = getAngle();
         spread = getSpread();
         originPoint = getOriginPoint();
@@ -223,10 +229,6 @@ class creature {
         backPoint = getBackPoint();
         area = getArea();
       }
-    }
-
-    private float getArea() {
-      return (((sqrt(((originPoint.x-frontPoint.x)*(originPoint.x-frontPoint.x))+((originPoint.y-frontPoint.y)*(originPoint.y-frontPoint.y)))*sqrt(((originPoint.x-backPoint.x)*(originPoint.x-backPoint.x))+((originPoint.y-backPoint.y)*(originPoint.y-backPoint.y))))/2)*(sin(spread)));
     }
 
     private float getSize() {
@@ -257,29 +259,26 @@ class creature {
       return 0.5 + (0.5 * (r / (1 + abs(r))));
     }
 
-    void getForces() { //mapping function is inverse quadratic and then values are made proportional to their sum
+    void getForces() { //mapping function is inverse quadratic
       float water = (genome.avg(appendageTraits.get(index).waterForce));
-      waterForce = ((-1/(1.01+(water*water)))+1);
-      //waterForce *= 6;
+      waterForce = (((float)-1/(((float)10/9)+(water*water)))+1);
       float grass = (genome.avg(appendageTraits.get(index).grassForce));
-      grassForce = ((-1/(1.01+(grass*grass)))+1);
-      //grassForce *= 4;
+      grassForce = (((float)-1/(((float)10/9)+(grass*grass)))+1);
       float mountain = (genome.avg(appendageTraits.get(index).mountainForce));
-      mountainForce = ((-1/(1.01+(mountain*mountain)))+1);
-      //mountainForce *= 4;
-      
-      float divisor = waterForce+grassForce+mountainForce;
-      waterForcePercent = waterForce/divisor;
-      grassForcePercent = grassForce/divisor;
-      mountainForcePercent = mountainForce/divisor;
+      mountainForce = (((float)-1/(((float)10/9)+(mountain*mountain)))+1);
     }
 
+    void getLengths() {
+      frontlength = ((float)mountainForce*67*size);
+      backlength = ((float)grassForce*67*size);
+    }
+    
     private float getAngle() {
-      return (((index+1)*(PI/numSegments))-(PI/2));//(float)(Math.atan((segments.get(index).backPoint.x-segments.get(index).frontPoint.x)/(segments.get(index).backPoint.y-segments.get(index).frontPoint.y)));
+      return (((index+1)*(PI/numSegments)));//(float)(Math.atan((segments.get(index).backPoint.x-segments.get(index).frontPoint.x)/(segments.get(index).backPoint.y-segments.get(index).frontPoint.y)));
     }
-
+    
     private float getSpread() {
-      return (PI/6);//(float)((Math.acos(((mountainForce*mountainForce)+(grassForce*grassForce)-(waterForce*waterForce))/(2*mountainForce*grassForce)))/2);
+      return (0.4*PI*waterForce);
     }
 
     private Vec2 getOriginPoint() { // point of origin of the appendages is the front point of the associated segment
@@ -287,11 +286,20 @@ class creature {
     }
 
     private Vec2 getFrontPoint() {
-      return new Vec2(((float)(/*grassForce*/1*(Math.sin(spread+angle+(PI/2))))*10*size)+originPoint.x, ((float)(/*grassForce*/1*(Math.cos(spread+angle+(PI/2))))*10*size)+originPoint.y);
+      return new Vec2((float)(frontlength*(Math.sin(spread+angle)))+originPoint.x,
+                      (float)(frontlength*(Math.cos(spread+angle)))+originPoint.y);
     }
 
     private Vec2 getBackPoint() {
-      return new Vec2(((float)(/*mountainForce*/1*(Math.sin((-1*spread)+angle+(PI/2))))*10*size)+originPoint.x, ((float)(/*mountainForce*/1*(Math.cos((-1*spread)+angle+(PI/2))))*10*size)+originPoint.y);
+      return new Vec2((float)(backlength*(Math.sin((-1*spread)+angle)))+originPoint.x,
+                      (float)(backlength*(Math.cos((-1*spread)+angle)))+originPoint.y);
+    }
+
+    private float getArea() {
+      return (((sqrt(((originPoint.x-frontPoint.x)*(originPoint.x-frontPoint.x))+
+                     ((originPoint.y-frontPoint.y)*(originPoint.y-frontPoint.y)))*
+                sqrt(((originPoint.x-backPoint.x)*(originPoint.x-backPoint.x))+
+                     ((originPoint.y-backPoint.y)*(originPoint.y-backPoint.y))))/2)*(sin(spread)));
     }
   }
 
@@ -347,10 +355,10 @@ class creature {
     brain = new Brain(genome);
     genome.inheritance(num);
     freezeTimer = 0;
+    wiggletimer = 0;
     hit_indicator = 0;
 
-    current_actions = new float[brain.OUTPUTS];
-
+    
     // used for data collection
     sPos = pos.clone();
     total_energy_space = max_energy_locomotion + max_energy_reproduction + max_energy_health;
@@ -378,10 +386,11 @@ class creature {
     health = maxHealth;         // initial health (probably should be evolved)
     fitness = 0;                // initial fitness
     alive = true;               // creatures begin life alive
+    bodyTemp = 20;            // creatures internal body temperature
 
-    maxMovementForce = baseMaxMovementForce - (2*getWidth());
-    if (maxMovementForce < 0) maxMovementForce = 0;
-    for (Appendage app : appendages) maxMovementForce += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
+    maxMovementForce = baseMaxMovementForce;// - (2*getWidth());
+    //if (maxMovementForce < 0) maxMovementForce = 0;
+    //for (Appendage app : appendages) maxMovementForce += 50*app.size; // Every appendage contributes to overall movement speed a little, 15 to start out. This encourages the evolution of appendages in the first place.
 
     scent = setScent();                 // does creature produce scent
     scentStrength = setScentStrength(); // how strong is the scent
@@ -679,12 +688,25 @@ class creature {
   }
 
   void calcBehavior(){
-    for(int i = 0; i<brain.OUTPUTS; i++){
-      current_actions[i] = 0;
-      for(int j = 0; j<brain.INPUTS; j++){
-        current_actions[i] += (senses.brain_array[j]*brain.weights[i][j]);
+    brain.calc_inputs(senses.brain_array[0], senses.brain_array[1]);
+    for(int i = 0; i < brain.OUTPUTS; i++) {
+      if(brain.activate(i) == true) {
+        brain.outputs[i] = brain.get_output(i);    // apply some function to the input value and 
+                                        // place the result in output vector
+      }else{
+        brain.outputs[i] = 0;
       }
-    }
+   }
+  
+    /* calc_inputs();
+    
+    
+    /*for(int i = 0; i<brain.OUTPUTS; i++){
+      brain.outputs[i] = 0;
+      for(int j = 0; j<brain.INPUTS; j++){
+        brain.outputs[i] += (senses.brain_array[j]*brain.weights[i][j]);
+      }
+   }*/
   }
 
   // The update function is called every timestep
@@ -697,7 +719,8 @@ class creature {
     Vec2 pos2 = box2d.getBodyPixelCoord(body);
     float a = body.getAngle();
 
-  
+    wiggletimer++;
+    if (wiggletimer == wigglelength) wiggletimer = 0;
 
     calcBehavior();
     timestep_counter++;
@@ -708,7 +731,7 @@ class creature {
     munching = munchnext;
     if (munching != null) {
       if (munchtimer == 50) {
-        if(current_actions[2] > 0.0) { // if the creature is hungry
+        if(brain.outputs[2] > 0.0) { // if the creature is hungry
           if (!invinciblestructures) {
             if (munching.type == 'b') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
@@ -760,27 +783,38 @@ class creature {
       //if (!body.isActive())body.setActive(true);
       //if (body.getType() == BodyType.STATIC)body.setType(BodyType.DYNAMIC);
 
-      torque = current_actions[0];
+      torque = brain.outputs[0];
 
-      //torque = current_actions[0]*baseMaxTorque;
+      //torque = outputs[0]*baseMaxTorque;
 
       // force is a percentage of max movement speed from 10% to 100%
-      // depending on the output of the neural network in current_actions[1], the movement force may be backwards
+      // depending on the output of the neural network in outputs[1], the movement force may be backwards
       // as of now the creatures never completely stop moving
 
-      f = (maxMovementForce * Utilities.MovementForceSigmoid(current_actions[1]));
+      f = (maxMovementForce * Utilities.MovementForceSigmoid(brain.outputs[1]));
 
       // force is scaled to a percentage of max movement speed between 10% and 100% asymptotically approaching 100%
       // force is negative if current action is negative, positive if it's positive (allows for backwards movement)
 
+      float environInfluence = 1; // A value of influence between 0 and 1 that abstracts the modified speed of a specific environment.
       int switchnum;
-      if (environ.checkForLiquid((double)pos2.x, (double)pos2.y) == 1) {
+      if (environ.checkForLiquid(pos2.x, pos2.y)) {
         time_in_water++;
         switchnum = 0;
+        environInfluence = (1 / (getWidth() * getMass())) * 1000;
+      } else if (environ.checkForMountain(pos2.x, pos2.y)) {
+        switchnum = 1;
+        environInfluence = 1 - (getCreatureDensity()) + 0.2;
+      } else {
+        switchnum = 2;
       }
-      else if (environ.checkForMountain((double)pos2.x, (double)pos2.y) == 1) switchnum = 1;
-      else switchnum = 2;
-
+      if(environInfluence < 0) environInfluence = 0;
+      if(environInfluence > 1) environInfluence = 1;
+      
+      //println(getWidth() + " " + getMass() + " : " + (1 / ((getWidth() - 20) * getMass())) * 1000 + " ; " + (1 / (getWidth() * getMass())) * 1000); // water
+      //println(1 - (getCreatureDensity() - 0.1) + " " + (1 - (getCreatureDensity())) // rock
+      
+      
       float base = f;
 
       // appendages will change the force depending on the environment
@@ -788,19 +822,19 @@ class creature {
         if (app.size > 0) { // if the appendage exists
           switch (switchnum) {
           case 0: // if the creature's center is in water
-            f -= (base*app.grassForcePercent)/numSegments;
-            f += (2*base*app.waterForcePercent)/numSegments;
-            f -= (base*app.mountainForcePercent)/numSegments;
+            f -= (base*app.grassForce*app.size)/numSegments;
+            f += (2*base*app.waterForce*app.size)/numSegments;
+            f -= (base*app.mountainForce*app.size)/numSegments;
             break;
           case 1: // if the creature's center is on a mountain
-            f -= (base*app.grassForcePercent)/numSegments;
-            f -= (base*app.waterForcePercent)/numSegments;
-            f += (2*base*app.mountainForcePercent)/numSegments;
+            f -= (base*app.grassForce*app.size)/numSegments;
+            f -= (base*app.waterForce*app.size)/numSegments;
+            f += (2*base*app.mountainForce*app.size)/numSegments;
             break;
           case 2: // if the creature's center is on grass
-            f += (2*base*app.grassForcePercent)/numSegments;
-            f -= (base*app.waterForcePercent)/numSegments;
-            f -= (base*app.mountainForcePercent)/numSegments;
+            f += (2*base*app.grassForce*app.size)/numSegments;
+            f -= (base*app.waterForce*app.size)/numSegments;
+            f -= (base*app.mountainForce*app.size)/numSegments;
             break;
           }
         }
@@ -809,8 +843,12 @@ class creature {
   
       if (energy_locomotion > 0) { // If there's energy left apply force
         body.applyForce(new Vec2(f * cos(a - (PI*1.5)), f * sin(a - (PI*1.5))), body.getWorldCenter());
-        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005));   // moving uses locomotion energy
         energy_locomotion = (energy_locomotion - abs((float)(torque * 0.005)));
+        body.applyForce(new Vec2(environInfluence * f * cos(a - (PI*1.5)), environInfluence * f * sin(a - (PI*1.5))), body.getWorldCenter());
+        
+        energy_locomotion = energy_locomotion - abs(2 + (f * 0.005)) - (10 - (1 / environ.temperature));   // moving uses locomotion energy
+        energy_locomotion = (energy_locomotion - abs((float)(torque * 0.0001)));
+
   
         // data collection
         locomotion_used += (abs(2 + (f * 0.005)) + abs((float)(torque * 0.0001)));
@@ -913,11 +951,15 @@ class creature {
       hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
     }
     
+    PGraphics pg;
+    pg = createGraphics(100, 100);
+    
+    pg.beginDraw();
     PolygonShape ps; // Create a polygone variable
     // set some shape drawing modes
     rectMode(CENTER);
     ellipseMode(CENTER);
-  drawLegs();
+ // drawLegs();
     pushMatrix();// Stores the current drawing reference frame
     translate(pos.x, pos.y,1);  // Move the drawing reference frame to the creature's position
     rotate(-a);  // Rotate the drawing reference frame to point in the direction of the creature
@@ -925,11 +967,23 @@ class creature {
     for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {  // While there are still Box2D fixtures in the creature's body, draw them and get the next one
       if (f.getUserData().getClass() == Segment.class) {
         fill(getColor(((Segment)f.getUserData()).index)); // Get the creature's color
+
+        ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
+        beginShape();   // Begin drawing the shape
+        //strokeWeight(.1);
+        // noStroke();
+        Vec2 v;
+        Vec2 vorig;
+        float len;
+        for (int i = 0; i < 3; i++) {
+          v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
+          vertex(v.x, v.y);  // Draw that vertex
+        }
+        endShape(CLOSE);
       }
+    
       if (f.getUserData().getClass() == Appendage.class) {
         fill(getColor(((Appendage)f.getUserData()).index)); // Get the creature's color
-      }
-
       ps = (PolygonShape)f.getShape();  // From the fixture list get the fixture's shape
       beginShape();   // Begin drawing the shape
       strokeWeight(0.8);
@@ -938,8 +992,29 @@ class creature {
       for (int i = 0; i < 3; i++) {
         v = box2d.vectorWorldToPixels(ps.getVertex(i));  // Get the vertex of the Box2D polygon/fixture, translate it to pixel coordinates (from Box2D coordinates)
         vertex(v.x, v.y);  // Draw that vertex
+        ps = (PolygonShape)f.getShape(); // From the fixture list get the fixture's shape
+        //strokeWeight(.1);
+        // noStroke();
+        Vec2 vorig = ((Appendage)f.getUserData()).originPoint;
+        float centerangle;
+        if (((Appendage)f.getUserData()).index % 2 == 0) centerangle = (((Appendage)f.getUserData()).angle+(((float)((abs(wiggletimer-(wigglelength/2)))-(wigglelength/4))/(wigglelength/4))*wigglestrength));
+        else centerangle = (((Appendage)f.getUserData()).angle-(((float)((abs(wiggletimer-(wigglelength/2)))-(wigglelength/4))/(wigglelength/4))*wigglestrength));
+        Vec2 v1 = new Vec2((float)(-1*((Appendage)f.getUserData()).frontlength*(Math.sin(centerangle+((Appendage)f.getUserData()).spread)))+vorig.x,
+                           (float)(((Appendage)f.getUserData()).frontlength*(Math.cos(centerangle+((Appendage)f.getUserData()).spread)))+vorig.y);
+        Vec2 v2 = new Vec2((float)(-1*((Appendage)f.getUserData()).backlength*(Math.sin(centerangle-((Appendage)f.getUserData()).spread)))+vorig.x,
+                           (float)(((Appendage)f.getUserData()).backlength*(Math.cos(centerangle-((Appendage)f.getUserData()).spread)))+vorig.y);
+        beginShape();   // Begin drawing the shape
+        vertex(vorig.x,vorig.y);
+        vertex(v1.x,v1.y);
+        vertex(v2.x,v2.y);
+        endShape(CLOSE);
+        beginShape();   // Begin drawing the shape for the opposite side of the body
+        vertex(-1*vorig.x,vorig.y);
+        vertex(-1*v1.x,v1.y);
+        vertex(-1*v2.x,v2.y);
+        endShape(CLOSE);
       }
-      endShape(CLOSE);
+      }
     }
 
     stroke(10);
@@ -1099,7 +1174,7 @@ class creature {
       vertices3  = new Vec2[3];  // Create an array of 3 new vectors
 
       // Next create a segment, pie slice, of the creature by defining
-      // 3 vertices of a poly gone
+      // 3 vertices of a polygon
 
       // First vertex is at the center of the creature
       vertices3[0] = box2d.vectorPixelsToWorld(new Vec2(0, 0));

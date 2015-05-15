@@ -88,8 +88,8 @@ class Sensory_Systems {
     
     sensorX = x + evolved_length * cos(-1 * (angle + PI+evolved_angle));
     sensorY = y + evolved_length * sin(-1 * (angle + PI+evolved_angle));
-    sensorX = round((sensorX) / 20) * 20;
-    sensorY = round((sensorY) / 20) * 20;
+    sensorX = round((sensorX) / 20) * 5;
+    sensorY = round((sensorY) / 20) * 5;
         /*If feeler can pick up smell*/
     if (feeler_scent[i]) {
       float env_scent = environ.getScent(sensorX, sensorY);

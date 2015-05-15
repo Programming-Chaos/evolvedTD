@@ -5,10 +5,35 @@
  * This is done to make sensing efficient - a creature can sense whether there's food (for example) in a cell.
  */
 
+/*  For Zack:
+ *    - Sine wave for water
+ *    - For rock - same as grass but more stark contrast
+ *    - Multi threading so water can look like it's moving
+ */
+
+/*  For Chase:
+ *    - Tie temperature to creatures
+         - internal body temp [DONE]
+         - make temperature more dynamic [WHY]
+         - make the creature compare their body temp to air temp, then decide
+           - IF bodyTemp > temperature:
+               1. increase metabolic rate (spend energy faster)
+               2. huddle together
+           - IF bodyTemp < temperature:
+               1. increase metabolic rate (spend energy fast)
+               2. lighter colored creatures will lose energy slower than darker ones
+               
+ *    - Create Radiation [DONE]
+ *    - Tie radiation to creatures [DONE]
+ *    - A couple new biomes? (optional) [DONE-ish]
+ */
+
+
 int cellWidth = 20;
 int cellHeight = 20;
 int maxscent = 255;
 
+boolean isLavaPlanet = false;  // is it the lave planet?
 boolean isRaining;     // returns whether or not it is raining
 
 int waitRainOff, waitRainOn; // will wait 1 minute before raining again after stopping
@@ -37,7 +62,6 @@ class tile {
   int coloring;      // 0 to 255 value that describes tile visually
   int opacity;
   color colors;
-  int weathering;    // 0 to 255 value that describes tile weathering visually
 
   // 0 (solid) to 255 (water) value that describes the viscosity of a
   // tile and determines whether the tile can be considered liquid
@@ -69,9 +93,7 @@ class tile {
     coloring = 0;
     opacity = 1;
     colors = color(0, 200 + (int)random(25), 0);
-    weathering = 0;
     viscosity = 10;
-    weathering = 0;
     scent = 0;
     creatureScent = 0;
     creatureScentColor = 0;
@@ -83,14 +105,12 @@ class tile {
     hasCreatureScent = false;
 
     DEBUG_sensing = false;
-
   }
 
   // GET
   int[] getTaste()         { return taste; }
   float getAlt()           { return altitude; }
   int getColor()           { return coloring; }
-  int getWeather()         { return weathering; }
   int getViscosity()       { return viscosity; }
   float getScent()         { return scent; }
   boolean hasFood()        { return hasFood; }
@@ -107,7 +127,6 @@ class tile {
 
   void setAlt(float a)           { altitude = a; }
   void setColor(int c)           { coloring = c; }
-  void setWeather(int w)         { weathering = w; }
   void setViscosity(int v)       { viscosity = v; }
   void setScent(float s)         { scent = s; }
   void hasFood(boolean f)        { hasFood = f; }
@@ -161,7 +180,8 @@ class environment {
   int environAltitude;
   int rockFrequency;
   float liquidReservior; // Amount of water the environment is holding to expened into rain
-  float temp; // celsius
+  float temperature;       // celsius
+  float radiation;  
   PGraphics image;
   
   // Coloring for the different terrain types.
@@ -183,6 +203,7 @@ class environment {
     environHeight = worldHeight / cellHeight;
     environAltitude = (int)random(255);
     isRaining = false;
+    
     // Establish world type
     int altShift = decideWorldType();
     
@@ -502,7 +523,24 @@ class environment {
       }
     }
     update_scent();
-    update_creature_scent();
+
+    //update_creature_scent();
+    /*
+    if(isLavaPlanet == true) {
+      for(int i = 0; i < environWidth; i++) {
+        for(int j = 0; j < environHeight; j++) {
+          if(tileMap[i][j].hasCreature() != null) { 
+            println("there is a creature here");
+            if(tileMap[i][j].isLiquid == true) {
+              println("this creature is touching water");
+              creature c = tileMap[i][j].hasCreature();
+              c.changeHealth(-1000);
+            }
+          }
+        }
+      }
+    }*/      
+
   }
 
   int checkForFood(double x1, double y1) {
@@ -612,33 +650,33 @@ class environment {
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
     if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
     if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
-    return tileMap[x][y].getTaste();
+    return tileMap[y][x].getTaste();
   }
 
+  boolean checkForLiquid(float x1, float y1) {
+    int x, y;
+    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
+    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
+        
+    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
+    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
 
+    if (tileMap[y][x].biome == WATER) {
+      return true;
+    }
+    return false;
+  }
 
-  int checkForLiquid(double x1, double y1) {
+  boolean checkForMountain(float x1, float y1) {
     int x, y;
     x = (int)((worldWidth*0.5+x1-1)/cellWidth);
     y = (int)((worldHeight*0.5+y1-1)/cellHeight);
     if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
     if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
-    if (tileMap[x][y].biome == WATER) {
-      return 1;
+    if (tileMap[y][x].biome == MOUNTAIN) {
+      return true;
     }
-    return 0;
-  }
-
-  int checkForMountain(double x1, double y1) {
-    int x, y;
-    x = (int)((worldWidth*0.5+x1-1)/cellWidth);
-    y = (int)((worldHeight*0.5+y1-1)/cellHeight);
-    if (x >= environWidth || x < 0) x = (x+environWidth)%environWidth; // in case sensing point is out of bounds
-    if (y >= environHeight || y < 0) y = (y+environWidth)%environHeight;
-    if (tileMap[x][y].biome == MOUNTAIN) {
-      return 1;
-    }
-    return 0;
+    return false;
   }
 
   void display() {
@@ -782,7 +820,7 @@ class environment {
     image.endDraw();
   }
 
-  /**** WEATHER ****/
+  /**** CLIMATE ****/
 
   // updates the amount of water in the water reserve
   /*
@@ -837,18 +875,29 @@ class environment {
   // Draws rain animation
   void rainfall() {
     float x, y;
-    
-    // rainy blue overlay
-    fill(0, 0, 255, 45);
-    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
-    
-    for(int i = 0; i < 800; i++) {
-      x = random((-worldWidth / 2), (worldWidth / 2));
-      y = random((-worldHeight / 2), (worldHeight / 2));
-      stroke(0, 0, 200, 120);
-      line(x, y, x, y+30);
+    if(isLavaPlanet == true) {
+      fill(255, 0, 0, 30);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));      
+      for(int i = 0; i < 200; i++) {
+        x = random((-worldWidth / 2), (worldWidth / 2));
+        y = random((-worldHeight / 2), (worldHeight / 2));
+        stroke(147, 125, 125, 100);
+        line(x, y, x, y+30);
+      }
+      chanceOfLightning();
+    } else {
+      // rainy blue overlay
+      fill(0, 0, 255, 45);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
+      
+      for(int i = 0; i < 800; i++) {
+        x = random((-worldWidth / 2), (worldWidth / 2));
+        y = random((-worldHeight / 2), (worldHeight / 2));
+        stroke(0, 0, 200, 120);
+        line(x, y, x, y+30);
+      }
+      chanceOfLightning();
     }
-    chanceOfLightning();
   }
 
   void findTheBugs() {
@@ -891,12 +940,20 @@ class environment {
     int yOffset = -worldHeight;
     int yFinal = randY;
 
-    fill(225, 225, 225, 125);
-    rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
-
+    if(isLavaPlanet == true) {
+      fill(225, 200, 200, 125);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));
+    } else {
+      fill(225, 225, 225, 125);
+      rect((-worldWidth / 2), (-worldHeight / 2), (worldWidth), (worldHeight));      
+    }
     noFill();
     strokeWeight(5);
-    stroke(255, 255, 200);
+    
+    if(isLavaPlanet == true) 
+      stroke(255, 125, 60);
+    else 
+      stroke(255, 255, 200);
 
     beginShape();
     curveVertex(xOffset, yOffset);
@@ -919,27 +976,25 @@ class environment {
     if(tileMap[tileX][tileY].hasCreature() != null) {
       creature c = tileMap[tileX][tileY].hasCreature();
       c.changeHealth(-1000);
-      println("Killed it!");
       
       // data collection
       rKills++;
     }
     strokeWeight(1);
     if( random(-4, 1) < 0 ) PlaySounds( "Thunder_01" ); //thunder
-    //thunder.rewind();
-    //thunder.play();
   }
   
   // decides on the world type by choosing random number between 1 and 4
   int decideWorldType() {
-    int decision = int(random(1, 4.999999));
+    int decision = int(random(1, 5.999999));
     int altShift = 0;
     int r = 0, b = 0, g = 0, temp = 0;
     float waterALT = 0.0, rockALT = 0.0;
     switch(decision) {
       case 1:
         // temperate
-        temp = int(random(20, 25));
+        temperature = int(random(20, 25));
+        radiation = 0.2;
         liquid = color(0, 0, 175);
         rock = color(150, 150, 150);
         land = color(0, 150, 0);
@@ -949,8 +1004,9 @@ class environment {
         break;
       
       case 2:
-        // dry - desert, minimal water
-        temp = int(random(40, 45));
+        // desert
+        temperature = int(random(40, 45));
+        radiation = 0.3;        
         liquid = color(0, 170, 170);
         rock = color(165, 103, 41);
         land = color(239, 233, 125); // 240 231 100
@@ -960,9 +1016,10 @@ class environment {
         break;
         
       case 3:
-        // rainy - lots of water, always raining
+        // rainy
         isRaining = true;
-        temp = int(random(15, 20));
+        temperature = int(random(15, 20));
+        radiation = 0.18;
         liquid = color(7, 37, 75);
         rock = color(125, 125, 75);
         land = color(10, 125, 10);
@@ -972,8 +1029,9 @@ class environment {
         break;
         
       case 4:
-        // cold - snowy
-        temp = int(random(-5, 0));
+        // snowy
+        temperature = int(random(-5, 0));
+        radiation = 0.17;
         liquid = color(153, 204, 255);
         rock = color(150, 150, 150);
         land = color(245, 245, 245); 
@@ -982,17 +1040,18 @@ class environment {
         altShift = 100;        
         break;
         
-      /*
       case 5:
-        // radiation - ??
-        temp = int(random(20, 40));
-        liquid = color(0, 0, 225);
-        rock = color(150, 150, 150);
-        land = color(0, 150, 0);
-        waterALT = 0.35f;
+        // lava
+        isLavaPlanet = true;
+        isRaining = true;
+        temperature = int(random(300, 320));
+        radiation = 1.0;
+        liquid = color(225, 0, 0);
+        rock = color(50, 50, 50);
+        land = color(100, 50, 0);
+        waterALT = 0.26f;
         rockALT = 0.60f;
         break;
-      */
     }
     
     r = (land >> 16) & 255;

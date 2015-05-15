@@ -37,6 +37,8 @@ class player {
   boolean placing = false;
   int numStructuresCreated = 0;
   int targetMode = 1;
+  float framerate;
+  int frameraterefreshtimer = 0;
   structure pickedup;
   
   Panel testpanel;
@@ -49,6 +51,8 @@ class player {
   Panel test;
   
   player() {
+    framerate = 0;
+    lasttime = millis();
     structures = new ArrayList<structure>();
     upgradepanels = new ArrayList<Panel>();
     activeweapon = 1;
@@ -155,8 +159,8 @@ class player {
                          +"If you're holding a tower you can delete it\n"
                          +"by moving it to the X button on the right side\nof the tower management panel and clicking it.");
 
-    hudPanel = new Panel(1250,100,-625,-1200,false,100);
-    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF")); } }, 50);
+    hudPanel = new Panel(2500,100,0,-1200,false,100);
+    hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF") + "\t\t\t\tFramerate: " + framerate); } }, 50);
 
     //pricePanel = new Panel(100,40,0,0,false,150);
     //pricePanel.createTextBox
@@ -284,6 +288,12 @@ class player {
   void update() {
     if (state == State.RUNNING) {
       resources += resourceGain;
+    }
+    frameraterefreshtimer++;
+    if (frameraterefreshtimer == 20) {
+      framerate = (20000.0 / (millis() - lasttime));
+      lasttime = millis();
+      frameraterefreshtimer = 0;
     }
     // walk through the structures
     for (int i = structures.size() - 1; i >= 0; i--) {

@@ -5,7 +5,7 @@ import java.util.Collections;
 
 class population {
   ArrayList<creature> swarm;
-  static final int POP_SIZE = 35;
+  static final int POP_SIZE = 50;
 
   float baseGameteChance = 0.4; // Base gamete success rate
   int baseGameteRadius = 6; // Base gamete mating range
@@ -85,6 +85,52 @@ class population {
              minAlpha = temp;
              ret = c.getPos();
           }  
+        }
+      }
+    }
+    return ret;
+  }
+  
+    Vec2 highestWidth() {
+    Vec2 ret = new Vec2(0,0);
+    float temp, maxWidth = 0;
+    boolean first = true;
+    for (creature c: swarm) {
+      if (c.alive) {
+        if (first) {
+          maxWidth = c.getWidth();
+          ret = c.getPos();
+          first = false;
+        }
+        else {
+          temp = c.getWidth();
+          if (temp > maxWidth) {
+            maxWidth = temp;
+            ret = c.getPos();
+          }
+        }
+      }
+    }
+    return ret;
+  }
+  
+    Vec2 lowestWidth() {
+    Vec2 ret = new Vec2(0,0);
+    float temp, minWidth = 0;
+    boolean first = true;
+    for (creature c: swarm) {
+      if (c.alive) {
+        if (first) {
+          minWidth = c.getWidth();
+          ret = c.getPos();
+          first = false;
+        }
+        else {
+          temp = c.getWidth();
+          if (temp < minWidth) {
+            minWidth = temp;
+            ret = c.getPos();
+          }
         }
       }
     }
