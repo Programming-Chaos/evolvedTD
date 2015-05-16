@@ -36,7 +36,7 @@ class creature {
   
   boolean alive;         // dead creatures remain in the swarm to have a breeding chance
   int munchtimer = 0;
-  int munchstrength = 50;// should be evolved
+  int munchstrength = 20;// should be evolved
   structure munching = null;
   structure munchnext = null;
   float fitness;         // used for selection
@@ -306,11 +306,11 @@ class creature {
   }
 
   // Constructor, creates a new creature at the given location and angle
-
   // This constructor is generally only used for the first wave, after
   // that creatures are created from parents.
   creature(float x, float y, float a) {
     angle = a;
+    angle += (PI * random(-0.15,0.15)); // adds a little randomness so all creatures aren't pointing exactly at the center
     genome = new Genome();
     construct((float)20000, new Vec2(x, y));
   }
@@ -330,7 +330,6 @@ class creature {
 
   // construct a new creature with the given genome, energy and position
   creature(Genome g, float e, Vec2 pos) {
-    //angle = random(0, 2 * PI); // start at a random angle
     // point each creature at the center
     angle = atan2(pos.x,pos.y);
     // push them away from the center
@@ -338,6 +337,8 @@ class creature {
       pos = new Vec2(random(0.2,0.5) * worldWidth * sin(angle),
                  random(0.2,0.5) * worldWidth * cos(angle));
     }
+    angle += (PI * random(-0.15,0.15)); // adds a little randomness so all creatures aren't pointing exactly at the center
+    
     genome = g;
     construct(e, pos);
   }
@@ -733,7 +734,7 @@ class creature {
     munching = munchnext;
     if (munching != null) {
       if (munchtimer == 50) {
-        if(brain.outputs[2] > 0.0) { // if the creature is hungry
+        if(true){ //brain.outputs[2] > 0.0) { // if the creature is hungry Temporarily removed because the brain changed
           if (!invinciblestructures) {
             if (munching.type == 'f') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
@@ -1239,6 +1240,6 @@ class creature {
       }
     }
     // give some initial force to start them moving
-    body.applyLinearImpulse(new Vec2(3000 * cos(angle - (PI*1.5)), 3000 * sin(angle - (PI*1.5))), body.getWorldCenter(), true);
+    //body.applyLinearImpulse(new Vec2(30 * cos(angle - (PI*1.5)), 30 * sin(angle - (PI*1.5))), body.getWorldCenter(), true);
   }
 }

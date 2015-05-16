@@ -92,7 +92,6 @@ void setup() {
   textFont(font);
   panels = new ArrayList<Panel>();
   animations = new ArrayList<Animation>();
-  the_player = new player();
 
   minim = new Minim(this);
 
@@ -129,6 +128,8 @@ void setup() {
   initTables();
   // Setup soundfiles array in sound.pde
   setupSoundFiles();
+    the_player = new player();
+    the_player.initialize();
 }
 
 void draw() {

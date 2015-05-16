@@ -618,10 +618,10 @@ class tower {
   void wave_fire() {
     if (type == 'l') return; // Laserguns can't wavefire. This is so much simpler.
     if (type == 'g') return; // electron guns also can't wavefire
-    if (unlimitedpower ? false : energy < 5) return;
+    if (unlimitedpower ? false : energy < 500) return; // requires at least 500 to wave fire
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
       projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
-    if (!unlimitedpower) energy -= 5;
+    if (!unlimitedpower) energy = 0;  // wave fire uses up all of your energy, at least 500
     firing.play();
     switch (type) {
       case 'r':

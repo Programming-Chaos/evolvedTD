@@ -169,6 +169,20 @@ class player {
     selectedCreature = null;
   }
 
+ void initialize(){  // sets initial tower
+ 
+    placing = false;
+    placeStructure('b');
+    pickedup.f.inTransit = false;
+    pickedup = null;
+    placing = false;
+
+    structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+    structurePanel.hiddenpanel = true;
+    structurePanel.shown = false;
+    updateStructures();
+ }
+
   void display() {
     if (selectedCreature != null) {
       
