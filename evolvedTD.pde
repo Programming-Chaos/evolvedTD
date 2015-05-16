@@ -128,8 +128,8 @@ void setup() {
   initTables();
   // Setup soundfiles array in sound.pde
   setupSoundFiles();
-    the_player = new player();
-    the_player.initialize();
+  the_player = new player();
+  the_player.initialize();
 }
 
 void draw() {
@@ -365,7 +365,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o1;
     food p2 = (food)o2;
-    if(p1.brain.outputs[2] == 0.0) {
+    if(p1.brain.outputs[2] == 0.0 && p1.freezeTimer == 0) {
       PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
@@ -379,7 +379,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     // creatures grab food
     creature p1 = (creature)o2;
     food p2 = (food)o1;
-    if(p1.brain.outputs[2] == 0.0) {
+    if(p1.brain.outputs[2] == 0.0 && p1.freezeTimer == 0) {
       PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {

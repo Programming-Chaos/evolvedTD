@@ -169,19 +169,14 @@ class player {
     selectedCreature = null;
   }
 
- void initialize(){  // sets initial tower
- 
-    placing = false;
-    placeStructure('b');
+  void initialize() {  // sets initial tower
+    pickedup = new structure('b', ++numStructuresCreated);
+    structures.add(pickedup);
+    pickedup.f.xpos = 0;
+    pickedup.f.ypos = 0;
     pickedup.f.inTransit = false;
     pickedup = null;
-    placing = false;
-
-    structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
-    structurePanel.hiddenpanel = true;
-    structurePanel.shown = false;
-    updateStructures();
- }
+  }
 
   void display() {
     if (selectedCreature != null) {

@@ -732,9 +732,9 @@ class creature {
     double torque = 0;
     
     munching = munchnext;
-    if (munching != null) {
-      if (munchtimer == 50) {
-        if(true){ //brain.outputs[2] > 0.0) { // if the creature is hungry Temporarily removed because the brain changed
+    if (munching != null && freezeTimer == 0) {
+      if (munchtimer == 50) { // this is how many ticks it takes a creature to take a bite
+        if(brain.outputs[2] == 0.0) { // if the creature is hungry Temporarily changed because the brain changed
           if (!invinciblestructures) {
             if (munching.type == 'f') {
               if (munching.f.shield < munchstrength) { // this bite will deplete the last of the shield
@@ -949,9 +949,12 @@ class creature {
     float a = body.getAngle();
     
     if (hit_indicator > 0) { //makes the animation show up when hit
+      noStroke();
       fill (153,0,0);
       ellipse (pos.x, pos.y, getWidth()+15, getWidth()+15); //this draws the animation when the creature gets hit. Animation is a circle right now
-      hit_indicator=hit_indicator-1; //this counts down each timestep to make the animation dissapear
+      stroke(0);
+      strokeWeight(1);
+      hit_indicator--; //this counts down each timestep to make the animation dissapear
     }
     
     PGraphics pg;
