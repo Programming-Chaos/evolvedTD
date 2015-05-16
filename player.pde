@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 boolean follow_selected = true;
 boolean show_siblings = false;
 boolean show_cousins = false;

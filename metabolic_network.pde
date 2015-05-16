@@ -1,3 +1,4 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
 
 /* Defines the network for controlling metabolism
    The creature has three energy "pools": one for reproduction, one for locomotion, and one for health.

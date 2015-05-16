@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 class BurntCreature {
   int timer;
   Vec2 center;

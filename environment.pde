@@ -1,3 +1,4 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
 
 /* The environment is divided into cells.
  * Each cell has a type (an int).

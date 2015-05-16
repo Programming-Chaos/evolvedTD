@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 /* SENSORY SYSTEMS
 
    Here have added feelers evolution, and the ability for each of the

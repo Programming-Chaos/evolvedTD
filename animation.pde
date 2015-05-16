@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 // create a new instance of this class
 // add frames to it
 // set the amount of ticks that it should play in

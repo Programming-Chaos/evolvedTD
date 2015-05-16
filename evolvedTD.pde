@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 import ddf.minim.spi.*;
 import ddf.minim.signals.*;
 import ddf.minim.*;

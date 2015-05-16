@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 /* This class holds a population of creatures in an arraylist called swarm.
  * Each generation/wave the whole population attacks.
  */

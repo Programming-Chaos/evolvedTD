@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 /*
   Team Krang :: Brain & behavior
 

@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 // standard deviation of mutation added to each gene in meiosis
 static float MUTATION_DEVIATION = 0.03;
 

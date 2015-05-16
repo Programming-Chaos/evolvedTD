@@ -1,3 +1,5 @@
+// Copyright (C) 2015 evolveTD Copyright Holders
+
 import java.util.Comparator;
 
 static int creature_count = 0;
