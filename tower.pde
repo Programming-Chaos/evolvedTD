@@ -617,12 +617,12 @@ class tower {
 
   void wave_fire() {
     if (type == 'l') return; // Laserguns can't wavefire. This is so much simpler.
-    if (type == 'g') return; // electron guns also can't wavefire
-    if (unlimitedpower ? false : energy < 500) return; // requires at least 500 to wave fire
+    if (type == 'g') return; // electron guns also can't wavefire. Way too OP.
+    if (unlimitedpower ? false : energy < (ecost*20)) return; // requires at least 20*ecost to wave fire
     for (float a = 0; a < 2*PI ; a += ((2*PI)/20)) // postions of new projectiles are not at 0,0 to avoid collisions.
       projectiles.add(new projectile(xpos+(5*cos(a)), ypos+(5*sin(a)), a, dmg, type, projectileSpeed));
-    if (!unlimitedpower) energy = 0;  // wave fire uses up all of your energy, at least 500
-    firing.play();
+    if (!unlimitedpower) energy -= (ecost*20);  // wave fire uses up all of your energy, at least 500
+    firing.play(); // firing animation
     switch (type) {
       case 'r':
         PlaySounds( "Railgun_Long_01" ); //rail long
@@ -632,9 +632,6 @@ class tower {
         break;
       case 'i':
         PlaySounds( "Cannon_01" ); //cannon
-        break;
-      case 'g':
-        
         break;
     }
   }
