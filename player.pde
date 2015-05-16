@@ -26,6 +26,7 @@ class player {
   Panel helpPanel;
   Panel towerstatsPanel;
   Panel farmstatsPanel;
+  Panel pricePanel;
   int rcost = 300;
   int pcost = 600;
   int icost = 1000;
@@ -33,7 +34,6 @@ class player {
   int gcost = 4000;
   int bcost = 100;
   int dcost = 100;
-  int ccost = 0;
   int money = 1000;
   int currentcost = 0;
   int moneytimer = 0;
@@ -107,7 +107,7 @@ class player {
     structurePanel.createButton(250, 300, -625, 0, icost + "$\nFreeze\nTurret", 45, 0, 200, 255, new ButtonPress() {public void pressed() { placeStructure('i'); } });
     structurePanel.createButton(250, 300, -375, 0, lcost + "$\nLaser\nArtillery", 45, 220, 20, 20, new ButtonPress() {public void pressed() { placeStructure('l'); } });
     structurePanel.createButton(250, 300, -125, 0, gcost + "$\nElectron\nCloud\nGenerator", 45, 100, 255, 200, new ButtonPress() {public void pressed() { placeStructure('g'); } });
-    structurePanel.createButton(250, 300, 375, 0, ccost + "$\nCable", 45, 100, 100, 100, new ButtonPress() {public void pressed() { placeStructure('c'); } });
+    structurePanel.createButton(250, 300, 375, 0, "Cost varies\nCable", 45, 100, 100, 100, new ButtonPress() {public void pressed() { placeStructure('c'); } });
     structurePanel.createButton(250, 300, 625, 0, bcost + "$\nDrill", 45, 50, 50, 50, new ButtonPress() {public void pressed() { placeStructure('d'); } });
     structurePanel.createButton(250, 300, 875, 0, bcost + "$\nBioreactor", 45, 50, 255, 50, new ButtonPress() {public void pressed() { placeStructure('b'); } });
     structurePanel.createButton(250, 300, 1125, 0, "X", 200, 255, 0, 0, new ButtonPress() {public void pressed() { deleteStructure(); } });
@@ -162,9 +162,9 @@ class player {
     hudPanel = new Panel(2500,100,0,-1200,false,100);
     hudPanel.createTextBox(20, 20, new StringPass() { String passed() { return ("Currency: " + (mistermoneybagsmode ? "One billion dollars!" : money) + "\t\t\t\tWave: " + (generation+1) + "\t\t\t\tAutofire: " + (autofire ? "ON" : "OFF") + "\t\t\t\tFramerate: " + framerate); } }, 50);
 
-    //pricePanel = new Panel(100,40,0,0,false,150);
-    //pricePanel.createTextBox
-    //pricePanel.enabled = false;
+    pricePanel = new Panel(100,40,0,0,false,0);
+    pricePanel.createTextBox(0, 0, new StringPass() { String passed() { return ("$" + currentcost); } }, 50, true);
+    pricePanel.enabled = false;
 
     selectedCreature = null;
   }
@@ -282,7 +282,10 @@ class player {
       }
       if (pickedup.type == 't') pickedup.t.display();
       else if (pickedup.type == 'f') pickedup.f.display();
-      else if (pickedup.type == 'c') pickedup.c.display();
+      else if (pickedup.type == 'c') {
+        pickedup.c.display();
+        if (pickedup.c.otherEnd != null) pickedup.c.otherEnd.display();
+      }
     }
     else {
       for (structure s : structures) if (s.type == 'c') s.c.display(); // cables get drawn first so they're not covering up structures
@@ -296,6 +299,10 @@ class player {
   }
 
   void update() {
+    if (pickedup != null ? pickedup.type == 'c' : false) {
+      pricePanel.panel_x = worldRatioX*(mouseX-(width/2))+2*pickedup.c.radius+((zoomOffset-cameraZ)/10);
+      pricePanel.panel_y = worldRatioY*(mouseY-(height/2))+pickedup.c.radius+((zoomOffset-cameraZ)/10);
+    }
     frameraterefreshtimer++;
     if (frameraterefreshtimer == 20) {
       framerate = (20000.0 / (millis() - lasttime));
@@ -390,29 +397,31 @@ class player {
               for (structure s : structures)
                 if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
                   if (s.type == 'c')
-                    if (s.c.xpos == z.f.xpos && s.c.ypos == z.f.ypos)
+                    if (s.c.xpos == z.f.xpos && s.c.ypos == z.f.ypos && s.c.enabled)
                       z.f.connectedCables.add(s.c);
             }
             break;
           case 'c':
             z.c.connectedStructures.clear();
-            for (structure s : structures)
-              if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
-                switch (s.type) {
-                  case 't':
-                    if (s.t.xpos == z.c.xpos && s.t.ypos == z.c.ypos)
-                      z.c.connectedStructures.add(s);
-                    break;
-                  case 'f':
-                    if (s.f.type == 'd')
-                      if (s.f.xpos == z.c.xpos && s.f.ypos == z.c.ypos)
+            if (z.c.enabled) {
+              for (structure s : structures)
+                if (placing?(s.ID != pickedup.ID):true) // ensure that this structure isn't currently picked up
+                  switch (s.type) {
+                    case 't':
+                      if (s.t.xpos == z.c.xpos && s.t.ypos == z.c.ypos)
                         z.c.connectedStructures.add(s);
-                    break;
-                  case 'c':
-                    if (s.c.xpos == z.c.xpos && s.c.ypos == z.c.ypos)
-                      z.c.connectedStructures.add(s);
-                    break;
-                }
+                      break;
+                    case 'f':
+                      if (s.f.type == 'd')
+                        if (s.f.xpos == z.c.xpos && s.f.ypos == z.c.ypos)
+                          z.c.connectedStructures.add(s);
+                      break;
+                    case 'c':
+                      if (s.c.xpos == z.c.xpos && s.c.ypos == z.c.ypos && s.c.enabled)
+                        z.c.connectedStructures.add(s);
+                      break;
+                  }
+            }
             break;
         }
   }
@@ -458,6 +467,10 @@ class player {
       money -= cost;
       placing = true;
       pickedup = new structure(type, ++numStructuresCreated);
+      if (type == 'c') {
+        currentcost = cost;
+        pricePanel.enabled = true;
+      }
       structures.add(pickedup);
       structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = true;
       structurePanel.hiddenpanel = false;
@@ -498,20 +511,34 @@ class player {
     if (money < cost) {
       println("You do not have sufficient funds to purchase this structure...");
       placing = false;
+      if (pickedup.type == 'c') pricePanel.enabled = false;
       pickedup = null;
+      pricePanel.enabled = false;
       structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
       structurePanel.hiddenpanel = true;
       return;
     }
     money -= cost;
     pickedup = new structure(type, ++numStructuresCreated);
+    if (type == 'c') {
+      currentcost = cost;
+      pricePanel.enabled = true;
+    }
     structures.add(pickedup);
   }
   
   void deleteStructure() {
     placing = false;
     structures.remove(pickedup);
-    money += (pickedup.moneyinvested/2);
+    if (pickedup.type == 'c') {
+      money += (pickedup.c.previouscost/2);
+      pricePanel.enabled = false;
+      if (pickedup.c.otherEnd != null) {
+        pickedup.c.otherEnd.destroybody();
+        structures.remove(pickedup.c.otherEnd.parent);
+      }
+    }
+    else money += (pickedup.moneyinvested/2);
     pickedup = null;
     structurePanel.buttons.get(structurePanel.buttons.size()-1).enabled = false;
     structurePanel.hiddenpanel = true;

@@ -40,6 +40,7 @@ boolean buttonpressed = false;
 boolean autofire = true;
 boolean mistermoneybagsmode = false;
 boolean invinciblestructures = false;
+boolean unlimitedpower = false;
 
 environment environ;           // the environment object
 population the_pop;            // the population of creatures
@@ -364,7 +365,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o1;
     food p2 = (food)o2;
     if(p1.brain.outputs[2] == 0.0) {
-      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+      PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -378,7 +379,7 @@ void beginContact(Contact cp) { // called when two box2d objects collide
     creature p1 = (creature)o2;
     food p2 = (food)o1;
     if(p1.brain.outputs[2] == 0.0) {
-      if (playSound) PlaySounds( "Munch_0" + int(random(1,4)) );
+      PlaySounds( "Munch_0" + int(random(1,4)) );
       p1.addEnergy(p2.nourishment); // getting food is valuable
       if (p2 != null) {
         p2.remove = true; // flag the food to be removed during the food's update (you can't(?) kill the food's body in the middle of this function)
@@ -599,14 +600,20 @@ void mouseClicked() { // called if either mouse button is pressed and released w
                 the_player.structures.add(the_player.pickedup);
               }
               else {
-                the_player.pickedup.c.inTransit = false;
-                the_player.pickedup.c.enabled = true;
-                the_player.pickedup.c.otherEnd.enabled = true;
-                the_player.pickedup = null;
-                the_player.placing = false;
-                the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
-                the_player.structurePanel.hiddenpanel = true;
-                the_player.structurePanel.shown = false;
+                if (the_player.currentcost <= the_player.money) {
+                  the_player.pickedup.c.updatePreviousCost();
+                  the_player.money -= the_player.currentcost;
+                  the_player.pickedup.c.inTransit = false;
+                  the_player.pickedup.c.enabled = true;
+                  the_player.pickedup.c.otherEnd.enabled = true;
+                  the_player.pricePanel.enabled = false;
+                  the_player.pickedup = null;
+                  the_player.placing = false;
+                  the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+                  the_player.structurePanel.hiddenpanel = true;
+                  the_player.structurePanel.shown = false;
+                }
+                else println("You do not have sufficient funds to purchase a cable this long...");
               }
               the_player.updateStructures();
             }
@@ -679,14 +686,20 @@ void mouseClicked() { // called if either mouse button is pressed and released w
             the_player.structures.add(the_player.pickedup);
           }
           else {
-            the_player.pickedup.c.inTransit = false;
-            the_player.pickedup.c.enabled = true;
-            the_player.pickedup.c.otherEnd.enabled = true;
-            the_player.pickedup = null;
-            the_player.placing = false;
-            the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
-            the_player.structurePanel.hiddenpanel = true;
-            the_player.structurePanel.shown = false;
+            if (the_player.currentcost <= the_player.money) {
+              the_player.pickedup.c.updatePreviousCost();
+              the_player.money -= the_player.currentcost;
+              the_player.pickedup.c.inTransit = false;
+              the_player.pickedup.c.enabled = true;
+              the_player.pickedup.c.otherEnd.enabled = true;
+              the_player.pricePanel.enabled = false;
+              the_player.pickedup = null;
+              the_player.placing = false;
+              the_player.structurePanel.buttons.get(the_player.structurePanel.buttons.size()-1).enabled = false;
+              the_player.structurePanel.hiddenpanel = true;
+              the_player.structurePanel.shown = false;
+            }
+            else println("You do not have sufficient funds to purchase a cable this long...");
           }
           the_player.updateStructures();
         }
@@ -705,7 +718,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
       if (!upgrading) {
         // find a creature
         the_player.selectedCreature = null;
-        follow_selected= true;
+        follow_selected = true;
         for (creature c : the_pop.swarm) {
           Vec2 location = c.getPos();
           float crad = (c.getWidth()/2);
@@ -766,6 +779,7 @@ void mouseClicked() { // called if either mouse button is pressed and released w
               structureclick = true;
               if (the_player.selectedStructure != null && the_player.selectedStructure.ID == s.ID) { // if this structure is already selected, pick up structure
                 the_player.pickedup = s;
+                the_player.pricePanel.enabled = true;
                 the_player.pickedup.c.inTransit = true;
                 the_player.pickedup.c.xpos = round(mouse_x);
                 the_player.pickedup.c.ypos = round(mouse_y);

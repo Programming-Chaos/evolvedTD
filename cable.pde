@@ -13,7 +13,9 @@ class cable {
   boolean conflict = false;
   boolean remove = false;
   boolean enabled = false;
+  int previouscost = 0;
   cable otherEnd;
+  int pulsetimer = 0;
   ArrayList<structure> connectedStructures;
   Body terminal_body = null;
   
@@ -104,6 +106,10 @@ class cable {
     }
   }
   
+  void updatePreviousCost() {
+    previouscost = round(sqrt(((xpos-otherEnd.xpos)*(xpos-otherEnd.xpos))+((ypos-otherEnd.ypos)*(ypos-otherEnd.ypos)))*2.5);
+  }
+  
   void display() {
     if (inTransit) {
       strokeWeight(1);
@@ -151,12 +157,18 @@ class cable {
     }
     if (otherEnd != null) {
       float cablelength = sqrt(((xpos-otherEnd.xpos)*(xpos-otherEnd.xpos))+((ypos-otherEnd.ypos)*(ypos-otherEnd.ypos)))/2;
+      if (the_player.pickedup != null ? (the_player.pickedup.ID == ID ? the_player.pickedup.c.cableID == cableID : false) : false)
+        the_player.currentcost = (cablelength*2 >= previouscost ? round(cablelength*2-previouscost) : round((cablelength*2-previouscost)/2));
       pushMatrix();
       translate(xpos,ypos,0);
       rotate(atan2(otherEnd.ypos-ypos,otherEnd.xpos-xpos)-(PI/2));
       rectMode(CORNER);
       noStroke();
-      fill(0,0,0,255);
+      if (pulsetimer > 0) {
+        fill(0,(pulsetimer*25),(pulsetimer*25),255);
+        pulsetimer--;
+      }
+      else fill(0,0,0,255);
       rect((-1*(5)),0,(2*(5)),cablelength);
       rectMode(CENTER);
       stroke(0);

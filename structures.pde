@@ -49,6 +49,7 @@ class pulse {
   
   void transmit(structure z) {
     if (z.type == 'c') {
+      z.c.pulsetimer = 10;
       if (visitedStructureIDs.hasValue(z.c.cableID)) return; // this structure has been visited before and shouldn't be visited again
     }
     else if (visitedStructureIDs.hasValue(z.ID)) return; // this structure has been visited before and shouldn't be visited again
@@ -89,10 +90,10 @@ class pulse {
         }
         else s.t.energy += portion;
       }
-      else {
+      else if (s.type == 'f') {
         if ((s.f.maxEnergy-s.f.energy) < portion) {
           remainder += (portion-(s.f.maxEnergy-s.f.energy));
-          s.t.energy = s.t.maxEnergy;
+          s.f.energy = s.f.maxEnergy;
         }
         else s.f.energy += portion;
       }
