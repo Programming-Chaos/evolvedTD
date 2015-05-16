@@ -36,9 +36,9 @@ boolean displayScent = false;  // not displaying scent speeds things up a lot
 boolean displayFeelers = false;// displaying feelers makes the creatures look a bit too spidery
 boolean buttonpressed = false;
 boolean autofire = true;
-boolean mistermoneybagsmode = true;
-boolean invinciblestructures = true;
-boolean unlimitedpower = true;
+boolean mistermoneybagsmode = false;
+boolean invinciblestructures = false;
+boolean unlimitedpower = false;
 
 environment environ;           // the environment object
 population the_pop;            // the population of creatures
