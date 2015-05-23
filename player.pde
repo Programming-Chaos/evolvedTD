@@ -327,6 +327,7 @@ class player {
           for (Fixture f = structures.get(i).f.farm_body.getFixtureList(); f != null; f = f.getNext())
             f.setUserData(null);
           box2d.destroyBody(structures.get(i).f.farm_body); // destroy the body of a dead farm
+          if (selectedStructure != null ? selectedStructure.ID == structures.get(i).ID : false) selectedStructure = null;
           structures.remove(i);
         }
       }
@@ -337,12 +338,14 @@ class player {
           for (Fixture f = structures.get(i).t.tower_body.getFixtureList(); f != null; f = f.getNext())
             f.setUserData(null);
           box2d.destroyBody(structures.get(i).t.tower_body); // destroy the body of a dead tower
+          if (selectedStructure != null ? selectedStructure.ID == structures.get(i).ID : false) selectedStructure = null;
           structures.remove(i);
         }
       }
       else if (structures.get(i).type == 'c') {
         structures.get(i).c.update(); // update them
         if (structures.get(i).c.remove) {
+          if (selectedStructure != null ? selectedStructure.ID == structures.get(i).ID : false) selectedStructure = null;
           if (pickedup.c.otherEnd != null) {
             pickedup.c.otherEnd.terminal_body.setUserData(null);
             for (Fixture f = pickedup.c.otherEnd.terminal_body.getFixtureList(); f != null; f = f.getNext())
