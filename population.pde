@@ -16,8 +16,8 @@ class population {
     swarm = new ArrayList<creature>();
     float a;
     for (int i = 0; i < POP_SIZE; i++) {
-      a = i*(2*PI/POP_SIZE);//random(0, 2*PI);
-      creature c = new creature(0.45*worldWidth*sin(a),0.45*worldWidth*cos(a),a);
+      a = i*(2*PI/POP_SIZE); // distribute creatures around a circle, next line adds a little noise to their positions.
+      creature c = new creature(0.45*(1+random(-0.05,0.05))*worldWidth*sin(a),0.45*(1+random(-0.05,0.05))*worldWidth*cos(a),a);
       swarm.add(c);
     }
   }

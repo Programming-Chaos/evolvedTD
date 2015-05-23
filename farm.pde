@@ -67,7 +67,6 @@ class farm {
 
     xpos = round(mouse_x);
     ypos = round(mouse_y);
-
     switch (type) {
       case 'b':
         parent.moneyinvested += the_player.bcost;
@@ -89,7 +88,7 @@ class farm {
         productionSpeed = baseProductionSpeed*(productionSpeedUpgrades+1);
         shieldRegen = baseShieldRegen*(shieldRegenUpgrades+1);
         break;
-      case 'd':
+      case 'd':     
         energy = 0;
         parent.moneyinvested += the_player.dcost;
         baseProductionSpeed = 1;
@@ -141,6 +140,7 @@ class farm {
         shieldRegenButtons[c] = upgradePanel.createButton(420, 280, 600, 900-((5-c)*280),button3text + "\nX"+ (c+2) + "\n100$", 50, 255, (255-(c*51)), 0, new ButtonPress() { public void pressed() { the_player.selectedStructure.f.upgradeShieldRegen(); } });
       }
     }
+
     the_player.upgradepanels.add(upgradePanel);
   }
 

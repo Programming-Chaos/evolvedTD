@@ -169,6 +169,15 @@ class player {
     selectedCreature = null;
   }
 
+  void initialize() {  // sets initial tower
+    pickedup = new structure('b', ++numStructuresCreated);
+    structures.add(pickedup);
+    pickedup.f.xpos = 0;
+    pickedup.f.ypos = 0;
+    pickedup.f.inTransit = false;
+    pickedup = null;
+  }
+
   void display() {
     if (selectedCreature != null) {
       

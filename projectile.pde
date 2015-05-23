@@ -103,7 +103,7 @@ class projectile {
               beginShape();
               noFill();
               stroke(255,255,100,255);
-              strokeWeight(0.5);
+              strokeWeight(1);
               vertex(pos.x,pos.y);
               loopfor = round(random(2,8));
               for (int i = 1; i < loopfor; i++)
