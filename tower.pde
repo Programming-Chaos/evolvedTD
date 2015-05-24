@@ -38,12 +38,6 @@ class BurntCreature {
       beginShape();
       for (Vec2 v : coords)
         vertex(v.x,v.y);
-      /*vertex(20, 20);
-      vertex(40, 20);
-      vertex(40, 40);
-      vertex(60, 40);
-      vertex(60, 60);
-      vertex(20, 60);*/
       endShape(CLOSE);
       stroke(0);
       popMatrix();
@@ -498,6 +492,8 @@ class tower {
     noStroke();
     fill(20, 200, 255);
     rect(xpos, ypos-50, 0.2*shield, 6);
+    
+    strokeWeight(1);
 
     if (inTransit) {
     // draw the outline of the tower's box2D body

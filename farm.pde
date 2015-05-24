@@ -321,6 +321,8 @@ class farm {
     noStroke();
     fill(20, 200, 255);
     rect(xpos, ypos-50, 0.2*shield, 6);
+    
+    strokeWeight(1);
 
     if (inTransit) {
     // draw the outline of the farm's box2D body

@@ -111,6 +111,7 @@ class cable {
   }
   
   void display() {
+    strokeWeight(1);
     if (inTransit) {
       strokeWeight(1);
       for (structure s : the_player.structures) { // draw the outlines of all the other structure's bodies
